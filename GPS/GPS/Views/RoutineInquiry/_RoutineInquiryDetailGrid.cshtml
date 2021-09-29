@@ -1,0 +1,128 @@
+﻿@using GPS.Models.Master
+@using GPS.Constants
+@{
+    List<Routine> RoutineItem = ViewData["Routine_Item"] != null ? (List<Routine>)ViewData["Routine_Item"] : new List<Routine>();
+    string errormessage = ViewData["Message"] != null ? ViewData["Message"].ToString() : "";
+    string ROUTINE_NO = ViewData["ROUTINE_NO"] != null ? ViewData["ROUTINE_NO"].ToString() : "";
+}
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <div style="border: 1pt solid #ccc;">
+        <div id="tScrollHeadItem" style="width: 98.5%; overflow: hidden;">
+            <table id="dynamic-table" class="table table-striped table-bordered table-condensed appended-table" style="width: 1291px; max-width: 1291px !important;">
+                <thead>
+                    <tr>
+                        <th class="text-center" width="30px"></th>
+                        <th class="text-center" width="47px">PR Item</th>
+                        <th class="text-center" width="50px">Class</th>
+                        <th class="text-center" width="60px">Category</th>
+                        <th class="text-center" width="90px">Item</th>
+                        <th class="text-center" width="179px">Description</th>
+                        <th class="text-center" width="45px">QTY</th>
+                        <th class="text-center" width="39px">UOM</th>
+                        <th class="text-center" width="39px">Curr</th>
+                        <th class="text-center" width="91px">Price</th>
+                        <th class="text-center" width="91px">Amount</th>
+                        <th class="text-center" width="130px">WBS</th>
+                        <th class="text-center" width="100px">Cost Center</th>
+                        <th class="text-center" width="100px">GL Account</th>
+                        <th class="text-center" width="200px">Vendor</th>
+                    </tr>
+                    <tr></tr>
+                </thead>
+            </table>
+        </div>
+        <div id="tScrollBodyItem" style="overflow: scroll;height: 270px;">
+            <table id="tblScroll" class="table table-striped table-bordered table-condensed appended-table" style="width: 1291px; max-width: 1291px !important;">
+                <tbody>
+                    @if ((RoutineItem.Count > 0) && (errormessage == ""))
+                    {
+                        int i = 0;
+                        foreach (Routine pr in RoutineItem)
+                        { 
+                            <tr class="removedetail">
+                                <td class="text-center cold-@i" width="30px">
+                                    @if(@pr.IS_PARENT == "Y" && @pr.ITEM_CLASS == "S")
+                                    {
+                                        <div id="@pr.ITEM_NO" onclick="javascript:changeIcon('@pr.ITEM_NO', '@pr.ROUTINE_NO');">
+                                            <span class="fa fa-plus-square-o" style="cursor: pointer;"></span>
+                                        </div>
+                                    }
+                                </td>
+                                <td class="text-center cold-@i" width="47px">@pr.ITEM_NO</td>
+                                <td class="text-center cold-@i" width="50px">@pr.ITEM_CLASS</td>
+                                <td class="text-center cold-@i" width="60px">@pr.VALUATION_CLASS</td>
+                                <td class="text-left cold-@i" width="90px">@if(pr.MAT_NUMBER != "X") { @pr.MAT_NUMBER }</td>
+                                <td class="text-left cold-@i" width="179px">@pr.MAT_DESC</td>
+                                <td class="text-right cold-@i" width="45px">@String.Format("{0:#,0.00}", pr.QTY)</td>
+                                <td class="text-center cold-@i" width="39px">@pr.UOM</td>
+                                <td class="text-center cold-@i" width="39px">@pr.CURR</td>
+                                <td class="text-right cold-@i" width="91px">@String.Format("{0:#,0.00}", pr.PRICE)</td>
+                                <td class="text-right cold-@i" width="91px">@String.Format("{0:#,0.00}", pr.AMOUNT)</td>
+                                <td class="text-center cold-@i" width="130px">@if(pr.WBS_NO != "X") { @pr.WBS_NO }</td>
+                                <td class="text-center cold-@i" width="100px">@if(pr.COST_CENTER != "X") { @pr.COST_CENTER }</td>
+                                <td class="text-center cold-@i" width="100px">@if(pr.GL_ACCOUNT_CD != "X") { @pr.GL_ACCOUNT_CD }</td>
+                                <td class="text-left cold-@i" width="200px"><span class="text">@pr.VENDOR_NAME</span></td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    { 
+                        <tr class="removedetail">
+                            <td colspan="12" class="text-center">@CommonDisplayMessage.NoData</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                <tfoot>
+                    <tr>
+                        <td colspan="12">
+                            <div class="col-xs-10 col-sm-10 col-md-10">
+                                @Html.Partial("_UIPaging")
+                            </div>
+                            <div class="col-xs-2 col-sm-2 col-md-2">
+                                @if ((RoutineItem.Count() > 0) && (RoutineItem != null) && (errormessage == ""))
+                                {
+                                    <div id="prdetail-pagesize" class="form-inline text-right">
+                                        <label>
+                                            Page Size
+                                            <select class="cursor-1 page" id="detail-pagesize"  onchange="javascript: SearchRoutineItem(1, '@ROUTINE_NO')" style="height:25px;">
+                                                <option>10</option>
+                                                <option>25</option>
+                                                <option>50</option>
+                                                <option>100</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var errormessage = "@errormessage";
+        if (errormessage !== "") {
+            $("#alert-detail").css("display", "inherit");
+            $("#alert-detail").html(errormessage);
+        }
+    })
+
+    $("#tScrollBodyItem").scroll(function () {
+        $("#tScrollHeadItem").scrollLeft($("#tScrollBodyItem").scrollLeft());
+    });
+
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip({ placement: 'right' });
+    });
+</script>

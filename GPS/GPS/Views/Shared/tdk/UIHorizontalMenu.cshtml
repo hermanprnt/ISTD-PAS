@@ -1,0 +1,74 @@
+﻿@using System.Text
+@using Toyota.Common.Utilities
+@{
+    /*
+        -- DO NOT ALTER THIS FILE --
+     
+        Toyota .Net Development Kit
+        Copyright (c) Toyota Motor Manufacturing Indonesia, All Right Reserved.
+     
+        Author: lufty.abdillah@gmail.com  
+    */    
+}
+
+@{
+    MenuList menuList = Html.Toyota().Page.Menu;    
+}
+
+@functions {
+    MvcHtmlString _DrawMenuIcon(Menu menuItem) {
+        StringBuilder scriptBuilder = new StringBuilder();
+        if (!string.IsNullOrEmpty(menuItem.Glyph))
+        {
+            scriptBuilder.Append(string.Format("<i class=\"fa fa-{0} fa-fw\"></i>&nbsp;", menuItem.Glyph.ToLower()));
+        } else if (!string.IsNullOrEmpty(menuItem.IconUrl))
+        {
+            // TODO: gambar icon di sini
+        }
+        return new MvcHtmlString(scriptBuilder.ToString());
+    }
+}
+
+@if (!menuList.IsNullOrEmpty())
+{    
+    <ul class="nav navbar-nav">
+    @foreach (Menu menuItem in menuList)
+    {
+        if (!menuItem.Visible)
+        {
+            continue;
+        }
+
+        if (menuItem.HasChildren())
+        {
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    @_DrawMenuIcon(menuItem)@menuItem.Text&nbsp;<b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                @foreach (Menu submenuItem in menuItem.Children)
+                {
+                    if (submenuItem.Separator == MenuSeparator.Before)
+                    {
+                        <li class="divider"></li>
+                    }
+                    <li>
+                        <a href="@submenuItem.NavigateUrl">@_DrawMenuIcon(submenuItem)@submenuItem.Text</a>
+                    </li>
+                    if (submenuItem.Separator == MenuSeparator.After)
+                    {
+                        <li class="divider"></li>
+                    }
+                }
+                </ul>
+            </li>
+        }
+        else
+        {
+            <li>
+                <a href="@menuItem.NavigateUrl">@_DrawMenuIcon(menuItem)@menuItem.Text</a>
+            </li>
+        }
+    }
+    </ul>
+}

@@ -1,0 +1,479 @@
+﻿<script type="text/javascript"> 
+    $(document).ready(function () {        
+        onClear();  
+
+        $('.date-picker').datepicker({
+            autoclose: true,
+            todayHighlight: true,
+            format: " yyyy",
+            viewMode: "years",
+            minViewMode: "years"
+        })
+        .next().on(ace.click_event, function () {
+	        $(this).prev().focus();
+        });                                   
+    });
+
+    function formatNumeric(type) {
+        var id = "";
+        if (type == "amount") id = "#txtAmmount";
+        else id = "#txtAmmountTol";
+
+        if ($(id).val() == "" || $(id).val() == undefined)
+            $(id).val("0");
+        if ($(id).val() != "0")
+            $(id).val($.AsPrice($(id).val()));
+    }
+
+    $.fn.addOption = function (optText, optValue) {
+            var option = new Option(optText, optValue);
+            return this.append(option);
+    };
+
+    //param for delete      
+    function GetQuota(){
+        var ids = [];
+        $("input[id^=chk-]").each(function (i, a) {
+            if (a.id != null && a.id.length > 0 && a.checked) {
+                ids.push({                
+                    div: $('#' + a.id).data('div'),
+                    type: $('#' + a.id).data('type')                
+                });
+            }
+        });
+        return ids;
+    }
+
+    function YearsGenerate() { 
+        $("#txtYear").css("background-color", "#FFFFFF");
+    }
+
+    function onGenerateData(){
+        $("#generatePopUp").modal();
+    }
+
+    function onGenerate()
+    {
+        var isValid = $.ValidateMandatory(["#txtYear"]);
+        if (!isValid) return;
+  
+        var yearToday = new Date().getFullYear(); 
+        if ($("#txtYear").val() < yearToday){       
+             $.messagebox.show(
+                "Warning",
+                "Year not more less for yearToday",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+            return;   
+        }
+
+        $("#generatePopUp").modal('hide');
+        $.disable_enable_button.disable(); 
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("GenerateData")",
+            data: {           
+                Years : $("#txtYear").val()            
+            },
+            success: function (data) { 
+                var result = data.message.split('|');
+                if(result[0] == 'True'){
+                     $.disable_enable_button.enable(); 
+                     $.messagebox.show(
+                        "Info",
+                        result[1],
+                        "SUC",
+                        "SINGLE",
+                        "",
+                        ""
+                      ) 
+                }
+                else if (result[0] == 'Confirm'){
+                    $.disable_enable_button.enable();
+                    $.messagebox.show(
+                        "Confirmation",
+                        "Are You Sure You Want to generate ? <br><br> <p class='text-success'><b style='color: Red;'>*</b>Old data will be removed</p>",
+                        "INF",
+                        "CONFIRM",
+                        "onOKGenerate()",
+                        ""
+                    )  
+                }
+                else{
+                     $.disable_enable_button.enable();
+                     $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    ) 
+                }
+            },
+            error:function (xhr, ajaxOptions, thrownError,data){
+                alert(xhr.status);
+            }
+        });
+    }
+
+    function onOKGenerate()
+    {
+        $("#generatePopUp").modal('hide');
+        $.disable_enable_button.disable(); 
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("GenerateDataConfirm")",
+            data: {           
+                Years : $("#txtYear").val()            
+            },
+            success: function (data) {
+                var result = data.message.split('|');
+                if(result[0] == 'True'){
+                     $.disable_enable_button.enable(); 
+                     $.messagebox.show(
+                        "Info",
+                        result[1],
+                        "SUC",
+                        "SINGLE",
+                        "",
+                        ""
+                      ) 
+                }
+                else{
+                     $.disable_enable_button.enable();
+                     $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    ) 
+                }
+            },
+            error:function (xhr, ajaxOptions, thrownError,data){
+                alert(xhr.status);
+            }
+        });
+    }  
+
+    function onSearchData(page)
+    {
+        $.disable_enable_button.disable(); 
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("onGetData")",
+            data: {
+                search : 'Y',
+                Display: $("#cbodisplay").val(),
+                Page:page,
+                division_name : $("#txtDivision option:selected").val(),
+                wbs : $("#txtWBS").val(),			   
+                type : $("#txtType option:selected").val(),               
+                ord_coord : $("#txtOrdCoord option:selected").val() 
+            },
+            success: function (data) {
+                $("#detailgrid").html(data);
+                $.disable_enable_button.enable(); 
+            },
+            error:function (xhr, ajaxOptions, thrownError,data){
+                alert(xhr.status);
+            }
+        });
+    }  
+
+    function onClear()
+    {
+        $("#alert-search").css("display", "none");           
+        $("#txtDivision").val("");
+        $("#txtWBS").val("");
+        $("#txtType").val("");
+        $("#txtOrdCoord").val("");
+            
+        $("input[id^=chk-]").each(function(i,a){
+            a.checked = false;          
+        }); 
+    
+        $.disable_enable_button.enable();  
+            
+        ClearGrid(1);          
+    }
+
+    function ClearGrid(page) { 
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("onGetData")",
+            data: {
+                search : '',
+                Display: $("#cbodisplay").val(),
+                Page:page,
+                division_name : '',
+                wbs : '',			   
+                type : '',               
+                ord_coord : ''                        
+            },
+            success: function (data) {
+                $("#detailgrid").html(data);
+            }        
+        });
+    }
+
+    function onAddData() {    
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+            data: {
+                flag: '0'                                
+            },                
+            success: function (data) {  
+                 $("#basicModal").html(data);
+                 $("#myModalLabel").html('<h4>Quota (Add)</h4>');    
+                 $("#basicModal").modal();                            
+            }
+        });   
+    }
+
+    function onEditData() {      
+        if ($(".grid-checkbox-body:checked").length == 0){        
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else if ($(".grid-checkbox-body:checked").length > 1){       
+            $.messagebox.show(
+                "Warning",
+                "Please Select only One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+            var selectedData = GetQuota();               
+            
+            $.ajax({
+                type: "post",
+                url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+                data: {
+                    flag: '1'                                 
+                },                
+                success: function (data) {                    
+                    $("#basicModal").html(data);                   
+
+                    $.ajax({
+                        type: "post",
+                        url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+                        data: {
+                                DivisionID: selectedData[0].div,
+                                QuotaType: selectedData[0].type                                       
+                        },                
+                        success: function (data) {             
+                            $("#txtDivisionPU").val(data.DIVISION_ID);
+                            $('#txtWBSPU').addOption(data.WBS_NO , data.WBS_NO);  
+                            $("#txtTypePU").val(data.QUOTA_TYPE);
+                            $("#txtCoordPU").val(data.ORDER_COORD2);
+                            $("#txtAmmount").val(data.QUOTA_AMOUNT2);
+                            $("#txtAmmountTol").val(data.QUOTA_AMOUNT_TOL2);                             
+                            
+                            $.Disable(["#txtDivisionPU", "#txtTypePU", "#txtWBSPU"]);
+
+                            $("#basicModal").modal(); 	 
+                            
+                        }
+                    });                             
+                }
+            });  
+        }        
+    }
+
+    function onDeleteData() {
+        if ($(".grid-checkbox-body:checked").length == 0)        
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be deleted",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )   
+        else         
+            $.messagebox.show(
+                "Confirmation",
+                "Are You Sure You Want to Delete this Item ?",
+                "INF",
+                "CONFIRM",
+                "onYesDelete()",
+                ""
+            )  
+    }
+
+    //delete
+    function onYesDelete()
+    {
+        var selectedData = GetQuota();
+        var keyArray = [];
+        for (var i = 0; i < selectedData.length; i++) {
+            keyArray.push(selectedData[i].div + ";" + selectedData[i].type);
+        }
+        var selectedKey = keyArray.join(","); 
+         
+        $.ajax({
+            type:"POST",
+            url:"@Html.Toyota().Page.GetActionUrl("DeleteQuota")",
+            data: {
+               Key: selectedKey
+            },
+            success: function(data){ 
+               var result = data.split('|');        
+               if(result[0] == 'True'){                
+                      $.messagebox.show(
+                        "Info",
+                        result[1],
+                        "SUC",
+                        "SINGLE",
+                        "OkInfoSave()",
+                        ""
+                      )  
+                }
+                else if(result[0] == 'Error'){
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    ) 
+                }
+            },
+            error:function(x, t, e){
+                alert(x.responseText);
+                window.location.reload();
+            }
+        });
+    } 
+
+    function onDivision() { 
+         $("#txtDivisionPU").css("background-color", "#FFFFFF");
+         $.ajax({
+            type: "POST",
+            url: "@Url.Content("~/Quota/GetListWBS")",
+            data: { DivisionID : $("#txtDivisionPU").val() != "" ? $("#txtDivisionPU").val() : 0 },
+            success: function (resultMessage) {
+                $('#txtWBSPU').empty();
+                if (resultMessage != "") {
+                    var rows = resultMessage.split('|');
+                    var cols = "";
+                    //$('#txtHdrCDPU').addOption("", "");
+                    for (i = 0; i < rows.length; i++) {
+                        if (rows[i] != '') 
+                        {
+                            cols = rows[i].split(';');
+                            $('#txtWBSPU').addOption(cols[0] , cols[0]);
+                        }
+                    }                
+                }
+                else {
+                    $('#txtWBSPU').addOption("", "");
+                }                              
+            }
+        });
+    }
+
+    function onType() { 
+        $("#txtTypePU").css("background-color", "#FFFFFF");
+    }        
+      
+    function onSaveData() {
+        var isValid = $.ValidateMandatory(["#txtDivisionPU", "#txtTypePU"]);
+        if (!isValid) return;
+     
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SaveQuotaMaster")",
+            data: {  
+                flag                : $("#txtEdit").val(),           
+                DIVISION_ID         : $("#txtDivisionPU").val(),
+                DIVISION_NAME       : $("#txtDivisionPU option:selected").text(),  
+                WBS_NO              : $("#txtWBSPU").val(),         
+                QUOTA_TYPE          : $("#txtTypePU").val(),
+                TYPE_DESCRIPTION    : $("#txtTypePU option:selected").text(),
+                ORDER_COORD2        : $("#txtCoordPU").val(),
+                ORDER_COORD_NAME    : $("#txtCoordPU option:selected").text(),
+                QUOTA_AMOUNT2       : $("#txtAmmount").val() != "" ? $("#txtAmmount").val() : 0, //$("#txtAmmount").val(),
+                QUOTA_AMOUNT_TOL2   : $("#txtAmmountTol").val() != "" ? $("#txtAmmountTol").val() : 0 //$("#txtAmmountTol").val()
+            },
+            success: function(data){
+                var result = data.message.split('|');
+                if(result[0] == 'True') {                     
+                        $.messagebox.show(
+                        "Info",
+                        result[1],
+                        "SUC",
+                        "SINGLE",
+                        "OkInfoSave()",
+                        ""
+                        )                
+                }              
+                else {                    
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )                    
+                }                
+            }
+        }); 
+    }
+
+    function OkInfoSave() {   
+        $("#basicModal").modal('hide'); 
+        onSearchData(1);  
+    }      
+
+    function OnDownloadTemplate() {     
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("CekTemplate")",        
+            success: function (data) {
+                if(data == 'False'){           
+                    $.messagebox.show(
+                    "Error",
+                    "Template Not Found",
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+                }
+                else{
+                    $.fileDownload("Quota/DownloadTemplate/"); 
+                }
+            
+            }        
+        });
+    } 
+
+    function onDownloadData() {  
+        var param = '?division_id=' + $("#txtDivision option:selected").val(); 
+        param += '&wbs=' + $("#txtWBS").val();  
+        param += '&type=' + $("#txtType option:selected").val(); 
+        param += '&ord_coord=' + $("#txtOrdCoord").val(); 
+   
+        var link = '@Url.Content("Quota/DownloadData/")' + param;        
+        window.location = link;       
+    } 
+</script>

@@ -1,0 +1,82 @@
+﻿@using System.Linq
+@using GPS.Constants
+@using GPS.Models.Master
+@using GPS.CommonFunc
+@model GPS.ViewModels.GenericViewModel<PurchasingGroup>
+
+<div class="col-xs-12">
+    <div id="main-container" class="afixed-main-container">
+        <div id="purchasinggrp-fixed-table-container" class="table-responsive afixed-table-container">
+            <div id="purchasinggrp-fixed-table-viewport" class="afixed-table-viewport"></div>
+            <table id="purchasinggrp-fixed-table" class="table table-striped table-bordered table-condensed table-hover afixed-table">
+                <colgroup>
+                    <col style="width:20px;" />
+                    <col style="width:70px;" />
+                    <col style="width:170px;" />
+                    <col style="width:170px;" />
+                    <col style="width:70px;" />
+                    <col style="width:70px;" />
+                    <col style="width:70px;" />
+                    <col style="width:70px;" />
+                </colgroup>
+                <thead>
+                    <tr class="afixed-header" id="purchasinggrp-level1header">
+                        <th rowspan="2">
+                            <input type="checkbox" id="chkall-purchasinggrp"/>
+                        </th>
+                        <th colspan="2">Purchasing Group</th>
+                        <th rowspan="2">Procurement Channel</th>
+                        <th colspan="2">Created</th>
+                        <th colspan="2">Changed</th>
+                    </tr>
+                    <tr class="afixed-header" id="purchasinggrp-level2header">
+                        <th>Code</th>
+                        <th>Description</th>
+                        <th>By</th>
+                        <th>Date</th>
+                        <th>By</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody >
+                    @if (Model.DataList.Any())
+                    {
+                        foreach (PurchasingGroup item in Model.DataList)
+                        {
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" id="chk-purchasinggrp-@item.DataNo" data-procchannel="@item.ProcChannelCode" data-code="@item.PurchasingGroupCode"/>
+                                </td>
+                                <td class="text-center">
+                                    <a id="lnk-@Model.GridPaging.DataName-@item.DataNo" href="javascript:void(0)" data-embedded="@item.AsEmbeddedData()">@item.PurchasingGroupCode</a>
+                                </td>
+                                <td>@item.Description</td>
+                                <td>@(item.ProcChannelCode + " - " + item.ProcChannelDesc)</td>
+                                <td>@item.CreatedBy</td>
+                                <td class="text-center">@item.CreatedDate.ToStandardFormat()</td>
+                                <td>@item.ChangedBy</td>
+                                <td class="text-center">@item.ChangedDate.ToStandardFormat()</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="afixed-column text-center">@CommonDisplayMessage.NoData</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                    <tfoot>
+                        <tr>
+                            <td colspan="13">
+                                    @Html.Partial(CommonPage.GridPagination, Model.GridPaging)
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+</div>

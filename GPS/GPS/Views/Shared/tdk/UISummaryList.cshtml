@@ -1,0 +1,131 @@
+﻿@using System.Collections
+@using System.Reflection
+@using Toyota.Common.Utilities
+@model UISummaryListSettings
+           
+<div id="@Model.Id" class="panel panel-@Convert.ToString(Model.ColorType).ToLower() @Model.PrintCssClass()">
+    <div class="panel-heading">
+        <form role="form" action="#">
+            <div class="input-group">
+                <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                <input type="text" class="form-control" placeholder="Filter ..."/>
+            </div>
+        </form>            
+    </div>
+    <div class="panel-body">
+        <div class="list-group">
+            @{
+                string titleField = Model.TitleFieldName;
+                string subtitleField = Model.SubtitleFieldName;
+                string textField = Model.TextFieldName;
+                string keyField = Model.KeyFieldName;
+                IEnumerable source = Model.DataSource;
+                IEnumerator enumerator = source.GetEnumerator();
+                PropertyInfo prop;                
+                Type type;
+                object obj;
+                string title = string.Empty;
+                string subtitle = string.Empty;
+                string text = string.Empty;
+                object value = string.Empty;
+                string key = string.Empty;
+                string state = string.Empty;      
+                long dataCount = 0;          
+                while(enumerator.MoveNext()) {
+                    dataCount++;
+                    obj = enumerator.Current;
+                    type = obj.GetType();
+
+                    title = string.Empty;
+                    subtitle = string.Empty;
+                    text = string.Empty;
+                    value = string.Empty;
+                    key = string.Empty;
+                    state = string.Empty;
+                    
+                    if(!titleField.IsNullOrEmpty()) 
+                    {
+                        prop = type.GetProperty(titleField);
+                        if(!prop.IsNull()) 
+                        {
+                            value = prop.GetValue(obj, null);
+                            title = !value.IsNull() ? Convert.ToString(value) : Model.MissingTitleText;
+                            if (!Model.CustomTitle.IsNull())
+                            {
+                                title = Model.CustomTitle.Invoke(value);
+                            }   
+                        }                           
+                    }
+                    
+                    if(!subtitleField.IsNullOrEmpty()) 
+                    {
+                        prop = type.GetProperty(subtitleField);
+                        if(!prop.IsNull()) 
+                        {
+                            value = prop.GetValue(obj, null);
+                            subtitle = !value.IsNull() ? Convert.ToString(value) : string.Empty;
+                            if (!Model.CustomSubtitle.IsNull())
+                            {
+                                subtitle = Model.CustomSubtitle.Invoke(value);
+                            }   
+                        }                        
+                    }                    
+
+                    if(!textField.IsNullOrEmpty()) 
+                    {
+                        prop = type.GetProperty(textField);
+                        if(!prop.IsNull()) 
+                        {
+                            value = prop.GetValue(obj, null);
+                            text = !value.IsNull() ? Convert.ToString(value) : string.Empty;
+                            if (!Model.CustomText.IsNull())
+                            {
+                                text = Model.CustomText.Invoke(value);
+                            }
+                        }                                              
+                    }                    
+
+                    if(!keyField.IsNullOrEmpty()) 
+                    {
+                        prop = type.GetProperty(keyField);
+                        if(!prop.IsNull()) 
+                        {
+                            value = prop.GetValue(obj, null);
+                            key = !value.IsNull() ? Convert.ToString(value) : string.Empty;
+                            if (!Model.CustomKey.IsNull())
+                            {
+                                key = Model.CustomKey.Invoke(obj);
+                            }
+                        }                        
+                        state = key.Equals(Model.SelectedKey) ? "active" : string.Empty;
+                    }
+
+                    string callbackRoute = Model.CallbackRoute.IsNullOrEmpty() ? "#" : string.Format("?_pkey={0}", key);
+                    
+                    <a href="@callbackRoute" class="summary list-group-item @state" data-key="@key">
+                        <h4 class="list-group-item-heading">
+                            @title.ToMvcHtmlString(Model.MissingTitleText)<br /><small>@subtitle</small>
+                            @if (Model.UseReadLabel)
+                            { <span class="label label-info pull-right">new</span> }                            
+                        </h4>
+                        <div class="content">
+                            <p class="list-group-item-text text-justified">@text.ToMvcHtmlString()</p>
+                        </div>            
+                    </a>    
+                }
+            }        
+        </div>
+    </div>
+    <div class="panel-footer text-center">
+        @Html.Toyota().UI.Paginator(settings => {
+            settings.Id = "pgPage_" + Model.Id;
+            settings.PageCount = Model.DataSource.Count();
+        }).GetHtml()
+    </div>
+</div>    
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#@Model.Id").tdkSummaryList(@Model.PrintJsProperties());        
+    });
+</script>

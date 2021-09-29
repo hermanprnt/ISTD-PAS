@@ -1,0 +1,110 @@
+﻿@{
+    /*
+        -- DO NOT ALTER THIS FILE --
+     
+        Toyota .Net Development Kit
+        Copyright (c) Toyota Motor Manufacturing Indonesia, All Right Reserved.
+     
+        Author: lufty.abdillah@gmail.com  
+    */    
+}
+@using System.Text
+@using Toyota.Common.Utilities
+@model UIVerticalMenuSettings
+@{
+    MenuList menuList = Html.Toyota().Page.Menu;    
+}
+
+@functions {
+    MvcHtmlString _DrawMenuIcon(Menu menuItem)
+    {
+        StringBuilder scriptBuilder = new StringBuilder();
+        if (!string.IsNullOrEmpty(menuItem.Glyph))
+        {
+            scriptBuilder.Append(string.Format("<i class=\"fa fa-{0} fa-fw\"></i>&nbsp;", menuItem.Glyph.ToLower()));
+        }
+        else if (!string.IsNullOrEmpty(menuItem.IconUrl))
+        {
+            // TODO: gambar icon di sini
+        }
+        return new MvcHtmlString(scriptBuilder.ToString());
+    }
+}
+
+@if (!menuList.IsNullOrEmpty())
+{    
+    string screenId = Html.Toyota().Page.ScreenID.ToString().ToLower();
+    string activeClassState;
+    string submenuActiveClassState;
+    
+    <ul id="@Model.Id" class="nav nav-pills nav-stacked">
+    @foreach (Menu menuItem in menuList)
+    {
+        if (!menuItem.Visible)
+        {
+            continue;
+        }
+        activeClassState = menuItem.Id.ToLower().Equals(screenId) ? "active" : string.Empty;
+        
+        <li class="@activeClassState">
+        @if (menuItem.HasChildren())
+        {
+            <a href="#" data-toggle="collapse" data-target="#@menuItem.Id">
+                @_DrawMenuIcon(menuItem)@menuItem.Text&nbsp;<i class="fa fa-chevron-right pull-right"></i>
+            </a>
+            <div id="@menuItem.Id" class="collapse">
+                <ul class="nav">
+                @foreach (Menu submenuItem in menuItem.Children)
+                {
+                    submenuActiveClassState = submenuItem.Id.ToLower().Equals(screenId) ? "active" : string.Empty;
+                    if (submenuItem.Separator == MenuSeparator.Before)
+                    {
+                        <li class="divider"></li>
+                    }
+                    <li class="@submenuActiveClassState">
+                        <a href="@submenuItem.NavigateUrl" style="padding-left: 30px">@_DrawMenuIcon(submenuItem)&nbsp;@submenuItem.Text</a>
+                    </li>
+                    if (submenuItem.Separator == MenuSeparator.After)
+                    {
+                        <li class="divider"></li>
+                    }
+                }
+                </ul>
+            </div>            
+        }
+        else
+        {
+            <a href="@menuItem.NavigateUrl">@_DrawMenuIcon(menuItem)&nbsp;@menuItem.Text</a>
+        }
+        </li>
+    }
+    </ul>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var menu, menuAnchor, menuIcon, submenuWrapper, submenu, submenuItems;
+            var submenu;
+            $("#@Model.Id").children("li").each(function () {
+                menu = $(this);
+                menuAnchor = menu.children("a");
+                submenuWrapper = menu.children("div.collapse");
+                submenu = submenuWrapper.children("ul");
+                submenuItems = submenu.children("li");
+                if (submenuItems.hasClass("active")) {
+                    submenuWrapper.addClass("in");
+                    menuAnchor.children("i").removeClass("fa-chevron-right").addClass("fa-chevron-down"); ;
+                }
+                if (submenuItems.size() > 0) {
+                    menuAnchor.click(function (e) {
+                        e.preventDefault();
+                        var menuIcon = $(this).children("i");
+                        if (menuIcon.hasClass("fa-chevron-right")) {
+                            menuIcon.removeClass("fa-chevron-right").addClass("fa-chevron-down");
+                        } else {
+                            menuIcon.removeClass("fa-chevron-down").addClass("fa-chevron-right");
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

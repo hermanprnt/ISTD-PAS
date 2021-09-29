@@ -1,0 +1,103 @@
+@using GPS.Controllers.Master
+@using GPS.Core.ViewModel
+@using GPS.ViewModels.Master
+@model MaterialImageViewModel
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var OnAjaxBegin = ViewData.Get("OnAjaxBegin"),
+            OnAjaxComplete = ViewData.Get("OnAjaxComplete"),
+            OnAjaxError = ViewData.Get("OnAjaxError");
+
+        $(document).on("click", "#btnupload-materialimage", function (e) { $("#upl-materialimage").trigger("click"); });
+
+        function UploadMaterialImage(file, matNo) {
+            var formData = new FormData();
+            formData.append("uploadedFile", file);
+            formData.append("processId", ViewData.Get("ProcessId"));
+            formData.append("matNo", matNo);
+
+            $.ajax({
+                type: "POST",
+                url: "@MaterialController.Action.UploadNewImage",
+                contentType: false, // NOTE: disable header to include content-type
+                processData: false, // NOTE: disabe jquery to convert data to string
+                data: formData,
+                success: function (data) {
+                    if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                        $.messagebox.show(data.ResponseType, data.Message, data.ResponseType);
+                        $("#pop-updateimage").modal("hide");
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        }
+
+        $(document).on("change", "#upl-materialimage", function (e) {
+            OnAjaxBegin("Upload new Material Image");
+
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: "@MaterialController.Action.GetUploadImageValidationInfo",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        try {
+                            $(e.target).validatefile(data);
+                            UploadMaterialImage(e.target.files[0], $(e.target).data("matno"));
+                        }
+                        catch (ex) {
+                            $.messagebox.show("@ActionResponseViewModel.Error", ex.message, "@ActionResponseViewModel.Error");
+                        }
+                    }
+                    else {
+                        $.messagebox.show(data.ResponseType, data.Message, data.ResponseType);
+                    }
+
+                    OnAjaxComplete();
+                },
+                error: function (data) {
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                    OnAjaxError();
+                }
+            });
+        });
+    });
+
+    //# sourceURL=_PopUpUpdateImage.cshtml
+</script>
+
+<div class="modal-dialog modal-sm">
+    <div class="modal-content">
+        <div class="modal-header">
+            <p class="modal-title">
+                @(Model.MatNo + " - " + Model.MatName)
+            </p>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="text-center">
+                        <img src="@Model.MatImage" class="img-thumbnail" alt="@(Model.MatNo + " - " + Model.MatName)" style="width: 150px; height: 150px;" />
+                    </div>
+                    <div class="v-space"></div>
+                    <div class="text-center">
+                        <button id="btnupload-materialimage" class="btn btn-xs btn-default btn-std">Upload new image</button>
+                        <input id="upl-materialimage" type="file" class="hidden" data-matno="@Model.MatNo" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="btn-group-xs text-right">
+                <button id="btnupdateimage-ok" class="btn btn-xs btn-primary btn-std">Ok</button>
+                <button id="btnupdateimage-cancel" class="btn btn-xs btn-danger btn-std" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

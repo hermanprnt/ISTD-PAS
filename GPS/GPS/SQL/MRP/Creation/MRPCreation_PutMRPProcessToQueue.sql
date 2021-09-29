@@ -1,0 +1,1 @@
+﻿EXEC sp_MRPCreation_PutMRPProcessToQueue @ProcessId, @Parameter, @MRPType, @CurrentUser

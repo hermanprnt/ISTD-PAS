@@ -1,0 +1,91 @@
+﻿@using GPS.Models.Common
+@{
+    string TypePaging = ViewData["TypePaging"] != null ? ViewData["TypePaging"].ToString() : "";
+    Tuple<Paging, string, string> PagingData = ViewData["PagingData" + TypePaging] != null ? (Tuple<Paging, string, string>)ViewData["PagingData" + TypePaging]
+                                                : new Tuple<Paging, string, string>(new Paging(0, 1 , 10), "", "0");
+    
+    double PageCount = 0;
+    double DataCount = 0;
+    double PageIndex = 0;
+    
+    if (PagingData.Item1 != null)
+    {
+        PageCount = PagingData.Item1.CountPage;
+        DataCount = PagingData.Item1.CountData;
+        PageIndex = PagingData.Item1.PositionPage;
+    }
+ }
+<script type="text/javascript">
+    $(document).ready(function () {
+        var pageCount = Number("@PageCount");
+        var dataCount = Number("@DataCount");
+        var pageIndex = Number("@PageIndex");
+
+        if (dataCount === 0) { $("#page-@PagingData.Item2").addClass("_pagination-disabled"); }
+        else
+        {
+            if (pageIndex === 1) {
+                $("#page-First-@PagingData.Item2").addClass("_pagination-disabled");
+                $("#page-Prev-@PagingData.Item2").addClass("_pagination-disabled");
+            }
+
+            if (pageIndex >= pageCount) {
+                $("#page-Next-@PagingData.Item2").addClass("_pagination-disabled");
+                $("#page-Last-@PagingData.Item2").addClass("_pagination-disabled");
+            }
+        }
+    })
+</script>
+
+
+<style>
+    ._pagination-disabled {
+        pointer-events: none;
+        cursor: default;
+        color:lightgray;
+    }
+</style>
+
+<ul class="pagination pagination-sm hidden-xs" style="margin-top:0;">
+    <li>
+    @if (PagingData.Item1 != null)
+    {
+        if (@PagingData.Item1.CountData > 0)
+        {
+            <span class="_pagination-label">Page @PagingData.Item1.PositionPage of @PagingData.Item1.CountPage (@PagingData.Item1.CountData item(s))</span>
+        }
+    }                                                                                                  
+    </li>
+        @if (PagingData.Item1 != null)
+        {
+            if (PagingData.Item1.CountData > 0)
+            {
+                <li><span><a id="page-First-@PagingData.Item2" href="javascript: @PagingData.Item2 ( @PagingData.Item1.First , '@PagingData.Item3' )">First</a> </span></li>
+                <li><span><a id="page-Prev-@PagingData.Item2" href="javascript: @PagingData.Item2 ( @PagingData.Item1.Prev , '@PagingData.Item3' )">Prev</a> </span></li> 
+                int minpage = PagingData.Item1.PositionPage - 2;
+                int maxpage = PagingData.Item1.PositionPage + 2;
+                for (int k = 1; k <= PagingData.Item1.CountPage; k++)
+                {
+                    if ((k >= minpage) && (k <= maxpage))
+                    {
+                        if (k == PagingData.Item1.PositionPage)
+                        {
+                        <li class="active">
+                            <a id="page-@PagingData.Item2" href="javascript: @PagingData.Item2 ( @k , '@PagingData.Item3' )">@k</a>
+                            <span class="hidden" id="currentpage">@k</span>
+                        </li> 
+                        }
+                        else
+                        {
+                        <li>
+                            <a id="page-@PagingData.Item2" href="javascript: @PagingData.Item2 ( @k , '@PagingData.Item3' )">@k</a>
+                        </li>  
+                        }
+                    }
+                } 
+                <li><span><a id="page-Next-@PagingData.Item2" href="javascript: @PagingData.Item2 ( @PagingData.Item1.Next , '@PagingData.Item3' )">Next</a></span></li>
+                <li><span><a id="page-Last-@PagingData.Item2" href="javascript: @PagingData.Item2 ( @PagingData.Item1.Last , '@PagingData.Item3' )">Last</a></span></li>
+            }
+        }
+</ul>
+

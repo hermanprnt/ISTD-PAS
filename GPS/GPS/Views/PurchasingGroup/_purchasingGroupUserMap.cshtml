@@ -1,0 +1,101 @@
+@using GPS.Constants
+@using GPS.Controllers.Master
+@using GPS.Core.ViewModel
+@using GPS.Models.Master
+@model IList<PurchasingGroupUser>
+
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-header">
+            <p class="modal-title">
+                Map User
+            </p>
+        </div>
+        <div class="modal-body">
+            <div class="form-horizontal">
+                <div class="row">
+                    <div class="col-xs-6 btn-group-xs">
+                        <button id="btn-usermap-add" class="btn btn-primary btn-xs btn-std">Add</button>
+                        <button id="btn-usermap-delete" class="btn btn-danger btn-xs btn-std">Delete</button>
+                    </div>
+                    <div class="col-xs-6"></div>
+                </div>
+                <div class="v-space"></div>
+                <div class="row">
+                    <div id="grid-usermap">
+                        @Html.Partial(PurchasingGroupController.Partial.UserMapGrid, Model)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="btn-group-xs text-right">
+                <button id="btn-close" type="button" class="btn btn-danger btn-xs btn-std" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var OnAjaxBegin = ViewData.Get("OnAjaxBegin"),
+            OnAjaxComplete = ViewData.Get("OnAjaxComplete"),
+            OnAjaxError = ViewData.Get("OnAjaxError");
+
+        $("#pop-purchgrpusermap").onOnce("click", "#btn-usermap-add", function () {
+            OnAjaxBegin("Add user mapping");
+            $.ajax({
+                type: "POST",
+                url: "@PurchasingGroupController.Action.UserMapEdit",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#pop-purchgrpusermapedit").html(data);
+                        $("#pop-purchgrpusermapedit").modal();
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        $("#pop-purchgrpusermap").onOnce("click", "#btn-usermap-delete", function () {
+            var paramList = [];
+            var chkList = $("[id^=chk-usermap-]:checked");
+            if (chkList.length < 1) {
+                $.displaymessagebox.show("@DisplayMessageId.DeleteAtLeastOne");
+            }
+            else {
+                chkList.each(function(idx) {
+                    var data = $(this).data("embedded");
+                    paramList.push(data.RegNo);
+                });
+
+                OnAjaxBegin("Add user mapping");
+                $.ajax({
+                    type: "POST",
+                    url: "@PurchasingGroupController.Action.UserMapDelete",
+                    data: JSON.stringify({
+                        purchasingGroup: ViewData.Get("PurchasingGroup"),
+                        regNoList: paramList
+                    }),
+                    contentType: "@CommonFormat.JsonMimeType",
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            $("#grid-usermap").html(data);
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            }
+        });
+    });
+
+    //# sourceURL=_purchasingGroupUserMap.cshtml
+</script>

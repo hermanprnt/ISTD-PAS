@@ -1,0 +1,183 @@
+﻿
+@using Toyota.Common.Credential
+@{
+    User user = Html.Toyota().Page.User;
+}
+@using GPS.Constants
+@using GPS.Constants.MRP
+@model GPS.ViewModels.MRP.MRPCreationViewModel
+
+<script type="text/javascript"> 
+<<<<<<< HEAD
+
+
+    function autoRefresh_div()
+    {
+        $("#divtable").load(location.href + ' #divtable');
+    }
+    setInterval('autoRefresh_div()', 100000);
+
+
+
+=======
+>>>>>>> 3773a59e77a4b2339d5f378fb2c408bd394770ee
+$(document).ready(function () {
+
+        /* ============================== Init: begin ============================== */
+
+        function DisableAllFeatures() {
+            $("#btnmrp-check").prop("disabled", true);
+            $("#btnmrp-run").prop("disabled", true);
+        }
+
+        function EnableAllFeatures() {
+            $("#btnmrp-check").prop("disabled", false);
+            $("#btnmrp-run").prop("disabled", false);
+        }
+
+        function ResetForm() {
+            var btnMRPRun = $("#btnmrp-run");
+            if (!btnMRPRun.hasClass("hidden"))
+                btnMRPRun.addClass("hidden");
+
+            $("#txtlookup-procgroup").val("");
+        }
+
+        function Init() {
+            $tdk.ProcessId = "@Model.ProcessId";
+
+            $("#cmb-procgroup").lookupgrid();
+
+            ResetForm();
+            EnableAllFeatures();
+        }
+
+        Init();
+
+        /* =============================== Init: end =============================== */
+        
+        /* ========================= Check then Run: begin ========================= */
+
+        function MRPCheckIsValid() {
+            return $("#txtlookup-procgroup").val() !== "";
+        }
+
+        $("#btnmrp-check").click(function (e) {
+            if (!MRPCheckIsValid()) {
+                $.messagebox.show("Search criteria is not valid", "Please select Procurement Usage Group first.", "WRN");
+                return;
+            }
+
+            $.progressbox.show($tdk.PageTitle, "Checking MRP");
+            DisableAllFeatures();
+            $.ajax({
+                type: "POST",
+                url: "@MRPPage.CreationMRPCheckAction",
+                data: {
+                    procUsageGroup: $("#txtlookup-procgroup").val()
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#procusagegroup-check").html(data);
+                        $("#btnmrp-run").removeClass("hidden");
+	                    document.getElementById("divtable").style.visibility = 'visible';
+                        onGetData(1);
+                    }
+                    else {
+                        $.messagebox.show("Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: function () {
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    $.messagebox.show("Error", data.responseText, "ERR");
+                }
+            });
+        });
+
+        $("#btnmrp-run").click(function (e) {
+            $("#pop-runconfirm").modal();
+        });
+
+        $("#btnrun-ok").click(function (e) {
+            $("#pop-runconfirm").modal("hide");
+
+            $.progressbox.show($tdk.PageTitle, "Processing MRP");
+            DisableAllFeatures();
+            $.ajax({
+                type: "POST",
+                url: "@MRPPage.CreationMRPProcessAction",
+                data: JSON.stringify({
+                    ProcessId: $tdk.ProcessId,
+                    ProcUsageGroup: $("#txtlookup-procgroup").val(),
+                    MRPMonth: $("#cmb-mrpmonth").data($("#cmb-mrpmonth > option:checked").val()),
+                    ProcessType: $("#cmb-mrpmonth").val()
+                }),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        /*$("#grid-poitem").html(data);
+                        $("#grid-poitem table #chk-all-pritem").addClass("hidden");
+                        $("#grid-poitem table .itemedit-col-action").removeClass("hidden");*/
+                        
+                    }
+                    else {
+                        $.messagebox.show("Error", data.Message, data.ResponseType);
+	                    document.getElementById("divtable").style.visibility = 'hidden';
+                    }
+                },
+                complete: function () {
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    $.messagebox.show("Error", data.responseText, "ERR");
+                }
+            });
+        });
+
+        /* ========================== Check then Run: end ========================== */
+        
+
+        
+    });
+
+$(document).ready(function () {   
+    $('.date-picker').datepicker({
+        autoclose: true,
+        todayHighlight: true
+    })
+    //show datepicker when clicking on the icon
+	.next().on(ace.click_event, function () {
+		$(this).prev().focus();
+	});            
+}); 
+
+$.fn.addOption = function (optText, optValue) {
+    var option = new Option(optText, optValue);
+    return this.append(option);
+};
+
+function onGetData(page)
+{
+    $.ajax({
+        type: "POST",
+        url: "@Html.Toyota().Page.GetActionUrl("CallData")",
+        data: {
+            Display: $("#cbodisplay").val() ,
+            Page:page,               
+            ProcUsage : $("#txtlookup-procgroup").val(),
+            Month : $("#cmb-mrpmonth").data($("#cmb-mrpmonth > option:checked").val())
+        },
+        success: function (data) {
+            $("#divtable").html(data);
+        }        
+        ,complete:function(){
+                $.progressbox.hide();
+        }
+    });
+}
+
+</script>

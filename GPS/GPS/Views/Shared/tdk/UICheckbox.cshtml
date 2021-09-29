@@ -1,0 +1,10 @@
+﻿@model UICheckBoxSettings
+           
+<div id="@Model.Id" class="_checkbox @Model.PrintCssClass()">
+    <input type="checkbox" name="@Model.Name" />@Model.Caption
+</div>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#@Model.Id").tdkCheckBox(@Model.PrintJsProperties());
+    });    
+</script>

@@ -1,0 +1,47 @@
+﻿@using GPS.Constants.PRPOApproval
+<style type="text/css">
+    #attachment-header-toogle-button:hover 
+    {
+        cursor: pointer;
+    }
+</style>
+
+<div id="attachment-header-container">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group form-group-xs">
+                <div style="text-align:left;background-color: #555;color:white;font-size: 10pt;font-weight: bold;width: 100%;padding: 3px 3px 3px 7px;">
+                    Attachment
+                    <span id="attachment-header-toogle-button" style="float:right;padding-right:7px;">Show</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="attachment-data-container">
+    <div class="row" style="padding-bottom:1em;">
+        <div class="col-sm-12">
+            <div class="form-group form-group-xs">
+                <div class="col-sm-12">
+                    <div style="background-color:white;height:150px;overflow:auto;border:0.1em solid #DDD;">
+                        @Html.Partial(PRPOApprovalPage.POApprovalAttachmentGrid)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#attachment-data-container").css("display", "none");
+    });
+
+    $("#attachment-header-toogle-button").click(function (e) {
+        $("#attachment-data-container").toggle(200, "linear");
+
+        var toogleText = $(this).text();
+        toogleText = toogleText === "Show" ? "Hide" : "Show";
+        $(this).text(toogleText);
+    });
+</script>

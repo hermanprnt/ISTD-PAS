@@ -1,0 +1,235 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Constants.PRPOApproval
+@using GPS.Controllers.PO
+@using GPS.Core.ViewModel
+@using GPS.Models.Common
+@using GPS.Models.PRPOApproval
+@using GPS.ViewModels
+@{
+    POApproval poApproval = (POApproval)ViewData["POApproval"];
+    IList<Attachment> attachmentList = (IList<Attachment>)ViewData["POApprovalBiddingDoc"];
+    IList<Attachment> quotationList = (IList<Attachment>)ViewData["POApprovalQuotation"];
+    PaginationViewModel paginationModels = (PaginationViewModel)ViewData["POApprovalDetailPage"];
+}
+
+<style type="text/css">
+    .decimalPlace {
+        text-align: right;
+    }
+</style>
+
+@Html.Hidden("usertype-detail-value", poApproval.UserType)
+<div class="form-horizontal row-fluid">
+    <div class="row" style="padding-left:5px;">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-purchasinggroup-detail" class="col-xs-5 col-sm-4 control-label text-muted">Purch. Group</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.TextBox("txt-purchasinggroup-detail", poApproval.PurchasingGroup, new {@readonly = "readonly", @class = "form-control"})
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="txt-curr-detail" class="col-xs-5 col-sm-4 control-label text-muted">Currency</label>
+                <div class="col-xs-3">
+                    @Html.TextBox("txt-curr-detail", poApproval.Currency, new {@readonly = "readonly", @class = "form-control"})
+                </div>
+                <div class="col-xs-5">
+                    @Html.TextBox("txt-curr-detail", poApproval.ExchangeRate.ToStandardFormat(), new { @readonly = "readonly", @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="txt-attachment-detail" class="col-xs-5 col-sm-4 control-label text-muted">Attachment</label>
+                @if (attachmentList.Any())
+                {
+                    foreach (Attachment att in attachmentList)
+                    {
+                        @Html.ActionLink(att.FILE_NAME_ORI.Length > 20 ? att.FILE_NAME_ORI.Substring(0, 20) + ". . ." : att.FILE_NAME_ORI, "DownloadPOApprovalAttachment", "POApproval", new { docNo = att.DOC_NO, docSource = att.DOC_SOURCE, fileName = att.FILE_PATH, fileNameOri = att.FILE_NAME_ORI, docYear = att.DOC_YEAR }, new { id = "lnk-apprattachment-" + att.SEQ_NO, @class = "col-xs-7 col-sm-8 left-control-label lnk-download" });
+                    }
+                }
+                else
+                {
+                    <span class="col-xs-7 col-sm-8 left-control-label">No Attachment</span>
+                }
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6">
+            <div class="form-group form-group-xs">
+                <label for="txt-docdesc-detail" class="col-xs-5 col-sm-2 control-label text-muted">Description</label>
+                <div class="col-xs-7 col-sm-10">
+                    @Html.TextBox("txt-docdesc-detail", poApproval.DocDesc, new { @readonly = "readonly", @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="txt-vendor-detail" class="col-xs-5 col-sm-2 control-label text-muted">Vendor</label>
+                <div class="col-xs-7 col-sm-10">
+                    @Html.TextBox("txt-vendor-detail", poApproval.Vendor, new { @readonly = "readonly", @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="txt-quotation-detail" class="col-xs-5 col-sm-2 control-label text-muted">Quotation</label>
+                @if (quotationList.Any())
+                {
+                    foreach (Attachment att in quotationList)
+                    {
+                        @Html.ActionLink(att.FILE_NAME_ORI.Length > 20 ? att.FILE_NAME_ORI.Substring(0, 20) + ". . ." : att.FILE_NAME_ORI, "DownloadPOApprovalAttachment", "POApproval", new { docNo = att.DOC_NO, docSource = att.DOC_SOURCE, fileName = att.FILE_PATH, fileNameOri = att.FILE_NAME_ORI, docYear = att.DOC_YEAR }, new { id = "lnk-apprquotation-" + att.SEQ_NO, @class = "col-xs-7 col-sm-10 left-control-label lnk-download" });
+                    }
+                }
+                else
+                {
+                    <span class="col-xs-7 col-sm-10 left-control-label">No Attachment</span>
+                }
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-docdt-detail" class="col-xs-5 col-sm-4 control-label text-muted">Total Item</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.TextBox("txt-docdt-detail", paginationModels.TotalDataCount, new { @readonly = "readonly", @class = "form-control decimalPlace" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="txt-status-detail" class="col-xs-5 col-sm-4 control-label text-muted">Total Amount</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.TextBox("txt-status-detail", poApproval.Amount.ToStandardFormat(), new { @readonly = "readonly", @class = "form-control decimalPlace" })
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="line-br"></div>
+    <div class="row">
+        <div class="col-xs-12">
+            @if ((HttpContext.Current.Session["btndetail_approve_po"] == null ? false : (bool)HttpContext.Current.Session["btndetail_approve_po"]))
+            {
+                <button id="btndetail-approve" tabindex="13" class="btn btn-primary btn-xs btn-std">Approve</button>
+            }
+            @if ((HttpContext.Current.Session["btndetail_reject_po"] == null ? false : (bool)HttpContext.Current.Session["btndetail_reject_po"]))
+            {
+                <button id="btndetail-reject" tabindex="14" class="btn btn-danger btn-xs btn-std">Reject</button>
+            }
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row" style="padding-left:12px" id="tab-data">
+        <ul class="nav nav-tabs">
+            <li id="00" class="active"><a href="javascript:onChangeTab('00')">PO Item</a></li>
+            <li id="01"><a href="javascript:onChangeTab('01')">Condition</a></li>
+        </ul>
+    </div>
+    <div class="v-space"></div>
+</div>
+
+<script type="text/javascript">
+    function GetApproveHeaderParameterFromDetail() {
+        var pagingInfo = ViewData.Get("PagingInfo");
+        if (pagingInfo === undefined) { // --> called from dashboard
+            pagingInfo = {
+                CurrentPage: 1,
+                PageSize: 10
+            };
+        }
+
+        return {
+            ApprovalMode: "INC",
+            PONoList: docNo + ",",
+
+            DocNo: docNo,
+            DocDesc: "",
+            DateFrom: undefined,
+            DateTo: undefined,
+            PurchasingGroup: "",
+            Vendor: "",
+            Currency: "",
+            Division: "",
+            UserType: "@UserType.CurrentUser",
+
+            CurrentPage: pagingInfo.CurrentPage,
+            PageSize: pagingInfo.PageSize
+        };
+    }
+
+    function ApproveHeaderFromDetail(responseCallback) {
+        var param = GetApproveHeaderParameterFromDetail();
+        $.ajax({
+            type: "POST",
+            url: '@POApprovalController.Action.ApprovePO',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            ajaxSend: $.progressbox.show("PO Approval Approve", "Approve PO Approval Data. . ."),
+            success: responseCallback
+        });
+    }
+
+    function RejectHeaderFromDetail(responseCallback) {
+        var param = GetApproveHeaderParameterFromDetail();
+        $.ajax({
+            type: "POST",
+            url: '@POApprovalController.Action.RejectPO',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            ajaxSend: $.progressbox.show("PO Approval Reject", "Reject Header PO Approval Data. . ."),
+            success: responseCallback
+        });
+    }
+
+    function CloseDetailThenRefreshHeader() {
+        $("#btn-close-detail").trigger("click");
+
+        if (typeof SearchPOApproval !== 'function') // --> called from dashboard
+        {
+            SearchPRApproval(undefined, undefined, function (data) {
+                $("#data-container-HomeWorklist").html(data); //home
+            });
+
+            $("#dialog-container").off("hidden.bs.modal");
+        }
+        else {
+            $_pageSize = $("#cmb-perpage-POApproval").val();
+            SearchPOApproval(undefined, $_pageSize, function (data) {
+                if (!data.ResponseType)
+                    $("#data-container-@PRPOApprovalPage.POApproval").html(data);
+                else
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+
+                $("#dialog-container").off("hidden.bs.modal");
+            });
+        }
+    }
+
+    $("#btndetail-approve").click(function (e) {
+        ApproveHeaderFromDetail(function(data) {
+            if (!data.ResponseType) {
+                $("#dialog-container").html(data);
+                $("#dialog-container").modal();
+                $("#dialog-container").on("hidden.bs.modal", CloseDetailThenRefreshHeader);
+            }
+            else
+                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+        });
+    });
+
+    $("#btndetail-reject").click(function (e) {
+        RejectHeaderFromDetail(function(data) {
+            if (!data.ResponseType) {
+                $("#dialog-container").html(data);
+                $("#dialog-container").modal();
+                $("#dialog-container").on("hidden.bs.modal", CloseDetailThenRefreshHeader);
+            }
+            else
+                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+        });
+    });
+
+    var elements = document.getElementsByClassName("lnk-download");
+    //if (elements.length > 0)
+    //    setInterval(clickDownload(elements[0].id, 0, elements.length), 150);
+    for (var i = 0; i < elements.length; i++)
+    {
+        window.open(elements[i].href, '_blank');
+        //alert(elements[i].id + ' ' + i.toString());
+        //document.getElementById(elements[0].id).click();
+    }
+
+    //# sourceURL=POApprovalDetailParam.cshtml
+</script>

@@ -1,0 +1,291 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Constants.PRPOApproval
+@using GPS.Models.Common
+@using GPS.Models.PRPOApproval
+@using GPS.ViewModels
+@{
+    POApproval poApproval = (POApproval)ViewData["POApproval"];
+    List<POApprovalDetail> poApprovalList = (List<POApprovalDetail>)ViewData["POApprovalDetail"];
+    PaginationViewModel paginationModel = (PaginationViewModel)ViewData["POApprovalDetailPage"];
+
+    string DOC_NO = string.Empty;
+    string DOC_TYPE = string.Empty;
+    string USER_TYPE = string.Empty;
+    if (poApproval != null)
+    {
+        DOC_NO = poApproval.DocNo;
+        DOC_TYPE = "PO";
+        //USER_TYPE = poApproval.USER_TYPE;
+    }
+}
+
+<div style="width:100%;overflow:auto;">
+    <table id="table-@PRPOApprovalPage.POApprovalDetailGrid" class="table table-striped table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th style="width:25px;"></th>
+                <th width="75px">PR No</th>
+                <th width="35px">Item</th>
+                <th width="40px">Category</th>
+                <th width="65px">Material No</th>
+                <th width="180px">Material Description</th>
+                <th width="50px">Qty</th>
+                <th width="45px">UoM</th>
+                <th width="90px">Price</th>
+                <th width="90px">Amount</th>
+                <th width="135px">WBS</th>
+                <th width="60px">Cost center</th>
+                <th width="50px">GL Account</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (poApprovalList.Count > 0)
+        {
+            foreach (POApprovalDetail item in poApprovalList)
+            {
+                <tr id="row-approval-detail-@item.NUMBER" data-is-rejected="@item.IS_REJECTED">
+                    <td class="text-center">
+                        @if(@item.HAS_ITEM)
+                        {
+                            <div id="@item.DOC_ITEM_NO" onclick="javascript:changeIcon('@item.DOC_ITEM_NO', '@item.DOC_NO');">
+                                <span class="fa fa-plus-square-o" style="cursor: pointer;"></span>
+                            </div>
+                        }
+                    </td>
+                    <td class="text-center">@item.PR_NO</td>
+                    <td class="text-center">@(String.IsNullOrEmpty(item.DOC_ITEM_NO) ? String.Empty : Convert.ToInt32(item.DOC_ITEM_NO).ToString())</td>
+                    <td class="text-center">@item.VALUATION_CLASS</td>
+                    <td>@item.MAT_NO</td>
+                    <td>@item.MAT_DESC</td>
+                    <td class="text-right">@item.QTY.ToStandardFormat()</td>
+                    <td class="text-center">@item.UOM</td>
+                    <td class="text-right">@item.PRICE.ToStandardFormat()</td>
+                    <td class="text-right">@Convert.ToDecimal(item.AMOUNT).ToStandardFormat()</td>
+                    <td class="text-center">@item.WBS_NO</td>
+                    <td class="text-center">@item.COST_CENTER_CD</td>
+                    <td class="text-center">@item.GL_ACCOUNT</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="12" class="text-center">@CommonDisplayMessage.NoData</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function (e) {
+        docNo = '@DOC_NO';
+        docType = '@DOC_TYPE';
+        userType = '@USER_TYPE';
+
+        InitDetailCheck();
+        BindDetailCheck();
+    });
+
+    ///////// Detail Populate Data Methods
+    function AddDetailCheck(itemNo) {
+        var result = $("#docitemno-list-value").val();
+
+        var docMode = docNo + "|" + docType + "|" + detailSelectionMode + "|";
+        var docNoIndex = result.indexOf(docMode);
+        if (docNoIndex != -1) {
+            var delimitterIndex = result.indexOf(";", docNoIndex);
+            var docItemList = result.substring(docNoIndex, delimitterIndex);
+            var itemList = docItemList.replace(docMode, "");
+            var itemIndex = itemList.indexOf(itemNo);
+            if (itemIndex == -1) {
+                itemList = itemList + itemNo + ",";
+                result = result.replace(docItemList, (docMode + itemList));
+            }
+        }
+        else {
+            result = result + docMode + itemNo + "," + ";";
+        }
+
+        return result;
+    }
+    function RemoveDetailCheck(itemNo) {
+        var result = $("#docitemno-list-value").val();
+
+        var docMode = docNo + "|" + docType + "|" + detailSelectionMode + "|";
+        var docNoIndex = result.indexOf(docMode);
+        if (docNoIndex != -1) {
+            var delimitterIndex = result.indexOf(";", docNoIndex);
+            var docItemList = result.substring(docNoIndex, delimitterIndex);
+            var itemList = docItemList.replace(docMode, "");
+            var itemIndex = itemList.indexOf(itemNo);
+            if (itemIndex != -1) {
+                itemList = itemList.replace(itemNo + ",", "");
+                result = result.replace(docItemList, (docMode + itemList));
+            }
+        }
+
+        return result;
+    }
+    function FindDetailCheck(itemNo) {
+        docItemNoList = $("#docitemno-list-value").val();
+
+        var result = -1;
+
+        var docMode = docNo + "|" + docType + "|" + detailSelectionMode + "|";
+        var docNoIndex = docItemNoList.indexOf(docMode);
+        if (docNoIndex != -1) {
+            var delimitterIndex = docItemNoList.indexOf(";", docNoIndex);
+            var docItemList = docItemNoList.substring(docNoIndex, delimitterIndex);
+            var itemList = docItemList.replace(docMode, "");
+            result = itemList.indexOf(itemNo);
+        }
+
+        return result;
+    }
+
+    function InitDetailCheck() {
+        detailSelectionMode = $("#detail-selection-mode").val();
+        docItemNoCount = parseInt($("#docitemno-count-value").val(), 10);
+        docItemNoList = $("#docitemno-list-value").val();
+
+        if (detailSelectionMode == 'EXC')
+            docItemNoCount = @(paginationModel.TotalDataCount) - docItemNoCount;
+
+        $("#detail-selection-mode").val(detailSelectionMode);
+        $("#docitemno-count-value").val(docItemNoCount);
+        $("#docitemno-list-value").val(docItemNoList);
+    }
+    function BindDetailCheck() {
+        detailSelectionMode = $("#detail-selection-mode").val();
+        docItemNoCount = parseInt($("#docitemno-count-value").val(), 10);
+        docItemNoList = $("#docitemno-list-value").val();
+
+        // If doc item no count is set from header.
+        if (docItemNoCount == @(paginationModel.TotalDataCount) && @(paginationModel.TotalDataCount) > 0) {
+            detailSelectionMode = "EXC";
+            docItemNoList = "";
+
+            updateHeaderCheck(docNo, docType, true);
+            bindHeaderCheck();
+            $("#chk-all-detail").prop("checked", true);
+        }
+        else if (docItemNoCount == 0) {
+            detailSelectionMode = "INC";
+            docItemNoList = "";
+
+            updateHeaderCheck(docNo, docType, false);
+            bindHeaderCheck();
+            $("#chk-all-detail").prop("checked", false);
+        }
+        else
+        {
+            updateHeaderCheck(docNo, docType, false);
+            bindHeaderCheck();
+            $("#chk-all-detail").prop("checked", false);
+        }
+
+        $("#detail-selection-mode").val(detailSelectionMode);
+        $("#docitemno-count-value").val(docItemNoCount);
+        $("#docitemno-list-value").val(docItemNoList);
+
+        switch (detailSelectionMode.toUpperCase())
+        {
+            case "INC":
+                $("[id^=chk-approval-detail-]", "#table-@PRPOApprovalPage.POApprovalDetailGrid").each(function (idx) {
+                    if (FindDetailCheck($(this).data("itemno")) != -1)
+                        $(this).prop("checked", true);
+                    else
+                        $(this).prop("checked", false);
+                });
+                break;
+            case "EXC":
+                $("[id^=chk-approval-detail-]", "#table-@PRPOApprovalPage.POApprovalDetailGrid").each(function (idx) {
+                    if (FindDetailCheck($(this).data("itemno")) != -1)
+                        $(this).prop("checked", false);
+                    else
+                        $(this).prop("checked", true);
+                });
+                break;
+        }
+    }
+
+    $("#chk-all-detail").change(function (e) {
+        // Reset Detail List.
+        var chkAll = this;
+        $("[id^=chk-approval-detail-]", "#table-@PRPOApprovalPage.POApprovalDetailGrid").each(function (idx) {
+            $(this).prop("checked", chkAll.checked);
+        });
+
+        if (chkAll.checked) {
+            detailSelectionMode = "EXC";
+            docItemNoList = "";
+            docItemNoCount = @(paginationModel.TotalDataCount);
+        }
+        else {
+            detailSelectionMode = "INC";
+            docItemNoList = "";
+            docItemNoCount = 0;
+        }
+
+        $("#detail-selection-mode").val(detailSelectionMode);
+        $("#docitemno-list-value").val(docItemNoList);
+        $("#docitemno-count-value").val(docItemNoCount);
+
+        // Reset Detail Main List And Update Header List.
+        updateHeaderCheck(docNo, docType, chkAll.checked);
+        bindHeaderCheck();
+        removeDetailMainList(docNo);
+    });
+
+    $("[id^=chk-approval-detail-]", "#table-@PRPOApprovalPage.POApprovalDetailGrid").change(function (e) {
+        docItemNoList = $("#docitemno-list-value").val();
+        docItemNoCount = parseInt($("#docitemno-count-value").val(), 10);
+
+        if (this.checked) {
+            switch (detailSelectionMode.toUpperCase())
+            {
+                case "INC":
+                    docItemNoList = AddDetailCheck($(this).data("itemno"));
+                    docItemNoCount = docItemNoCount + 1;
+                    break;
+                case "EXC":
+                    docItemNoList = RemoveDetailCheck($(this).data("itemno"));
+                    docItemNoCount = docItemNoCount + 1;
+                    break;
+            }
+        }
+        else {
+            switch (detailSelectionMode.toUpperCase())
+            {
+                case "EXC":
+                    docItemNoList = AddDetailCheck($(this).data("itemno"));
+                    docItemNoCount = docItemNoCount - 1;
+                    break;
+                case "INC":
+                    docItemNoList = RemoveDetailCheck($(this).data("itemno"));
+                    docItemNoCount = docItemNoCount - 1;
+                    break;
+            }
+        }
+
+        $("#docitemno-list-value").val(docItemNoList);
+        $("#docitemno-count-value").val(docItemNoCount);
+
+        BindDetailCheck();
+    });
+    ///////// End Detail Populate Data Methods
+
+    $("[id^=lnk-status-detail-]", "#table-@PRPOApprovalPage.POApprovalDetailGrid").click(function (e) {
+        e.preventDefault();
+        itemNo = $(this).data("itemno");
+
+        OpenPRApprovalHistory(undefined, undefined, function (data) {
+            $("#history-popup-container").html(data);
+            $("#history-popup-container").modal();
+        });
+    });
+
+    //# sourceURL=POApprovalDetailGrid.cshtml
+</script>

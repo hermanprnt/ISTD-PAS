@@ -1,0 +1,59 @@
+﻿@using GPS.Constants.PR
+<style>
+    .table {
+        table-layout: fixed;
+    }
+
+    .table > tr > td {
+        vertical-align : middle;    
+    }
+
+    .table > thead > tr > th {
+        vertical-align : middle;    
+    }
+</style>
+<div class="modal-dialog modal-xs" style="width:500px">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>Vendor Lookup</div>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12">
+                    <div class="form-group form-group-xs">
+                        <div class="input-group input-group-xs">
+                            <form id="form-vendor-grid">
+                                <input id="vendorsearchbox" class="form-control custom-text" type="text">
+                            </form>
+                            <span class="input-group-btn">
+                                <button id="btnsearch-gl" class="addinput custom-button-grid btn btn-primary btn-xs" type="button" onclick="javascript:getVendorGrid(1)">
+                                    &nbsp<i class="fa fa-search"></i>&nbsp</button>
+                                <button id="btnclearlookup" class="addinput custom-button-grid btn btn-default btn-xs" type="button" onclick="javascript:ClearLookupCriteria('vendor')">
+                                    &nbsp<i class="fa fa-eraser"></i>&nbsp</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin-top:10px">
+                <div class="full-border">
+                    <div class="col-xs-12 col-md-12 form-main-group-box-search" id="vendor-grid-container">
+                        @Html.Partial(PurchaseRequisitionPage._LookupVendorGrid)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col-xs-12 text-right">
+                <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal" onclick="javascript:ClearLookupValue('vendor')">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#form-vendor-grid').submit(function () {
+        getVendorGrid(1)
+        return false;
+    });
+</script>

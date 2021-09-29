@@ -1,0 +1,76 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="border:thin" class="table-responsive">
+    <div class="col-xs-3">
+            <table id="displaydashboard" class="table table-striped table-bordered table-condensed" style="display: block">
+                <thead>
+                    <tr class="text-left">
+                        <th colspan="3" height="40px" style="text-align: center">Search Document</th>
+                    </tr>
+                    <tr class="text-left">
+                        <th colspan="3" style="text-align:left">Search Purchase Order</th>
+                    </tr>
+                    <tr class="text-left">
+                        <th style="text-align:left"> PO Number</th>
+                        <th><input id="txtPONumber" class="form-control" type="text" style="font-size: 9pt;" required/></th>
+                        <th><button type="button" class="btn btn-primary btn-xs" style="width: 70px">Go</button> </th>
+                    </tr>
+                    <tr class="text-left">
+                        <th colspan="3" style="text-align:left">Search Delivery Status</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align:left">Manifest No</th>
+                        <th><input id="txtDeliveryStatus" class="form-control" type="text" style="font-size: 9pt;" required /></th>
+                        <th><button type="button" class="btn btn-primary btn-xs" style="width: 70px">Go</button> </th>
+                    </tr>
+                    <tr class="text-left">
+                        <th colspan="3" style="text-align:left">Search Invoices</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align:left">Invoice No</th>
+                        <th><input id="txtInvoiceNo" class="form-control" type="text" style="font-size: 9pt;" required /></th>
+                        <th><button type="button" class="btn btn-primary btn-xs" style="width: 70px">Go</button> </th>
+                    </tr>
+                    <tr class="text-left">
+                        <th colspan="3" style="text-align:left">Search Payment</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align:left">Payment No</th>
+                        <th><input id="txtPaymentNo" class="form-control" type="text" style="font-size: 9pt;" required /></th>
+                        <th><button type="button" class="btn btn-primary btn-xs" style="width: 70px">Go</button> </th>
+                    </tr>
+                </thead>
+            </table> 
+       
+    </div>
+    <div class="col-xs-3">&nbsp;</div>
+    <div class="col-xs-3">&nbsp;</div>
+    <div class="col-xs-3">
+        <table id="displaydashboard" class="table table-striped  table-condensed" style="display: block">
+            <thead>
+                <tr class="text-left">
+                    <th colspan="3" height="40px" style="text-align: center">Quick Links</th>
+                </tr>
+                <tr class="text-left">
+                    <th width="60px" style="text-align:left"><img class="logo-title" src="/Content/Bootstrap/img/app-logo.png"></img></th>
+                    <th style="text-align:left"><a href="#"><u>Global Data Exchange</u> </a> <br /> PIC: </br> Email </br> Mobile: </th>
+                    <th>&nbsp;</th>   
+                </tr>
+                <tr class="text-left">
+                    <th style="text-align:left"><img class="logo-title" src="/Content/Bootstrap/img/app-logo.png"></img></th>
+                    <th style="text-align:left"><a href="#"><u>Supplier Daily Order And Warranty</u> </a><br /> PIC: </br> Email </br> Mobile: </th>
+                    <th>&nbsp;</th>
+                </tr>
+                <tr class="text-left">
+                    <th style="text-align:left"><img class="logo-title" src="/Content/Bootstrap/img/app-logo.png"></img></th>
+                    <th style="text-align:left"><a href="#"><u> Global WARP Supplier Interface </u> </a> <br /> PIC: </br> Email </br> Mobile: </th>
+                    <th>&nbsp;</th>
+                </tr>    
+                
+            </thead>
+        </table>
+
+    </div>
+</div>

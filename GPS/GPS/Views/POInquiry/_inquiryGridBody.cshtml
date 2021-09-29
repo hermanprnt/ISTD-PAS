@@ -1,0 +1,142 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Constants.PO
+@using GPS.Models.PO
+@using GPS.ViewModels.PO
+@model POInquiryViewModel
+@if (Model.DataList.Any())
+{
+    foreach (PurchaseOrder item in Model.DataList)
+    {
+    <tr class="@(item.POStatusCode == "49" || item.POStatusCode == "45" ? "cancel" : String.Empty)">
+        <td class="text-center">
+            <input id="chk-@Model.GridPaging.DataName-@item.DataNo" data-pono="@item.PONo" data-status="@item.POStatusCode" data-sapno="@item.SAPPONo" type="checkbox" />
+        </td>
+        <td style="width: 31px" class="text-center">
+            @if (item.ProcessId == null)
+            {
+                <a class="ref"><i class="fa fa-unlock" id="unlock"></i></a>
+            }
+            else
+            {
+                <a id="unlck-@item.DataNo" class="ref" data-pono="@item.PONo"><i class="fa fa-lock" id="lock" data-toggle="tooltip" title="Document still used by @item.LockedBy"></i></a>
+            }
+        </td>
+        <td class="text-center">
+            @if (item.IsHaveAttachment)
+            {
+                <i class="fa fa-paperclip"></i>
+            }
+@*@item.DataNo*@
+        </td>
+        <td class="text-center">
+            <!-- NOTE: tabindex need not to be sequential http://www.w3.org/TR/WCAG20-TECHS/H4.html#H4-ex3 -->
+            <a id="lnk-@Model.GridPaging.DataName-@item.DataNo" href="javascript:void(0)" tabindex="13" data-pono="@item.PONo">@item.PONo</a>
+        </td>
+        @* 20191008 *@
+        <td width="40px" class="text-center" value="@item.DOC_NO">
+            @if (item.DOC_NO == null)
+            {
+                <i class="fa fa-comment" style="display: none;"></i>
+            }
+            else
+            {
+                <i class="fa fa-comment"></i>
+            }
+        </td>
+        @* 20191008 *@
+        <td>@item.POHeaderText</td>
+        <td class="text-center">@item.PODate.ToStandardFormat()</td>
+        <td class="text-center">@item.PurchasingGroup</td>
+        <td class="text-left">@item.Vendor</td>
+        <td class="text-center">@item.Currency</td>
+        <td class="text-right">@item.Amount.ToStandardFormat()</td>
+        @* 20200129 *@
+        <td>@if (@item.POStatus.Equals("PO Posting"))
+            {
+                 <a href="javascript:void(0)" onclick="openPopUpErrorPosting(@item.PONo)">@item.POStatus</a>
+            }
+            else
+            {
+                @item.POStatus
+            }
+        </td>
+        @* 20200129 *@
+        <td class="icon text-center">
+            @if (item.HasSPK && item.POStatusCode != POStatus.Draft)
+            {
+                <img id="img-spkpdf-@item.DataNo" tabindex="14" data-pono="@item.PONo" data-podate="@item.PODate.Year.ToString()" src="@Url.Content("~/Content/img/pdf_icon.png")"/>
+            }
+        </td>
+        <td class="icon text-center">
+            @if (item.POStatusCode == POStatus.Created)
+            {
+                <!-- NOTE: tabindex need not to be sequential http://www.w3.org/TR/WCAG20-TECHS/H4.html#H4-ex3 -->
+                <img id="img-pdf-@item.DataNo" tabindex="15" data-pono="@item.PONo" data-podate="@item.PODate.Year.ToString()" src="@Url.Content("~/Content/img/pdf_icon.png")"/>
+            }
+        </td>
+        <td class="icon text-center">
+            @if (item.POStatusCode == POStatus.Posting || item.POStatusCode == POStatus.Released)
+            {
+                <!-- NOTE: tabindex need not to be sequential http://www.w3.org/TR/WCAG20-TECHS/H4.html#H4-ex3 -->
+                <img id="img-pdf-@item.DataNo" tabindex="15" data-pono="@item.PONo" data-podate="@item.PODate.Year.ToString()" src="@Url.Content("~/Content/img/pdf_icon.png")"/>
+            }
+        </td>
+        <td class="col-hidden hidden">
+            @if ((item.CancelBy != "") && (item.CancelBy != null))
+            {
+                <a href="#" onclick="ShowCancelReason('@item.CancelReason', '@item.PONo')">@item.CancelBy</a>
+            }
+        </td>
+        <td class="text-center col-hidden hidden">@item.CancelDate.ToStandardFormat()</td>
+        <td class="col-hidden hidden">@item.DownloadedBy</td>
+        <td class="text-center col-hidden hidden">@item.DownloadedDate.ToStandardFormat()</td>
+        <td class="col-hidden hidden">@item.CreatedBy</td>
+        <td class="text-center col-hidden hidden">@item.CreatedDate.ToStandardFormat()</td>
+        <td class="col-hidden hidden">@item.ChangedBy</td>
+        <td class="text-center col-hidden hidden">@item.ChangedDate.ToStandardFormat()</td>
+    </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="15" class="text-center">@CommonDisplayMessage.NoData</td>
+    </tr>
+}
+
+<script>
+    //20200129 start
+    function openPopUpErrorPosting(PONo) {
+        $.ajax({
+            type: "POST",
+            url: "@GPS.Controllers.PO.POInquiryController.Action.Error_PO",
+            data: { PONo: PONo },
+            success: function (data) {
+                $.messagebox.show(
+                        "Detail Error Posting" + " " + PONo,
+                        data,
+                        "WRN",
+                        "SINGLE",
+                        "",
+                        ""
+                )
+                //$('#messagebox-text').html("<strong>" + data[1] + "</strong>" + "<br />" + data[0]);
+                if (data[1] != null) {
+                    $('#messagebox-text').html('<h1 style="font-size: 25px;"><strong>' + data[1] + "</strong></h1>" + "<br />" + data[0]);
+                }
+            },
+            error: function (data) {
+                $.messagebox.show(
+                        "Detail Error Posting",
+                        data,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+            }
+        });
+    }
+    //20200129 start
+</script>

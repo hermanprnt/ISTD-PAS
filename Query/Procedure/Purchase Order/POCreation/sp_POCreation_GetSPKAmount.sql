@@ -1,0 +1,15 @@
+CREATE PROCEDURE [dbo].[sp_POCreation_GetSPKAmount]
+    @processId BIGINT,
+    @poNo VARCHAR(11)
+AS
+BEGIN
+    IF ISNULL(@poNo, '') = ''
+    BEGIN
+        SELECT ISNULL(SUM(NEW_AMOUNT), 0) FROM TB_T_PO_ITEM WHERE PROCESS_ID = @processId AND ISNULL(PO_NO, '') = ISNULL(@poNo, '') AND DELETE_FLAG = 'N'
+    END
+    ELSE
+    BEGIN
+        SELECT ISNULL(CASE WHEN ISNULL(SPK_NO, '') = '' THEN PO_AMOUNT ELSE SPK_AMOUNT END, 0)
+        FROM TB_R_PO_H WHERE PO_NO = ISNULL(@poNo, '')
+    END
+END

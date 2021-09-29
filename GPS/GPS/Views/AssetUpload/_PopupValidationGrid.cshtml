@@ -1,0 +1,70 @@
+﻿@using GPS.Models.Asset
+@using GPS.Constants
+@{
+    Tuple<List<AssetUpload>, string, string> gridData = (Tuple<List<AssetUpload>, string, string>)ViewData["AssetDetail"] != null ?
+                                                        (Tuple<List<AssetUpload>, string, string>)ViewData["AssetDetail"] :
+                                                        new Tuple<List<AssetUpload>, string, string>(new List<AssetUpload>(), "", "");
+}
+
+<div id="tScrollHeadItem" style="width: 100%; overflow: hidden;">
+    <input type="text" id="procid" style="display:none" value="@gridData.Item2">
+    <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 1200px; max-width: 1200px;">
+        <thead>
+            <tr>
+                <th class="text-center" width="80px">PR No.</th>
+                <th class="text-center" width="50px">Item No</th>
+                <th class="text-center" width="50px">Seq No</th>
+                <th class="text-center" width="90px">Asset No</th>
+                <th class="text-center" width="90px">Asset Category</th>
+                <th class="text-left" width="90px">Asset Class</th>
+                <th class="text-left" width="180px">Asset Location</th>
+                <th class="text-center" width="90px">Sub-asset</th>
+                <th class="text-center" width="90px">Serial No</th>
+                <th class="text-center" width="50px">Status</th>
+                <th class="text-left" width="230px">Message</th>
+                <th class="text-center" width="50px"></th>
+            </tr>
+            <tr></tr>
+        </thead>
+    </table>
+</div>
+<div id="tScrollBodyItem" style="overflow: scroll;">
+    <table id="tblScroll" class="table table-striped table-bordered table-condensed table-fixed" style="width: 1200px; max-width: 1200px;">
+        <tbody>
+            @if ((gridData.Item1.Count > 0) && (gridData.Item3 == ""))
+            {
+                int i = 0;
+                foreach (AssetUpload item in gridData.Item1)
+                { 
+                    <tr class="row-data">
+                        <td class="text-center cold-@i" width="80px">@item.PR_NO</td>
+                        <td class="text-center cold-@i" width="50px">@item.ITEM_NO</td>
+                        <td class="text-center cold-@i" width="50px">@item.SEQ_NO</td>
+                        <td class="text-center cold-@i" width="90px">@item.ASSET_NO</td>
+                        <td class="text-center cold-@i" width="90px">@item.ASSET_CATEGORY</td>
+                        <td class="text-center cold-@i" width="90px">@item.ASSET_CLASS</td>
+                        <td class="text-left cold-@i" width="180px">@item.ASSET_LOCATION</td>
+                        <td class="text-center cold-@i" width="90px">@item.SUBASSET_NO</td>
+                        <td class="text-center cold-@i" width="90px">@item.SERIAL_NO</td>
+                        <td class="text-center cold-@i" width="50px">@item.VALID_FLAG</td>
+                        <td class="text-left cold-@i" width="230px">@item.MESSAGE</td>
+                        <td class="text-center cold-@i" width="50px"><i class="fa fa-trash btn btn-xs btn-danger" onclick="javascript:DeleteItem('@item.PR_NO', '@item.ITEM_NO', '@item.SEQ_NO')"></i></td>
+                    </tr>
+                    i++;
+                }
+            }
+            else
+            { 
+                <tr>
+                    <td colspan="10" class="text-center">@CommonDisplayMessage.NoData</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $("#tScrollBodyItem").scroll(function () {
+        $("#tScrollHeadItem").scrollLeft($("#tScrollBodyItem").scrollLeft());
+    });
+</script>

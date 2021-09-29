@@ -1,0 +1,20 @@
+﻿<div class="modal-dialog modal-md" style="overflow:auto;width:40%;min-height:60%;min-width:300px;">
+    <div class="modal-content" style="background-color:#3a87ad;color:white;">
+        <div class="modal-header" style="border-bottom: 0px !important">
+            <h4 class="modal-title dettitle popup-title" id="cancel-popup-title" style="font-size:13px">Cancel PR</h4>
+        </div>
+        <div class="modal-body" style="padding:10px !important;background-color:white;color:black;margin:2px !important">
+            <p style="font-size:13px;">Are you sure you want to cancel Document No : <label id="cancel-lbl-pr_no" style="font-size:inherit"></label> ?</p>
+            <p style="font-size:11px;">
+                If you're sure to cancel this purchase requisition, please fill 
+                <strong>Cancel Reason<span style="color:red">*</span></strong> in text field below :
+            </p>
+            <textarea id="input-reason-container" style="width:100%;resize:none;font-size:11px" rows="3" maxlength="100"></textarea>
+            <p style="font-size:10px;font-style:italic"><span style="color:red">*</span>Mandatory, Minimum 10 Character, Maximum 100 Character</p>
+            <div class="btn-group-xs text-right">
+                <button id="btncancel-ok" type="button" class="btn btn-primary btn-xs" onclick="doCancelValidationPR()">Yes</button>
+                <button id="btncancel-no" type="button" class="btn btn-danger btn-xs" data-dismiss="modal" onclick="doCancelAbort()">No</button>
+            </div>
+        </div>
+    </div>
+</div>

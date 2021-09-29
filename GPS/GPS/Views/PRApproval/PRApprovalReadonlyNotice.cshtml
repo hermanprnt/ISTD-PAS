@@ -1,0 +1,17 @@
+﻿@model String
+
+<div class="modal-dialog modal-sm">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <b>
+                <h4 class="modal-title">Notice</h4>
+            </b>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <textarea id="txt-notice" readonly="readonly" class="form-control">@Model</textarea>
+            </div>
+        </div>
+    </div>
+</div>

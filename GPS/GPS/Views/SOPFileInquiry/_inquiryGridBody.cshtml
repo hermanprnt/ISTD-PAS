@@ -1,0 +1,56 @@
+﻿@using GPS.Constants;
+@using GPS.Models.Common;
+@using GPS.CommonFunc;
+@model GPS.ViewModels.SOP.SOPFileViewModel
+
+<style>
+    a.no-dotted:active,
+    a.no-dotted:focus{
+        outline:none
+    }
+    a.no-dotted{
+        text-decoration:none;
+    }
+
+    button.btn-red{
+        background-color: #c90b0b !important;
+        border-color: #ef3f3f;
+    }
+
+    button.btn-red:hover,
+    button.btn-red:active{
+        background-color: #d74040 !important;
+        border-color: #ef3f3f;
+    }
+</style>
+
+@if (Model.DataList.Any())
+{
+    foreach (AttachmentFile item in Model.DataList)
+    {
+        <tr>
+            <td width="20px"></td>
+            <td width="70px" class="center">@item.NO</td>
+            <td width="350px">
+                <img src="@Url.Content("~/Content/img/app/"+item.IMG_FILE_EXTENSION)" alt="" style="width: 30px;height: 38px;float: left;" />
+                <a href="javascript:void(0)" class="no-dotted" onclick="javascript: onDownloadFile('@item.DOCUMENT_ID')" style="float: left;">
+                    <div style="padding-top: 12px;padding-left: 5px;height: 38px;">@item.FILE_NAME_ORI</div>
+                </a>
+            </td>
+            <td>@item.FILE_DESC</td>
+            <td width="120px" class="center">@item.FILE_SIZE_STR.ToString()</td>
+            <td width="150px" class="center">@item.CREATED_DT.ToStandardFormat()</td>
+            <td width="50px" class="center authorized_delete">
+                <div>
+                    <button class="btn btn-default btn-red btn-xs" onclick="onDeleteFile('@item.DOCUMENT_ID')"><i class="fa fa-times-circle" aria-hidden="true" style="padding-left: .5px;"></i></button>
+                </div>
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="7" class="text-center">@CommonDisplayMessage.NoData</td>
+    </tr>
+}

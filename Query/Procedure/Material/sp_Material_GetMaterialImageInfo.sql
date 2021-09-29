@@ -1,0 +1,11 @@
+CREATE PROCEDURE [dbo].[sp_Material_GetMaterialImageInfo]
+    @matNo VARCHAR(50)
+AS
+BEGIN
+    SELECT mat.MAT_NO MatNo, mat.MAT_DESC MatName, ISNULL(mi.IMG_URL, '') MatImageName
+    FROM (
+        SELECT MAT_NO, MAT_DESC FROM TB_M_MATERIAL_PART WHERE MAT_NO = @matNo
+        UNION SELECT MAT_NO, MAT_DESC FROM TB_M_MATERIAL_NONPART WHERE MAT_NO = @matNo
+    ) mat
+    LEFT JOIN TB_M_MATERIAL_IMAGE mi ON mi.MAT_NO = mat.MAT_NO
+END

@@ -1,0 +1,87 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Models.PO
+@model GPS.ViewModels.GenericViewModel<GPS.Models.PO.PRPOItem>
+
+    <div id="tScrollBody" style="overflow: scroll; ">
+        <table class="table table-striped table-bordered table-condensed" id="tblAdoptPr" style="width:1800px;">
+            <thead>
+                <tr>
+                    <th width="40px"></th>
+                    <th width="40px" class="itemedit-col-check hidden">
+                        <input id="chkall-@Model.GridPaging.DataName" type="checkbox" />
+                    </th>
+                    <th width="100px">PR No</th>
+                    <th width="85px">Item No</th>
+
+                    <th width="100px">Material No</th>
+                    <th width="400px">Material Description</th>
+                    <th width="50px">Qty</th>
+                    <th width="45px">UOM</th>
+                    <th width="190px">Price</th>
+                    <th width="190px">Amount</th>
+                    <th width="400px">Vendor</th>
+                    <th width="90px">Plant</th>
+                    <th width="90px">Sloc</th>
+                    <th width="400px">Creator</th>
+                    <th width="450px">WBS</th>
+                    <th width="85px">Cost center</th>
+                    <th width="85px">GL Account</th>
+                    <th width="85px">Asset No</th>
+                    <th width="85px">Category</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.DataList.Any())
+            {
+                foreach (PRPOItem item in Model.DataList)
+                {
+            <tr id="exprow-@(Model.GridPaging.DataName + "-" + item.DataNo)" data-no="@item.DataNo">
+                <td class="text-center">
+                    @if (item.HasItem)
+                            {
+                            <i id="exp-@Model.GridPaging.DataName-@item.DataNo" class="fa fa-plus-square-o"
+                               style="cursor: pointer;" data-embedded="@item.AsEmbeddedData()"></i>
+                            }
+                </td>
+                <td class="text-center itemedit-col-check hidden">
+                    <input id="chk-@Model.GridPaging.DataName-@item.DataNo" type="checkbox" data-embedded="@item.AsEmbeddedData()" />
+                </td>
+                <td class="text-center">@item.PRNo</td>
+                <td class="text-center">@item.PRItemNo</td>
+
+                <td class="text-center">@item.MatNo</td>
+                <td>@item.MatDesc</td>
+                <td class="text-right">@item.Qty.ToStandardFormat()</td>
+                <td class="text-center">@item.UOM</td>
+                <td class="text-right">@item.PricePerUOM.ToStandardFormat()</td>
+                <td class="text-right">@item.PriceAmount.ToStandardFormat()</td>
+                <td>@item.VendorDesc</td>
+                <td class="text-center">@item.Plant</td>
+                <td class="text-center">@item.SLoc</td>
+                <td class="text-left">@item.Creator</td>
+                <td class="text-left">@item.WBSNo</td>
+                <td class="text-center">@item.CostCenter</td>
+                <td class="text-center">@item.GLAccount</td>
+                <td class="text-center">@item.AssetNo</td>
+                <td class="text-center">@item.ValuationClass</td>
+            </tr>
+                }
+            }
+            else
+            {
+            <tr>
+                <td colspan="17" class="text-center">@CommonDisplayMessage.NoData</td>
+            </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="v-space"></div>
+    @Html.Partial(CommonPage.GridPagination, Model.GridPaging)
+    <script>
+        $(document).ready(function () {
+
+            //$("#tScrollBody").width($(document).height() - 270);
+        });
+    </script>

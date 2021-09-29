@@ -1,0 +1,70 @@
+﻿@using GPS.Models.Master
+@{
+    List<Material> MaterialNo = (List<Material>)ViewData["MaterialNo"];
+    List<Vendor> VendorCode = (List<Vendor>)ViewData["VendorCD"];
+}
+
+<div class="modal fade" id="sourceListModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">Source List Data</h4>
+                <input type="hidden" id="txtId" />
+            </div>
+            <form id="formEmployee" method="post" action="javascript: onSaveChange();">
+                <div class="modal-body">
+                    <div class="alert alert-danger" role="alert" style="display:none" id="alert-searchModal"></div>
+                    <div class="alert alert-info" role="alert" style="display:none" id="info-searchModal"></div>
+                    <div class="alert alert-success" role="alert" style="display:none" id="success-searchModal"></div>
+                    <div class="alert alert-warning" role="alert" style="display:none" id="warning-searchModal"></div>
+
+                    <div class="form-horizontal">
+                        <div class="form-group form-group-sm">
+                            <label class="col-sm-3 control-label text-muted required-left">Material No</label>
+                            <div class="col-sm-9">
+                                <select id="ddlAddMaterialNo" class="form-control" required>
+                                <option value="">None</option>
+                                    @foreach (Material item in MaterialNo)
+                                    {
+                                        <option value="@item.MaterialNo">@item.MaterialNo - @item.MaterialDesc</option> 
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-sm">
+                            <label class="col-sm-3 control-label text-muted required-left">Vendor Code</label>
+                            <div class="col-sm-9">
+                                <select id="ddlAddVendorCD" class="form-control" required>
+                                <option value="">None</option>
+                                    @foreach (Vendor item in VendorCode)
+                                    {
+                                        <option value="@item.VendorCd">@item.VendorCd - @item.VendorName</option> 
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-sm">
+                            <label class="col-sm-3 control-label text-muted required-left">Valid From</label>
+                            <div class="col-sm-9">
+                                <input id="dtAddValidFrom" type="text" class="form-control _datepicker" required />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-sm">
+                            <label class="col-sm-3 control-label text-muted">Valid To</label>
+                            <div class="col-sm-9">
+                                <input id="dtAddValidTo" type="text" readonly="readonly" disabled="disabled" class="form-control" value="31.12.9999" />
+                            </div>
+                        </div>
+                        <input id="txtCreatedBy" type="hidden" />
+                        <input id="txtCreatedDate" type="hidden" />
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary btn-xs" id="btnSave" >Save</button>
+                    <button type="button" class="btn btn-danger btn-xs" id="btnCancel" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,16 @@
+﻿SELECT VENDOR_CD AS VendorCd,
+	   SAP_VENDOR_ID AS SAPVendorID,
+	   VENDOR_NAME AS VendorName,
+	   VENDOR_PLANT AS VendorPlant,
+	   PURCHASING_GRP_CD AS PurchGroup,
+	   PAYMENT_METHOD_CD AS PaymentMethodCd,
+	   PAYMENT_TERM_CD AS PaymentTermCd,
+	   VENDOR_ADDRESS AS [Address],
+	   CITY AS City,
+	   PHONE AS Phone,
+	   FAX AS Fax,
+	   ATTENTION AS Attention,
+	   POSTAL_CODE AS Postal,
+	   COUNTRY AS Country,
+	   EMAIL_ADDR AS Mail
+FROM TB_M_VENDOR WHERE VENDOR_CD = @VendorCd

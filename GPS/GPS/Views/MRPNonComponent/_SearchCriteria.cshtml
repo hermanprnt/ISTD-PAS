@@ -1,0 +1,148 @@
+﻿@using GPS.Models.MRP
+
+@{
+    List<MRPNonComponent> ListProcUsage = (List<MRPNonComponent>)ViewData["ListProcUsage"];   
+}
+<form role="form" class="form-horizontal" id="searchForm" method="post" action="javascript: onGetData(1)">
+<div class="row">    
+   <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs ">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                Proc Usage</label>
+            <div class="col-xs-8 col-sm-9 col-md-8">
+                <select id="txtProcUsage"  class="form-control mandatory">
+                    <option value=""></option>
+                    @foreach (MRPNonComponent item in ListProcUsage)
+                    {
+                        <option value="@item.PROC_USAGE_CD">@item.PROC_USAGE_CD - @item.DESCRIPTION</option> 
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs ">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                Material No</label>
+            <div class="col-xs-8 col-sm-9 col-md-8">
+                <div class="input-group" id="btn-group2" >
+                 <input type="text"  id="txtMatNo" disabled="disabled" class="form-control mandatory" />
+                  <span class="input-group-addon" onclick="LookupMatNo(1)"><i class="fa fa-search"></i></span>  
+                  </div>              
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted" style="background-color:transparent; color:White">aa</label>
+        <input type="hidden" id="txtMatDesc" />
+        </div>
+    </div>
+   <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                Header Type</label>
+            <div class="col-xs-8 col-sm-9 col-md-8">
+                <input type="text" id="txtHdrType" class="form-control" />
+            </div>
+        </div>
+    </div>
+   <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                Header Code</label>
+            <div class="col-xs-8 col-sm-9 col-md-8">
+                <input type="text" id="txtHdrCD" class="form-control" />
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                Model</label>
+            <div class="input-group input-group-xs col-xs-8 col-sm-9 col-md-8" style="padding-left: 11px;padding-right: 11px; height: 26px;">
+                 
+                    <input class="form-control " id="txtModel" name="txtModel" type="text"  />                       
+                                
+            </div>
+        </div>
+    </div> 
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                Transmission</label>
+            <div class="input-group input-group-xs col-xs-8 col-sm-9 col-md-8" style="padding-left: 11px;padding-right: 11px; height: 26px;">
+                    <input class="form-control " id="txtTransmission" name="txtTransmission" type="text"  />                                 
+            </div>
+        </div>
+    </div> 
+<div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                Engine</label>
+            <div class="input-group input-group-xs col-xs-8 col-sm-9 col-md-8" style="padding-left: 11px;padding-right: 11px; height: 26px;">
+                    <input class="form-control " id="txtEngine" name="txtEngine" type="text"  />                                 
+            </div>
+        </div>
+    </div> 
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                D/E</label>
+            <div class="input-group input-group-xs col-xs-8 col-sm-9 col-md-8" style="padding-left: 11px;padding-right: 11px; height: 26px;">
+                    <select id="txtDE" class="form-control">
+                    <option value=""></option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    </select>                                
+            </div>
+        </div>
+    </div> 
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                Prod Sfx</label>
+            <div class="input-group input-group-xs col-xs-8 col-sm-9 col-md-8" style="padding-left: 11px;padding-right: 11px; height: 26px;">
+                    <input class="form-control " id="txtProdSfx" name="txtProdSfx" type="text"  />                                 
+            </div>
+        </div>
+    </div> 
+<div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                Color</label>
+            <div class="input-group input-group-xs col-xs-8 col-sm-9 col-md-8" style="padding-left: 11px;padding-right: 11px; height: 26px;">
+                    <input class="form-control " id="txtColor" name="txtColor" type="text"  />                                 
+            </div>
+        </div>
+    </div> 
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                Valid Date</label>
+            <div class="input-group input-group-xs col-xs-8 col-sm-9 col-md-8" style="padding-left: 11px;padding-right: 11px; height: 26px;">
+                 <div class="input-group" style="cursor: pointer;">
+                    <input class="form-control date-picker" id="txtValidDate" name="txtValidDate" type="text" data-date-format="yyyy-mm-dd" />                       
+                    <span class="input-group-addon"><i class="fa fa-calendar bigger-110"></i></span> 
+                </div>              
+            </div>
+        </div>
+    </div>
+    </div>
+    
+    <div class="col-xs-12 text-right">
+        <div class="form-group-xs">        
+            <button type="submit" class="btn btn-primary btn-xs">
+                Search</button>        
+            <button type="button" class="btn btn-default btn-xs" id="btnnclear" onclick="onClear()">
+                Clear</button>
+        </div>
+</div>
+</form>
+
+<div id="divlookup">
+@Html.Partial("_LookupGrid_MatNo") 
+</div>
+

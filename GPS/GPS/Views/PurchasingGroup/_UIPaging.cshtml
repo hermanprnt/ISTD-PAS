@@ -1,0 +1,152 @@
+﻿@using GPS.Models
+@using GPS.Models.Common
+@{
+    Paging pg = (Paging)ViewData["Paging"];
+    Paging pg2 = (Paging)ViewData["PagingDownload"];  
+    int minpage = pg.PositionPage - 2;
+    int maxpage = pg.PositionPage + 2;
+    
+    }
+    
+@if(pg.PositionPage == pg.First || pg.CountData == 0)
+    {
+        <style>
+        #pgFirst 
+        {
+              pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+        #pgPrev
+        {
+              pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+       </style> 
+    }
+@if(pg.PositionPage == pg.Last )
+    {
+        <style>
+        #pgNext 
+        {
+                      pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+        #pgLast
+        {
+                      pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+       </style> 
+    }
+    
+@if(pg.CountData == 0)
+    {
+        <style>
+        #pgFirst 
+        {
+              pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+        #pgPrev
+        {
+              pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+         #pgNext
+        {
+              pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+         #pgLast
+        {
+              pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+       </style> 
+    }
+<ul class="pagination pagination-sm hidden-xs" style="margin-top:0;">
+    <li>
+
+   @if (@pg.CountData == 1 || @pg.CountData == 0)
+   {
+        <span class="_pagination-label">Page @pg.PositionPage of @pg.CountPage (@pg.CountData item)</span>
+   }
+   else
+   { 
+       <span class="_pagination-label">Page @pg.PositionPage of @pg.CountPage (@pg.CountData items)</span>
+   }                                                                                             
+    </li>
+    <li><span><a href="javascript: onGetData(@pg.First)" id="pgFirst">First</a> </span></li>
+    <li><span><a href="javascript: onGetData(@pg.Prev)" id="pgPrev">Prev</a> </span></li>
+        @for (int k = 1; k <= @pg.CountPage; k++)
+        {
+            if ((k >= minpage) && (k <= maxpage))
+            {
+                if (@k == pg.PositionPage)
+                {
+                <li class="active">
+                    <a href="javascript: onGetData(@k)">@k</a>
+                </li> 
+                }
+                else
+                {
+                <li>
+                    <a href="javascript: onGetData(@k)">@k</a>
+                </li>  
+                }
+            }
+        } 
+    <li><span><a href="javascript: onGetData(@pg.Next)" id="pgNext">Next</a></span></li>
+    <li><span><a href="javascript: onGetData(@pg.Last)" id="pgLast">Last</a></span></li>
+    
+        @*<li>
+            <span class="_pagination-goto">
+                <input type="text" id="txtgo" class="_number-only" />
+            </span>
+        </li>*@
+@*    <li>
+        <span class="_pagination-goto">
+            <button onclick="onGodata()" id="btngo" type="button" class="_btn-go">Go</button>
+        </span>
+    </li>*@
+</ul>
+
+    
+<div class="visible-xs text-center">
+    <div class="col-xs-12">
+        <span class="_pagination-label">Showing 1 to 10 of 10 row(s)</span>
+    </div>
+    <div class="col-xs-12">
+        <ul class="pagination pagination-sm">
+            <li><span>First</span></li>
+            <li><span>Prev</span></li>
+            <li class="active">
+                <a href="javascript: onGetData(1)">1</a>
+            </li>
+            <li><span>Next</span></li>
+            <li><span>Last</span></li>
+        </ul>
+    </div>
+    <div class="col-xs-4 col-xs-offset-4">
+        <div class="input-group">
+            <input type="text" class="form-control" />
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-warning">Go</button>
+            </span>
+        </div>
+    </div>
+</div>
+
+@section BodyScript{
+    <script type="text/javascript">
+    
+  </script>
+  }

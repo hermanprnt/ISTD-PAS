@@ -1,0 +1,93 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Css override -->
+<style type="text/css">
+
+.form-group {
+    margin-bottom: 5px;
+}
+
+.form-horizontal .control-label {
+    text-align: left;
+}
+
+.col-sm-2 {
+    width: 16%;
+  }
+  
+.modal-content 
+{
+    width: 900px;
+}
+  
+</style>
+<!--- End css override -->
+
+@section BodyScript{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("._datePicker").datepicker();
+        });
+
+    </script>
+}
+
+<form role="form" class="form-horizontal" id="searchForm">
+    <div class="full-border font-small">
+        <div class="row">
+            <div class="col-xs-12 col-md-12 form-main-group-box-search">
+                <!-- Row 1 -->
+                <div class="form-group form-group-sm form-group form-group-sm-box-search">
+                    
+                    <label class="col-xs-2 col-sm-2 col-sm-2-col-2 object-loss-right control-label text-muted">Transaction</label>
+                    <div class="col-xs-2 col-sm-2 col-sm-ctl object-loss-left">
+                        <select class="form-control" id="cmbType">
+                            <option value="0">&nbsp;</option>
+                            <option value="1">Budget Checking</option>
+                            <option value="2">Budget Commit</option>
+                            <option value="3">Budget Release</option>
+                        </select>
+                    </div>
+                    
+                    <label class="col-xs-2 col-sm-2 object-loss-right control-label text-muted">Document Number</label>
+                    <div class="col-xs-2 col-sm-2 object-loss-left">
+                        <input id="txtDocno" type="text" class="form-control" />
+                    </div>
+
+                    <label class="col-xs-2 col-sm-2 object-loss-right control-label text-muted">Document Year</label>
+                    <div class="col-xs-2 col-sm-2 object-loss-left">
+                        <input id="txtDocyear" maxlength="4" type="text" class="form-control" />
+                    </div>
+
+                </div>
+                <!-- Row 2 -->
+                <div class="form-group form-group-sm form-group form-group-sm-box-search">
+                    
+                    <label class="col-xs-2 col-sm-2 object-loss-right control-label text-muted">WBS Number</label>
+                    <div class="col-xs-2 col-sm-2 object-loss-left">
+                        <input id="txtWBSno" type="text" class="form-control" />
+                    </div>
+
+                    <label class="col-xs-2 col-sm-2 object-loss-right control-label text-muted">Amount</label>
+                    <div class="col-xs-2 col-sm-2 object-loss-left">
+                        <input id="txtAmount" type="text" class="form-control" />
+                    </div>
+
+                </div>
+                <!-- Row 2 -->
+                <div class="form-group form-group-sm form-group form-group-sm-box-search">
+                    <label class="col-xs-10 col-sm-10 object-loss-right control-label text-muted">Message</label>
+                    <div class="col-xs-2 col-sm-2 object-loss-left">
+                        <input id="txtCostCenter" type="text" class="form-control" />
+                    </div>
+                </div>
+                <!-- Row End -->
+            </div>
+        </div>
+
+    </div>
+</form>
+
+<div>&nbsp;</div>

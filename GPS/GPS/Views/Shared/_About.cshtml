@@ -1,0 +1,135 @@
+﻿<!-- About popup -->
+<div id="about-popup" class="modal fade"> 
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title" id="popup-title">Application Info 
+                <i class="fa fa-lightbulb-o fa-lg green pull-right" style="font-size: 1.7em;"></i></h4>
+            </div>
+
+            <div class="modal-body">
+                <p class="text-large">@Html.Toyota().Application.Name</p>
+                <p>Application description.</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id ='btnClearCache' class="btn btn-primary btn-xs btn-std" data-dismiss="modal">Clear Cache</button>
+                <button type="button" class="btn btn-primary btn-xs btn-std" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Script AboutPopup Start -->
+<script type="text/javascript">
+    $("#btnClearCache").click(function () {
+        $.ajax({
+            url: "",
+            context: document.body,
+            success: function (s, x) {
+                $.messagebox.show(
+                        "Clear Cache",
+                        "Are you sure want to clear the cache?",
+                        "INF",
+                        "CONFIRM",
+                        "clearjQueryCache();zeit('zeitstempel');zeit('_tdk_session_id');zeit('parentMenu');zeit('ASP.NET_SessionId');",
+                        //"//window.location.replace('/Login/Logout');//location.reload(true);",
+                        "");
+                
+            }
+        });
+    });
+
+    function clearCacheMessage()
+    {
+        //$.messagebox.show(
+        //            "Clear Cache",
+        //            "Cache browser has been successfully cleared!",
+        //            "INF",
+        //            "SINGLE",
+        //            "window.location.replace('/Home');",
+        //            //"//window.location.replace('/Login/Logout');//location.reload(true);",
+        //            "");
+        
+    }
+
+    function zeit(cookievar) {
+        if (document.cookie) {
+            a = document.cookie;
+            console.log(a);
+            cookiewert = "";
+            while (a.length > 0) {
+                cookiename = a.substring(0, a.indexOf('='));
+                if (cookiename == cookievar) {
+                    cookiewert = a.substring(a.indexOf('=') + 1, a.indexOf(';'));
+                    console.log(cookiewert);
+                    break;
+                }
+                a = a.substring(a.indexOf(cookiewert) + cookiewert.length + 1, a.length);
+                console.log(cookiename);
+            }
+            if (cookiewert.length > 0) {
+                alter = new Date().getTime() - cookiewert;
+
+                if (alter > 3600000) {
+                    document.cookie = cookievar+"=" + new Date().getTime() + ";";
+                    location.reload(true);
+                }
+                else {
+                    return;
+                }
+            }
+            else {
+                document.cookie = cookievar + "=" + new Date().getTime() + ";";
+                location.reload(true);
+            }
+        }
+        else {
+            document.cookie = cookievar + "=" + new Date().getTime() + ";";
+            location.reload(true);
+        }
+    }
+
+    function clearjQueryCache() {
+        for (var x in jQuery.cache) {
+            console.log(x);
+            delete jQuery.cache[x];
+        }
+    }
+</script>
+<!-- Script AboutPopup End -->
+
+<!-- Contact person popup -->
+<div id="contact-popup" class="modal fade">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">Application Helpdesk <i class="glyphicon glyphicon-phone-alt orange pull-right fa-lg"></i></h4>
+
+            </div>
+
+            <div class="modal-body">
+                <address>
+                    <strong>Toyota Motor Manufacturing Indonesia</strong>
+                    <p><i class="fa fa-building-o fa-lg purple" title="Address"></i> : Jl. Laks. Yos Sudarso, Sunter II, Jakarta 14330, Indonesia</p>
+                    <p><i class="fa fa-phone fa-lg green" title="Phone"></i> : (62-21) 6515551</p>
+                </address>
+
+                <p>For general information and questions, please contact :</p>
+                <address>
+                    <strong>Application Helpdesk</strong>
+                    <p><i class="fa fa-envelope-o fa-lg purple" title="Email"></i> : <a href="mailto:app.helpdesk@toyota.co.id">app.helpdesk@toyota.co.id</a></p>
+                    <p><i class="fa fa-phone fa-lg green" title="Phone"></i> : 62020</p>
+                </address>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-xs btn-std" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>

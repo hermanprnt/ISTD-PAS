@@ -1,0 +1,1 @@
+﻿EXEC sp_SOPFileInquiry_SubmitSOP @DOC_TYPE, @FILE_NAME, @FILE_NAME_ORI,	@FILE_DESC,	@FILE_EXTENSION, @FILE_SIZE, @currentUser

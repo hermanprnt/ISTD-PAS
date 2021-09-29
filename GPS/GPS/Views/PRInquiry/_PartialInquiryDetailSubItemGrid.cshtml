@@ -1,0 +1,47 @@
+﻿@using GPS.Constants
+@using GPS.Models.PR.PRInquiry
+@model  GPS.Models.PR.PRInquiry.PRInquiry
+@{
+    List<PRInquiry> data = ViewData["PR_SubItem"] != null ?
+                            (List<PRInquiry>)ViewData["PR_SubItem"] :
+                            new List<PRInquiry>(new List<PRInquiry>());      
+}
+
+@if(data.Count > 0)
+{
+    int i = 1;
+    foreach(var si in data) 
+    {
+    <tr class="subitemgrid-@si.ITEM_NO">
+        @if(i == 1) {
+            <td colspan="5" rowspan="@data.Count"></td>
+        }
+        <td class="text-left" colspan="2">@si.SUBITEM_MAT_DESC</td>
+        <td></td>
+        <td class="text-right">@String.Format("{0:#,0.00}", si.SUBITEM_QTY)</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="text-center">@si.SUBITEM_UOM</td>
+        <td></td>
+        <td></td>
+        <td class="text-right">@String.Format("{0:#,0.00}", si.PRICE_PER_UOM)</td>
+        <td class="text-right">@String.Format("{0:#,0.00}", si.SUBITEM_AMOUNT)</td>
+        <td class="text-right">@String.Format("{0:#,0.00}", si.SUBITEM_LOCAL_AMOUNT)</td>        
+        <td></td>
+        <td class="text-center">@si.SUBITEM_WBS_NO</td>
+        <td class="text-center">@si.SUBITEM_COST_CENTER</td>
+        <td class="text-center">@si.SUBITEM_GL_ACCOUNT</td>
+        @if(i == 1) {
+            <td colspan="8" rowspan="@data.Count"></td>
+        }
+        @{i++;}
+    </tr>
+    }
+}
+else
+{
+    <tr class="removed text-center subitemgrid">
+        <td colspan="8">@CommonDisplayMessage.NoData</td>
+    </tr>
+}

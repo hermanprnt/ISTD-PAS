@@ -1,0 +1,75 @@
+﻿@using GPS.Models
+@using GPS.Models.Master
+@{ List<Plant> PlantList = ViewData["ListPlant"] == null ? new List<Plant>() : (List<Plant>)ViewData["ListPlant"]; }
+
+<div class="row">
+    <div class="col-xs-12 col-sm-6 text-left">
+        
+    </div>
+</div>
+<div class="row">
+    <div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+        <div style="border: 1pt solid #ccc;">
+            <div id="tScrollHead" style="width: 98.65%; overflow: hidden;">
+                <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 100%;">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="vertical-align: middle; width:35px;" rowspan="2">#</th>
+                            <th class="text-center" colspan="2" style="width:596px">Plant</th>
+                            <th class="text-center" colspan="2" style="width:315px">Created</th>
+                            <th class="text-center" colspan="2" style="width:315px">Changed</th>
+                        </tr>
+                        <tr style="font-weight:bold">
+                            <th class="text-center" style="width:100px">Code</th>
+                            <th class="text-center" style="width:496px">Name</th>
+                            <th class="text-center" style="width:189px">By</th>
+                            <th class="text-center" style="width:126px">Date</th>
+                            <th class="text-center" style="width:189px">By</th>
+                            <th class="text-center" style="width:126px">Date</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div id="tScrollBody" style="overflow: scroll; height: 270px;">
+                <table id="tblScroll" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 100%;">
+                    <tbody>
+                        <tr id="ModifyRow" style="display: none;">
+                            <td id="row-entry-0" class="text-center" style="width:35px">&nbsp;</td>
+                            <td id="row-entry-1" style="width:100px"><input id="txtModifyPlantCd" type="text" class="form-control inline-grid text-center" maxlength="4" value="" /></td>
+                            <td id="row-entry-2" style="width:496px"><input id="txtModifyPlantName" type="text" class="form-control inline-grid" maxlength="50" value="" /></td>
+                            <td id="row-entry-3" style="width:189px">&nbsp;</td>
+                            <td id="row-entry-4" style="width:126px">&nbsp;</td>
+                            <td id="row-entry-5" style="width:189px">&nbsp;</td>
+                            <td id="row-entry-6" style="width:126px">&nbsp;</td>
+                        </tr>
+                        @foreach (Plant item in PlantList)
+                        {
+                            <tr>
+                                <td class="text-center" style="width:35px"><input type="checkbox" id="cb-@item.PLANT_CD" data-plant="@item.PLANT_CD" class="grid-checkbox grid-checkbox-body" /></td>
+                                <td class="text-center" style="width:100px">@item.PLANT_CD</td>
+                                <td style="width:496px">@item.PLANT_NAME</td>
+                                <td style="width:189px">@item.CREATED_BY</td>
+                                <td class="text-center" style="width:126px">@item.CREATED_DT</td>
+                                <td style="width:189px">@item.CHANGED_BY</td>
+                                <td class="text-center" style="width:126px">@item.CHANGED_DT</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                    <tfoot>
+                        <tr>
+                            <td colspan="12">
+                                <div class="col-xs-12" style="margin-bottom: 20px;">
+                                    @Html.Partial("_Paging")
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

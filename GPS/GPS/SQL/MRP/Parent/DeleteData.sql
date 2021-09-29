@@ -1,0 +1,4 @@
+﻿DELETE FROM TB_M_PARENT
+WHERE PARENT_CD = @ParentCode AND
+      PARENT_TYPE = @ParentType 
+	 

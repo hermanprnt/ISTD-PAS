@@ -1,0 +1,87 @@
+﻿@using GPS.Models.MRP
+
+<style>
+        .pagination-disabled
+        {
+          pointer-events: none;
+          cursor : default;
+          color:lightgray;
+        }           
+</style> 
+
+<div id="gridlookupParentCd2" class="modal fade">
+    <div class="modal-dialog modal-md" style="width:800px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="popup-title">
+                    Parent Code</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row ">
+                    <div class="col-xs-12 col-md-12">
+                        <div class="form-group form-group-xs">
+                            <div>
+                                <div class="input-group input-group-xs">
+                                    @*<input id="txtlookupParentCd" class="form-control" type="text" placeholder="input name...." />*@
+                                <div class="input-group-btn">
+                                    <div class="input-group" style="cursor:pointer">
+                                    <form method="post" action="javascript: SearchLookup(1,2)">
+                                        <input id="txtlookupParentCd2" class="form-control" type="text" placeholder="input name...." />
+                                    </form>
+                                        <span class="input-group-addon" onclick="SearchLookup(1,2)"><i class="fa fa-search"></i></span>
+                                        <span class="input-group-addon" onclick="LookupClearParentCd()"><i class="fa fa-eraser"></i></span>                                  
+                                    </div> 
+                                </div>
+                                    @*<span class="input-group-btn">
+                                        <button type="button" onclick="SearchLookup(1)" data-loading-text="<i class='glyphicon-refresh-animate glyphicon glyphicon-refresh'></i>"
+                                            class=" btn btn-default btn-sm ">
+                                            &nbsp<i class="fa fa-search"></i>
+                                        </button>
+                                        <button class=" btn btn-default btn-sm" title="Clear" type="button" onclick="LookupClearMatNo()">
+                                            &nbsp<i class="fa  fa-eraser"></i>&nbsp</button>
+                                    </span>*@
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group form-group-xs">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">
+                                                Parent Code
+                                            </th>
+                                            <th class="text-center">
+                                                Parent Type
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodylookup-listemp2">
+                                       
+                                    </tbody>
+                                </table>                               
+                            </div>
+                            <div class="row">
+                            <div class="col-xs-12">
+                                <ul class="pagination pagination-sm hidden-xs" style="margin-top: 0;" id="parentcd-paging2">
+                                    <li style="display: none" class="paging-index-selected2"></li>
+                                    <li style="display: none" class="paging-label"><span>Showing Page <span class="page-no">
+                                    </span>of <span class="page-total"></span>(<span class="total-data"></span> row) </span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        </div>                        
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-sm" onclick="CloseLookupParentCd()">
+                    close</button>
+            </div>
+        </div>
+    </div>
+</div>

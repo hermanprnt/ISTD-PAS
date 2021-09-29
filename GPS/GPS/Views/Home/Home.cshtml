@@ -1,0 +1,648 @@
+﻿@using GPS.Constants
+@using GPS.Constants.PRPOApproval
+@using GPS.ViewModels
+@using GPS.Models.Common
+@{
+    Layout = CommonPage.MainLayout;
+    HttpContext.Current.Session.Timeout = (int)TimeSpan.FromMinutes(60).TotalMinutes;
+    HttpContext.Current.Session.Add("btndetail_approve", Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PRApproval", "btndetail-approve"));
+    HttpContext.Current.Session.Add("btn_edit_detail", Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PRApproval", "btn-edit-detail"));
+    HttpContext.Current.Session.Add("btndetail_approve_po", Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POApproval", "btndetail-approve"));
+    HttpContext.Current.Session.Add("btndetail_reject_po", Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POApproval", "btndetail-reject"));
+
+    List<Notification> announcementList = (List<Notification>)ViewData["HomeNotification"];
+}
+
+<link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/js/lobibox/lobibox.css")" />
+<style>
+    .table > tr > td,
+    .table > thead > tr > th {
+        vertical-align : middle;
+    }
+    #table-HomeDelayWorklist,
+    #table-HomeWorklist,
+    #table-HomeNotice
+    {
+        border-collapse: collapse;
+    }
+    #table-HomeDelayWorklist tr.data:hover,
+    #table-HomeWorklist tr.data:hover,
+    #table-HomeNotice tr.data:hover
+    {
+        background-color: #ccc;
+    }
+    #table-HomeDelayWorklist tr.data td:hover,
+    #table-HomeWorklist tr.data td:hover,
+    #table-HomeNotice tr.data td:hover
+    {
+        cursor: pointer;
+    }
+
+    .list-unstyled {
+        padding-left: 0;
+        list-style: none;
+    }
+</style>
+<script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/lobibox/lobibox.js")"></script>
+
+<div class="ncp-theme">
+     <div class="col-xs-9" style="margin-right: 0px; padding-left:0px;">
+    <div class="row">
+        <div class="col-xs-12" style="padding-right: 0px;">
+            <div class="panel panel-default dashboard-widget">
+                <div class="panel-heading">
+                    <i class="fa fa-check"></i>&nbsp;
+                    Worklist to be Approved
+                </div>
+                <div class="panel-body">
+                    <div id="data-container-HomeWorklist" class="input-group input-group-sm" style="width:100%;background-color:white;">
+                        @Html.Partial(CommonPage.HomeWorklist)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+<div class="col-xs-12" style="padding-right: 0px;">
+            <div class="panel panel-default dashboard-widget">
+                <div class="panel-heading">
+                    <i class="fa fa-check"></i>&nbsp;
+                    Delayed Approved
+                </div>
+                <div class="panel-body">
+                    <div id="data-container-HomeAllDelayedApproval" class="input-group input-group-sm" style="width:100%;background-color:white;">
+                        @Html.Partial(CommonPage.HomeAllDelayedApproval)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div class="row">
+            <div class="col-xs-12" style="padding-right: 0px;">
+            <div class="panel panel-default dashboard-widget">
+                <div class="panel-heading">
+                    <i class="fa fa-comment"></i>&nbsp;
+                    Notice
+                </div>
+                <div class="panel-body">
+                    <div id="data-container-HomeNotice" class="input-group input-group-sm" style="width:100%;background-color:white;">
+                        @Html.Partial(CommonPage.HomeNotice)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+            <div class="row">
+            <div class="col-xs-12" style="padding-right: 0px;">
+            <div class="panel panel-default dashboard-widget">
+                <div class="panel-heading">
+                    <i class="fa fa-list-alt"></i>&nbsp;
+                    PR/PO Tracking
+                </div>
+                <div class="panel-body">
+                    <div id="data-container-HomeTracking" class="input-group input-group-sm" style="width:100%;background-color:white;">
+                        @Html.Partial(CommonPage.HomeTracking)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <div class="col-xs-3" style="padding-right: 0px;">
+                <div class="col-xs-12" style="padding-right: 0px;">
+            <div class="panel panel-default dashboard-widget">
+                <div class="panel-heading" style="background:#d9edf7; color:#31708f">
+                    <i class="fa fa-bullhorn"></i>&nbsp;
+                    Announcement
+                </div>
+                <div class="panel-body" style="min-height:400px;">
+                    <div class="col-xs-12">
+                        <div id="data-container-HomeAnnouncement" class="input-group input-group-sm" style="width:100%;background-color:white;">
+                            @Html.Partial(CommonPage.HomeNotification)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <div class="col-xs-12" style="padding-right: 0px;">
+            <div class="panel panel-default dashboard-widget" style="border-color:Green;">
+                <div class="panel-heading" style="background:green;">
+                    <i class="fa fa-support fa-lg"></i>&nbsp;
+                    Help
+                </div>
+                <div class="panel-body" style="min-height:90px;padding: 10px 20px;">
+                    <ul class="list-unstyled">
+                        <li style="font-size: 12px;padding-top: 5px;"><i class="fa fa-phone text-right" style="padding-right:10px;font-size: 13px;"></i>021-651 5551 Ext: 62020</li>
+                        <li><hr></li>
+                        <li><i class="fa fa-envelope text-right" style="padding-right:10px;font-size: 13px;"></i><a href="mailto:pas-admin@toyota.co.id" style="font-size: 12px;">pas-admin@toyota.co.id</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="popup-container" class="modal fade bs-example-modal-lg" data-backdrop="static" data-keyboard="false">
+</div>
+<div id="history-popup-container" class="modal fade bs-example-modal-lg" data-backdrop="static" data-keyboard="false">
+</div>
+<div id="dialog-container" class="modal fade bs-example-modal-lg" data-backdrop="static" data-keyboard="false">
+</div>
+
+@Html.Hidden("header-selection-mode")
+@Html.Hidden("docno-count-value")
+@Html.Hidden("docno-list-value")
+@Html.Hidden("detail-selection-mode")
+@Html.Hidden("docitemno-count-value")
+@Html.Hidden("docitemno-list-value")
+@Html.Hidden("docitemno-main-list-value")
+
+<script type="text/javascript">
+    ///////// Shared variables.
+    var docNo;
+    var docType;
+    var docDt;
+    var docDesc;
+    var itemNo;
+    var itemNum;
+    var userType;
+    var divisionName;
+
+    var headerSelectionMode;
+    var docNoCount;
+    var docNoList;
+    var detailSelectionMode;
+    var docItemNoCount;
+    var docItemNoList;
+    var docItemNoMainList;
+
+    $(document).ready(function () {
+        openNotificationbox();
+    });
+
+    function openNotificationbox() {
+        var iCounter = 0;
+        @foreach(var notif in announcementList)
+        {
+            <text>
+        setTimeout(function () {
+            var message = '@notif.CONTENT.Replace(Environment.NewLine, "<br/>").Replace("\\r?\\n", "<br />")'
+                    Lobibox.notify('info', {
+                    //size: 'mini',
+                        //rounded: true,
+                        title: '@notif.TITLE',
+                        img: 'http://hrportal.toyota.co.id/Content/images/@notif.AUTHOR' + ".jpg",
+                        delay: 10000,
+                        width: 550,
+                        //delayIndicator: false,
+                        position: 'top right',
+                        msg: message.split('&lt;').join("<").split('&gt;').join(">").replace(/Please open :(.*)+$/, '')
+                            });
+            }, iCounter * 12000);
+            iCounter = iCounter + 1;
+            </text>
+        }
+    }
+
+    $(document).ajaxComplete(function (event, xhr, settings) {
+        ToogleDetailView("EndAction");
+        $.progressbox.hide();
+    });
+
+    /////////// View Methods
+    function ToogleDetailView(mode) {
+        switch (mode) {
+            case 'BeginAction': // Disable action control.
+                $("#btn-approve-detail").prop("disabled", true);
+                $("#btn-reject-detail").prop("disabled", true);
+                $("#btn-close-detail").prop("disabled", true);
+                $("#btn-post-notice").prop("disabled", true);
+                break;
+            case 'EndAction': // Enable action control.
+                $("#btn-approve-detail").prop("disabled", false);
+                $("#btn-reject-detail").prop("disabled", false);
+                $("#btn-close-detail").prop("disabled", false);
+                $("#btn-post-notice").prop("disabled", false);
+                break;
+        }
+    }
+    var resetDetailSelection = function ResetDetailSelection() {
+        $("#detail-selection-mode").val("INC");
+        $("#docitemno-count-value").val("0");
+        $("#docitemno-list-value").val("");
+
+        $("#docitemno-main-list-value").val("");
+    }
+    /////////// End View Methods
+
+    /////////// Data Methods
+    function ApprovePRApprovalDetail(responseCallback) {
+        var param = GetPRApprovalApproveDetailParameter();
+        ;
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("PRApproval", "ApprovePRApprovalDetail", new { })',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Worklist", "Approve Detail PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+    function RejectPRApprovalDetail(responseCallback) {
+        var param = GetPRApprovalApproveDetailParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("PRApproval", "RejectPRApprovalDetail", new { })',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Worklist", "Reject Detail PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+    function SearchPRApproval(pageIndex, pageSize, responseCallback) {
+        var param = null;
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("GetHomeWorklist")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Worklist", "Search Header PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+
+    var openPRApprovalDetail = function OpenPRApprovalDetail(pageIndex, pageSize, responseCallback) {
+        var param = GetPRApprovalDetailParameter(pageIndex, pageSize);
+        $.ajax({
+            type: "GET",
+            url: '@Html.Toyota().Page.GetActionUrl("PRApproval", "GetPRApprovalDetail", new {})',
+            data: param,
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Worklist", "Search Detail PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+
+    var openPOApprovalDetail = function OpenPOApprovalDetail(pageIndex, pageSize, showNotice, responseCallback) {
+        var param = GetPOApprovalDetailParameter(showNotice);
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("POApproval", "GetPOApprovalDetail", new {})',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Worklist", "Search Detail PO Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+
+    function SearchPRApprovalDetail(pageIndex, pageSize, responseCallback) {
+        var param = GetPRApprovalDetailParameter(pageIndex, pageSize);
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("PRApproval", "GetPRApprovalDetailGrid", new {})',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Worklist", "Search Detail PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+
+    function OpenPRApprovalHistory(pageIndex, pageSize, responseCallback) {
+        var param = GetPRApprovalHistoryParameter(pageIndex, pageSize);
+        $.ajax({
+            type: "GET",
+            url: '@Html.Toyota().Page.GetActionUrl("PRApproval", "GetPRApprovalHistory", new {})',
+            data: param,
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Worklist", "Search Workflow PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+    function SearchPRApprovalHistory(pageIndex, pageSize, responseCallback) {
+        var param = GetPRApprovalHistoryParameter(pageIndex, pageSize);
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("PRApproval", "GetPRApprovalHistoryGrid", new {})',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Worklist", "Search Workflow PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+    function PostPRApprovalNotice(responseCallback) {
+        var param = GetPRApprovalNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("PRApproval", "PostPRApprovalNotice", new {})',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Notice", "Post PR Approval Notice. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+    function ReplyPRApprovalNotice(responseCallback) {
+        var param = GetPRApprovalReplyNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("PRApproval", "ReplyPRApprovalNotice", new {})',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Notice", "Reply PR Approval Notice. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+    function DeletePRApprovalNotice(responseCallback) {
+        var param = GetPRApprovalDeleteNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("PRApproval", "DeletePRApprovalNotice", new {})',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Notice", "Delete PR Approval Notice. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+    function PostPOApprovalNotice(responseCallback) {
+        var param = GetPOApprovalNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("POApproval", "PostPOApprovalNotice", new {})',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Notice", "Post PO Approval Notice. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+    function ReplyPOApprovalNotice(responseCallback) {
+        var param = GetPOApprovalReplyNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("POApproval", "ReplyPOApprovalNotice", new {})',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Notice", "Reply PO Approval Notice. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+    function DeletePOApprovalNotice(responseCallback) {
+        var param = GetPOApprovalDeleteNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("POApproval", "DeletePOApprovalNotice", new {})',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("Dashboard Notice", "Delete PO Approval Notice. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+    /////////// End Data Methods
+
+    /////////// Helper Methods
+    function GetPOApprovalDetailParameter(showNotice) {
+        return {
+            param: {
+                DocNo: docNo,
+                UserType: "@UserType.CurrentUser"
+            },
+            showNotice: (showNotice !== undefined),
+            pageIndex: 1,
+            pageSize: 10
+        };
+    }
+
+    function GetPRApprovalDetailParameter(pageIndex, pageSize) {
+        pageIndex = pageIndex || 1;
+        pageSize = pageSize || 10;
+
+        return {
+            DOC_NO: docNo,
+            DOC_TYPE: docType,
+            STR_DOC_DT: docDt,
+            DOC_DESC: docDesc,
+            USER_TYPE: 'CURRENT_USER',
+            DIVISION_NAME: divisionName,
+            pageIndex: pageIndex,
+            pageSize: pageSize
+        };
+    }
+    function GetPRApprovalNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            DOC_TYPE: docType,
+            NOTICE_TO_USER: $("#notice-to-user-list").val(),
+            NOTICE_TO_ALIAS: $("#notice-to-alias-list").val(),
+            NOTICE_IMPORTANCE: $("#cmb-notice-importance").val(),
+            NOTICE_MESSAGE: $("#txt-notice-message").val()
+        };
+    }
+    function GetPRApprovalReplyNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            DOC_TYPE: docType,
+            REPLY_FOR: seqNo,
+            NOTICE_TO_USER: $("#notice-to-user-list").val(),
+            NOTICE_TO_ALIAS: $("#notice-to-alias-list").val(),
+            NOTICE_IMPORTANCE: $("#cmb-notice-importance").val(),
+            NOTICE_MESSAGE: $("#txt-notice-message").val()
+        };
+    }
+    function GetPRApprovalDeleteNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            SEQ_NO: seqNo
+        };
+    }
+    function GetPOApprovalNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            DOC_TYPE: docType,
+            NOTICE_TO_USER: $("#notice-to-user-list").val(),
+            NOTICE_TO_ALIAS: $("#notice-to-alias-list").val(),
+            NOTICE_IMPORTANCE: $("#cmb-notice-importance").val(),
+            NOTICE_MESSAGE: $("#txt-notice-message").val()
+        };
+    }
+    function GetPOApprovalReplyNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            DOC_TYPE: docType,
+            REPLY_FOR: seqNo,
+            NOTICE_TO_USER: $("#notice-to-user-list").val(),
+            NOTICE_TO_ALIAS: $("#notice-to-alias-list").val(),
+            NOTICE_IMPORTANCE: $("#cmb-notice-importance").val(),
+            NOTICE_MESSAGE: $("#txt-notice-message").val()
+        };
+    }
+    function GetPOApprovalDeleteNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            SEQ_NO: seqNo
+        };
+    }
+    function GetPRApprovalHistoryParameter(pageIndex, pageSize) {
+        pageIndex = pageIndex || 1;
+        pageSize = pageSize || 10;
+
+        return {
+            DOC_NO: docNo,
+            ITEM_NO: itemNo,
+            DOC_TYPE: docType,
+
+            pageIndex: pageIndex,
+            pageSize: pageSize
+        };
+    }
+    function GetPRApprovalApproveDetailParameter() {
+        detailSelectionMode = $("#detail-selection-mode").val();
+
+        if (detailSelectionMode === "EXC") {
+            var docitemno = "";
+            if ($("#docitemno-list-value").val() == null || $("#docitemno-list-value").val() == "")
+                docitemno = docNo + "|" + docType + "|" + detailSelectionMode + "|" + $("#docitemno-list-value").val() + ";"
+            else
+                docitemno = $("#docitemno-list-value").val();
+
+            return {
+
+                docItemNoList: docitemno,
+                userType: "CURRENT_USER"
+            };
+        }
+        else if (detailSelectionMode === "INC") {
+            return {
+                docItemNoList: $("#docitemno-list-value").val(),
+                userType: "CURRENT_USER"
+            };
+        }
+    }
+    /////////// End Helper Methods
+
+    /////////// Header And Detail Gridview Checkbox Methods
+    var bindHeaderCheck = function BindHeaderCheck() {
+    }
+
+    var updateHeaderCheck = function UpdateHeaderCheck(docNo, docType, isChecked) {
+        headerSelectionMode = $("#header-selection-mode").val();
+        docNoCount = parseInt($("#docno-count-value").val(), 10);
+        docNoList = $("#docno-list-value").val();
+
+        docNoCount = (docNoCount < 0) ? 0 : docNoCount;
+        if (isChecked) {
+            switch (headerSelectionMode.toUpperCase()) {
+                case "INC":
+                    if (docNoList.indexOf(docNo) == -1) {
+                        //docNoList = docNoList + docNo + "|" + docType + "|" + headerSelectionMode + "|;";
+                        docNoList = docNoList + docNo + ",";
+                        docNoCount = docNoCount + 1;
+                    }
+                    break;
+                case "EXC":
+                    if (docNoList.indexOf(docNo) != -1) {
+                        //docNoList = docNoList.replace(docNo + "|" + docType + "|" + headerSelectionMode + "|;", "");
+                        docNoList = docNoList.replace(docNo + ",", "");
+                        docNoCount = docNoCount + 1;
+                    }
+                    break;
+            }
+        }
+        else {
+            switch (headerSelectionMode.toUpperCase()) {
+                case "EXC":
+                    if (docNoList.indexOf(docNo) == -1) {
+                        //docNoList = docNoList + docNo + "|" + docType + "|" + headerSelectionMode + "|;";
+                        docNoList = docNoList + docNo + ",";
+                        docNoCount = docNoCount - 1;
+                    }
+                    break;
+                case "INC":
+                    if (docNoList.indexOf(docNo) != -1) {
+                        //docNoList = docNoList.replace(docNo + "|" + docType + "|" + headerSelectionMode + "|;", "");
+                        docNoList = docNoList.replace(docNo + ",", "");
+                        docNoCount = docNoCount - 1;
+                    }
+                    break;
+            }
+        }
+
+        $("#header-selection-mode").val(headerSelectionMode);
+        $("#docno-count-value").val(docNoCount);
+        $("#docno-list-value").val(docNoList);
+    }
+
+    var updateDetailMainList = function UpdateDetailMainList(docNo) {
+        docItemNoMainList = $("#docitemno-main-list-value").val();
+        detailSelectionMode = $("#detail-selection-mode").val();
+        docItemNoCount = parseInt($("#docitemno-count-value").val(), 10);
+        docItemNoList = $("#docitemno-list-value").val();
+
+        var docItemNoIndex = docItemNoMainList.indexOf(docNo);
+        if (docItemNoIndex != -1) {
+            var delimitterIndex = docItemNoMainList.indexOf(";", docItemNoIndex);
+            var docItemNo = docItemNoMainList.substring(docItemNoIndex, delimitterIndex + 1);
+            docItemNoMainList = docItemNoMainList.replace(docItemNo, docItemNoList);
+        }
+        else {
+            var delimitterIndex = docItemNoMainList.indexOf(";", docItemNoIndex);
+            var docItemNo = docItemNoMainList.substring(docItemNoIndex, delimitterIndex + 1);
+            docItemNoMainList = docItemNoMainList + docItemNoList;
+        }
+
+        detailSelectionMode = "INC";
+        docItemNoCount = 0;
+        docItemNoList = "";
+
+        $("#docitemno-main-list-value").val(docItemNoMainList);
+        $("#detail-selection-mode").val(detailSelectionMode);
+        $("#docitemno-count-value").val(docItemNoCount);
+        $("#docitemno-list-value").val(docItemNoList);
+    }
+
+    var removeDetailMainList = function RemoveDetailMainList(docNo) {
+        docItemNoMainList = $("#docitemno-main-list-value").val();
+
+        var docItemNoIndex = docItemNoMainList.indexOf(docNo);
+        if (docItemNoIndex != -1) {
+            var delimitterIndex = docItemNoMainList.indexOf(";", docItemNoIndex);
+            var docItemNo = docItemNoMainList.substring(docItemNoIndex, delimitterIndex + 1);
+            docItemNoMainList = docItemNoMainList.replace(docItemNo, "");
+        }
+
+        $("#docitemno-main-list-value").val(docItemNoMainList);
+    }
+    /////////// End Header And Detail Gridview Checkbox Methods
+</script>

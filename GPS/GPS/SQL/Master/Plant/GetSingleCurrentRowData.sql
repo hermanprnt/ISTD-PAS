@@ -1,0 +1,13 @@
+﻿DECLARE @@SQL VARCHAR(MAX)
+
+SET @@SQL = 'SELECT 
+				PLANT_CD, 
+				PLANT_NAME, 
+				CREATED_BY, 
+				dbo.StandarDate(CREATED_DT) AS CREATED_DT,
+				CHANGED_BY,
+				dbo.StandarDate(CHANGED_DT) AS CHANGED_DT
+			FROM TB_M_PLANT
+			WHERE PLANT_CD = ''' + @PlantCd + '''';
+
+EXEC(@@SQL)

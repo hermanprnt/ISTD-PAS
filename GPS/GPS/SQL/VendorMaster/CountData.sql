@@ -1,0 +1,31 @@
+DECLARE @@SQL VARCHAR(MAX)
+
+SET @@SQL = 
+	'SELECT ISNULL(MAX(Number), 0) FROM
+	(
+		SELECT ROW_NUMBER() OVER (ORDER BY VENDOR_CD ASC) AS Number
+		FROM TB_M_VENDOR
+		WHERE 1=1
+	'
+
+		IF (ISNULL(@VENDOR_CD, '') <> '')
+			SET @@SQL = @@SQL + ' AND VENDOR_CD = ''' + @VENDOR_CD + ''''
+
+		IF (ISNULL(@VENDOR_PLANT, '') <> '')
+			SET @@SQL = @@SQL + ' AND VENDOR_PLANT LIKE ''%' + @VENDOR_PLANT + '%'''
+
+		IF (ISNULL(@SAP_VENDOR_ID, '') <> '')
+			SET @@SQL = @@SQL + ' AND SAP_VENDOR_ID LIKE ''%' + @SAP_VENDOR_ID + '%'''
+		
+		IF (ISNULL(@PAYMENT_METHOD_CD, '') <> '')
+			SET @@SQL = @@SQL + ' AND PAYMENT_METHOD_CD LIKE ''%' + @PAYMENT_METHOD_CD + '%'''
+		
+		IF (ISNULL(@PAYMENT_TERM_CD, '') <> '')
+			SET @@SQL = @@SQL + ' AND PAYMENT_TERM_CD LIKE ''%' + @PAYMENT_TERM_CD + '%'''
+		
+		IF (ISNULL(@DELETION_FLAG, '') <> '')
+			SET @@SQL = @@SQL + ' AND DELETION_FLAG = ''' + @DELETION_FLAG + ''''
+			
+		SET @@SQL = @@SQL + ') AS TB'
+
+EXEC (@@SQL)

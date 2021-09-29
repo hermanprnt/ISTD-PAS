@@ -1,0 +1,60 @@
+﻿SELECT DISTINCT
+	DENSE_RANK() OVER (ORDER BY WBS_NO ASC) AS NUMBER,
+	WBS_NO, 
+	WBS_NAME AS 'WBS_DESCRIPTION',
+	NULL AS 'NON_SAP_FLAG',
+	PROJECT_NO AS 'WBS_TYPE'
+FROM TB_R_WBS
+WHERE (WBS_YEAR = @WBS_YEAR OR WBS_YEAR = '9999')
+	AND ((DIVISION_ID = ISNULL(@DIV_CD,'')
+		AND ISNULL(@DIV_CD,'')  <> ''
+		OR (ISNULL(@DIV_CD,'') = '')))
+	AND ((REPLACE(REPLACE(WBS_NO, '-', ''), '/', '') LIKE '%' + ISNULL(@WBS_NO,'') + '%'
+		AND ISNULL(@WBS_NO,'')  <> ''
+		OR (ISNULL(@WBS_NO,'') = '')))
+UNION
+SELECT DISTINCT
+	DENSE_RANK() OVER (ORDER BY bch.WBS_NO ASC) AS NUMBER,
+	bch.WBS_NO, 
+	bch.WBS_DESCRIPTION,
+	bch.NON_SAP_FLAG, 
+	NULL AS 'WBS_TYPE'
+FROM [BMS_DB].[BMS_DB].[dbo].[TB_R_BUDGET_CONTROL_H] bch
+WHERE (bch.WBS_YEAR = @WBS_YEAR OR bch.WBS_YEAR = '9999') AND bch.NON_SAP_FLAG IS NOT NULL
+	AND ((bch.WBS_DIVISION = ISNULL(@DIV_CD,'')
+		AND ISNULL(@DIV_CD,'')  <> ''
+		OR (ISNULL(@DIV_CD,'') = '')))
+	AND ((REPLACE(REPLACE(bch.WBS_NO, '-', ''), '/', '') LIKE '%' + ISNULL(@WBS_NO,'') + '%'
+		AND ISNULL(@WBS_NO,'')  <> ''
+		OR (ISNULL(@WBS_NO,'') = '')))
+
+
+----SELECT DISTINCT
+----	DENSE_RANK() OVER (ORDER BY bch.WBS_NO ASC) AS NUMBER,
+----	bch.WBS_NO, 
+----	bch.WBS_DESCRIPTION,
+----	bch.NON_SAP_FLAG 
+----FROM [BMS_DEV].[NEW_BMS_DB].[dbo].[TB_R_BUDGET_CONTROL_H] bch
+
+----WHERE (bch.WBS_YEAR = @WBS_YEAR OR bch.WBS_YEAR = '9999') AND bch.NON_SAP_FLAG IS NULL
+----	AND ((bch.WBS_DIVISION = ISNULL(@DIV_CD,'')
+----		AND ISNULL(@DIV_CD,'')  <> ''
+----		OR (ISNULL(@DIV_CD,'') = '')))
+----	AND ((REPLACE(REPLACE(bch.WBS_NO, '-', ''), '/', '') LIKE '%' + ISNULL(@WBS_NO,'') + '%'
+----		AND ISNULL(@WBS_NO,'')  <> ''
+----		OR (ISNULL(@WBS_NO,'') = '')))
+----UNION
+----SELECT DISTINCT
+----	DENSE_RANK() OVER (ORDER BY bch.WBS_NO ASC) AS NUMBER,
+----	bch.WBS_NO, 
+----	bch.WBS_DESCRIPTION,
+----	bch.NON_SAP_FLAG 
+----FROM [BMS_DEV].[NEW_BMS_DB].[dbo].[TB_R_BUDGET_CONTROL_H] bch
+
+----WHERE (bch.WBS_YEAR = @WBS_YEAR OR bch.WBS_YEAR = '9999') AND bch.NON_SAP_FLAG IS NOT NULL
+----	AND ((bch.WBS_DIVISION = ISNULL(@DIV_CD,'')
+----		AND ISNULL(@DIV_CD,'')  <> ''
+----		OR (ISNULL(@DIV_CD,'') = '')))
+----	AND ((REPLACE(REPLACE(bch.WBS_NO, '-', ''), '/', '') LIKE '%' + ISNULL(@WBS_NO,'') + '%'
+----		AND ISNULL(@WBS_NO,'')  <> ''
+----		OR (ISNULL(@WBS_NO,'') = '')))

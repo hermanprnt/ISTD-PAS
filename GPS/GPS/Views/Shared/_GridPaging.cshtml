@@ -1,0 +1,32 @@
+﻿@using GPS.ViewModels
+@model GridPagingViewModel
+<style>
+    ._pagination-sm {
+        border-top-left-radius: 3px;
+        border-bottom-left-radius: 3px;
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+    }
+</style>
+<div class="row">
+    <div class="col-sm-8">
+        <ul class="pagination pagination-sm" style="margin-top: 0">
+            <li>
+                <span class="_pagination-label">Page <span id="curr-page-@Model.Id">@Model.CurrentPage</span> of <span id="total-page-@Model.Id">@Model.TotalPage</span> ( <span id="total-data-@Model.Id">@Model.TotalDataCount</span> items)</span>
+            </li>
+            <li><span><a id="lnk-page-@Model.Id-first" href="javascript: void(0)" data-page="1">First</a></span></li>
+            <li><span><a id="lnk-page-@Model.Id-prev" href="javascript: void(0)" data-page="@(Model.CurrentPage - 1)">Prev</a></span></li>
+            @foreach (int idx in Model.PageIndex)
+            {
+                <li @Html.Raw(Model.CurrentPage == idx ? "class=\"active\"" : String.Empty)><a id="lnk-page-@Model.Id-@idx" href="javascript: void(0)" data-page="@idx">@idx</a></li>
+            }
+            <li><a id="lnk-page-@Model.Id-next" href="javascript: void(0)" data-page="@(Model.CurrentPage + 1)">Next</a></li>
+            <li><a id="lnk-page-@Model.Id-last" href="javascript: void(0)" data-page="@Model.TotalPage">Last</a></li>
+        </ul>
+    </div>
+    <div class="col-sm-4 text-right">
+        <span class="form-inline ">
+            Page size @Html.DropDownList("cmb-perpage-" + Model.Id, PaginationViewModel.PageRowCountSelectList, new { id = "cmb-perpage-" + Model.Id, @class = "cursor-1 input-sm", @style="height:25px" })
+        </span>
+    </div>
+</div>

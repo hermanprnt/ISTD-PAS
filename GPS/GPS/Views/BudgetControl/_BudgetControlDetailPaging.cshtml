@@ -1,0 +1,127 @@
+﻿@using GPS.Models.Common
+@{
+    Paging pg2 = ViewData["PagingDetail"] != null ? (Paging)ViewData["PagingDetail"] : new Paging(0,1,10);
+    int minpage = pg2.PositionPage - 2;
+    int maxpage = pg2.PositionPage + 2;
+
+    string ActionType = ViewData["ActionType"] != null ? ViewData["ActionType"].ToString() : "0";
+}
+    
+  
+@if(pg2.PositionPage == pg2.First || pg2.CountData == 0)
+    {
+        <style>
+        #pgFirstDetail 
+        {
+            pointer-events: none;
+            cursor: default;
+            color:lightgray;
+        }
+        #pgPrevDetail
+        {
+            pointer-events: none;
+            cursor: default;
+            color:lightgray;
+        }
+       </style> 
+    }
+@if(pg2.PositionPage == pg2.Last )
+    {
+        <style>
+        #pgNextDetail 
+        {
+                      pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+        #pgLastDetail
+        {
+                      pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+       </style> 
+    }
+    
+@if(pg2.CountData == 0)
+    {
+        <style>
+        #pgFirstDetail 
+        {
+              pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+        #pgPrevDetail
+        {
+              pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+         #pgNextDetail
+        {
+              pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+         #pgLastDetail
+        {
+              pointer-events: none;
+        cursor: default;
+        color:lightgray;
+        }
+       </style> 
+    }
+    
+<ul class="pagination pagination-sm hidden-xs col-xs-9 text-right" style="margin-top:0;">
+    <li>
+    
+   @if (@pg2.CountData == 1 || @pg2.CountData == 0)
+   {
+        <span class="_pagination-label">Showing Page @pg2.PositionPage of @pg2.CountPage (@pg2.CountData row)</span>
+   }
+   else
+   { 
+       <span class="_pagination-label">Showing Page @pg2.PositionPage of @pg2.CountPage (@pg2.CountData rows)</span>
+   }                                                                                             
+    </li>
+    <li><span><a href="javascript: onListDetail(@pg2.First,'@ActionType')" id="pgFirstDetail">First</a> </span></li>
+    <li><span><a href="javascript: onListDetail(@pg2.Prev,'@ActionType')" id="pgPrevDetail">Prev</a> </span></li>
+        @for (int k = 1; k <= @pg2.CountPage; k++)
+        {
+            if ((k >= minpage) && (k <= maxpage))
+            {
+                if (@k == pg2.PositionPage)
+                {
+                <li class="active">
+                    <a href="javascript: onListDetail(@k,'@ActionType')">@k</a>
+                </li> 
+                }
+                else
+                {
+                <li>
+                    <a href="javascript: onListDetail(@k,'@ActionType')">@k</a>
+                </li>  
+                }
+            }
+        } 
+    <li><span><a href="javascript: onListDetail(@pg2.Next,'@ActionType')" id="pgNextDetail">Next</a></span></li>
+    <li><span><a href="javascript: onListDetail(@pg2.Last,'@ActionType')" id="pgLastDetail">Last</a></span></li>                  
+</ul>
+
+<div class="col-xs-12 col-sm-3 text-right" style="height: 30px; padding-top: 3px;">
+            <span>Size</span>&nbsp;
+            <select class="input-xs page-size" id="cbodisplaydetail" onchange="onListDetail(1,'@ActionType')">                
+                <option>10</option>
+                <option>25</option>
+                <option>50</option>
+                <option>100</option>
+            </select>
+</div>
+
+<script type="text/javascript">
+        $(document).ready(function (e) {
+            $("#cbodisplaydetail").val(@(pg2.DataPerPage));
+        var a =  $("#txtAction").val();
+        });
+    </script>

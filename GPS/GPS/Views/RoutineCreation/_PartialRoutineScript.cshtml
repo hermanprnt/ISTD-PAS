@@ -1,0 +1,1911 @@
+﻿@using GPS.Constants.Master
+@using GPS.Constants.PR
+@using GPS.Controllers.Master
+<script type="text/javascript" id="Global">
+    $tdk.AjaxMethod = "POST";
+
+    var LookupMaxRowPerPage = 10;
+
+    // Temporary variable for data manipulation to screen
+    var OLD_COORDINATOR = '';
+    var TYPE_GL = '';
+    var TYPE_WBS = '';
+
+    // ID of input field and button in PR Creation Screen
+    var idHeader = {
+        ROUTINE_NO: "#aroutineno",
+        PROCESS_ID: "#aproc",
+        ORG_ID: "#org_id",
+        POSITION_LEVEL: "#position_level",
+        USER_DIVISION_ID: "#division_id",
+        USER_NOREG: "#noreg",
+        PLANT_CD: "#aplntno",
+        SLOC_CD: "#astorage",
+        PR_DESC: "#exp",
+        PR_COORDINATOR: "#apurchasing",
+        DIVISION_ID: "#cmb-division",
+        NOREG: "#anoreg",
+        SCHEDULE: "#aschedule",
+        MONTH: "#amonth",
+        DAY: "#aday",
+        STATUS: "#astatus",
+        VALID_DT: "#avalid"
+    }
+
+    var idItem = {
+        NO: "#no",
+
+        WBS_NO: "#awbsno",
+        WBS_NAME: "#awbsname",
+        COST_CENTER: "#acost",
+        COST_CENTER_DIV: "#cascade-costcenter",
+        VALUATION_CLASS: "#aitemcat",
+        VALUATION_CLASS_DESC: "#avaldesc",
+        ITEM_CLASS: "#aclass",
+        ITEM_TYPE: "#avalitemtype",
+        ITEM_TYPE_DESC: "#avalitemdesc",
+        GL_ACCOUNT: "#agl",
+        CAR_FAMILY_CD: "#acar",
+        MAT_GRP_CD: "#agrp",
+        MAT_TYPE_CD: "#atype",
+        QUOTA_FLAG: "#aquotaflag",
+        MAT_NO: "#amatno",
+        MAT_DESC: "#amatdesc",
+        QTY: "#aqty",
+        UOM: "#auom",
+        CURR: "#acurr",
+        PRICE: "#aprice",
+        AMOUNT: "#aamount",
+        VENDOR_CD: "#avendor",
+        VENDOR_NAME: "#avendorname",
+        CALC_VALUE: "#acalcvalue"
+    }
+
+    var idSubItem = {
+        NO: "#subitem_no",
+
+        WBS_NO: "#awbsnosubitem",
+        WBS_NAME: "#awbsnamesubitem",
+        GL_ACCOUNT: "#aglsubitem",
+        COST_CENTER: "#acost",
+        COST_CENTER_DIV: "#cascade-costcenter-subitem",
+        MAT_DESC: "#amatdescsubitem",
+        QTY: "#aqtysubitem",
+        UOM: "#auomsubitem",
+        PRICE: "#apricesubitem",
+        AMOUNT: "#aamountsubitem",
+        CALC_VALUE: "#acalcvaluesubitem"
+    }
+
+    var idBtn = {
+        SAVE_HEADER: ".btnsavehead",
+        CANCEL_HEADER: ".btncancelhead",
+
+        SAVE_ITEM: ".btnsaveitem",
+        CANCEL_ITEM: ".btncancelitem",
+
+        SAVE_SUBITEM: ".btnsavesubitem",
+        CANCEL_SUBITEM: ".btncancelsubitem"
+    }
+
+    var idDivLookup = {
+        DIV_PIC: "#lookuppic",
+        DIV_VALCLASS: "#lookupvalclass",
+        DIV_MATERIAL: "#lookupmaterial",
+        DIV_VENDOR: "#lookupvendor",
+        DIV_WBSITEM: "#lookupwbsitem",
+        DIV_GLITEM: "#lookupglitem",
+        DIV_WBSSUBITEM: "#lookupwbssubitem",
+        DIV_GLSUBITEM: "#lookupglsubitem"
+    }
+
+    function AssignVariable(message, param) {
+        for (var i = 0; i < param.length; i++) {
+            message = message.replace("{" + i + "}", param[i]);
+        }
+        return message;
+    }
+
+    function GetValidDate(date) {
+        if (date != "") {
+            date = date.split('.');
+            var date = date[1] + '-' + date[0] + '-' + date[2];
+        }
+        return date;
+    }
+
+    function ClearHtml(id) {
+        for (var i = 0; i < id.length ; i++) {
+            if (id[i] != "")
+                $(id[i]).html("");
+        }
+    }
+
+    function DisableLookup(idList, isDisabled) {
+        if (GetType(idList) !== "Array")
+            throw new InvalidOperationException("idList of DisableLookup must be an Array of selector.");
+
+        idList.forEach(function (item) {
+            var $item = $(item);
+            if ($item.hasClass("lookup")) {
+                var btnlookup = $item.find("button");
+                if (isDisabled) {
+                    $item.find("input").addClass("lookup-disabled");
+                    btnlookup.addClass("lookup-disabled");
+                }
+                else {
+                    $item.find("input").removeClass("lookup-disabled");
+                    btnlookup.removeClass("lookup-disabled");
+                }
+                btnlookup.prop("disabled", isDisabled);
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript" id="Field-and-Button-Setting">
+    function onChangeStatus() {
+        if ($(idHeader.STATUS).hasClass("inactive")) {
+            $(idHeader.STATUS).removeClass("inactive");
+            $(idHeader.STATUS).addClass("active");
+        }
+        else {
+            $(idHeader.STATUS).removeClass("active");
+            $(idHeader.STATUS).addClass("inactive");
+        }
+    }
+
+    function onDivisionChanged() {
+        if ($(idHeader.USER_DIVISION_ID).val() == $(idHeader.DIVISION_ID).val()) {
+            $(idHeader.NOREG).val($(idHeader.USER_NOREG).val());
+        }
+        else if ($(idHeader.DIVISION_ID).val() == "") {
+            $.Clear([idHeader.NOREG]);
+        }
+        else if ($(idHeader.DIVISION_ID).val() != "" && $(idHeader.USER_DIVISION_ID).val() != $(idHeader.DIVISION_ID).val()) {
+            $.Clear([idHeader.NOREG]);
+        }
+        populateComboBox("costcenter");
+    }
+
+    function onScheduleChanged() {
+        var sch = $(idHeader.SCHEDULE).val();
+
+        if (sch == "" || sch == "D") {
+            $.Clear([idHeader.MONTH, idHeader.DAY]);
+            $.Disable([idHeader.MONTH, idHeader.DAY]);
+        }
+        else if (sch == "M") {
+            $.Clear([idHeader.MONTH, idHeader.DAY]);
+            $.Disable([idHeader.MONTH]);
+            $.Enable([idHeader.DAY]);
+            populateDayMonth("M");
+        }
+        else if (sch == "Y") {
+            $.Clear([idHeader.MONTH, idHeader.DAY]);
+            $.Enable([idHeader.MONTH, idHeader.DAY]);
+            populateDayMonth("Y");
+        }
+        else if (sch == "W") {
+            $.Clear([idHeader.MONTH, idHeader.DAY]);
+            $.Disable([idHeader.MONTH]);
+            $.Enable([idHeader.DAY]);
+            populateDayMonth("W");
+        }
+    }
+
+    function populateDayMonth(id) {
+        var i;
+        var month = 0;
+        var day = 0;
+
+        if (id == 'Y') {
+            month = 12;
+            day = 31;
+        }
+        if (id == 'M') day = 31;
+        if (id == 'W') day = 7;
+
+        if (month > 0) {
+            var _select = $('<select>');
+            $(idHeader.MONTH).empty();
+
+            _select.append(
+                $("<option></option>").val("").html("")
+            );
+            for (i = 1; i <= month; ++i) {
+                _select.append(
+                    $("<option></option>").val(i).html(i)
+                );
+            }
+            $(idHeader.MONTH).append(_select.html());
+        }
+        else $(idHeader.MONTH).empty();
+
+        if (day > 0) {
+            var _select2 = $('<select>');
+
+            $(idHeader.DAY).empty();
+
+            _select2.append(
+                $("<option></option>").val("").html("")
+            );
+            for (i = 1; i <= day; ++i) {
+                _select2.append(
+                    $("<option></option>").val(i).html(i)
+                );
+            }
+            $(idHeader.DAY).append(_select2.html());
+        }
+        else $(idHeader.DAY).empty();
+    }
+
+    function populateComboBox(id) {
+        var target = "";
+        var source = "";
+        var url = "";
+        var title = "";
+
+        switch (id) {
+            case "sloc": {
+                target = "#cascade-sloc";
+                source = $(idHeader.PLANT_CD).val();
+                url = "GetSlocbyPlant";
+                break;
+            }
+            case "costcenter": {
+                if ($(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).is(':enabled'))
+                    target = target + "#cascade-costcenter, ";
+                if ($(idSubItem.COST_CENTER_DIV).is(":visible"))
+                    target = target + "#cascade-costcenter-subitem, ";
+                if (target != "")
+                    target = target.substr(0, target.length - 2);
+
+                source = $(idHeader.DIVISION_ID).val() == "" ? 0 : $(idHeader.DIVISION_ID).val();
+                if ((source === 0) || (source === null))
+                    source = $(idHeader.USER_DIVISION_ID).val();
+                url = "SelectCostCenter";
+                break;
+            }
+        }
+
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._RoutineController" + url,
+            data: { param: source },
+            success: function (resultMessage) {
+                $(target).html(resultMessage);
+            },
+            error: function (resultMessage) {
+                var e = resultMessage.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function cancelReplacement() {
+        $(idHeader.PR_COORDINATOR).val(OLD_COORDINATOR);
+    }
+
+    function PRCoordinatorChecking() {
+        var coor = $(idHeader.PR_COORDINATOR).val();
+
+        if (($('.isrow').length > 0 || $('.isrowsubitem').length > 0 || isUnsaveItem() === true)) {
+            $.messagebox.show(
+                "Info",
+                "When you change PR Coordinator, all items will be deleted. Are you sure you want to continue?",
+                "INF",
+                "CONFIRM",
+                "DeleteAllItem('" + $(idHeader.PROCESS_ID).val() + "')",
+                "cancelReplacement()"
+            )
+        }
+        else OLD_COORDINATOR = coor;
+    }
+
+    function onChangeUOM(type) {
+        var label = "#auom";
+        if (type == "subitem") label = label + type;
+
+        if (type == "item") $(idItem.CALC_VALUE).val($("#" + $(label + " option:selected").attr('id')).data("calc_value"));
+        else $(idSubItem.CALC_VALUE).val($("#" + $(label + " option:selected").attr('id')).data("calc_value"));
+
+        GetAmount(type);
+    }
+
+    function ClearEditorItem(checkType) {
+        var seqno = $(idItem.NO).html();
+        
+        if ($('#addTable').find('.subitem-' + (seqno == "" ? "0" : seqno)).length != 0) {
+            ClearEditorSubItem();
+            $("#collapseitem").css("display", "none");
+            $(".subitem-" + (seqno == "" ? "0" : seqno)).remove();
+        }
+
+        ClearHtml([idItem.ITEM_CLASS, idItem.NO]);
+        $.Clear([idItem.VALUATION_CLASS, idItem.ITEM_TYPE,
+                 idItem.ITEM_TYPE_DESC, idItem.WBS_NO,
+                 idItem.COST_CENTER, idItem.GL_ACCOUNT,
+                 idItem.MAT_NO, idItem.MAT_DESC,
+                 idItem.UOM, idItem.CURR,
+                 idItem.VENDOR_CD, idItem.QTY, idItem.PRICE, idItem.AMOUNT]);
+        $.Enable([idItem.QTY, idItem.UOM, idItem.PRICE, idItem.COST_CENTER]);
+        DisableLookup([idDivLookup.DIV_MATERIAL, idDivLookup.DIV_WBSITEM, idDivLookup.DIV_GLITEM], false);
+    }
+
+    function EditorInitialize(mode) {
+        switch (mode) {
+            case "EditItem": {
+                if ($(idHeader.ROUTINE_NO).val() != "0") {
+                    $.Disable([idItem.MAT_DESC, idItem.UOM, idItem.CURR]);
+                    DisableLookup([idDivLookup.DIV_VALCLASS, idDivLookup.DIV_MATERIAL, idDivLookup.DIV_WBSITEM, idDivLookup.DIV_GLITEM], true);
+
+                    if ($(idItem.MAT_NO).val() == "") $.Disable([idItem.PRICE]);
+                }
+                break;
+            }
+            case "EditSubItem": {
+                if ($(idHeader.ROUTINE_NO).val() != "0") {
+                    $.Disable([idSubItem.MAT_DESC]);
+
+                    $(idSubItem.COST_CENTER, $(idSubItem.COST_CENTER_DIV)).attr("disabled", "disabled");
+                    $(idSubItem.COST_CENTER, $(idSubItem.COST_CENTER_DIV)).addClass("disabled-control");
+
+                    DisableLookup([idDivLookup.DIV_WBSSUBITEM, idDivLookup.DIV_GLSUBITEM], true);
+                }
+                break;
+            }
+        }
+        $.Disable([idBtn.SAVE_HEADER, idBtn.CANCEL_HEADER]);
+    }
+
+    function GetAmount(type) {
+        if (type == "subitem") {
+            if ($(idSubItem.QTY).val() == "" && $(idSubItem.QTY).val().indexOf('.') <= -1) $(idSubItem.QTY).val('0')
+            else if ($(idSubItem.QTY).val().indexOf('.') <= -1) $(idSubItem.QTY).val(parseFloat($(idSubItem.QTY).val()));
+            if ($(idSubItem.PRICE).val() == "") $(idSubItem.PRICE).val('0')
+
+            var price = $.AsPrice(parseFloat($(idSubItem.PRICE).val().replace(/,/g, "")).toString());
+            $(idSubItem.PRICE).val($.AsPrice(price));
+
+            $(idSubItem.AMOUNT).val($.AsPrice((parseFloat($(idSubItem.QTY).val()).toFixed(2) * parseFloat($(idSubItem.CALC_VALUE).val()) * parseFloat($(idSubItem.PRICE).val().replace(/,/g, ""))).toString()));
+        }
+        else {
+            if ($(idItem.QTY).val() == "" && $(idItem.QTY).val().indexOf('.') <= -1) $(idItem.QTY).val('0')
+            else if($(idItem.QTY).val().indexOf('.') <= -1) $(idItem.QTY).val(parseFloat($(idItem.QTY).val()));
+            if ($(idItem.PRICE).val() == "") $(idItem.PRICE).val('0')
+            
+            var price = $.AsPrice(parseFloat($(idItem.PRICE).val().replace(/,/g, "")).toString());
+            $(idItem.PRICE).val($.AsPrice(price));
+
+            $(idItem.AMOUNT).val($.AsPrice((parseFloat($(idItem.QTY).val()).toFixed(2) * parseFloat($(idItem.CALC_VALUE).val()) * parseFloat($(idItem.PRICE).val().replace(/,/g, ""))).toString()));
+        }
+    }
+
+    function collapseItem(addedit_flag, seqno) {
+        var keyitem = addedit_flag == 'Y' ? '' : seqno;
+        var keysubitem = addedit_flag == 'Y' ? ($(idItem.NO).html() == '' ? '-0' : '-' + $(idItem.NO).html()) : seqno;
+
+        if ($("#collapseitem" + keyitem).children('.fa').hasClass("fa-plus-square-o")) {
+            // expand grid
+            $("#collapseitem" + keyitem).children('.fa').removeClass("fa-plus-square-o");
+            $("#collapseitem" + keyitem).children('.fa').addClass("fa-minus-square-o");
+
+            loadDetailGrid(addedit_flag, seqno);
+        } else {
+            // collapse grid
+            $("#collapseitem" + keyitem).children('.fa').removeClass("fa-minus-square-o");
+            $("#collapseitem" + keyitem).children('.fa').addClass("fa-plus-square-o");
+
+            if (addedit_flag == "NE") //remove subitem grid before edit
+                $(".subitem" + keysubitem).remove();
+            else
+                $(".subitem" + keysubitem).css("display", "none");
+        }
+    }
+</script>
+
+<script type="text/javascript" id="Header-Management">
+    function SaveRoutine(step, msg) {
+        if (step == 1) {
+            if (isUnsaveItem() === true)
+                SaveItem('0');
+            else {
+                $.disable_enable_button.disable();
+                confirmSave(msg);
+            }
+        }
+        else confirmSave(msg);
+    }
+
+    function confirmSave(msg, SaveType) {
+        if (msg == "") {
+            msg = HeaderMandatoryValidation(msg);
+            if (msg == "" && $('.isrow').length <= 0) { msg = msg + "@PurchasingRequisitionMessages.singleRowCreated" }
+        }
+
+        if (msg != "") {
+            $.disable_enable_button.enable();
+            $.messagebox.show(
+                SaveType + " PR",
+                msg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+                )
+            $.Enable([idBtn.SAVE_HEADER, idBtn.CANCEL_HEADER]);
+            return false;
+        }
+        else {
+            $.disable_enable_button.enable();
+
+            $.messagebox.show(
+                SaveType + " PR",
+                "Are You Sure You Want to save Data ?",
+                "INF",
+                "CONFIRM",
+                "doSaveRoutine()",
+                ""
+            )
+        }
+    }
+
+    function getRoutineParam() {
+        var avalid = $(idHeader.VALID_DT).val().split('-') || "";
+        var datefrom = avalid != "" ? GetValidDate(avalid[0].trim()) : "";
+        var dateto = avalid != "" ? GetValidDate(avalid[1].trim()) : "";
+
+        var status = "A";
+        if ($(idHeader.STATUS).hasClass("inactive")) status = "I";
+
+        return {
+            PR_COORDINATOR: $(idHeader.PR_COORDINATOR).val(),
+            PLANT_CD: $(idHeader.PLANT_CD).val(),
+            SLOC_CD: $(idHeader.SLOC_CD).val(),
+            DIVISION_ID: $(idHeader.DIVISION_ID).val(),
+            DIVISION_NAME: $(idHeader.DIVISION_ID + " option:selected").text(),
+            ROUTINE_NO: $(idHeader.ROUTINE_NO).val(),
+            PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+            PR_DESC: $(idHeader.PR_DESC).val(),
+            DIVISION_PIC: $(idHeader.NOREG).val(),
+            SCH_TYPE: $(idHeader.SCHEDULE).val(),
+            SCH_MONTH: $(idHeader.MONTH).val(),
+            SCH_DAY: $(idHeader.DAY).val(),
+            ACTIVE_FLAG: status,
+            VALID_FROM: datefrom,
+            VALID_TO: dateto
+        }
+    }
+
+    function HeaderMandatoryValidation() {
+        var msg = "";
+        var item = "";
+        var dateitem = "";
+        var itemdependency = "";
+ 
+        var isvalid = $.ValidateMandatory([idHeader.PLANT_CD, idHeader.SLOC_CD, idHeader.PR_DESC, idHeader.PR_COORDINATOR, idHeader.DIVISION_ID, idHeader.NOREG, idHeader.VALID_DT, idHeader.SCHEDULE]);
+        if (!isvalid) {
+            if ($(idHeader.PLANT_CD).val() == '') 
+                item = item + " Plant Code,";
+             
+            if ($(idHeader.SLOC_CD).val() == '') 
+                item = item + " Storage Code,";
+             
+            if ($(idHeader.PR_DESC).val().trim() == '') 
+                item = item + " PR Desc,";
+             
+            if ($(idHeader.PR_COORDINATOR).val() == '') 
+                item = item + " PR Coordinator,";
+            
+            if ($(idHeader.DIVISION_ID).val() == '') 
+                item = item + " Division,";
+             
+            if ($(idHeader.NOREG).val() == '') 
+                item = item + " PIC,";
+            
+            if ($(idHeader.VALID_DT).val() == '') 
+                item = item + " Valid Date,";
+            
+            if ($(idHeader.SCHEDULE).val() == '') 
+                item = item + " Schedule Type,";
+        }
+
+        if ($(idHeader.SCHEDULE).val() != '') {
+            if ($(idHeader.SCHEDULE).val() == 'M' && $(idHeader.DAY).val() == '')
+                itemdependency = itemdependency + " Day,";
+            if ($(idHeader.SCHEDULE).val() == 'W' && $(idHeader.DAY).val() == '')
+                itemdependency = itemdependency + " Day,";
+            if ($(idHeader.SCHEDULE).val() == 'Y' && $(idHeader.MONTH).val() == '')
+                itemdependency = itemdependency + " Month,";
+            if ($(idHeader.SCHEDULE).val() == 'Y' && $(idHeader.Day).val() == '')
+                itemdependency = itemdependency + " Day,";
+        }
+
+        if (item !== "")
+            msg = msg + "<p>" + AssignVariable("@PurchasingRequisitionMessages.mandatoryField",
+                                        [item.substring(0, item.length - 1)]) + "</p>";
+        if (itemdependency !== "")
+            msg = msg + "<p>" + AssignVariable("@PurchasingRequisitionMessages.mandatoryItemIf",
+                                        [itemdependency.substring(0, itemdependency.length - 1), "Schedule Type is " + $(idHeader.SCHEDULE).val()]) + "</p>";
+        if ($(idHeader.VALID_DT).val() == '')
+            msg = msg + "<p>" + AssignVariable("@PurchasingRequisitionMessages.mandatoryAtLeast",
+                                        ["Valid Date From", "Valid Date To"]) + "</p>";
+
+        return msg;
+    }
+
+    function doSaveRoutine() {
+        $.Disable([idBtn.SAVE_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+
+        var param = getRoutineParam();
+        $.progressbox.show("Save Routine", "Saving Routine onprogress . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._SaveRoutine",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (resultMessage) {
+                var message = resultMessage.split('|');
+                $.Enable([idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+                if ($(idHeader.ROUTINE_NO).val() == "0") $.Enable([idBtn.SAVE_HEADER]);
+                if (message[0] === 'SUCCESS') {
+                    $.progressbox.hide();
+
+                    $.messagebox.show(
+                        "Save Routine",
+                        AssignVariable("@PurchasingRequisitionMessages.successSaveRoutine", [message[1]]),
+                        "SUC",
+                        "SINGLE",
+                        "window.location = '/RoutineInquiry'",
+                        ""
+                    )
+                    }
+                    else if (message[0] === 'WARNING') {
+                        $.progressbox.hide();
+
+                        $.messagebox.show(
+                            "Save Routine",
+                            "Success " + SaveType + " data with Routine No. " + message[1] + ", with WARNING " + message[2],
+                            "WRN",
+                            "SINGLE",
+                            "window.location = '/Home'",
+                            ""
+                        )
+                    }
+                    else {
+                        $.messagebox.show(
+                            "Save Routine",
+                            message[0],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+
+                        $.progressbox.hide();
+                    }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function CancelCreation() {
+        $.messagebox.show(
+            "Cancel Routine Creation",
+            "Are You Sure You Want to Cancel All Changes ?",
+            "INF",
+            "CONFIRM",
+            "doCancelCreation()",
+            ""
+            )
+    }
+
+    function doCancelCreation() {
+        $.progressbox.show("Cancel Routine Creation / Update", "Abort all changed Data . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._CancelCreation",
+            data: {
+                PROCESS_ID: $(idHeader.PROCESS_ID).val()
+            },
+            success: function (resultMessage) {
+                $('.removed').remove();
+                $.progressbox.hide();
+                window.close();
+                window.location = "/RoutineInquiry";
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    @*function ShowLatestCreation(PR_NO, DIVISION_ID) {
+        $.progressbox.show("Get PR Data", "Get New PR Data . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._ShowLatestPR",
+		    data: {
+		        PR_NO: PR_NO,
+		        DIVISION_ID: DIVISION_ID
+		    },
+		    success: function (resultMessage) {
+		        $.progressbox.hide();
+		        window.location = "/PRInquiry";
+		    },
+		    error: function (resultMessage) {
+		        $.progressbox.hide();
+		    }
+		});
+    }*@
+</script>
+
+<script type="text/javascript" id="Cascade-and-Validation-Combo">
+    function isUnsaveItem() {
+        if ($(idItem.ITEM_CLASS).html() != "" ||
+            $(idItem.VALUATION_CLASS).val() != "" ||
+            $(idItem.WBS_NO).val() != "" ||
+            $(idItem.GL_ACCOUNT).val() != "" ||
+            $(idItem.MAT_NO).val() != "" ||
+            $(idItem.MAT_DESC).val() != "" ||
+            ($(idItem.QTY).val() != "" && $(idItem.QTY).val() != "0") ||
+            $(idItem.UOM).val() != "" ||
+            $(idItem.CURR).val() != "" ||
+            ($(idItem.PRICE).val() != "" && $(idItem.PRICE).val() != "0") ||
+            $(idItem.VENDOR_CD).val() != "")
+            return true;
+        else
+            return false;
+    }
+
+    function isUnsaveSubItem() {
+        if ($(idSubItem.WBS_NO).val() != "" ||
+            $(idSubItem.COST_CENTER, $(idSubItem.COST_CENTER_DIV)).val() != "" ||
+            $(idSubItem.GL_ACCOUNT).val() != "" ||
+            $(idSubItem.MAT_DESC).val() != "" ||
+            ($(idSubItem.QTY).val() != "" && $(idSubItem.QTY).val() != "0") ||
+            $(idSubItem.UOM).val() != "" ||
+            ($(idSubItem.PRICE).val() != "" && $(idSubItem.PRICE).val() != "0") ||
+            ($(idSubItem.AMOUNT).val() != "" && $(idSubItem.AMOUNT).val() != "0"))
+            return true;
+        else
+            return false;
+    }
+</script>
+
+<script type="text/javascript" id="Item-Data-Management">
+    function DeleteAllItem(procid) {
+        if (isUnsaveItem() === true) 
+            ClearEditorItem();
+
+        $.progressbox.show("Deleting Item", "Deleting Item . . .");
+        var procid = $(idHeader.PROCESS_ID).val();
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._DeleteAllItem",
+            data: { PROCESS_ID: procid },
+            success: function (resultMessage) {
+                $.ajax({
+                    type: $tdk.AjaxMethod,
+                    url: "@RoutineCreationController._GetItemTemp",
+                    data: { PROCESS_ID: procid },
+                    success: function (data) {
+                        if (data.PROCESS_STATUS === "ERR") {
+                            var msg = "Data Successfully Deleted" +
+                                        "Error While Get Data " + data.MESSAGE_CONTENT;
+
+                            $.messagebox.show(
+                                "Delete Item",
+                                msg,
+                                "ERR",
+                                "SINGLE",
+                                "",
+                                ""
+                            )
+                            $.progressbox.hide();
+                            return;
+                        }
+
+                        $('#detail-grid-creation').html(data);
+                        if ($(".isrow").length <= 0) 
+                            $.Disable([idBtn.SAVE_HEADER]);
+
+                        $.progressbox.hide();
+                    },
+                    error: function (resultMessage) {
+                        var e = resultMessage.responseText;
+                        $.progressbox.hide();
+                        alert($(e).find("title").text());
+                    }
+                });
+            },
+            error: function (resultMessage) { }
+        });
+    }
+
+    function DeleteItem(itemno) {
+        $.messagebox.show(
+            "Delete Item",
+            "Are You Sure You Want to Delete this Item ?",
+            "INF",
+            "CONFIRM",
+            "doDeleteItem('" + itemno + "')",
+            ""
+        )
+    }
+
+    function doDeleteItem(itemno) {
+        $.progressbox.show("Deleting Item", "Deleting Item . . .");
+        var procid = $(idHeader.PROCESS_ID).val();
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._DeleteItem",
+            data: {
+                ITEM_NO: itemno,
+                PROCESS_ID: procid
+            },
+            success: function (resultMessage) {
+                if (resultMessage === "SUCCESS") {
+                    $.ajax({
+                        type: $tdk.AjaxMethod,
+                        url: "@RoutineCreationController._GetItemTemp",
+                        data: { PROCESS_ID: procid },
+                        success: function (data) {
+
+                            if (data.PROCESS_STATUS === "ERR") {
+                                var msg = "Data Successfully Deleted" +
+                                            "Error While Get Data " + data.MESSAGE_CONTENT;
+
+                                $.messagebox.show(
+                                    "Delete Item",
+                                    msg,
+                                    "ERR",
+                                    "SINGLE",
+                                    "",
+                                    ""
+                                )
+
+                                $.progressbox.hide();
+                                return;
+                            }
+
+                            $('#detail-grid-creation').html(data);
+
+                            if ($(".isrow").length <= 0) {
+                                $.Disable([idBtn.SAVE_HEADER]);
+                            }
+
+                            $.progressbox.hide();
+                        },
+                        error: function (resultMessage) {
+                            var e = resultMessage.responseText;
+                            $.progressbox.hide();
+                            alert($(e).find("title").text());
+                        }
+                    });
+                }
+                else {
+                    $.messagebox.show(
+                        "Delete Item",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+
+                    $.progressbox.hide();
+                }
+            },
+            error: function (resultMessage) { }
+        });
+    }
+
+    function getItemRoutineParam(seqno) {
+        return {
+            PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+            ITEM_CLASS: $(idItem.ITEM_CLASS).html(),
+            ITEM_NO: seqno,
+            VALUATION_CLASS: $(idItem.VALUATION_CLASS).val().substring(0, 4),
+            VALUATION_CLASS_DESC: $(idItem.VALUATION_CLASS_DESC).val(),
+            WBS_NO: $(idItem.ITEM_CLASS).html() == 'S' ? 'X' : $(idItem.WBS_NO).val(),
+            WBS_NAME: $(idItem.ITEM_CLASS).html() == 'S' ? 'X' : $(idItem.WBS_NAME).val(),
+            COST_CENTER: $(idItem.ITEM_CLASS).html() == 'S' ? 'X' : $(idItem.COST_CENTER).val(),
+            GL_ACCOUNT_CD: $(idItem.ITEM_CLASS).html() == 'S' ? 'X' : $(idItem.GL_ACCOUNT).val(),
+            MAT_NUMBER: $(idItem.ITEM_CLASS).html() == 'S' ? 'X' : $(idItem.MAT_NO).val(),
+            CAR_FAMILY_CD: $(idItem.CAR_FAMILY_CD).val(),
+            MAT_GRP_CD: $(idItem.MAT_GRP_CD).val(),
+            MAT_TYPE_CD: $(idItem.MAT_TYPE_CD).val(),
+            ITEM_TYPE: $(idItem.ITEM_TYPE).val(),
+            MAT_DESC: $(idItem.MAT_DESC).val(),
+            QTY: $(idItem.QTY).val() || 0,
+            UOM: $(idItem.UOM).val(),
+            CURR: $(idItem.CURR).val(),
+            PRICE: $(idItem.PRICE).val().replace(/,/g, "") || 0,
+            AMOUNT: $(idItem.AMOUNT).val().replace(/,/g, "") || 0,
+            VENDOR_CD: $(idItem.VENDOR_CD).val(),
+            VENDOR_NAME: $(idItem.VENDOR_NAME).val(),
+            QUOTA_FLAG: $(idItem.QUOTA_FLAG).val()
+        }
+    }
+
+    function validateItem() {
+        var mandatoryDetailItem = "";
+        var isNumberItem = "";
+        var msg = "";
+        var reg = new RegExp(/^\d+(?:\.\d{1,18})?$/);
+
+        if ($(idItem.ITEM_CLASS).html() == "S") {
+            if (isUnsaveSubItem())
+                msg = SaveSubItem('0');
+        }
+
+        if (msg == "") {
+            if ($(idItem.ITEM_CLASS).html() != "S") {
+                if ($(idItem.WBS_NO).val() == '') 
+                        msg = msg + AssignVariable("@PurchasingRequisitionMessages.mandatoryReservation", ["WBS No", "PR Routine"]);
+
+                if ($(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).val() == '') mandatoryDetailItem = mandatoryDetailItem + "Cost Center, ";
+                if ($(idItem.GL_ACCOUNT).val() == '') mandatoryDetailItem = mandatoryDetailItem + "GL Account, ";
+            }
+
+            if ($(idItem.VALUATION_CLASS).val() == '')
+                mandatoryDetailItem = mandatoryDetailItem + "Item Category, ";
+            if ($(idItem.QTY).val() == '')
+                mandatoryDetailItem = mandatoryDetailItem + "Quantity, ";
+            if ($(idItem.CURR).val() == '')
+                mandatoryDetailItem = mandatoryDetailItem + "Currency Code, ";
+            if ($(idItem.UOM).val() == '')
+                mandatoryDetailItem = mandatoryDetailItem + "UOM, ";
+            if ($(idItem.PRICE).val().replace(/,/g, "") == '')
+                mandatoryDetailItem = mandatoryDetailItem + "Price, ";
+
+            if ($(idItem.QTY).val() != '') 
+                if (reg.test($(idItem.QTY).val()) == false) isNumberItem = isNumberItem + "Quantity, ";
+
+            if ($(idItem.PRICE).val() != '') 
+                if (reg.test($(idItem.PRICE).val().replace(/,/g, "")) == false) isNumberItem = isNumberItem + "Price, ";
+            
+            if ($(idItem.ITEM_CLASS).html() != "S") {
+                if ($(idItem.MAT_DESC).val() == "")
+                    msg = msg + AssignVariable("@PurchasingRequisitionMessages.mandatoryDescription", ["Material Description", "Material No"]);
+            }
+        }
+
+        if (mandatoryDetailItem != "")
+            msg = msg + AssignVariable("@PurchasingRequisitionMessages.mandatoryDetail", [mandatoryDetailItem.substr(0, mandatoryDetailItem.length - 2), "Item"]);
+
+        if (isNumberItem != "")
+            msg = msg + AssignVariable("@PurchasingRequisitionMessages.isNumber", [isNumberItem.substr(0, mandatoryDetailItem.length - 2), "Item"]);
+
+        return msg;
+    }
+
+    function CancelSaveItem()
+    {
+        $.progressbox.show("Get Item", "Get Item Data onprogress . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@RoutineCreationController._GetItemTemp",
+            data: { PROCESS_ID: $(idHeader.PROCESS_ID).val() },
+		    success: function (data) {
+		        $.Enable([idBtn.CANCEL_HEADER]);
+		        if ($(idHeader.ROUTINE_NO).val() == '0') $.Enable([idBtn.SAVE_HEADER]);
+
+		        if ($("#hiddenrow").html().length > 0) {
+		            $("#addrow").html($("#row-" + ($(idItem.NO).html() == "" ? "0" : $(idItem.NO).html())).html());
+		            $("#hiddenrow").empty();
+		        }
+
+		        $('#detail-grid-creation').html(data);
+
+		        $("[id^=editlink]").removeClass("_link-disabled");
+		        $("[id^=dellink]").removeClass("_link-disabled");
+
+		        ClearEditorItem();
+		        $.progressbox.hide();
+		    },
+            error: function (resultMessage) {
+                var e = resultMessage.responseText;
+                alert($(e).find("title").text());
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function SaveItem(type) {
+        //type = 0 (if trigger from submit/save button); type = 1 (if trigger from saveitem button)
+        var seqno = $(idItem.NO).html().length <= 0 ? "0" : $(idItem.NO).html();
+        if (type != '1') $.disable_enable_button.disable();
+        $.Disable([idBtn.SAVE_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+        var msg = validateItem();
+        if (msg != "") {
+            if (type == '1') {
+                $.messagebox.show(
+                    "Save Item",
+                    msg,
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+                $.Enable([idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+                if ($(idHeader.ROUTINE_NO).val() == '0') $.Enable([idBtn.SAVE_HEADER]);
+                return false;
+            }
+        }
+
+        if (msg == '') {
+            if (type == '1') $.progressbox.show("Save Item", "Saving Item onprogress . . .");
+            var param = getItemRoutineParam(seqno);
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@RoutineCreationController._SaveItem",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (resultMessage) {
+                    if (type == '1') onResultSaveItem(resultMessage, seqno);
+                    else if (resultMessage === "SUCCESS|") msg = resultMessage('|')[1];
+                },
+                error: function (resultMessage) {
+                    if (type == '1') {
+                        $.progressbox.hide();
+                        alert($(e).find("title").text());
+                    }
+                    else msg = $(e).find("title").text();
+                },
+                complete: function (resultMessage) {
+                    if (type != '1' ) {
+                        if(msg == "") {
+                            $.ajax({
+                                type: $tdk.AjaxMethod,
+                                url: "@RoutineCreationController._GetItemTemp",
+                                data: { PROCESS_ID: $(idHeader.PROCESS_ID).val() },
+                                success: function (data) {
+                                    ClearEditorItem("true");
+
+                                    if ($("#hiddenrow").html().length > 0) {
+                                        $("#addrow").html($("#row-" + ($(idItem.NO).html() == "" ? "0" : $(idItem.NO).html())).html());
+                                        $("#hiddenrow").empty();
+                                    }
+
+                                    $('#detail-grid-creation').html(data);
+
+                                    $("[id^=editlink]").removeClass("_link-disabled");
+                                    $("[id^=dellink]").removeClass("_link-disabled");
+                                },
+                                error: function (resultMessage) {
+                                    var e = resultMessage.responseText;
+                                    msg = e;
+                                },
+                                complete: function (resultMessage) {
+                                    SaveRoutine(2, msg);
+                                }
+                            });
+                        }
+                        else SaveRoutine(2, msg);
+                    }
+                }
+            });
+        }
+        else if (type != '1') SaveRoutine(2, msg);
+    }
+
+    function onResultSaveItem(resultMessage, seqno) {
+        if (resultMessage === 'SUCCESS|') {
+            $.Enable([idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+            if ($(idHeader.ROUTINE_NO).val() == '0') $.Enable([idBtn.SAVE_HEADER]);
+            $.ajax({
+                type: $tdk.AjaxMethod,
+                url: "@RoutineCreationController._GetItemTemp",
+                data: { PROCESS_ID: $(idHeader.PROCESS_ID).val() },
+                success: function (data) {
+                    if (data.PROCESS_STATUS === "ERR") {
+
+                        var msg = "Data Successfully Saved " +
+                                    "Error While Get Data " + data.MESSAGE_CONTENT;
+
+                        $.messagebox.show(
+                            "Save Item",
+                            msg,
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                        $.progressbox.hide();
+                        return;
+                    }
+
+                    ClearEditorItem();
+
+                    if ($("#hiddenrow").html().length > 0) {
+                        $("#addrow").html($("#row-" + (seqno)).html());
+                        $("#hiddenrow").empty();
+                    }
+
+                    $.Enable([idBtn.CANCEL_HEADER]);
+                    if ($(idHeader.ROUTINE_NO).val() == '0') $.Enable([idBtn.SAVE_HEADER]);
+
+                    $('#detail-grid-creation').html(data);
+                    $("[id^=editlink]").removeClass("_link-disabled");
+                    $("[id^=dellink]").removeClass("_link-disabled");
+
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    var e = data.responseText;
+                    alert($(e).find("title").text());
+                }
+            });
+        }
+        else {
+            $.progressbox.hide();
+            $.messagebox.show(
+                "Save Item",
+                resultMessage.Split('|')[1],
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+            $.Enable([idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+            if ($(idHeader.ROUTINE_NO).val() == '0') $.Enable([idBtn.SAVE_HEADER]);
+        }
+    }
+
+    function EditItem(thisindex) {
+        // TO DO : check authorization current user to edit this item
+
+        if ($("#collapseitem-" + thisindex).children('.fa').hasClass("fa-minus-square-o")) collapseItem('NE', '-' + thisindex);
+
+        $.progressbox.show("Edit Item", "Editing Item . . .");
+
+        $("[id^=editlink]").addClass("_link-disabled");
+        $("[id^=dellink]").addClass("_link-disabled");
+
+        $("#hiddenrow").empty();
+        $("#hiddenrow").html($("#row-" + thisindex).html());
+        $("#row-" + thisindex).empty();
+        $("#row-" + thisindex).html($("#addrow").html());
+        $("#addrow").empty();
+        $(idItem.ITEM_CLASS).html($(".tclass-" + thisindex).html());
+        $(idItem.NO).html(thisindex);
+
+        $(idItem.VALUATION_CLASS).val($(".titem-" + thisindex).html());
+        $(idItem.ITEM_TYPE).val($(".tvalitemtype-" + thisindex).html());
+        $(idItem.VALUATION_CLASS_DESC).val($(".tvaldesc-" + thisindex).html());
+        $(idItem.WBS_NO).val($(".twbs-" + thisindex).html());
+        $(idItem.WBS_NO).val($(".twbsname-" + thisindex).html());
+        $(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).val($(".tcost-" + thisindex).html());
+        $(idItem.GL_ACCOUNT).val($(".tgl-" + thisindex).html());
+        $(idItem.MAT_NO).val($(".tmatno-" + thisindex).html());
+        $(idItem.CAR_FAMILY_CD).val($(".tcar-" + thisindex).html());
+        $(idItem.MAT_GRP_CD).val($(".tgrp-" + thisindex).html());
+        $(idItem.MAT_TYPE_CD).val($(".ttype-" + thisindex).html());
+        $(idItem.QUOTA_FLAG).val($(".tquotaflag-" + thisindex).html());
+        $(idItem.MAT_DESC).val($(".tmatdesc-" + thisindex).html());
+        if ($(idItem.MAT_NO).val() != "")
+            $.Disable([idItem.MAT_DESC, idItem.QTY, idItem.UOM, idItem.CURR, idItem.PRICE]);
+        else
+            $.Enable([idItem.MAT_DESC, idItem.QTY, idItem.UOM, idItem.CURR, idItem.PRICE]);
+
+        $(idItem.QTY).val($(".tqty-" + thisindex).html());
+        $(idItem.UOM).val($(".tuom-" + thisindex).html());
+        $(idItem.CALC_VALUE).val($(".hcalvalue-" + thisindex).html());
+        $(idItem.CURR).val($(".tcurr-" + thisindex).html());
+        $(idItem.PRICE).val($.AsPrice($(".hprice-" + thisindex).html()));
+        $(idItem.AMOUNT).val($.AsPrice($(".hamount-" + thisindex).html()));
+        $(idItem.VENDOR_CD).val($(".tvendorcd-" + thisindex).html());
+        $(idItem.VENDOR_NAME).val($(".tvendorname-" + thisindex).html());
+
+        if ($(idItem.ITEM_CLASS).html() == "S") {
+            $.Disable([idItem.GL_ACCOUNT, idItem.PRICE, idItem.AMOUNT, idItem.QTY, idItem.UOM]);
+            DisableLookup([idDivLookup.DIV_WBSITEM, idDivLookup.DIV_GLITEM], true);
+
+            $(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).attr("disabled", "disabled");
+            $(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).addClass("disabled-control");
+
+            loadDetailGrid('Y', '-' + thisindex);
+        }
+        else {
+            $.Enable([idItem.PRICE, idItem.AMOUNT]);
+            DisableLookup([idDivLookup.DIV_WBSITEM], false);
+            $(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).removeAttr("disabled");
+            $(".subitem-" + (thisindex == "" ? "0" : thisindex)).remove();
+        }
+        
+        EditorInitialize("EditItem");
+        $.progressbox.hide();
+    }
+</script>
+
+<script id="Subitem-Data-Management">
+    function loadDetailGrid(addeditflag, seqno) {
+        if (seqno == "" && $(idItem.NO).html() != "") seqno = "-" + $(idItem.NO).html();
+        
+        var itemno = "0";
+        if (seqno != "") itemno = seqno.substr(1, seqno.length);
+
+        $.progressbox.show("Get Sub Item", "Get Sub Item onprogress . . .");
+        if ($('#addTable').find('.subitem-' + itemno).length == 0) {
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetSubItemTemp",
+                data: {
+                    PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+                    ITEM_NO: itemno,
+                    type: "init",
+                    addeditflag: addeditflag
+                },
+                success: function (data) {
+                    $("#collapseitem" + (addeditflag == 'Y' ? '' : seqno)).closest('tr').after(data);
+                    if (addeditflag == 'N') 
+                        $(".actiondetail").css("display", "none");
+                    else 
+                        populateComboBox('costcenter');
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    $.progressbox.hide();
+                    alert(data);
+                }
+            });
+        }
+        else {
+            $('.subitem-' + itemno).show();
+            $.progressbox.hide();
+        }
+    }
+
+    function validateSubItem() {
+        var mandatoryDetailItem = "";
+        var isNumberItem = "";
+        var msg = "";
+        var reg = new RegExp(/^\d+(?:\.\d{1,18})?$/);
+
+        if ($(idSubItem.WBS_NO).val() == '')
+            mandatoryDetailItem = mandatoryDetailItem + "WBS No, ";
+        if ($(idSubItem.COST_CENTER, $(idSubItem.COST_CENTER_DIV)).val() == '')
+            mandatoryDetailItem = mandatoryDetailItem + "Cost Center, ";
+        if ($(idSubItem.GL_ACCOUNT).val() == '')
+            mandatoryDetailItem = mandatoryDetailItem + "GL Account, ";
+        if ($(idSubItem.MAT_DESC).val() == '')
+            mandatoryDetailItem = mandatoryDetailItem + "Descricption, ";
+
+        if ($(idSubItem.QTY).val() == '') mandatoryDetailItem = mandatoryDetailItem + "Quantity, ";
+        if ($(idSubItem.UOM).val() == '') mandatoryDetailItem = mandatoryDetailItem + "UOM, ";
+        if ($(idSubItem.PRICE).val() == '') mandatoryDetailItem = mandatoryDetailItem + "Price, ";
+
+        if (reg.test($(idSubItem.QTY).val()) == false) isNumberItem = isNumberItem + "Quantity, ";
+        if (reg.test($(idSubItem.PRICE).val().replace(/,/g, "")) == false) isNumberItem = isNumberItem + "Quantity, ";
+
+        if (mandatoryDetailItem != "")
+            msg = msg + AssignVariable("@PurchasingRequisitionMessages.mandatoryDetail", [mandatoryDetailItem.substr(0, mandatoryDetailItem.length - 2), "sub item"]);
+
+        if (isNumberItem != "")
+            msg = msg + AssignVariable("@PurchasingRequisitionMessages.isNumber", [isNumberItem.substr(0, mandatoryDetailItem.length - 2), "sub item"]);
+
+        return msg;
+    }
+
+    function ClearEditorSubItem() {
+        ClearHtml([idSubItem.NO]);
+        $.Clear([idSubItem.GL_ACCOUNT, idSubItem.MAT_DESC, idSubItem.UOM,
+            idSubItem.QTY, idSubItem.PRICE, idSubItem.AMOUNT]);
+        $(idSubItem.COST_CENTER, $(idSubItem.COST_CENTER_DIV)).val('');
+        $(idSubItem.WBS_NO).val('');
+    }
+
+    function CancelSaveSubItem(itemno) {
+        if (itemno == "undefined" || itemno == "" || itemno == null)
+            itemno = $(idItem.NO).html().length <= 0 ? "0" : $(idItem.NO).html()
+
+        ClearEditorSubItem();
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@RoutineCreationController._GetSubItemTemp",
+            data: {
+                PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+                ITEM_NO: itemno,
+                type: "load",
+                addeditflag: "Y"
+            },
+            success: function (data) {
+                $('#tbsubitem-' + itemno).parent().html(data);
+            },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function getSubItemParam(seqno) {
+        return {
+            PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+            SUBITEM_NO: seqno,
+            ITEM_NO: $(idItem.NO).html().length <= 0 ? "0" : $(idItem.NO).html(),
+            SUBITEM_WBS_NO: $(idSubItem.WBS_NO).val(),
+            SUBITEM_COST_CENTER: $(idSubItem.COST_CENTER, $(idSubItem.COST_CENTER_DIV)).val(),
+            SUBITEM_GL_ACCOUNT: $(idSubItem.GL_ACCOUNT).val(),
+            SUBITEM_MAT_DESC: $(idSubItem.MAT_DESC).val(),
+            SUBITEM_QTY: $(idSubItem.QTY).val(),
+            SUBITEM_UOM: $(idSubItem.UOM).val(),
+            PRICE_PER_UOM: $(idSubItem.PRICE).val().replace(/,/g, ""),
+            SUBITEM_AMOUNT: $(idSubItem.AMOUNT).val().replace(/,/g, "")
+        };
+    }
+
+    function SaveSubItem(type) {
+		//type = 0 (if trigger from saveitem button); type = 1 (if trigger from savesubitem button)
+        var seqno = $(idSubItem.NO).html().length <= 0 ? "0" : $(idSubItem.NO).html();
+		
+        var msg = validateSubItem();
+        if (msg != "") {
+            if (type == '1') {
+                $.messagebox.show(
+					"Save Sub Item",
+					msg,
+					"ERR",
+					"SINGLE",
+					"",
+					""
+				)
+                $.Enable([idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+                if ($(idHeader.ROUTINE_NO).val() == "0") $.Enable([idBtn.SAVE_HEADER]);
+                return false;
+            }
+        }
+
+        if (msg == "") {
+            if (type == '1') {
+                $.Disable([idBtn.SAVE_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+                $.progressbox.show("Save Sub Item", "Saving Sub Item onprogress . . .");
+            }
+            var param = getSubItemParam(seqno);
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@RoutineCreationController._SaveSubItem",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (resultMessage) {
+                    if (type == '1')
+                        onResultSaveSubItem(resultMessage, seqno);
+                    else if (resultMessage === "SUCCESS") msg = "";
+                },
+                error: function (resultMessage) {
+                    var e = resultMessage.responseText;
+                    if (type == '1') {
+                        $.progressbox.hide();
+                        alert($(e).find("title").text());
+                    }
+                    else
+                        msg = $(e).find("title").text();
+                }
+            });
+        }
+
+        if (type != '1') return msg;
+    }
+
+    function onResultSaveSubItem(resultMessage, seqno) {
+        if (resultMessage === 'SUCCESS') {
+            $.Enable([idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+            if ($(idHeader.ROUTINE_NO).val() == "0") $.Enable([idBtn.SAVE_HEADER]);
+            var itemno = $(idItem.NO).html().length <= 0 ? "0" : $(idItem.NO).html();
+            $.ajax({
+                type: $tdk.AjaxMethod,
+                url: "@RoutineCreationController._GetSubItemTemp",
+                data: {
+                    PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+                    ITEM_NO: itemno,
+                    type: "load",
+					addeditflag: "Y"
+                },
+                success: function (data) {
+                    if (data.PROCESS_STATUS === "ERR") {
+                        var msg = "Data Successfully Saved " +
+                                    "Error While Get Data " + data.MESSAGE_CONTENT;
+
+                        $.messagebox.show(
+                            "Save Sub Item",
+                            msg,
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                        $.progressbox.hide();
+                        return;
+                    }
+
+                    ClearEditorSubItem();
+
+                    $('#tbsubitem-' + itemno).parent().html(data);
+
+                    $("[id^=editlink]").removeClass("_link-disabled");
+                    $("[id^=dellink]").removeClass("_link-disabled");
+
+                    OLD_AMOUNT = 0;
+                    for (i = 1; i <= $('.isrowsubitem').length; i++) OLD_AMOUNT = OLD_AMOUNT + parseFloat($(".iamountsubitem-" + i.toString()).html());
+
+                    $(idItem.AMOUNT).val(OLD_AMOUNT);
+
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    var e = data.responseText;
+                    alert($(e).find("title").text());
+                }
+            });
+        }
+        else {
+            $.messagebox.show(
+                "Save Sub Item",
+                resultMessage,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+            $.Enable([idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+            if ($(idHeader.ROUTINE_NO).val() == '0') $.Enable([idBtn.SAVE_HEADER]);
+        }
+    }
+
+    function DeleteSubItem(item_no, subitem_no) {
+        $.messagebox.show(
+            "Delete Sub Item",
+            "Are You Sure You Want to Delete this Sub Item ?",
+            "INF",
+            "CONFIRM",
+            "doDeleteSubItem('" + item_no + "', '" + subitem_no + "')",
+            ""
+        )
+    }
+
+    function doDeleteSubItem(item_no, subitem_no) {
+        $.progressbox.show("Delete Sub Item", "Deleting Sub Item . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._DeleteSelectedSubItemTemp",
+            data: {
+                PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+                ITEM_NO: item_no,
+                SUBITEM_NO: subitem_no
+            },
+            success: function (resultMessage) {
+                if (resultMessage == '') {
+                    $.ajax({
+                        type: $tdk.AjaxMethod,
+                        url: "@RoutineCreationController._GetSubItemTemp",
+                        data: {
+                            PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+                            ITEM_NO: item_no,
+                            type: "load",
+							addeditflag: "Y"
+                        },
+                        success: function (data) {
+                            if (data.PROCESS_STATUS === "ERR") {
+
+                                var msg = "Data Successfully Deleted " +
+                                          "Error While Get Data " + data.MESSAGE_CONTENT;
+
+                                $.messagebox.show(
+                                    "Delete Sub Item",
+                                    msg,
+                                    "ERR",
+                                    "SINGLE",
+                                    "",
+                                    ""
+                                )
+                                $.progressbox.hide();
+                                return;
+                            }
+
+                            $('#tbsubitem-' + item_no).parent().html(data);
+                            $.progressbox.hide();
+                        },
+                        error: function (resultMessage) {
+                            var e = resultMessage.responseText;
+                            $.progressbox.hide();
+                            alert($(e).find("title").text());
+                        }
+                    });
+                }
+                else {
+                    $.messagebox.show(
+                        "Delete Sub Item",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    $.progressbox.hide();
+                }
+            },
+            error: function (resultMessage) {
+                var e = resultMessage.responseText;
+                alert($(e).find("title").text());
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function EditSubItem(itemno, thisindex) {
+        // TO DO : Check authorization to edit subitem
+		
+        $.progressbox.show("Edit Item", "Editing Item . . .");
+        $("[id^=editlink]").addClass("_link-disabled");
+        $("[id^=dellink]").addClass("_link-disabled");
+
+        $("#hiddenrowdetail").empty();
+        $("#hiddenrowdetail").html($("#rowsubitem-" + itemno + "-" + thisindex).html());
+        $("#rowsubitem-" + itemno + "-" + thisindex).empty();
+        $("#rowsubitem-" + itemno + "-" + thisindex).html($("#addrowdetail").html());
+        $("#addrowdetail").empty();
+
+        $(idSubItem.NO).html(thisindex);
+        $(idSubItem.WBS_NO).val($(".iwbsnosubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.COST_CENTER, $(idSubItem.COST_CENTER_DIV)).val($(".icostcentercdsubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.GL_ACCOUNT).val($(".iglacdsubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.MAT_DESC).val($(".idescsubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.QTY).val($(".iqtysubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.UOM).val($(".iuomsubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.CALC_VALUE).val($(".hcalvaluesubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.PRICE).val($.AsPrice($(".ipricesubitem-" + itemno + "-" + thisindex).html()));
+        $(idSubItem.AMOUNT).val($.AsPrice($(".iamountsubitem-" + itemno + "-" + thisindex).html()));
+
+        EditorInitialize("EditSubItem");
+        $.progressbox.hide();
+    }
+</script>
+
+<script type="text/javascript" id="Grid-Lookup">
+    function ClearLookupCriteria(gridID) {
+        switch (gridID) {
+            case "pic": {
+                $.Clear(["#picsearchbox"]);
+                getPICGrid(1);
+                break;
+            }
+            case "valuationclass": {
+                $.Clear(["#valsearchbox"]);
+                getValClassGrid(1);
+                break;
+            }
+            case "materialno": {
+                $.Clear(["#matsearchbox"]);
+                getMaterialGrid(1);
+                break;
+            }
+            case "glaccount": {
+                $.Clear(["#glsearchbox"]);
+                getGLAccountGrid(1);
+                break;
+            }
+            case "wbs": {
+                $.Clear(["#wbssearchbox"]);
+                getWBSGrid(1);
+                break;
+            }
+            case "vendor": {
+                $.Clear(["#vendorsearchbox"]);
+                getVendorGrid(1);
+                break;
+            }
+        }
+    }
+
+    function getPICParam(page) {
+        return {
+            pageSize: LookupMaxRowPerPage,
+            page: page,
+            PIC_PARAM: $('#picsearchbox').val(),
+            DIVISION_ID: $(idHeader.DIVISION_ID).val()
+        }
+    }
+
+    function getPIC(page, type) {
+        var param = getPICParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetPIC",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                $("#pic-container").html(data);
+                $("#pic-container").modal();
+            },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function getPICGrid(page) {
+        var param = getPICParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetPICGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#pic-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function MovePICKey(noreg) {
+        $(idHeader.NOREG).val(noreg);
+
+        ClearLookupCriteria('pic');
+        $("#pic-container").modal('hide');
+    }
+
+    
+    function ClearLookupValue(gridID) {
+        switch (gridID) {
+            case "valuationclass": {
+                MoveValuationClassKey("", "", ""); break;
+            }
+            case "materialno": {
+                ClearMaterialValue();
+                ClearLookupCriteria('materialno');
+                break;
+            }
+            case "glaccount": {
+                MoveGLAccountKey("", ""); break;
+            }
+        }
+    }
+
+    function ClearMaterialValue() {
+        if ($(idItem.MAT_NO).val() != "") {
+            $.Clear([idItem.MAT_NO, idItem.CAR_FAMILY_CD, idItem.MAT_GRP_CD, "#atype",
+                idItem.MAT_DESC, idItem.UOM, idItem.CURR, idItem.QUOTA_FLAG, idItem.PRICE, idItem.AMOUNT]);
+            $.Enable([idItem.UOM, idItem.CURR, idItem.MAT_DESC, idItem.PRICE]);
+        }
+    }
+
+    function getValuationClassParam(page) {
+        return {
+            pageSize: LookupMaxRowPerPage,
+            page: page,
+            VALUATION_CLASS_PARAM: $('#valsearchbox').val(),
+            PR_COORDINATOR: $(idHeader.PR_COORDINATOR).val()
+        };
+    }
+
+    function getMaterialParam(page) {
+        return {
+            pageSize: LookupMaxRowPerPage,
+            page: page,
+            MAT_NUMBER_PARAM: $('#matsearchbox').val(),
+            VALUATION_CLASS: $(idItem.VALUATION_CLASS).val(),
+            PR_COORDINATOR: $(idHeader.PR_COORDINATOR).val(),
+            ITEM_TYPE: $(idItem.ITEM_TYPE).val()
+        };
+    }
+
+    function getGLAccountParam(page, type) {
+        var wbs_no = '';
+        var cost_center = '';
+
+        if (type != '') {
+            wbs_no = ((type == 'item') ? $(idItem.WBS_NO).val() : $(idSubItem.WBS_NO).val());
+            cost_center = ((type == 'item') ? $(idItem.COST_CENTER).val() : $(idSubItem.COST_CENTER).val());
+        }
+
+        return {
+            pageSize: LookupMaxRowPerPage,
+            page: page,
+            GL_ACCOUNT_PARAM: $('#glsearchbox').val(),
+            PLANT_CD: $(idHeader.PLANT_CD).val(),
+            WBS_NO: wbs_no,
+            COST_CENTER: cost_center,
+            DIVISION_ID: $(idHeader.DIVISION_ID).val()
+        }
+    }
+
+    function getWBSParam(page) {
+        return {
+            pageSize: LookupMaxRowPerPage,
+            page: page,
+            WBS_PARAM: $('#wbssearchbox').val(),
+            DIVISION_ID: $(idHeader.DIVISION_ID).val(),
+            PR_COORDINATOR: $(idHeader.PR_COORDINATOR).val()
+        }
+    }
+
+    function getVendorParam(page) {
+        return {
+            pageSize: LookupMaxRowPerPage,
+            page: page,
+            VENDOR_PARAM: $('#vendorsearchbox').val()
+        }
+    }
+
+    function getValClass(page) {
+        var mandatory_field = "";
+
+        if ($(idHeader.PR_COORDINATOR).val() == "" || $(idHeader.PR_COORDINATOR).val() == null) mandatory_field = mandatory_field + " PR Coordinator, ";
+
+        if (mandatory_field != "") {
+            mandatory_field = (mandatory_field.substr(0, mandatory_field.length - 2)).replace(",", " and");
+
+            $.messagebox.show(
+                "Get Item Category",
+                "Please select " + mandatory_field,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+            var param = getValuationClassParam(page);
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetValuationClass",
+	            data: JSON.stringify(param),
+	            contentType: "application/json; charset=utf-8",
+	            success: function (data) {
+	                $("#valclass-container").html(data);
+	                $("#valclass-container").modal();
+	            },
+	            error: function (data) {
+	                var e = data.responseText;
+	                alert($(e).find("title").text());
+	            }
+	        });
+            }
+        }
+
+        function getValClassGrid(page) {
+            var param = getValuationClassParam(page);
+
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetValuationClassGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#valclass-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function getMaterial(page) {
+        if ($(idItem.VALUATION_CLASS).val() == "" || $(idItem.VALUATION_CLASS).val() == null) {
+            $.messagebox.show(
+                "Get Material No",
+                "Please select item category",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+            var param = getMaterialParam(page);
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetMaterial",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#material-container").html(data);
+                    $("#material-container").modal();
+                },
+                error: function (data) {
+                    var e = data.responseText;
+                    alert($(e).find("title").text());
+                }
+            });
+        }
+    }
+
+    function getMaterialGrid(page) {
+        var param = getMaterialParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetMaterialGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#material-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function getGLAccount(page, type) {
+        var param = getGLAccountParam(page, type);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetGLAccount",
+		    data: JSON.stringify(param),
+		    contentType: "application/json; charset=utf-8",
+		    success: function (data) {
+		        TYPE_GL = type;
+		        $("#gl-container").html(data);
+		        $("#gl-container").modal();
+		    },
+		    error: function (data) {
+		        var e = data.responseText;
+		        alert($(e).find("title").text());
+		    }
+		});
+    }
+
+    function getGLAccountGrid(page) {
+        var param = getGLAccountParam(page, '');
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetGLAccountGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#gl-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function getWBS(page, type) {
+        var param = getWBSParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetWBS",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                TYPE_WBS = type;
+                $("#wbs-container").html(data);
+                $("#wbs-container").modal();
+            },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function getWBSGrid(page) {
+        var param = getWBSParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetWBSGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#wbs-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function getVendor(page) {
+        var param = getVendorParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetVendor",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                $("#vendor-container").html(data);
+                $("#vendor-container").modal();
+            },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function getVendorGrid(page) {
+        var param = getVendorParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@RoutineCreationController._GetVendorGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#vendor-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function MoveValuationClassKey(VALUATION_CLASS, VALUATION_CLASS_DESC, ITEM_CLASS, ITEM_TYPE) {
+        if ((($(idItem.VALUATION_CLASS).val() == "") && (VALUATION_CLASS == "")) || (($(idItem.VALUATION_CLASS).val() != "") && ($(idItem.VALUATION_CLASS).val() != VALUATION_CLASS) && (VALUATION_CLASS != ""))) {
+            $(".subitem" + $(idItem.NO).html() == "" ? "0" : $(idItem.NO).html()).remove();
+        }
+
+        if (VALUATION_CLASS != "") {
+            $(idItem.VALUATION_CLASS).val(VALUATION_CLASS);
+            $(idItem.VALUATION_CLASS_DESC).val(VALUATION_CLASS_DESC);
+            $(idItem.ITEM_TYPE).val(ITEM_TYPE);
+            $(idItem.ITEM_CLASS).html(ITEM_CLASS);
+
+            if (ITEM_CLASS == "S") {
+                $.Disable([idItem.COST_CENTER, idItem.QTY, idItem.PRICE, idItem.AMOUNT, idItem.UOM]);
+                DisableLookup([idDivLookup.DIV_MATERIAL, idDivLookup.DIV_WBSITEM, idDivLookup.DIV_GLITEM], true);
+
+                $(idItem.UOM).val('AU');
+                $(idItem.QTY).val('1');
+                $(idItem.PRICE).val('0');
+                OLD_AMOUNT = 0;
+                loadDetailGrid('Y', '');
+            }
+            else if (ITEM_CLASS == "M") {
+                $.Enable([idItem.COST_CENTER, idItem.UOM, idItem.MAT_DESC, idItem.QTY, idItem.PRICE]);
+                DisableLookup([idDivLookup.DIV_MATERIAL, idDivLookup.DIV_WBSITEM, idDivLookup.DIV_GLITEM], false);
+
+                $.Clear([idItem.UOM]);
+                $(idItem.QTY).val('0');
+                $(".subitem-" + ($(idItem.NO).html() == "" ? "0" : $(idItem.NO).html())).remove();
+            }
+        }
+
+        ClearLookupCriteria('valuationclass');
+        ClearMaterialValue();
+        $("#valclass-container").modal('hide');
+    }
+
+    function MoveMaterialNoKey(MAT_NO, id) {
+        $(idItem.MAT_NO).val(MAT_NO);
+        $(idItem.MAT_DESC).val($(id).data("materialdesc"));
+        $(idItem.VALUATION_CLASS).val($(id).data("valuationclass"));
+        $(idItem.VALUATION_CLASS_DESC).val($(id).data("valuationdesc"))
+        $(idItem.CAR_FAMILY_CD).val($(id).data("car"));
+        $(idItem.MAT_GRP_CD).val($(id).data("matgrp"));
+        $(idItem.MAT_TYPE_CD).val($(id).data("mattype"));
+        $(idItem.QUOTA_FLAG).val($(id).data("quotaflag"));
+        $(idItem.UOM).val($(id).data("uom").toUpperCase());
+        $(idItem.CURR).val($(id).data("curr"));
+        $(idItem.PRICE).val($(id).data("price"));
+        if (($(idItem.QTY).val() == "") || ($(idItem.QTY).val() == "0")) $(idItem.QTY).val(1);
+
+        GetAmount();
+        ClearLookupCriteria('materialno')
+        $.Disable([idItem.UOM, idItem.CURR, idItem.PRICE, idItem.MAT_DESC]);
+        $("#material-container").modal('hide');
+    }
+
+    function MoveGLAccountKey(glcd) {
+        if (TYPE_GL == "subitem")
+            $(idSubItem.GL_ACCOUNT).val(glcd)
+        else
+            $(idItem.GL_ACCOUNT).val(glcd);
+        ClearLookupCriteria('glaccount');
+        $("#gl-container").modal('hide');
+    }
+
+    function MoveWBSKey(wbs, wbsname) {
+        if (TYPE_WBS == "subitem") {
+            $(idSubItem.WBS_NO).val(wbs);
+            $(idSubItem.WBS_NAME).val(wbsname);
+        }
+        else {
+            $(idItem.WBS_NO).val(wbs);
+            $(idItem.WBS_NAME).val(wbsname);
+        }
+        ClearLookupCriteria('wbs');
+        $("#wbs-container").modal('hide');
+    }
+
+    function MoveVendorKey(vendor_cd, vendor_name) {
+        $(idItem.VENDOR_CD).val(vendor_cd);
+        $(idItem.VENDOR_NAME).val(vendor_name);
+
+        ClearLookupCriteria('vendor');
+        $("#vendor-container").modal('hide');
+    }
+
+    $(idItem.COST_CENTER_DIV).click(function () {
+        if ($(idHeader.DIVISION_ID).val() == "0") {
+            $.messagebox.show(
+                "Get Cost Center",
+                "Please select division",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+    });
+</script>

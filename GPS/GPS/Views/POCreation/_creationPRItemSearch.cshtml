@@ -1,0 +1,797 @@
+@using GPS.CommonFunc.WebControl
+@using GPS.Constants
+@using GPS.Controllers.Master
+@using GPS.Controllers.PO
+@using GPS.Core.ViewModel
+@using GPS.ViewModels
+@model GenericViewModel<GPS.Models.PO.PRPOItem>
+    @{
+        var maxItem_PO_Allowed = ViewData["MaxItemAllowed"] != null ? int.Parse(ViewData["MaxItemAllowed"].ToString()) : 50;
+        var messageErrorMaximumItem = ViewData["ErrMsgMaximumItem"] != null ? ViewData["ErrMsgMaximumItem"].ToString() : "maximum item allowed has achieved (data can not more than {0} item).";
+        messageErrorMaximumItem = string.Format(messageErrorMaximumItem, maxItem_PO_Allowed.ToString());
+        var ActionOrigin = "1"; //added : 20190722 : isid.rgl
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            /* ============================== Init: begin ============================== */
+
+            var processId = ViewData.Get("ProcessId"),
+                poNo = ViewData.Get("PONo"),
+                prItemDataName = ViewData.Get("PRItemDataName"),
+                RefreshPOItemMat = ViewData.Get("RefreshPOItemMat"),
+                RefreshSPKAmount = ViewData.Get("RefreshSPKAmount");
+            RefreshAttachment = ViewData.Get("RefreshAttachment");
+
+
+            function GetIdList() {
+                return [
+                    "#txt-pritem-prno",
+                    "#txt-pritem-materialno",
+                    "#txt-pritem-materialdesc",
+                    "#cmb-pritem-plantcode",
+                    "#cmb-pritem-sloccode",
+                    "#cmb-pritem-prcoordinator",
+                    "#btn-pritem-search",
+                    "#btn-pritem-clearsearch",
+                    "#btn-pritem-add",
+                    "#btn-pritem-cancel",
+                    "[id^=lnk-page-pritem-]",
+                    "#cmb-perpage-pritem"
+                ];
+            }
+
+            function GetLookupIdList() {
+                return [
+                    "#lookup-pritem-category",
+                    "#lookup-pritem-vendor"
+                ];
+            }
+
+            function DisableAllFeatures() {
+                $.Disable(GetIdList());
+                $.DisableLookup(GetLookupIdList());
+            }
+
+            function EnableAllFeatures() {
+                $.Enable(GetIdList());
+                $.EnableLookup(GetLookupIdList());
+            }
+
+            function ResetForm() {
+                $.Clear(GetIdList());
+                $.ClearLookup(GetLookupIdList());
+
+                $("#cmb-pritem-currency").val(ViewData.Get("Currency"));
+            }
+
+            function OnAjaxBegin(title) {
+                $.progressbox.show($tdk.PageTitle, title);
+                DisableAllFeatures();
+            }
+
+            function OnAjaxComplete() {
+                EnableAllFeatures();
+                $.progressbox.hide();
+            }
+
+            function OnAjaxError(data) {
+                var result = $.ValidateASPError(data.responseText);
+                $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+            }
+
+            function RefreshSLoc() {
+                $.ajax({
+                    type: "POST",
+                    url: "@CommonPage.RefreshSLocAction",
+                    data: {
+                        dropdownId: "pritem-sloccode",
+                        plantCode: $("#cmb-pritem-plantcode").valOrDefault()
+                    },
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            $("#pritem-sloc-container").html(data);
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    error: function (data) {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "ERR");
+                    }
+                });
+            }
+
+            ResetForm();
+            EnableAllFeatures();
+
+            $("#lookup-pritem-category").lookup({
+                IsSingleSelection: true,
+                SelectedFormatter: function (selected) { return selected.ValuationClass; },
+                DataName: "valuationclass",
+                AdditionalParam: [{
+                    Name: "PurchasingGroup",
+                    Type: "I",
+                    Value: "#cmbedit-purchasinggroup"
+                }],
+                LookupOpenUrl: "@POCreationController.Action.OpenValuationClassLookup",
+                LookupSearchUrl: "@POCreationController.Action.SearchValuationClassLookup",
+                OnSearchButtonClick: function () { $.ClearLookup(["#lookup-pritem-category"]); },
+                OnBeginCallback: function () { OnAjaxBegin("Search Category"); },
+                OnEndCallback: OnAjaxComplete
+            });
+
+            $("#lookup-pritem-vendor").lookup({
+                IsSingleSelection: true,
+                SelectedFormatter: function (selected) { return selected.Value; },
+                LookupOpenUrl: "@POCreationController.Action.OpenVendorLookup",
+                LookupSearchUrl: "@POCreationController.Action.SearchVendorLookup",
+                OnSearchButtonClick: function () { $.ClearLookup(["#lookup-pritem-vendor"]); },
+                OnBeginCallback: function () { OnAjaxBegin("Search Vendor"); },
+                OnEndCallback: OnAjaxComplete
+            });
+
+            var addAction = $("#grid-pritem table .itemadd-col-action");
+            var addRowAction = $("#grid-pritem table .itemadd-row-action");
+            if (!addAction.hasClass("hidden"))
+                addAction.addClass("hidden");
+            if (!addRowAction.hasClass("hidden"))
+                addRowAction.addClass("hidden");
+
+            $("#grid-pritem table .itemedit-col-check").removeClass("hidden");
+            $("#cmb-pritem-plantcode").change(RefreshSLoc);
+            RefreshSLoc();
+
+            /* =============================== Init: end =============================== */
+
+            /* ======================== Dropdown changed: begin ======================== */
+
+            $("#cmb-pritem-currency").change(function (e) {
+                ViewData.Add("Currency", $(this).valOrDefault());
+            });
+
+            $("#cmb-pritem-plantcode").change(function (e) {
+                OnAjaxBegin("Plant changed");
+                var plantCode = $(this).valOrDefault();
+                if (plantCode !== "" || plantCode !== undefined) {
+                    $.ajax({
+                        type: "POST",
+                        url: "@CommonPage.RefreshSLocAction",
+                        data: {
+                            dropdownId: "pritem-sloccode",
+                            plantCode: plantCode
+                        },
+                        success: function (data) {
+                            if (!data.ResponseType) {
+                                $("#cmb-sloccontainer").html(data);
+                            }
+                            else {
+                                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                            }
+                        },
+                        complete: OnAjaxComplete,
+                        error: OnAjaxError
+                    });
+                }
+            });
+
+            /* ========================= Dropdown changed: end ========================= */
+
+            /* =============================== Add: begin =============================== */
+
+            //add : 20190701 : isid.rgl : Event Check All, validate Vendor selected.
+            $("#grid-pritem table [id^=chkall]").change(function (e) {
+                var $this = $(this);
+                if (GetType($this) !== "HTMLInputElement" && $this.attr("type") !== "checkbox")
+                    throw new InvalidOperationException("Must be an input with type=\"checkbox\" element.");
+
+                var $dataname = $this.attr("id").split("-")[1];
+                var $chks = $("[id^=chk-" + $dataname + "-]:not([disabled])");
+                var isChecked = $this.prop("checked");
+                $chks.each(function (idx, el) {
+                    $(this).prop("checked", isChecked);
+                });
+
+                var dtvendor1 ="";
+                var dtvendor2 ="";
+                var n = null;
+                var CountVendor = 0;
+                if(isChecked == true)
+                {
+                    var chkdata = $("#grid-pritem table [id^=chk-pritem-]:checked");;
+                    chkdata .each(function (idx, el) {
+                        var data = $(this).data("embedded");
+
+                        dtvendor1 = data.Vendor;
+
+                        if(dtvendor1 != null)
+                        {
+                            if(dtvendor2 != dtvendor1)
+                            {
+                                dtvendor2 = dtvendor1;
+                                CountVendor =CountVendor +1;
+                            }
+                        }
+                    });
+                    if(CountVendor > 1){
+                        $("#pop-vendorconfirm").modal();
+                    }
+                }
+            });
+            //end : 20190701 : isid.rgl
+
+            /*addded : 20190627 : isid.rgl : check existing added adopt pr item, then check vendor code*/
+            var glob ="";
+            var glob2 ="";
+            var vendorselected ="";
+
+            $("#grid-pritem table [id^=chk-pritem-]").change(function (e) {
+
+                glob2 = $('#txtlookup-vendor').val();
+                var glob3 ="";
+                if(glob2 != "")
+                {
+                    glob3 = glob2.split('-');
+                }
+                var chkList = $("#grid-pritem table [id^=chk-pritem-]:checked");
+                var result="";
+                if (chkList.length >= 1) {
+                    chkList.each(function (idx) {
+                        var data = $(this).data("embedded");
+                        loop = chkList.length;
+                        //result = CheckExistingAdoptPR(processId);
+                        //$("#pop-vendorconfirm").modal();
+                        if(data.Vendor != null)
+                        {
+                            vendorselected = data.Vendor;
+                            $.ajax({
+                                type: "POST",
+                                url: "@POCreationController.Action.CheckExistingAdoptPR",
+                                data: JSON.stringify({
+                                    ProcessId: processId
+                                }),
+                                contentType: "@CommonFormat.JsonMimeType",
+                                success: function (dataresult) {
+                                    if (dataresult.ResponseType == 'S') {
+                                        result = dataresult.Message;
+                                        var res;
+
+                                        if(result != "")
+                                        {
+                                            res = result.split('|');
+                                            if( res[1].trim() != "x")
+                                            {
+                                                if(glob3[0].trim() != res[1].trim() || res[1].trim() != vendorselected )
+                                                {
+                                                    $("#pop-vendorconfirm").modal();
+                                                }
+                                            }
+                                        }
+                                        console.log(dataresult,'data');
+                                    }
+                                },
+                                error: function (dataresult) {
+                                    //$.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                                }
+                            });
+                        }
+                    });
+                }
+
+            });
+
+            $("#btnvendorconfirm-cancel").click(function (e) {
+                $("#pop-vendorconfirm").modal("hide");
+                $("#grid-pritem table [id^=chk-pritem-]").prop('checked', false);
+            });
+            $("#btnvendorconfirm-ok").click(function (e) {
+                $("#pop-vendorconfirm").modal("hide");
+                glob = "1";
+            });
+
+            //Closed : 20190628 : isid.rgl
+            @*$("#btn-pritem-add").click(function (e) {
+            var maxAllowedItem =@maxItem_PO_Allowed;
+            $.progressbox.show($tdk.PageTitle, "Add item");
+            var datavendor = "";
+            var vendor1 ="";
+            var vendor2 ="";
+            var loop =0;
+            DisableAllFeatures();
+            var paramList = [];
+            var chkList = $("#grid-pritem table [id^=chk-pritem-]:checked");
+            if (chkList.length >= 1) {
+                chkList.each(function (idx) {
+                    var data = $(this).data("embedded");
+                    //start add by khanif hanafi 25 April 2019
+                    // untuk insert data vendor
+
+                    loop = chkList.length;
+                    if(data.Vendor != null){
+                        if(loop == 1){
+                            datavendor = datavendor + data.Vendor + " - " + data.VendorName ;
+                        }
+                        else{
+                            vendor1= data.Vendor;
+                            if(vendor2 = "" || vendor2 != vendor1 )
+                            {
+                                vendor2 = vendor1;
+                                datavendor = datavendor + data.Vendor + " - " + data.VendorName +",";
+                            }
+                        }
+
+                    }
+
+                    //end add by khanif hanafi 25 April 2019
+                    paramList.push({
+                        PRNo: data.PRNo,
+                        PRItemNo: data.PRItemNo,
+                        AssetNo: data.AssetNo,
+                        SubAssetNo: data.SubAssetNo
+                    });
+                });
+
+                var currentItemCount = $("#grid-poitem div table tbody tr[id^=exprow-poitem]:visible").length;
+
+                if(paramList.length>maxAllowedItem || (currentItemCount+paramList.length)>maxAllowedItem)
+                {
+                    $.messagebox.show("@ActionResponseViewModel.Error", "@messageErrorMaximumItem", "@ActionResponseViewModel.Error");
+                    $.progressbox.hide();
+                    EnableAllFeatures();
+                    return false;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "@POCreationController.Action.ItemAdopt",
+                    data: JSON.stringify({
+                        PRItemAdoptList: paramList,
+                        ProcessId: processId,
+                        PONo: poNo,
+                        Currency: $("#cmb-pritem-currency").valOrDefault()
+                    }),
+                    contentType: "@CommonFormat.JsonMimeType",
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            // NOTE: #grid-poitem exist in POCreation
+                            $("#grid-poitem").html(data);
+                            $("#grid-poitem table #chk-all-pritem").addClass("hidden");
+                            $("#grid-poitem table .itemedit-col-action").removeClass("hidden");
+                            RefreshPOItemMat(processId, poNo);
+                            RefreshSPKAmount();
+                            RefreshAttachment();
+                            // add by khanif 25 April 2019
+                            RefreshVendlook(datavendor);
+                            // end add by khanif 25 April 2019
+
+                            if ($("#txt-currcd-1").html() != "" && $("#txt-currcd-1").html() != null && $("#txt-currcd-1").html() != undefined) {
+                                $("#cmbedit-currency").val($("#txt-currcd-1").html());
+                                $("#cmbedit-currency").trigger("change"); //trigger onchange currency
+                            }
+                            //$("#cmbedit-currency").val(ViewData.Get("Currency"));
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: function () {
+                        // NOTE: #pop-pritem exist in POCreation
+                        $("#pop-pritem").modal("hide");
+                        EnableAllFeatures();
+                        $.progressbox.hide();
+                    },
+                    error: function (data) {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                    }
+                });
+            }
+            else {
+                $.displaymessagebox.show("@DisplayMessageId.SelectOneToAdd");
+                EnableAllFeatures();
+                $.progressbox.hide();
+            }
+        });*@
+            //end closed : 20190628 : isid.rgl
+            //modified : 20190628 : isid.rgl
+            $("#btn-pritem-add").click(function (e) {
+                //debugger;
+                var maxAllowedItem =@maxItem_PO_Allowed;
+                //$.progressbox.show($tdk.PageTitle, "Add item");
+                var datavendor = "";
+                var vendor1 ="";
+                var vendor2 ="";
+                var loop =0;
+                var d ="";
+                //DisableAllFeatures();
+                var paramList = [];
+
+                var chkList = $("#grid-pritem table [id^=chk-pritem-]:checked");
+
+                if (chkList.length >= 1) {
+                    chkList.each(function (idx) {
+                        var data = $(this).data("embedded");
+                        //start add by khanif hanafi 25 April 2019
+                        // untuk insert data vendor
+
+                        loop = chkList.length;
+                        if(glob == "1")
+                        {
+                            datavendor = "";
+                        }
+                        else
+                        {
+                            if(data.Vendor != null){
+                                if(loop == 1){
+                                    datavendor = datavendor + data.Vendor + " - " + data.VendorName ;
+                                }
+                                else{
+                                    vendor1= data.Vendor;
+                                    if(vendor2 = "" || vendor2 != vendor1 )
+                                    {
+                                        vendor2 = vendor1;
+                                        datavendor = datavendor + data.Vendor + " - " + data.VendorName +",";
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if(glob2 != "")
+                                {
+                                    //var glob3 = glob2.val().split('-');
+                                    datavendor = glob2;
+                                }
+                            }
+                        }
+
+                        //end add by khanif hanafi 25 April 2019
+                        paramList.push({
+                            PRNo: data.PRNo,
+                            PRItemNo: data.PRItemNo,
+                            AssetNo: data.AssetNo,
+                            SubAssetNo: data.SubAssetNo
+                        });
+                    });
+
+                    var currentItemCount = $("#grid-poitem div table tbody tr[id^=exprow-poitem]:visible").length;
+
+                    if(paramList.length>maxAllowedItem || (currentItemCount+paramList.length)>maxAllowedItem)
+                    {
+                        $.messagebox.show("@ActionResponseViewModel.Error", "@messageErrorMaximumItem", "@ActionResponseViewModel.Error");
+                        $.progressbox.hide();
+                        EnableAllFeatures();
+                        return false;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "@POCreationController.Action.ItemAdopt",
+                        data: JSON.stringify({
+                            PRItemAdoptList: paramList,
+                            ProcessId: processId,
+                            PONo: poNo,
+                            Currency: $("#cmb-pritem-currency").valOrDefault()
+                        }),
+                        contentType: "@CommonFormat.JsonMimeType",
+                        success: function (data) {
+                            if (!data.ResponseType) {
+                                // NOTE: #grid-poitem exist in POCreation
+                                $("#grid-poitem").html(data);
+                                $("#grid-poitem table #chk-all-pritem").addClass("hidden");
+                                $("#grid-poitem table .itemedit-col-action").removeClass("hidden");
+                                RefreshPOItemMat(processId, poNo);
+                                RefreshSPKAmount();
+                                RefreshAttachment();
+                                // add by khanif 25 April 2019
+                                RefreshVendlook(datavendor);
+                                // end add by khanif 25 April 2019
+
+                                if ($("#txt-currcd-1").html() != "" && $("#txt-currcd-1").html() != null && $("#txt-currcd-1").html() != undefined) {
+                                    $("#cmbedit-currency").val($("#txt-currcd-1").html());
+                                    $("#cmbedit-currency").trigger("change"); //trigger onchange currency
+                                }
+                                //$("#cmbedit-currency").val(ViewData.Get("Currency"));
+                            }
+                            else {
+                                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                            }
+                        },
+                        complete: function () {
+                            // NOTE: #pop-pritem exist in POCreation
+                            $("#pop-pritem").modal("hide");
+                            EnableAllFeatures();
+                            $.progressbox.hide();
+                        },
+                        error: function (data) {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                        }
+                    });
+                }
+                else {
+                    $.displaymessagebox.show("@DisplayMessageId.SelectOneToAdd");
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                }
+            });
+
+            //end modfidied : 20190628 : isid.rgl
+            /*end added : 20190627 : isid.rgl*/
+
+            /* ================================ Add: end ================================ */
+
+            /* ============================= Search: begin ============================= */
+
+            function GetPRItemSearchCriteria(page, pageSize) {
+
+                page = page || 1;
+                pageSize = pageSize || $("#cmb-perpage-pritem").GetPageSize();
+                return {
+                    ProcessId: processId,
+                    PRNo: $("#txt-pritem-prno").valOrDefault(),
+                    MaterialNo: $("#txt-pritem-materialno").valOrDefault(),
+                    MaterialDesc: $("#txt-pritem-materialdesc").valOrDefault(),
+                    ValuationClass: $("#lookup-pritem-category").LookupVal(),
+                    Currency: $("#cmb-pritem-currency").valOrDefault(),
+                    VendorCode: $("#lookup-pritem-vendor").LookupVal(),
+                    PlantCode: $("#cmb-pritem-plantcode").valOrDefault(),
+                    SLocCode: $("#cmb-pritem-sloccode").valOrDefault(),
+                    PurchasingGroup: $("#cmbedit-purchasinggroup").valOrDefault(), // NOTE: this is exist on POCreation.cshtml
+
+                    CurrentPage: page,
+                    PageSize: pageSize
+                }
+            }
+
+            function PRItemSearchCriteriaIsValid(page) {
+                var criteria = GetPRItemSearchCriteria(page);
+                if (criteria.PRNo === "" && criteria.MaterialNo === "" &&
+                    criteria.MaterialDesc === "" && criteria.ValuationClass === "" &&
+                    criteria.Currency === "" && criteria.VendorCode === "" &&
+                    criteria.PlantCode === "" && criteria.SLocCode === "" &&
+                    criteria.PurchasingGroup === "") {
+                    return false;
+                }
+
+                return true;
+            }
+
+            var SearchPRItem = window.Searchpritem = function (page, pageSize, responseCallback) {
+                $.progressbox.show($tdk.PageTitle, "Search");
+                DisableAllFeatures();
+                $.ajax({
+                    type: "POST",
+                    url: "@POCreationController.Action.PRItemSearch",
+                    data: JSON.stringify(GetPRItemSearchCriteria(page, pageSize)),
+                    contentType: "@CommonFormat.JsonMimeType",
+                    success: responseCallback,
+                    complete: function () {
+                        EnableAllFeatures();
+                        $.progressbox.hide();
+                    },
+                    error: function (data) {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                    }
+                });
+            };
+
+            var SearchPRItemResponseCallback = window.SearchpritemResponseCallback = function (data) {
+                if (!data.ResponseType) {
+                    $("#grid-pritem").html(data);
+                    $("#grid-pritem table .itemedit-col-check").removeClass("hidden");
+                    $("#additional-pritem-container").addClass("hidden");
+                }
+                else {
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                }
+            };
+
+            $("#btn-pritem-search").click(function (e) {
+                $.progressbox.show($tdk.PageTitle, "Search");
+                DisableAllFeatures();
+                if (PRItemSearchCriteriaIsValid(undefined)) {
+                    SearchPRItem(undefined, undefined, SearchPRItemResponseCallback);
+                }
+                else {
+                    $.displaymessagebox.show("@DisplayMessageId.SelectOneCriteria");
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                }
+            });
+
+            $("#btn-pritem-clearsearch").click(function (e) {
+                $.progressbox.show($tdk.PageTitle, "Clear Search");
+                DisableAllFeatures();
+                ResetForm();
+
+                $.ajax({
+                    type: "POST",
+                    url: "@POCreationController.Action.PRItemSearchEmpty",
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            $("#grid-pritem").html(data);
+                            $("#grid-pritem table .itemedit-col-check").removeClass("hidden");
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: function () {
+                        EnableAllFeatures();
+                        $.progressbox.hide();
+                    },
+                    error: function (data) {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                    }
+                });
+            });
+
+            function OnPRSubItemCollapsing(dataName, dataNo, embedded, expanderRow, onCollapsed) {
+                $("[id^=expchildrow-" + dataName + dataNo + "]").remove();
+                EnableAllFeatures();
+                $.progressbox.hide();
+            }
+
+            function OnPRSubItemExpanding(dataName, dataNo, embedded, expanderRow, onExpanded) {
+                $.ajax({
+                    type: "POST",
+                    url: "@POCreationController.Action.SearchPRSubItem",
+                    data: {
+                        prNo: embedded.PRNo,
+                        prItemNo: embedded.PRItemNo,
+                        DataName: dataName + dataNo,
+                        currentPage: 1,
+                        pageSize: Number("@PaginationViewModel.DefaultPageSize"),
+                        ActionOrigin: @ActionOrigin
+                    },
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            $("[id^=expchildrow-" + dataName + dataNo + "]").remove();
+                            expanderRow.after(data);
+                            expanderRow.parent().find("[id^=expchildrow-" + dataName + dataNo + "] td:first-child").each(function () {
+                                $(this).attr("colspan", 3);
+                            });
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: function () {
+                        EnableAllFeatures();
+                        $.progressbox.hide();
+                    },
+                    error: function (data) {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                    }
+                });
+            }
+
+            $(document).onOnce("click", "[id^=exp-" + prItemDataName + "-]", function (e) {
+                $.progressbox.show($tdk.PageTitle, "Search PR Sub Item");
+                DisableAllFeatures();
+
+                var $this = $(this);
+                var embedded = $this.data("embedded");
+                
+                $this.ToggleSubItem(OnPRSubItemExpanding, void(0), OnPRSubItemCollapsing, void(0), embedded);
+            });
+
+            /* ============================== Search: end ============================== */
+        });
+
+        //# sourceURL=_creationPRItemSearch.cshtml
+    </script>
+    @*20190627 : isid.rgl : different vendor confirmation*@
+    <div id="pop-vendorconfirm" class="modal fade" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <p class="modal-title">
+                        Different Vendor Confirmation
+                    </p>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Are you sure want to add new item with different vendor from previous adopted PR ?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-group-xs text-right">
+                        <button id="btnvendorconfirm-ok" class="btn btn-xs btn-primary btn-std">Yes</button>
+                        <button id="btnvendorconfirm-cancel" class="btn btn-xs btn-danger btn-std">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*20190627 : isid.rgl : different vendor confirmation*@
+
+    <div class="modal-dialog modal-xxl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-title">
+                    Add PO Item
+                </p>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="form-group form-group-xs">
+                                <label for="txt-pritem-prno" class="col-xs-5 col-sm-4 control-label text-muted">PR No</label>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txt-pritem-prno" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group form-group-xs">
+                                <label for="cmb-pritem-plantcode" class="col-xs-5 col-sm-4 control-label text-muted">Plant</label>
+                                <div class="col-xs-7 col-sm-8">
+                                    @Html.DropDownList("cmb-pritem-plantcode", PlantController.PlantSelectList, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="form-group form-group-xs">
+                                <label for="cmb-pritem-itemcat" class="col-xs-5 col-sm-4 control-label text-muted">Category</label>
+                                <div class="col-xs-7 col-sm-8">
+                                    @Html.Lookup("pritem-category")
+                                </div>
+                            </div>
+                            <div class="form-group form-group-xs">
+                                <label for="cmb-pritem-sloc" class="col-xs-5 col-sm-4 control-label text-muted">Storage</label>
+                                <div id="pritem-sloc-container" class="col-xs-7 col-sm-8">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="form-group form-group-xs">
+                                <label for="txt-pritem-materialno" class="col-xs-5 col-sm-4 control-label text-muted">Material No</label>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txt-pritem-materialno" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group form-group-xs">
+                                <label for="lookup-pritemvendor" class="col-xs-5 col-sm-4 control-label text-muted">Vendor</label>
+                                <div class="col-sm-8">
+                                    @Html.Lookup("pritem-vendor")
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="form-group form-group-xs">
+                                <label for="txt-pritem-materialdesc" class="col-xs-5 col-sm-4 control-label text-muted">Material Desc.</label>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txt-pritem-materialdesc" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="form-group form-group-xs">
+                                <label for="cmb-pritem-currency" class="col-xs-5 col-sm-4 control-label text-muted">Currency</label>
+                                <div class="col-xs-7 col-sm-8">
+                                    @Html.DropDownList("cmb-pritem-currency", CurrencyController.CurrencySelectList, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-6">
+                        </div>
+                        <div class="col-xs-6 btn-group-xs text-right">
+                            <button id="btn-pritem-search" class="btn btn-primary btn-xs">Search</button>
+                            <button id="btn-pritem-clearsearch" class="btn btn-default btn-xs">Clear</button>
+                        </div>
+                    </div>
+                    <div class="v-space"></div>
+                    <div id="grid-pritem">
+                        @Html.Partial(POCreationController.Partial.CreationPRItemGrid, Model)
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="btn-group-xs text-right">
+                    <button id="btn-pritem-add" class="btn btn-primary btn-xs">Add</button>
+                    <button id="btn-pritem-cancel" class="btn btn-danger btn-xs" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Html.LookupContainer("pritem-category")
+    @Html.LookupContainer("pritem-vendor")

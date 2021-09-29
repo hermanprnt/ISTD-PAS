@@ -1,0 +1,9 @@
+﻿@model UIRadioSettings
+<div id="@Model.Id" class="_radio @Model.PrintCssClass()">
+    <input type="radio" name="@Model.Name" />@Model.Caption
+</div>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#@Model.Id").tdkRadio(@Model.PrintJsProperties());
+    });    
+</script>

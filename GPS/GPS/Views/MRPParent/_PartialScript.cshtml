@@ -1,0 +1,415 @@
+﻿@using Toyota.Common.Credential
+@{
+   User user = Html.Toyota().Page.User;
+}
+<script type="text/javascript"> 
+$(document).ready(function () {   
+    onClear();     
+        
+    $('.date-picker').datepicker({
+        autoclose: true,
+        todayHighlight: true
+    })
+    //show datepicker when clicking on the icon
+	.next().on(ace.click_event, function () {
+		$(this).prev().focus();
+	});            
+}); 
+
+$.fn.addOption = function (optText, optValue) {
+    var option = new Option(optText, optValue);
+    return this.append(option);
+};
+
+function onGetData(page) {    
+    $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val() ,
+                Page:page, 
+                USER_NAME :  '@user.Name',                
+                ParentCode : $("#txtParentCode").val(),
+                ParentType : $("#txtParentType").val()			             
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+            }        
+        });
+}
+
+/*Checkbox all*/   
+function onCekAll() { 
+    if ($("#checkall").is(":checked")) {
+            $(".grid-checkbox-body").prop('checked', true);
+        } else {
+            $(".grid-checkbox-body").prop('checked', false);
+        }
+}
+
+function GetSelectedGrid() {
+    var ids = [];
+    $("input[id^=cb-]").each(function (i, a) {
+        if (a.id != null && a.id.length > 0 && a.checked) {
+            ids.push($('#' + a.id).data('pc_cd'));
+        }
+    }
+    );
+    var h = ids.length;
+    var w = ids.join();
+    return [h, w];
+}
+
+function onClear() {    
+    $("#txtParentCode").val('');
+    $("#txtParentType").val('');	
+    $(".btnDownload").attr('disabled',true);
+      
+    $("input[id^=cb-]").each(function(i,a){
+        a.checked = false;          
+    }); 
+          
+    ClearGrid(1);    
+}
+
+function ClearGrid(page) { 
+    $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val() ,
+                Page:page, 
+                USER_NAME :  '@user.Name',               
+                ParentCode : '$',
+                ParentType : '$'			             
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+            }        
+        });
+}
+
+function ParentCodePU() { 
+    $("#txtParentCodePU").css("background-color", "#FFFFFF");
+}
+function ParentTypePU() { 
+    $("#txtParentTypePU").css("background-color", "#FFFFFF");
+}
+
+function onSaveData() { 
+    if ($("#txtParentCodePU").val() == '' && $("#txtParentTypePU").val() == ''){
+        $("#txtParentCodePU").css("background-color", "#F2BCD5");
+        $("#txtParentTypePU").css("background-color", "#F2BCD5");                      
+        return;
+    }    
+    else if ($("#txtParentCodePU").val() == ''){
+        $("#txtParentCodePU").css("background-color", "#F2BCD5");                          
+        return;
+    } 
+    else if ($("#txtParentTypePU").val() == ''){
+        $("#txtParentTypePU").css("background-color", "#F2BCD5");                          
+        return;
+    } 
+
+    $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
+            data: {
+                flag : $("#txtEdit").val(),  
+                USER_NAME :  '@user.Name', 
+                PARENT_CD_HIDE : $("#txtParentCodeHide").val(),           
+                PARENT_CD : $("#txtParentCodePU").val(), 
+                PARENT_TYPE_HIDE : $("#txtParentTypeHide").val(),           
+                PARENT_TYPE : $("#txtParentTypePU").val()               	                                 
+            },                
+            success: function (data) { 
+                var result = data.message.split('|');
+                if(result[0] == 'True') {
+                    //$("#info-save").modal();
+                     //$("#infoSave").html(data.message);
+                     $.messagebox.show(
+                        "Info",
+                        result[1],
+                        "SUC",
+                        "SINGLE",
+                        "OkInfoSave()",
+                        ""
+                    )  
+                     onGetData(1);
+                }              
+                else {
+                    //$("#confirm-save").modal();
+                    //$("#ConfirmModal").html(data.message); 
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )                         
+                }                            
+            }
+        });    
+}
+
+function OkWarningSave() {
+    $("#confirm-save").modal('hide');
+}
+
+function OkInfoSave() {
+    //$("#info-save").modal('hide');
+    $("#basicModal").modal('hide');
+}
+
+function onAddData() { 
+    $.ajax({
+        type: "post",
+        url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+        data: {
+            flag: '0'                                
+        },                
+        success: function (data) {  
+             $("#basicModal").html(data);
+             $("#myModalLabel").html('<h4>Parent (Add)</h4>');    
+             $("#basicModal").modal();                            
+        }
+    });   
+}
+
+function onEditData() {      
+    if ($(".grid-checkbox-body:checked").length == 0){
+        //$("#selected-0-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select at Least One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else if ($(".grid-checkbox-body:checked").length > 1){
+        //$("#selected-more-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select only One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else {
+        var value = GetSelectedGrid();
+        var key = value[Object.getOwnPropertyNames(value)[1]];       
+        var col;
+               
+        var PARENTCODE = "";
+        var PARENTTYPE = "";
+                     
+        col = key.split(';');           
+        PARENTCODE = col[0];
+        PARENTTYPE = col[1];                 
+            
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+            data: {
+                flag: '1'                                 
+            },                
+            success: function (data) {                    
+                    $("#basicModal").html(data);   
+                    $("#myModalLabel").html('<h4>Parent (Edit)</h4>');
+                    $("#basicModal").modal(); 
+                    
+                    $.ajax({
+                        type: "post",
+                        url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+                        data: {
+                            ParentCode : PARENTCODE,
+                            ParentType : PARENTTYPE                                         
+                        },                
+                        success: function (data) {                      
+                            $("#txtParentCodePU").val(data.PARENT_CD);
+                            $("#txtParentCodeHide").val(data.PARENT_CD);
+                            $("#txtParentTypeHide").val(data.PARENT_TYPE);
+                            $("#txtParentTypePU").val(data.PARENT_TYPE);	                                                                             
+                        }
+                    });   
+                    //                          
+            }
+        });  
+    }        
+}
+
+function onCopyData() {      
+    if ($(".grid-checkbox-body:checked").length == 0){
+        //$("#selected-0-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select at Least One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else if ($(".grid-checkbox-body:checked").length > 1){
+        //$("#selected-more-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select only One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else {
+        var value = GetSelectedGrid();
+        var key = value[Object.getOwnPropertyNames(value)[1]];       
+        var col;
+                
+        var PARENTCODE = "";
+        var PARENTTYPE = "";
+                     
+        col = key.split(';');           
+        PARENTCODE = col[0];
+        PARENTTYPE = col[1];                
+          
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+            data: {
+                flag: '0'                                
+            },                
+            success: function (data) {                     
+                    $("#basicModal").html(data);   
+                    $("#myModalLabel").html('<h4>Parent (Copy)</h4>');
+                    $("#basicModal").modal(); 
+                    
+                    $.ajax({
+                        type: "post",
+                        url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+                        data: {                            
+                            ParentCode : PARENTCODE,
+                            ParentType : PARENTTYPE                                                         
+                        },                
+                        success: function (data) {                                                        
+                            $("#txtParentCodePU").val(data.PARENT_CD);
+                            $("#txtParentCodeHide").val(data.PARENT_CD);
+                            $("#txtParentTypeHide").val(data.PARENT_TYPE);
+                            $("#txtParentTypePU").val(data.PARENT_TYPE);	                                                                                       
+                        }
+                    });   
+                    //                          
+            }
+        });  
+    }        
+}
+
+function onDeleteData() {
+    if ($(".grid-checkbox-body:checked").length == 0)
+        //$("#selected-0-confirm").modal(); 
+        $.messagebox.show(
+            "Warning",
+            "Please Select at Least One Record to be deleted",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )       
+    else 
+        //$("#delete-confirm").modal(); 
+        $.messagebox.show(
+            "Confirmation",
+            "Are You Sure You Want to Delete this Item ?",
+            "INF",
+            "CONFIRM",
+            "onYesDelete()",
+            ""
+        )     
+}
+
+function onYesDelete() {
+    var value = GetSelectedGrid();
+    var key = value[Object.getOwnPropertyNames(value)[1]];
+    var koma;
+    var field;
+    var col;
+        
+    var PARENTCODE = "";
+    var PARENTTYPE = "";    
+           
+    for(var i = 0; i < $(".grid-checkbox-body:checked").length; i++)
+    {
+        koma = key.split(',');
+        field = koma[i];
+        col = field.split(';');       
+        PARENTCODE += col[0];
+        PARENTCODE += ';';
+        PARENTTYPE += col[1];
+        PARENTTYPE += ';';
+    }    
+    PARENTCODE = PARENTCODE.substring(0,PARENTCODE.length - 1);
+    PARENTTYPE = PARENTTYPE.substring(0,PARENTTYPE.length - 1);
+   
+    $.ajax({
+        type: "POST",
+        url: "@Html.Toyota().Page.GetActionUrl("DeleteData")",
+        data: {  
+            Key : key,                     
+            ParentCode : PARENTCODE,
+            ParentType : PARENTTYPE                   
+        },
+        success: function (data) {
+            //$("#selected-info").modal();
+            //$("#infoModal").html(data); 
+             $.messagebox.show(
+                "Info",
+                data,
+                "SUC",
+                "SINGLE",
+                "",
+                ""
+            ) 
+            onGetData(1);
+        }        
+     });
+}
+
+function OnDownloadTemplate() {     
+      $.ajax({
+        type: "POST",
+        url: "@Html.Toyota().Page.GetActionUrl("CekTemplate")",        
+        success: function (data) {
+         if(data == 'False'){
+            //$("#selected-info").modal();
+            //$("#infoModal").html('Template not found'); 
+             $.messagebox.show(
+                "Error",
+                "Template Not Found",
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+         }
+         else{
+             $.fileDownload("MRPParent/DownloadTemplate/"); 
+         }
+            
+        }        
+     });
+} 
+
+function onDownloadData() {
+    var param = '?ParentCode=' + $("#txtParentCode").val();  
+    param += '&ParentType=' + $("#txtParentType").val();
+   
+    var link = '@Url.Content("MRPParent/DownloadData/")' + param;        
+    window.location = link;   
+} 
+
+</script>

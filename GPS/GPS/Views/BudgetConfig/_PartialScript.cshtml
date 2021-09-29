@@ -1,0 +1,560 @@
+﻿@using GPS.Controllers.Master
+@{
+    string fiyear = ViewData["FI_YEAR"] == null ? "" : ViewData["FI_YEAR"].ToString();
+    int DIVISION_ID = TempData["DIVISION_ID"] != null ? Convert.ToInt32(TempData["DIVISION_ID"]) : 0;
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#wbsyear").val("@fiyear");
+
+        $("#txtedit-wbsyear").val("@fiyear");
+
+        $("#division").val("@DIVISION_ID");
+
+        if ($("#division").val() != '16') {
+            $.Disable(["#division"]);
+        }
+
+        $('.date-pickerYear').datepicker({
+            autoclose: true,
+            format: "yyyy",
+            viewMode: "years",
+            minViewMode: "years"
+        })
+		//show datepicker when clicking on the icon
+		.next().on(ace.click_event, function () {
+		    $(this).prev().focus();
+		});
+        onClear();
+    });
+
+    function detailGrid() {
+        if ($tdk.isDetail > 0) {
+            $("#btn-detail").html('Show Detail');
+            $("._toggle-detail").hide();
+            $tdk.isDetail = 0;
+            $("#dynamic-table").css("width", "100%");
+            $("#tblScroll").css("width", "100%");
+        }
+        else {
+            $("#btn-detail").html('Hide Detail');
+            $("._toggle-detail").show();
+            $tdk.isDetail = 1;
+            $("#dynamic-table").css("width", "1270px");
+            $("#tblScroll").css("width", "1270px");
+        }
+    }
+
+    /*Checkbox all*/
+    function onCekAll() {
+        if ($("#checkall").is(":checked")) {
+            $(".grid-checkbox-body").prop('checked', true);
+        } else {
+            $(".grid-checkbox-body").prop('checked', false);
+        }
+    }
+
+    function GetSelectedGrid() {
+        var ids = [];
+        $("input[id^=cb-]").each(function (i, a) {
+            if (a.id != null && a.id.length > 0 && a.checked) {
+                ids.push({
+                    wbs_no: $('#' + a.id).data('wbs_no'),
+                    wbs_year: $('#' + a.id).data('wbs_year'),
+                    wbs_name: $('#' + a.id).data('wbs_name'),
+                    wbs_type: $('#' + a.id).data('wbs_type'),
+                });
+            }
+        });
+        return ids;
+    }
+
+    $.fn.addOption = function (optText, optValue) {
+        var option = new Option(optText, optValue);
+        return this.append(option);
+    };
+</script>
+
+<script type="text/javascript" id="Search">
+    function onGetData(page) {
+        $.disable_enable_button.disable();
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val(),
+                Page: page,
+                Division_ID: $("#cmb-division").val(),
+                WBS_Year: $("#wbsyear").val(),
+                WBS_No: $("#txt-wbsno").val(),
+                WBS_Name: $("#txt-wbsdescription").val()
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+                $.disable_enable_button.enable();
+            }
+        });
+    }
+
+    function onClear() {
+        $("#cmb-division").val('');
+        $("#txt-wbsyear").val('');
+        $("#txt-wbsno").val('');
+        $("#txt-wbsdescription").val('');
+
+
+        $("input[id^=cb-]").each(function (i, a) {
+            a.checked = false;
+        });
+        ClearGrid(1);
+    }
+
+    function ClearGrid(page) {
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val(),
+                Page: page,
+                Division_ID: $("#cmb-division").val(),
+                WBS_Year: $("#wbsyear").val(),
+                WBS_No: $("#txt-wbsno").val(),
+                WBS_Name: $("#txt-wbsdescription").val()
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript" id="savedelete">
+    function onAddData() {
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagEditAdd")",
+            data: {
+                flag: '0',
+                Key: null
+            },
+            success: function (data) {
+                $("#basicModal").html(data);
+                $("#basicModal").modal();
+            }
+        });
+    }
+
+    function onEditData() {
+        if ($(".grid-checkbox-body:checked").length == 0)
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else if ($(".grid-checkbox-body:checked").length > 1)
+            //$("#selected-more-confirm").modal();
+            $.messagebox.show(
+                "Warning",
+                "Please Select only One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else {
+            var selectedData = GetSelectedGrid();
+
+            $.ajax({
+                type: "post",
+                url: "@Html.Toyota().Page.GetActionUrl("IsFlagEditAdd")",
+                data: {
+                    flag: '1',
+                    wbsno: selectedData[0].wbs_no
+                },
+                success: function (data) {
+                    //console.log(data);
+                    $("#basicModal").html(data);
+                    $.Disable(["#txtedit-wbsno"]);
+                    $.Disable(["#txtedit-wbsname"]);
+                    $.Disable(["#txtedit-wbsyear"]);
+
+
+                    $("#basicModal").modal();
+
+                }
+            });
+        }
+    }
+
+    function onSaveEditData() {
+        var wbsyear = $("#txtedit-wbsyear").val();
+        var wbsname = $("#txtedit-wbsname").val();
+        var division = $("#cmb-division").val();
+        var wbsno = $("#txtedit-wbsno").val();
+        var wbstype = $("#cmbedit-wbstype").val();
+
+        $.ajax({
+            type: "post",
+            url: "@BudgetConfigController.Action._SaveEditDeleteData",
+            data: {
+                flag: $("#txtEdit").val(),
+                WbsYear: wbsyear,
+                WbsName: wbsname,
+                division: division,
+                WbsNo: wbsno,
+                WbsType: wbstype
+            },
+            success: function (data) {
+                var result = data.split('|');
+                if (result[0] == 'True') {
+                    $.messagebox.show(
+                    "Info",
+                    result[1],
+                    "SUC",
+                    "SINGLE",
+                    "OkInfoSave()",
+                    ""
+                    )
+                }
+                else {
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            }
+        });
+    }
+    function OkInfoSave() {
+        $("#basicModal").modal('hide');
+        onGetData(1);
+    }
+    function onDeleteData() {
+        if ($(".grid-checkbox-body:checked").length === 0)
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be deleted",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else if ($(".grid-checkbox-body:checked").length > 1)
+            //$("#selected-more-confirm").modal();
+            $.messagebox.show(
+                "Warning",
+                "Please Select only One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else
+            $.messagebox.show(
+               "Confirmation",
+               "Are You Sure You Want to Delete this Item ?",
+               "INF",
+               "CONFIRM",
+               "onYesDelete()",
+               ""
+           )
+    }
+
+    function onYesDelete() {
+        //debugger;
+        var selectedData = GetSelectedGrid();
+
+        var wbs_no = selectedData[0].wbs_no;
+        var wbs_year = selectedData[0].wbs_year;
+        var wbs_name = selectedData[0].wbs_name;
+        var wbs_type = selectedData[0].wbs_type
+
+        $.ajax({
+            type: "post",
+            url: "@BudgetConfigController.Action._SaveEditDeleteData",
+            data: {
+                flag: "2",
+                WbsNo: wbs_no,
+                WbsYear: wbs_year,
+                WbsName: wbs_name,
+                division: "",
+                WbsType: wbs_type
+            },
+            success: function (data) {
+                var result = data.split('|');
+                if (result[0] == 'True') {
+                    $.messagebox.show(
+                    "Info",
+                    result[1],
+                    "SUC",
+                    "SINGLE",
+                    "OkInfoSave()",
+                    ""
+                    )
+                }
+                else {
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript" id="lookupwbs">
+    function getWbsClassGrid(page) {
+        //debugger;
+        //console.log("pageSize : " + $("#cbolookupdisplay").val());
+        //console.log("page : " + page);
+        var mypagesize = 10;
+        if ($("#cbolookupdisplay").val() == undefined) {
+            mypagesize = 10
+        }
+        else {
+            mypagesize = $("#cbolookupdisplay").val();
+        }
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@BudgetConfigController.Action._getLookupWBSGrid",
+            data: {
+                pageSize: mypagesize,
+                page: page,
+                WBS_Year: $("#valsearchbox_wbsyear").val(),
+                WBS_No: $("#valsearchbox_wbsno").val(),
+                WBS_Name: $("#valsearchbox_wbsdescription").val()
+            },
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#lookupwbs-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function getLookupWbsClassGrid(page) {
+        //debugger;
+        //console.log("pageSize : " + $("#cbolookupdisplay").val());
+        //console.log("page : " + page);
+        var mypagesize = 10;
+        if ($("#cbolookupdisplay").val() == undefined) {
+            mypagesize = 10
+        }
+        else {
+            mypagesize = $("#cbolookupdisplay").val();
+        }
+
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@BudgetConfigController.Action._getLookupWBSGrid",
+            data: {
+                pageSize: mypagesize,
+                page: page,
+                WBS_Year: $("#valsearchbox_wbsyear").val(),
+                WBS_No: $("#valsearchbox_wbsno").val(),
+                WBS_Name: $("#valsearchbox_wbsdescription").val()
+            },
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                //console.log(data);
+                $("#lookupwbs-grid-container").html(data);
+                $('#cbolookupdisplay').val(mypagesize);
+            },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function MoveDataGridWBSKey(WBS_NO, WBS_NAME, WBS_YEAR, DIVISION_ID, DIVISION_DESC) {
+        $("#txtedit-wbsno").val(WBS_NO);
+        $("#txtedit-wbsname").val(WBS_NAME);
+        $("#txtedit-wbsyear").val(WBS_YEAR);
+        $("#txtedit-division").val(DIVISION_DESC);
+        $("#txtedit-divisionid").val(DIVISION_ID);
+
+        $("#lookupwbs-container").modal('hide');
+    }
+
+    function closeLookupWBSClass() {
+        $.Clear(["#valsearchbox_wbsno", "valsearchbox_wbsdescription", "valsearchbox_wbsyear"]);
+        $("#lookupwbs-container").modal('hide');
+    }
+
+    function getWbsClass(page) {
+        debugger;
+        var mypagesize = 10;
+        if ($("#cbolookupdisplay").val() == undefined) {
+            mypagesize = 10
+        }
+        else {
+            mypagesize = $("#cbolookupdisplay").val();
+        }
+        //console.log("pageSize : " + $("#cbolookupdisplay").val());
+        //console.log("page : " + page);
+
+        $.ajax({
+            type: "POST",
+            url: "@BudgetConfigController.Action._getLookupWBSPage",
+            data: {
+                pageSize: mypagesize,
+                page: page,
+                WBS_Year: $("#valsearchbox_wbsyear").val(),
+                WBS_No: $("#valsearchbox_wbsno").val(),
+                WBS_Name: $("#valsearchbox_wbsdescription").val()
+            },
+            success: function (data) {
+                $("#lookupwbs-container").html(data);
+                $("#lookupwbs-container").modal();
+
+                //$.disable_enable_button.enable();
+            },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+    function ClearLookupCriteria(gridID) {
+        $.Clear(["#valsearchbox_wbsno", "valsearchbox_wbsdescription", "valsearchbox_wbsyear"]);
+        getWbsClassGrid(1);
+    }
+</script>
+
+@*add : 20190703 : isid.rgl : fungsi download template & upload file*@
+<script type="text/javascript" id="upload">
+    var data1 = "";
+
+    function OnDownloadTemplate() {
+        $.ajax({
+            type: "POST",
+            url: "@BudgetConfigController.Action._CheckTemplate",
+            success: function (data) {
+                if (data == 'False') {
+                    $.messagebox.show(
+                       "Error",
+                       "Template Not Found",
+                       "ERR",
+                       "SINGLE",
+                       "",
+                       ""
+                   )
+                }
+                else {
+                    $.fileDownload("BudgetConfig/DownloadTemplate/");
+                }
+            }
+        });
+    }
+    function OkInfoUpload() {
+        $('#upfile').val('');
+        window.location = "BudgetConfig/DownloadUploadedResult?path=" + data1;
+        onGetData(1);
+    }
+
+    $('#upfile').on('change', function (e) {
+        var fileName = $('#upfile').val();
+        var xls = fileName.match(/\.(xls?)$/i);
+        if (xls != null) {
+            var files = e.target.files;
+            if (files.length > 0) {
+                if (window.FormData !== undefined) {
+                    var data = new FormData();
+                    for (var x = 0; x < files.length; x++) {
+                        data.append("file" + x, files[x]);
+                    }
+
+                    $.progressbox.show("Upload", "Loading Data...");
+
+                    $.ajax({
+                        type: "POST",
+                        url: "@BudgetConfigController.Action._UploadFile",
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        success: function (data) {
+                            $.progressbox.hide();
+                            var result = data.message.split('|');
+                            data1 = result[1];
+                            if (result[0] == 'SuccessWithError') {
+                                $.messagebox.show(
+                                    "ERROR",
+                                    "File Uploaded Error",
+                                    "ERR",
+                                    "SINGLE",
+                                    "OkInfoUpload()",
+                                    ""
+                                )
+                            }
+                            else if (result[0] == 'Success') {
+                                $.messagebox.show(
+                                    "SUCCESS",
+                                    "File Uploaded Successfully",
+                                    "SUCCESS",
+                                    "SINGLE",
+                                    "OkInfoUpload()",
+                                    ""
+                                )
+                            }
+                            else if (result[0] == 'Error') {
+                                $.messagebox.show(
+                                    "Error",
+                                    "File Uploaded Error",
+                                    "Error",
+                                    "SINGLE",
+                                    "OkInfoUpload()",
+                                    ""
+                                )
+                            }
+                        },
+                        error: function (xhr, status, p3, p4) {
+                            var err = "Error " + " " + status + " " + p3 + " " + p4;
+                            if (xhr.responseText && xhr.responseText[0] == "{")
+                                err = JSON.parse(xhr.responseText).Message;
+                            //console.log(err);
+                        }
+                    });
+                } else {
+                    $.messagebox.show(
+                        "Error",
+                        "This browser doesn't support HTML5 file uploads!",
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            }
+        }
+        else {
+            $.messagebox.show(
+               "Error",
+               "Please select an excel file with format xls",
+               "ERR",
+               "SINGLE",
+               "",
+               ""
+           )
+        }
+    });
+</script>
+@*end : 20190703 : isid.rgl : fungsi download template & upload file*@

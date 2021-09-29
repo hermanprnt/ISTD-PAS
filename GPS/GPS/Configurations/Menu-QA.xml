@@ -1,0 +1,396 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<menu>
+  <menu-item Id="menu-dashboard" Enabled="True" Visible="True" Url="/Home" Text="Dashboard" Description="Dashboard" Glyph="dashboard">
+    <authorization>
+      <role Id="R-GPS-AD-001"/>
+      <role Id="R-GPS-PR-001"/>
+      <role Id="R-GPS-PRA-001"/>
+      <role Id="R-GPS-PRA-002"/>
+      <role Id="R-GPS-PRA-003"/>
+      <role Id="R-GPS-PO-001"/>
+      <role Id="R-GPS-PO-002"/>
+      <role Id="R-GPS-POA-001"/>
+      <role Id="R-GPS-POA-002"/>
+      <role Id="R-GPS-GR-001"/>
+      <role Id="R-GPS-GR-002"/>
+    </authorization>
+  </menu-item>
+
+  <menu-item Id="MASTERDATA" Enabled="True" Visible="True" Text="Master Data" Description="Group menu of master data" Url="/" Glyph="list-alt" Restricted="true">
+    <authorization>
+      <role Id="R-GPS-AD-001"/>
+      <role Id="R-GPS-PR-001"/>
+      <role Id="R-GPS-PRA-001"/>
+      <role Id="R-GPS-PRA-002"/>
+      <role Id="R-GPS-PRA-003"/>
+      <role Id="R-GPS-PO-001"/>
+      <role Id="R-GPS-POA-001"/>
+      <role Id="R-GPS-POA-002"/>
+      <role Id="R-GPS-GR-001"/>
+      <role Id="R-GPS-GR-002"/>
+    </authorization>
+    <menu-item Id="submenu-calculationmapping" Enabled="True" Visible="True" Text="Calculation Mapping" Description="Calculation Mapping Page" Url="/CalculationMapping" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="submenu-costcenter" Enabled="True" Visible="True" Text="Cost Center" Description="Cost Center Page" Url="/CostCenter" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="submenu-ExchangeRate" Enabled="True" Visible="True" Text="Exchange Rate" Description="Exchange rate" Url="/ExchangeRate" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+
+    <menu-item Id="submenu-GLAccount" Enabled="True" Visible="True" Text="GL Account" Description="GL Account Page" Url="/MasterGLAccount" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+    
+    <menu-item Id="submenu-material" Enabled="True" Visible="True" Text="Material" Description="Material" Url="/Material" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="submenu-Plant" Enabled="True" Visible="True" Text="Plant" Description="Plant Master" Url="/Plant" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="submenu-Price" Enabled="True" Visible="True" Text="Price" Description="Price Master" Url="/Price" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="submenu-PurchasingGroup" Enabled="True" Visible="True" Text="Purchasing Group" Description="Purchasing Group" Url="/PurchasingGroup" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="submenu-quota" Enabled="True" Visible="True" Text="Quota" Description="Quota" Url="/Quota" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="submenu-routine" Enabled="True" Visible="True" Text="Routine" Description="Routine Draft" Url="/RoutineInquiry" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PR-001"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="submenu-sourcelist" Enabled="True" Visible="True" Text="Source List" Description="SourceList Page" Url="/SourceList" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+    <menu-item id="submenu-vendormaster"  enable="True" Visible="True" Url="/Vendor" Text="Supplier/Vendor" Description="Supplier/Vendor Master (Inquiry)" Glyph="caret-right">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+    <menu-item id="submenu-systemmaster"  enable="True" Visible="True" Url="/System" Text="System" Description="System" Glyph="caret-right">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="VALUATION_CLASS" Enabled="True" Visible="True" Text="Valuation Class" Description="Valuation Class Page" Url="/ValuationClass" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="BUDGET_CONTROL" Enabled="True" Visible="True" Text="Budget Control" Description="Budget Control Page" Url="/BudgetControl" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PRA-001"/>
+        <role Id="R-GPS-PRA-002"/>
+        <role Id="R-GPS-PRA-003"/>
+        <role Id="R-GPS-PO-001"/>
+        <role Id="R-GPS-POA-001"/>
+        <role Id="R-GPS-POA-002"/>
+        <role Id="R-GPS-GR-001"/>
+        <role Id="R-GPS-GR-002"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="WALLANNOUNCE" Enabled="True" Visible="True" Text="Wall Announcement" Description="Wall Announcement" Url="/WallAnnouncement" Glyph="file-o">
+    <authorization>
+      <role Id="R-GPS-AD-001"/>
+      <role Id="R-GPS-PR-001"/>
+      <role Id="R-GPS-PRA-001"/>
+      <role Id="R-GPS-PRA-002"/>
+      <role Id="R-GPS-PRA-003"/>
+      <role Id="R-GPS-PO-002"/>
+      <role Id="R-GPS-POA-001"/>
+      <role Id="R-GPS-POA-002"/>
+    </authorization>
+  </menu-item>
+    <menu-item Id="BUDGET_CONFIG" Enabled="True" Visible="True" Text="Budget Config" Description="Budget Config Page" Url="/BudgetConfig" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+
+      </authorization>
+    </menu-item>
+  </menu-item>
+
+  <menu-item Id="PR" Enabled="True" Visible="True" Text="Purchase Requisition" Description="Group menu of purchase requisition" Url="/" Glyph="file" Restricted="true">
+    <authorization>
+      <role Id="R-GPS-AD-001"/>
+      <role Id="R-GPS-PR-001"/>
+      <role Id="R-GPS-PRA-001"/>
+      <role Id="R-GPS-PRA-002"/>
+      <role Id="R-GPS-PRA-003"/>
+      <role Id="R-GPS-PO-001"/>
+      <role Id="R-GPS-POA-001"/>
+      <role Id="R-GPS-POA-002"/>
+      <role Id="R-GPS-GR-001"/>
+      <role Id="R-GPS-GR-002"/>
+    </authorization>
+    <menu-item Id="QUOTATRANS" Enabled="True" Visible="True" Text="Quota Transaction" Description="Quota Transaction" Url="/QuotaTransaction" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PR-001"/>
+        <role Id="R-GPS-PRA-001"/>
+        <role Id="R-GPS-PO-001"/>
+        <role Id="R-GPS-POA-001"/>
+      </authorization>
+    </menu-item>
+
+    <menu-item Id="ASSETUPLOAD" Enabled="True" Visible="True" Text="Asset Upload" Description="Asset Upload" Url="/AssetUpload" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PR-001"/>
+        <role Id="R-GPS-PRA-001"/>
+        <role Id="R-GPS-PRA-002"/>
+        <role Id="R-GPS-PRA-003"/>
+        <role Id="R-GPS-PO-001"/>
+        <role Id="R-GPS-POA-001"/>
+        <role Id="R-GPS-POA-002"/>
+        <role Id="R-GPS-GR-001"/>
+        <role Id="R-GPS-GR-002"/>
+      </authorization>
+    </menu-item>
+
+    <menu-item Id="PRCREATION" Enabled="True" Visible="True" Text="PR Creation" Description="Purchase requisition creation" Url="/PRCreation" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PR-001"/>
+        <role Id="R-GPS-PRA-001"/>
+      </authorization>
+    </menu-item>
+
+    <menu-item Id="PRINQUIRY" Enabled="True" Visible="True" Text="PR Inquiry" Description="Purchase requisition inquiry" Url="/PRInquiry" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PR-001"/>
+        <role Id="R-GPS-PRA-001"/>
+        <role Id="R-GPS-PRA-002"/>
+        <role Id="R-GPS-PRA-003"/>
+        <role Id="R-GPS-PO-001"/>
+        <role Id="R-GPS-POA-001"/>
+        <role Id="R-GPS-POA-002"/>
+        <role Id="R-GPS-GR-001"/>
+        <role Id="R-GPS-GR-002"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="PRSTATUSMONITORING" Enabled="True" Visible="True" Text="PR Status Monitoring" Description="Purchase requisition status monitoring" Url="/PRStatusMonitoring" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PR-001"/>
+        <role Id="R-GPS-PRA-001"/>
+        <role Id="R-GPS-PRA-002"/>
+        <role Id="R-GPS-PRA-003"/>
+        <role Id="R-GPS-PO-001"/>
+        <role Id="R-GPS-POA-001"/>
+        <role Id="R-GPS-POA-002"/>
+        <role Id="R-GPS-GR-001"/>
+        <role Id="R-GPS-GR-002"/>
+      </authorization>
+    </menu-item>
+
+    <menu-item Id="PRAPPROVAL" Enabled="True" Visible="True" Text="PR Approval" Description="PR approval" Url="/PRApproval" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PRA-001"/>
+        <role Id="R-GPS-PRA-002"/>
+        <role Id="R-GPS-PRA-003"/>
+      </authorization>
+    </menu-item>
+  </menu-item>
+
+  <menu-item Id="PO" Enabled="True" Visible="True" Text="Purchase Order" Description="Group menu of purchase order" Url="/" Glyph="shopping-cart" style="font-size:48px;" Restricted="true">
+    <authorization>
+      <role Id="R-GPS-AD-001"/>
+      <role Id="R-GPS-PR-001"/>
+      <role Id="R-GPS-PRA-001"/>
+      <role Id="R-GPS-PRA-002"/>
+      <role Id="R-GPS-PRA-003"/>
+      <role Id="R-GPS-PO-001"/>
+      <role Id="R-GPS-PO-002"/>
+      <role Id="R-GPS-POA-001"/>
+      <role Id="R-GPS-POA-002"/>
+      <role Id="R-GPS-GR-001"/>
+      <role Id="R-GPS-GR-002"/>
+    </authorization>
+    <menu-item Id="POCREATION" Enabled="True" Visible="True" Text="PO Creation" Description="Purchase order creation" Url="/POCreation" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PO-001"/>
+        <role Id="R-GPS-POA-001"/>
+      </authorization>
+    </menu-item>
+
+    <menu-item Id="URGENTSPK" Enabled="True" Visible="True" Text="Urgent PO SPK" Description="Urgent PO SPK creation" Url="/UrgentSPKCreation" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PO-001"/>
+        <role Id="R-GPS-POA-001"/>
+      </authorization>
+    </menu-item>
+
+    <menu-item Id="POINQUIRY" Enabled="True" Visible="True" Text="PO Inquiry" Description="Purchase order inquiry" Url="/POInquiry" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PR-001"/>
+        <role Id="R-GPS-PRA-001"/>
+        <role Id="R-GPS-PRA-002"/>
+        <role Id="R-GPS-PRA-003"/>
+        <role Id="R-GPS-PO-001"/>
+        <role Id="R-GPS-PO-002"/>
+        <role Id="R-GPS-POA-001"/>
+        <role Id="R-GPS-POA-002"/>
+        <role Id="R-GPS-GR-001"/>
+        <role Id="R-GPS-GR-002"/>
+      </authorization>
+    </menu-item>
+
+    <menu-item Id="POAPPROVAL" Enabled="True" Visible="True" Text="PO Approval" Description="PO approval" Url="/POApproval" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-POA-001"/>
+        <role Id="R-GPS-POA-002"/>
+      </authorization>
+    </menu-item>
+  </menu-item>
+
+  <menu-item Id="RCV" Enabled="True" Visible="True" Text="Receiving" Description="Group menu of receiving" Url="/" Glyph="gift" Restricted="true">
+    <authorization>
+      <role Id="R-GPS-AD-001"/>
+      <role Id="R-GPS-PR-001"/>
+      <role Id="R-GPS-PRA-001"/>
+      <role Id="R-GPS-PRA-002"/>
+      <role Id="R-GPS-PRA-003"/>
+      <role Id="R-GPS-PO-001"/>
+      <role Id="R-GPS-POA-001"/>
+      <role Id="R-GPS-POA-002"/>
+      <role Id="R-GPS-GR-001"/>
+      <role Id="R-GPS-GR-002"/>
+    </authorization>
+    <menu-item Id="GR" Enabled="True" Visible="True" Text="Good Receipt" Description="Good Receipt" Url="/GRCreation" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-GR-001"/>
+        <role Id="R-GPS-GR-002"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="SA" Enabled="True" Visible="True" Text="Service Acceptance" Description="Service Acceptance" Url="/SACreation" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-GR-001"/>
+        <role Id="R-GPS-GR-002"/>
+      </authorization>
+    </menu-item>
+    <menu-item Id="RCV-LIST" Enabled="True" Visible="True" Text="Receiving List" Description="Receiving List Inquiry" Url="/ReceivingList" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PR-001"/>
+        <role Id="R-GPS-PRA-001"/>
+        <role Id="R-GPS-PRA-002"/>
+        <role Id="R-GPS-PRA-003"/>
+        <role Id="R-GPS-PO-001"/>
+        <role Id="R-GPS-POA-001"/>
+        <role Id="R-GPS-POA-002"/>
+        <role Id="R-GPS-GR-001"/>
+        <role Id="R-GPS-GR-002"/>
+      </authorization>
+    </menu-item>
+  </menu-item>
+
+
+  <menu-item Id="LogMonitoring" Enabled="True" Visible="True" Text="Log Monitoring" Description="Log Monitoring" Url="/LogMonitoring" Glyph="desktop">
+    <authorization>
+      <role Id="R-GPS-AD-001"/>
+      <role Id="R-GPS-PR-001"/>
+      <role Id="R-GPS-PRA-001"/>
+      <role Id="R-GPS-PRA-002"/>
+      <role Id="R-GPS-PRA-003"/>
+      <role Id="R-GPS-PO-001"/>
+      <role Id="R-GPS-POA-001"/>
+      <role Id="R-GPS-POA-002"/>
+      <role Id="R-GPS-GR-001"/>
+      <role Id="R-GPS-GR-002"/>
+    </authorization>
+  </menu-item>
+
+  <menu-item Id="Report" Enabled="True" Visible="True" Text="Report" Description="Group menu of help" Url="/" Glyph="support" style="font-size:48px;" Restricted="true">
+    <authorization>
+      <role Id="R-GPS-AD-001"/>
+      <role Id="R-GPS-PR-001"/>
+      <role Id="R-GPS-PRA-001"/>
+      <role Id="R-GPS-PRA-002"/>
+      <role Id="R-GPS-PRA-003"/>
+      <role Id="R-GPS-PO-001"/>
+      <role Id="R-GPS-PO-002"/>
+      <role Id="R-GPS-POA-001"/>
+      <role Id="R-GPS-POA-002"/>
+      <role Id="R-GPS-GR-001"/>
+      <role Id="R-GPS-GR-002"/>
+    </authorization>
+    <menu-item Id="ProcurementTracking" Enabled="True" Visible="True" Text="Procurement Tracking" Description="Procurement Tracking" Url="/ProcurementTracking" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PR-001"/>
+        <role Id="R-GPS-PRA-001"/>
+        <role Id="R-GPS-PRA-002"/>
+        <role Id="R-GPS-PRA-003"/>
+        <role Id="R-GPS-PO-001"/>
+        <role Id="R-GPS-PO-002"/>
+        <role Id="R-GPS-POA-001"/>
+        <role Id="R-GPS-POA-002"/>
+        <role Id="R-GPS-GR-001"/>
+        <role Id="R-GPS-GR-002"/>
+      </authorization>
+    </menu-item>
+  </menu-item>
+
+  <menu-item Id="Help" Enabled="True" Visible="True" Text="Help" Description="Group menu of help" Url="/" Glyph="support" style="font-size:48px;" Restricted="true">
+    <authorization>
+      <role Id="R-GPS-AD-001"/>
+      <role Id="R-GPS-PR-001"/>
+      <role Id="R-GPS-PRA-001"/>
+      <role Id="R-GPS-PRA-002"/>
+      <role Id="R-GPS-PRA-003"/>
+      <role Id="R-GPS-PO-001"/>
+      <role Id="R-GPS-POA-001"/>
+      <role Id="R-GPS-POA-002"/>
+      <role Id="R-GPS-GR-001"/>
+      <role Id="R-GPS-GR-002"/>
+    </authorization>
+    <menu-item Id="SOPINQUIRY" Enabled="True" Visible="True" Text="SOP Download" Description="SOP file Download" Url="/SOPFileInquiry" Glyph="file-o">
+      <authorization>
+        <role Id="R-GPS-AD-001"/>
+        <role Id="R-GPS-PR-001"/>
+        <role Id="R-GPS-PRA-001"/>
+        <role Id="R-GPS-PRA-002"/>
+        <role Id="R-GPS-PRA-003"/>
+        <role Id="R-GPS-PO-001"/>
+        <role Id="R-GPS-POA-001"/>
+        <role Id="R-GPS-POA-002"/>
+        <role Id="R-GPS-GR-001"/>
+        <role Id="R-GPS-GR-002"/>
+      </authorization>
+    </menu-item>
+  </menu-item>
+</menu>

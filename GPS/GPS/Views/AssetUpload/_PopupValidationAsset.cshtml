@@ -1,0 +1,23 @@
+﻿@using GPS.Models.Asset
+@using GPS.Constants
+
+<div class="modal-dialog modal-md" style="width:1252px">
+    <div class="modal-content">
+        <div class="modal-header">
+            Asset Upload Validation
+        </div>
+        <div class="modal-body">
+            <div class="row" style="margin-top:10px">
+                <div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+                    <div id="grid-validation" style="border: 1pt solid #ccc;">
+                        @Html.Partial("_PopupValidationGrid")
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary btn-xs" id="btn-save" onclick="javascript:SaveData()">Save</button>
+            <button type="button" class="btn btn-danger btn-xs" onclick="javascript:CancelSave()">Cancel</button>
+        </div>
+    </div>
+</div>

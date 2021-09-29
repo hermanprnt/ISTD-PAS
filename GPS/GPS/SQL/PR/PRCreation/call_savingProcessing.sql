@@ -1,0 +1,64 @@
+﻿IF TYPE_ID(N'PR_H_TEMP') IS NULL
+BEGIN
+	CREATE TYPE PR_H_TEMP AS TABLE(
+		[PR_NO] [varchar](11) NOT NULL,
+		[DOC_DT] [date] NOT NULL,
+		[PR_DESC] [varchar](50) NULL,
+		[PR_TYPE] [varchar](2) NULL,
+		[PLANT_CD] [varchar](4) NOT NULL,
+		[SLOC_CD] [varchar](4) NOT NULL,
+		[PR_COORDINATOR] [varchar](6) NOT NULL,
+		[DIVISION_ID] [int] NOT NULL,
+		[DIVISION_NAME] [varchar](40) NULL,
+		[PR_STATUS] [varchar](2) NOT NULL,
+		[PROJECT_NO] [varchar](25) NULL,
+		[URGENT_DOC] [varchar](1) NOT NULL,
+		[MAIN_ASSET] [varchar](15) NULL,
+		[PR_NOTES] [varchar](500) NULL,
+		[DELIVERY_PLAN_DT] [date] NULL,
+		[PROCESS_ID] [bigint] NOT NULL
+	);
+END
+
+DECLARE @@PRHData AS PR_H_TEMP
+
+INSERT INTO @@PRHData (
+		[PR_NO]
+	   ,[DOC_DT]
+	   ,[PR_DESC]
+	   ,[PR_TYPE]
+	   ,[PLANT_CD]
+	   ,[SLOC_CD]
+	   ,[PR_COORDINATOR]
+	   ,[DIVISION_ID]
+	   ,[DIVISION_NAME]
+	   ,[PR_STATUS]
+	   ,[PROJECT_NO]
+	   ,[URGENT_DOC]
+	   ,[MAIN_ASSET]
+	   ,[PR_NOTES]
+	   ,[DELIVERY_PLAN_DT]
+	   ,[PROCESS_ID])
+	VALUES( 
+	   @PR_NO
+	   ,GETDATE()
+	   ,@PR_DESC
+	   ,@PR_TYPE
+	   ,@PLANT_CD
+	   ,@SLOC_CD
+	   ,@PR_COORDINATOR
+	   ,@DIVISION_ID
+	   ,@DIVISION_NAME
+	   ,@PR_STATUS
+	   ,@PROJECT_NO
+	   ,@URGENT_DOC
+	   ,@MAIN_ASSET_NO
+	   ,@PR_NOTES
+	   ,@DELIVERY_PLAN_DT
+	   ,@PROCESS_ID)
+
+UPDATE TB_T_PR_ITEM 
+	SET DELIVERY_PLAN_DT = @DELIVERY_PLAN_DT
+	WHERE PROCESS_ID = @PROCESS_ID AND ISNULL(DELETE_FLAG, 'N') <> 'Y' AND DELIVERY_PLAN_DT IS NULL
+
+EXEC [dbo].[sp_prcreation_savingProcessing] @USER_ID, @NOREG, @PR_NO, @PROCESS_ID, @DIVISION_ID, 'SP', @TYPE, @@PRHData

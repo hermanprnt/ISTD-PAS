@@ -1,0 +1,24 @@
+﻿DECLARE @@SQL VARCHAR(MAX)
+
+
+SET @@SQL = 
+'SELECT ISNULL(MAX(Number), 0) FROM
+(
+	SELECT ROW_NUMBER() OVER (ORDER BY CREATED_DT DESC, CHANGED_DT DESC) AS Number
+	FROM TB_M_QUOTA
+	WHERE 1=1
+'
+IF (ISNULL(@DIVISION_NAME, '') <> '')
+	SET @@SQL = @@SQL + ' AND DIVISION_ID LIKE ''%' + @DIVISION_NAME + '%'''
+
+IF (ISNULL(@WBS_NO, '') <> '')
+	SET @@SQL = @@SQL + ' AND WBS_NO LIKE ''%' + @WBS_NO + '%'''
+
+IF (ISNULL(@TYPE, '') <> '')
+	SET @@SQL = @@SQL + ' AND QUOTA_TYPE LIKE ''%' + @TYPE + '%'''
+
+IF (ISNULL(@ORD_COORD, '') <> '')
+	SET @@SQL = @@SQL + ' AND ORDER_COORD LIKE ''%' + @ORD_COORD + '%'''
+
+SET @@SQL = @@SQL + ' ) AS TB '
+EXEC (@@SQL)

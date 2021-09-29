@@ -1,0 +1,377 @@
+﻿<script type="text/javascript"> 
+    $(document).ready(function () {
+        onClear();      
+             
+        $('.date-picker').datepicker({
+            autoclose: true,
+            todayHighlight: true
+        })
+        //show datepicker when clicking on the icon
+	    .next().on(ace.click_event, function () {
+		    $(this).prev().focus();
+	    });            
+    }); 
+
+    var listmail = new Array();
+
+    function onGetData(page) { 
+        $.disable_enable_button.disable();  
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val() ,
+                Page:page,
+                VendorCode : $("#txtVendorCode").val(),
+                VendorName : $("#txtVendorName").val(),
+			    PayMethod : $("#txtPayMethod").val(),
+                PayTerm : $("#txtPayTerm").val()            
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+                $.disable_enable_button.enable();
+            }        
+        });
+    }
+
+    /*Checkbox all*/   
+    function onCekAll() { 
+        if ($("#checkall").is(":checked")) {
+            $(".grid-checkbox-body").prop('checked', true);
+        } else {
+            $(".grid-checkbox-body").prop('checked', false);
+        }
+    }
+
+    function GetSelectedGrid() {
+        var ids = [];
+        $("input[id^=cb-]").each(function (i, a) {
+            if (a.id != null && a.id.length > 0 && a.checked) {
+                ids.push($('#' + a.id).data('pc_cd'));
+            }
+        }
+        );
+        var h = ids.length;
+        var w = ids.join();
+        return [h, w];
+    }
+
+    function onClear() {
+        $("#txtVendorCode").val('');
+        $("#txtVendorName").val('');
+        $("#txtPayMethod").val(''),
+        $("#txtPayTerm").val('');
+    
+        $("input[id^=cb-]").each(function(i,a){
+            a.checked = false;          
+        }); 
+
+        ClearGrid(1);
+    }
+
+    function ClearGrid(page) {
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val() ,
+                Page:page,
+                VendorCode: 'NULLSTATE',
+                VendorName: 'NULLSTATE',
+                PayMethod: 'NULLSTATE',
+                PayTerm: 'NULLSTATE'
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+            }        
+        });
+    }
+
+    function validateEmail(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@@"]+(\.[^<>()\[\]\\.,;:\s@@"]+)*)|(".+"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+
+    function onaddedmail() {
+        var mail = $("#txtVendorMailForm").val();
+        if (mail !== null && mail !== "" && mail !== "undefined") {
+            if(validateEmail(mail))
+            {
+                listmail.push(mail);
+                if ($("#hiddenmail").val() == "" || $("#hiddenmail").val() == null || $("#hiddenmail").val() == "undefined") $("#hiddenmail").val('');
+
+                if ($("#hiddenmail").val().toLowerCase().indexOf(mail.toLowerCase()) == -1) {
+                    var html = "";
+                    html = html + "<p><span class='remove-list-mail-" + listmail.indexOf(mail) + "' id='isrow-mail-" + listmail.indexOf(mail) + "'>" +
+                                    "<a href='#' onclick=\"deleteMail('" + listmail.indexOf(mail) + "')\">" +
+                                        "<img width='15' height='15' src='@Url.Content("../Content/img/error.png")' title='Delete Mail'>" +
+                                            "</a>";
+                    html = html + "" + mail + "</span></p>"
+
+                    $("#hiddenmail").val($("#hiddenmail").val() + mail + ";");
+
+                    $.Clear(["#txtVendorMailForm"]);
+                    $('.appended-mail').append(html);
+                    $('.appended-mail').show();
+                }
+                else {
+                    $.messagebox.show(
+                        "Email Address Validation",
+                        "Mail address " + mail + " already added",
+                        "WRN",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            }
+            else{
+                $.messagebox.show(
+                    "Email Address Validation",
+                    "Email address is not valid",
+                    "WRN",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+            }
+        }
+    }
+
+    function deleteMail(index) {
+        var mail = listmail[index];
+        $("#isrow-mail-" + index).remove();
+        $("#hiddenmail").val($("#hiddenmail").val().replace(mail + ";", ""));
+    }
+
+    function onSaveData() {
+        var isvalid = $.ValidateMandatory(["#txtVendorCdForm", "#txtPurchGroup", "#txtVendorNameForm", "#txtPayTermForm", "#txtPayMethodForm", "#txtVendorCountryForm"]);
+        if(isvalid) {
+            $.ajax({
+                type: "post",
+                url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
+                data: {
+                    flag: $("#txtEdit").val(),
+                    VendorCd: $("#txtVendorCdForm").val(),
+                    VendorName: $("#txtVendorNameForm").val(),
+                    PurchGroup: $("#txtPurchGroup").val(),
+                    VendorPlant: $("#txtVendorPlantForm").val(),
+                    SAPVendorID: $("#txtSAPCodeForm").val(),
+                    PaymentMethodCd: $("#txtPayMethodForm").val(),
+                    PaymentTermCd: $("#txtPayTermForm").val(),
+                    Address: $("#txtVendorAddrForm").val(),
+                    City: $("#txtVendorCityForm").val(),
+                    Phone: $("#txtVendorPhoneForm").val(),
+                    Fax: $("#txtVendorFaxForm").val(),
+                    Attention: $("#txtVendorAttentionForm").val(),
+                    Postal: $("#txtVendorPostalForm").val(),
+                    Country: $("#txtVendorCountryForm").val(),
+                    Mail: $("#hiddenmail").val()
+                },
+                success: function (data) {
+                    var result = data.message.split('|');
+                    if (result[0] == 'True') {
+                        $.messagebox.show(
+                            "Save",
+                            result[1],
+                            "SUC",
+                            "SINGLE",
+                            "OkInfoSave()",
+                            ""
+                        )
+                    }
+                    else {
+                        $.messagebox.show(
+                            "Error",
+                            result[1],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                }
+            });
+        }
+    }
+
+    function OkInfoSave() {
+        $("#basicModal").modal('hide');
+        onGetData(1);
+    }
+
+    function onAddData() { 
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagEditAdd")",
+            data: {
+                flag: '0',
+                VendorCode: null
+            },                
+            success: function (data) {  
+                 $("#basicModal").html(data);   
+                 $("#basicModal").modal();                            
+            }
+        });   
+    }
+
+    function onEditData() {      
+        if ($(".grid-checkbox-body:checked").length == 0){
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+        )
+    }        
+    else if ($(".grid-checkbox-body:checked").length > 1){
+        $.messagebox.show(
+            "Warning",
+            "Please Select only One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else {
+        var numKey = GetSelectedGrid();
+        var selectedKey = numKey[Object.getOwnPropertyNames(numKey)[1]];
+        
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagEditAdd")",
+        data: {
+            flag: '1',
+            VendorCode: selectedKey
+        },
+        success: function (data) {
+            $("#basicModal").html(data);
+            $("#basicModal").modal();
+        }
+        });
+    }        
+}
+
+    function onDeleteData() {
+        if ($(".grid-checkbox-body:checked").length == 0)
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be deleted",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else 
+            $.messagebox.show(
+                "Confirmation",
+                "Are You Sure You Want to Delete this Item ?",
+                "INF",
+                "CONFIRM",
+                "onYesDelete()",
+                ""
+            )
+    }
+
+    function onYesDelete() {
+        var numKey = GetSelectedGrid();
+        var selectedKey = numKey[Object.getOwnPropertyNames(numKey)[1]];
+ 
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("DeleteData")",
+            data: {  
+                VendorCode: selectedKey         
+            },
+            success: function (data) {
+                $.messagebox.show(
+                    "Delete",
+                    data,
+                    "SUC",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+                onGetData(1);
+            }        
+         });
+    }
+
+
+    $.fn.addOption = function (optText, optValue) {
+        var option = new Option(optText, optValue);
+        return this.append(option);
+    };
+
+    function onCopyData() {
+        if ($(".grid-checkbox-body:checked").length == 0)
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be copy",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else if ($(".grid-checkbox-body:checked").length > 1)
+            $.messagebox.show(
+                "Warning",
+                "Please Select only One Record to be copy",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else {
+           var numKey = GetSelectedGrid();
+           var selectedKey = numKey[Object.getOwnPropertyNames(numKey)[1]];
+
+           $.ajax({
+               type: "post",
+               url: "@Html.Toyota().Page.GetActionUrl("IsFlagEditAdd")",
+            data: {
+                flag: '0',
+                VendorCode: selectedKey
+            },
+            success: function (data) {
+                $("#basicModal").html(data);
+                $("#basicModal").modal();
+            }
+           });
+        }
+    }
+
+    function OnDownloadTemplate() {     
+          $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("CekTemplate")",        
+            success: function (data) {
+             if(data == 'False'){
+                //$("#selected-info").modal();
+                //$("#infoModal").html('Template not found');
+                 $.messagebox.show(
+                    "Error",
+                    "Template Not Found",
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+             }
+             else{
+                 $.fileDownload("Vendor/DownloadTemplate/"); 
+             }
+            
+            }        
+         });
+    } 
+
+    function onDownloadData() {
+        var param = "?VendorCode=" + $("#txtVendorCode").val() + "&VendorName=" + $("#txtVendorName").val() + "&PayTerm=" + $("#txtPayTerm").val() + "&PayMethod=" + $("#txtPayMethod").val();
+        var link = '@Url.Content("Vendor/DownloadData/")' + param;
+        window.location = link;
+    } 
+</script>

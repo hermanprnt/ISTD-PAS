@@ -1,0 +1,42 @@
+﻿@using GPS.Models.Master
+@{
+    List<Routine> lpr = ViewData["WBS"] != "" ? (List<Routine>)ViewData["WBS"] : new List<Routine>();
+}
+<div class="table-responsive">
+    <table id="LookUpTable-glclass" class="table table-striped table-bordered table-condensed gl-lookup-table" width="100%">
+        <thead>
+            <tr>
+                <th class="text-center control-label text-muted" style="width:100%"  colspan="3">WBS</th>
+            </tr>
+            <tr>
+                <th class="text-center control-label text-muted" style="width:30%">Code</th>
+                <th class="text-center control-label text-muted" style="width:70%" colspan="2">Name</th>
+            </tr>
+        </thead>
+        <tbody id="bodylookup-glclass">
+            @if (lpr.Count > 0)
+            {
+                foreach (Routine pr in lpr)
+                { 
+                    <tr ondblclick="javascript:MoveWBSKey('@pr.WBS_NO', '@pr.WBS_NAME')" style="cursor:pointer">
+                        <td>@pr.WBS_NO</td>
+					    <td colspan="2">@pr.WBS_NAME</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center">No WBS Data</td>
+                </tr> 
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    @Html.Partial("_UIPaging")
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

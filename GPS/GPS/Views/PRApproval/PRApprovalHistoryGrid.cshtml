@@ -1,0 +1,55 @@
+﻿@using GPS.Constants
+@using GPS.Models.Common
+@using GPS.Models.PRPOApproval
+@using GPS.ViewModels
+@{
+    List<CommonApprovalHistory> prApprovalHistoryList = (List<CommonApprovalHistory>)ViewData["PRApprovalHistory"];
+    PaginationViewModel paginationModel = (PaginationViewModel)ViewData["PRApprovalHistoryPage"];
+}
+
+<style>
+    .table > tr > td, 
+    .table > thead > tr > th {
+        vertical-align : middle;    
+        line-height: 100%;
+    }
+</style>
+<div style="width:100%;overflow:auto;">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr style="width:100%;">
+                <th>Doc. No</th>
+                <th>Type</th>
+                <th>Division</th>
+                <th>User</th>
+                <th>Status</th>
+                <th>Action Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (prApprovalHistoryList.Count > 0)
+        {
+            foreach (CommonApprovalHistory item in prApprovalHistoryList)
+            {
+                <tr>
+                    <td class="text-center">@item.DOCUMENT_NO</td>
+                    <td class="text-center">@item.DOCUMENT_TYPE</td>
+                    <td class="text-left">@item.STRUCTURE_NAME</td>
+                    <td class="text-left">@item.APPROVED_BY</td>
+                    <td class="text-left">@item.APPROVAL_DESC</td> 
+                    <td class="text-center">@(item.APPROVED_DT != DateTime.MinValue ? item.APPROVED_DT.ToString(CommonFormat.Date) : "")</td>  
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">@CommonDisplayMessage.NoData</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+<div style="margin-top:1em;">
+    @Html.Partial(CommonPage.GridPagination, paginationModel)
+</div>

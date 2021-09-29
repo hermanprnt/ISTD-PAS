@@ -1,0 +1,70 @@
+﻿@{
+    ViewBag.Title = "SimpleMaster";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<form role="form" class="form-horizontal" id="searchForm">
+    <div class="row">
+        <div class="col-xs-12 col-md-6">
+            <div class="form-group form-group-sm">
+                <label class="col-xs-4 col-sm-3 control-label required-left text-muted">First name</label>
+                <div class="col-xs-8 col-sm-9">
+                    <input id="txtColumn1" type="text" class="form-control" required  />
+                </div>
+            </div>
+            <div class="form-group form-group-sm">
+                <label class="col-xs-4 col-sm-3 control-label required-left text-muted">Last name</label>
+                <div class="col-xs-8 col-sm-9">
+                    <input id="txtColumn2" type="text" class="form-control" required  />
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 col-md-6">
+            <div class="form-group form-group-sm">
+                <label class="col-xs-4 col-sm-3 control-label text-muted">Date of birth</label>
+                <div class="col-xs-8 col-sm-9">
+                    <input id="txtColumn3" type="text" class="form-control _datepicker" />
+                </div>
+            </div>
+        </div>    
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12 text-right">
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary">Search</button>
+                <button type="button" class="btn btn-default">Clear</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<hr />
+
+@Html.Partial("_SimpleGrid")
+@Html.Partial("_EditPopup")
+@Html.Partial("_DeleteConfirm")
+
+@section BodyScript{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $("#checkall").click(function () {
+                $(".check").prop("checked", $("#checkall").is(":checked"));
+            });
+
+            $(".btn-edit").click(function () {
+                $("#edit-popup").modal();
+            });
+
+            $(".btn-delete").click(function () {
+                $("#delete-confirm").modal();
+            });
+
+            $("._datepicker").datepicker();
+
+        });
+        
+    </script>
+}

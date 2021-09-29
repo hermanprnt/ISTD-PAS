@@ -1,0 +1,719 @@
+﻿<script type="text/javascript"> 
+$(document).ready(function () { 
+    onClear(); 
+    $("#txtDivision").val('@ViewBag.Division');           
+});
+
+ $.fn.addOption = function (optText, optValue) {
+        var option = new Option(optText, optValue);
+        return this.append(option);
+  };
+
+ function onClear() {
+    $.disable_enable_button.enable();
+    $("#txtDivision").val(''); 
+    $("#txtType").val(''); 
+    $("#txtWBS").val(''); 
+    $("#txtOrdCoord").val('');
+
+        $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("onGetData")",
+                data: {
+                    search : 'N',
+                    Display: $("#cbodisplay").val(),
+                    Page:1,
+                    division : $("#txtDivision").val(),			   
+                    type : $("#txtType").val(),
+                    wbs : $("#txtWBS").val(),
+                    coord : $("#txtOrdCoord").val(),
+                },
+                success: function (data) {
+                    $("#detailgrid").html(data);
+                },
+                error:function (xhr, ajaxOptions, thrownError,data){
+                 alert(xhr.status);
+                }
+        });
+  }
+  
+ function Key(e) {
+        // Allow: backspace, delete, tab, escape, enter and .
+        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+            // Allow: Ctrl+A
+            (e.keyCode == 65 && e.ctrlKey === true) ||
+            // Allow: home, end, left, right, down, up
+            (e.keyCode >= 35 && e.keyCode <= 40)) {
+            // let it happen, don't do anything
+            return;
+        }
+        // Ensure that it is a number and stop the keypress
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+    }
+
+        function getAmount()  {
+            if($("#txtQty").val() == 0)
+                $("#txtAmount").val('');
+            else
+                $("#txtAmount").val(parseFloat($("#txtQty").val()) * parseFloat($("#txtPrice").val()))
+        }       
+       
+        function onGetData(page)
+        {
+            $.disable_enable_button.disable(); 
+
+            var division = $("#txtDivision").val();
+            if(division == '') division = '0';
+
+            $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("onGetData")",
+            data: {
+                search : 'Y',
+                Display: $("#cbodisplay").val(),
+                Page:page,
+                division : division,			   
+                type : $("#txtType").val(),
+                wbs : $("#txtWBS").val(),
+                coord : $("#txtOrdCoord").val(),
+            },
+            success: function (data) {
+                $("#detailgrid").html(data);
+                $.disable_enable_button.enable(); 
+            },
+            error:function (xhr, ajaxOptions, thrownError,data){
+                alert(xhr.status);
+                $.disable_enable_button.enable(); 
+            }
+            });
+        }
+
+        function GetQuota(){
+            var ids = [];
+            $("input[id^=chk-]").each(function (i, a) {
+                if (a.id != null && a.id.length > 0 && a.checked) {
+                    ids.push({                
+                        month: $('#' + a.id).data('month'),
+                        div: $('#' + a.id).data('div'),
+                        type: $('#' + a.id).data('type')                
+                    });
+                }
+            });
+
+            return ids;
+        }
+
+    function CancelTolerance()
+    {
+        $("#PopUpTolerance").modal('hide'); 
+    }
+
+    var tol = 0;
+    function Tolerance()
+    {
+        if ($(".grid-checkbox-body:checked").length == 0){        
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else if ($(".grid-checkbox-body:checked").length > 1){       
+            $.messagebox.show(
+                "Warning",
+                "Please Select only One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+             var selectedData = GetQuota(); 
+             $.ajax({
+                        type: "post",
+                        url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+                        data: {
+                             ConsumeMonth : selectedData[0].month, 
+                             DivisionID: selectedData[0].div,
+                             QuotaType: selectedData[0].type                                       
+                        },                
+                        success: function (data) { 
+                            $("#txtPeriodTolHide").val(data.CONSUME_MONTH);
+                            $("#txtDivTolHide").val(data.DIVISION_ID);
+                            $("#txtTypeTolHide").val(data.TYPE);                           
+                            
+                            $("#txtPeriodTol").val(Periode(data.CONSUME_MONTH));  //--                                    
+                            $("#txtDivTol").val(data.DIVISION_NAME);
+                            $('#txtCoordTol').val(data.ORDER_COORD_NAME + ' (' + data.ORDER_COORD2 + ')');
+                            $("#txtWBSTol").val(data.WBS_NO);                           
+                            $("#txtTypeTol").val(data.TYPE_DESCRIPTION + ' (' + data.TYPE + ')');
+                            $("#txtQuotaAmountTol").val(data.QUOTA_AMOUNT2); 
+                            $("#txtUsageTol").val(data.USAGE_AMOUNT2);  
+                            $("#txtAddTol").val(data.ADDITIONAL_AMOUNT2); 
+                            $("#txtRemainQuotaTol").val(data.REMAINING2); 
+                            $("#txtTol").val(data.TOLERANCE2);
+                            $("#txtTolHide").val(data.TOLERANCE);                          
+                            tol = data.TOLERANCE2;
+
+                            $("#PopUpTolerance").modal(); 	                                                                                                       
+                        }
+               }); 
+        }
+    }
+
+function onSubmitTolerance()
+{
+    //if ($("#txtTol").val().replace(/,/g, '') > $("#txtTolHide").val()) 
+    if (parseFloat($("#txtTol").val().replace(/,/g, '')) > parseFloat($("#txtTolHide").val()))
+        $.messagebox.show(
+            "Warning",
+            "Not enough amount tolerance requested. Amount tolerance now is " + tol,
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    else{ 
+        $.ajax({
+                type: "post",
+                url: "@Html.Toyota().Page.GetActionUrl("SubmitTolerance")",
+                data: {
+                        ConsumeMonth : $("#txtPeriodTolHide").val(), 
+                        DivisionID:  $("#txtDivTolHide").val(),
+                        QuotaType: $("#txtTypeTolHide").val(),
+                        Tolerance : $("#txtTol").val()                                      
+                },                
+                success: function (data) { 
+                    var result = data.message.split('|');
+                    if(result[0] == 'True') {                     
+                         $.messagebox.show(
+                            "Info",
+                            result[1],
+                            "SUC",
+                            "SINGLE",
+                            "OkInfoSave()",
+                            ""
+                         )                
+                    }              
+                    else {                    
+                        $.messagebox.show(
+                            "Error",
+                            result[1],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )                    
+                    }            	                                                                                                       
+                }
+           }); 
+        //
+    }
+} 
+
+function OkInfoSave() {   
+    onGetData(1);
+    $("#PopUpTolerance").modal('hide');  
+    $("#PupUpAdditional").modal('hide'); 
+} 
+
+function CancelAdditional()
+{
+    $("#PupUpAdditional").modal('hide'); 
+    $("#PupUpAdditionalConfirm").modal('hide'); 
+} 
+    
+function Additional()
+{
+     if ($(".grid-checkbox-body:checked").length == 0){        
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else if ($(".grid-checkbox-body:checked").length > 1){       
+            $.messagebox.show(
+                "Warning",
+                "Please Select only One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+             var selectedData = GetQuota(); 
+              $.ajax({
+                        type: "post",
+                        url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+                        data: {
+                             ConsumeMonth : selectedData[0].month, 
+                             DivisionID: selectedData[0].div,
+                             QuotaType: selectedData[0].type                                       
+                        },                
+                        success: function (data) { 
+                            $("#txtPeriodAddHide").val(data.CONSUME_MONTH);
+                            $("#txtDivAddHide").val(data.DIVISION_ID);
+                            $("#txtTypeAddHide").val(data.TYPE);                            
+                            
+                            $("#txtPeriodAdd").val(Periode(data.CONSUME_MONTH));                                      
+                            $("#txtDivAdd").val(data.DIVISION_NAME);
+                            $('#txtCoordAdd').val(data.ORDER_COORD_NAME + ' (' + data.ORDER_COORD2 + ')');
+                            $("#txtWBSAdd").val(data.WBS_NO);                           
+                            $("#txtTypeAdd").val(data.TYPE_DESCRIPTION + ' (' + data.TYPE + ')');
+
+                            $("#txtAmountTransfer").val('0');
+                            GetListPeriode(data.CONSUME_MONTH);
+                            GetListSourceOrderType(data.DIVISION_ID);
+                                                       
+                            $("#PupUpAdditional").modal(); 	                                                                                                       
+                        }
+               });              
+        }    
+}
+
+function AdditionalConfirm(CONSUME_MONTH,DIVISION_ID,TYPE)
+{
+    $.ajax({
+        type: "post",
+        url: "@Html.Toyota().Page.GetActionUrl("GetSingleDataConfirm")",
+        data: {
+                ConsumeMonth : CONSUME_MONTH, 
+                DivisionID: DIVISION_ID,
+                QuotaType: TYPE                                       
+        },                
+        success: function (data) { 
+              $("#detailgridConfirm").html(data);                                                  
+              $("#PupUpAdditionalConfirm").modal();           	                                                                                                       
+        }
+     });          
+}
+
+function AdditionalConfirmRefresh(CONSUME_MONTH,DIVISION_ID,TYPE)
+{
+    $.ajax({
+        type: "post",
+        url: "@Html.Toyota().Page.GetActionUrl("GetSingleDataConfirmLookup")",
+        data: {
+            DIVISION_ID: DIVISION_ID,
+            ConsumeMonth: CONSUME_MONTH,
+            QuotaType: TYPE
+        },
+        datatype: "json",
+        traditional: true,
+        success: function (data) {
+            var items = $.parseJSON(data);
+            var item = [];
+            var i = 0;
+            var grid = ""
+            $("#bodylookup-listemp").empty();
+            $.each(items, function () {
+                grid = grid + "<tr>";
+                grid = grid + "<td class='text-center'>" + items[i].QUOTA_MONTH2 + "</td>";
+                grid = grid + "<td class='text-left'>" + items[i].TYPE_DESCRIPTION + "</td>";
+                grid = grid + "<td class='text-right'>" + items[i].AMOUNT + "</td>";
+                grid = grid + "<td class='text-right'>" +
+                                    "<button type='button' class='btn btn-primary btn-xs' onclick=\"javascript:ConfirmAdditional('" + items[i].DOC_NO + "'," + items[i].SEQ_NO + ",'" + items[i].CONFIRM_FLAG + "'," + items[i].AMOUNT + "," + items[i].DIVISION_ID + "," + items[i].DT_MONTH + "," + items[i].DST_TYPE + ")\">Commit</button>" +
+                                    "<button type='button' class='btn btn-danger btn-xs' onclick=\"javascript:ConfirmAdditionalCancel('" + items[i].DOC_NO + "'," + items[i].SEQ_NO + ",'" + items[i].CONFIRM_FLAG + "'," + items[i].AMOUNT + "," + items[i].DIVISION_ID + "," + items[i].DT_MONTH + "," + items[i].DST_TYPE + ")\">Cancel</button>" +
+                                "</td>";
+                grid = grid + "</tr>";
+                i++;
+            });
+            $("#bodylookup-listemp").append(grid);
+            onGetData(1);
+        }
+    });
+}
+
+function onSubmitAdditional()
+{ 
+    var type = $("#txtTypeAddHide").val();
+    var Sourcertype = $("#txtSourceOrderType").val();
+
+    if($("#txtPeriodAddHide").val() == $("#txtSourceAdd").val()){   
+        if(type == Sourcertype){
+            $.messagebox.show(
+                "Warning",
+                "Cannot transfer with same item",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+            return;
+        }
+    }
+   
+    if ($("#txtAmountTransfer").val() == '' || $("#txtAmountTransfer").val() == '0'){
+         $.messagebox.show(
+                "Warning",
+                "Amount Transfer not be empty or zero",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+    }
+    else{
+        $.ajax({
+                type: "post",
+                url: "@Html.Toyota().Page.GetActionUrl("SubmitAdditonal")",
+                data: {
+                        ConsumeMonth : $("#txtPeriodAddHide").val(), 
+                        DivisionID:  $("#txtDivAddHide").val(),
+                        QuotaType: $("#txtTypeAddHide").val(),
+                        AmountTransfer : $("#txtAmountTransfer").val(),
+                        SourcePeriode :  $("#txtSourceAdd").val(),
+                        SourceOrderType :  $("#txtSourceOrderType").val()                                      
+                },                
+                success: function (data) { 
+                    var result = data.message.split('|');
+                    if(result[0] == 'True') {                     
+                         $.messagebox.show(
+                            "Info",
+                            result[1],
+                            "SUC",
+                            "SINGLE",
+                            "OkInfoSave()",
+                            ""
+                         )                
+                    }              
+                    else {                    
+                        $.messagebox.show(
+                            "Error",
+                            result[1],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )                    
+                    }            	                                                                                                       
+                }
+           }); 
+        //
+    }
+}
+
+function ConfirmAdditional(DOC_NO,SEQ_NO,CONFIRM_FLAG,AMOUNT,DIVISION_ID,DT_MONTH,DST_TYPE)
+{ 
+    $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("ConfirmAdditional")",
+            data: {
+                    DOC_NO : DOC_NO, 
+                    SEQ_NO:  SEQ_NO,
+                    CONFIRM_FLAG: CONFIRM_FLAG,
+                    Amount : AMOUNT,
+                    DIVISION_ID : DIVISION_ID,
+                    DT_MONTH : DT_MONTH, 
+                    DST_TYPE : DST_TYPE                                                       
+            },                
+            success: function (data) { 
+                var result = data.message.split('|');
+                if(result[0] == 'True') {                     
+                        $.messagebox.show(
+                        "Info",
+                        result[1],
+                        "SUC",
+                        "SINGLE",
+                        "",
+                        ""
+                        )  
+                        AdditionalConfirmRefresh(DT_MONTH,DIVISION_ID,DST_TYPE);                                   
+                }              
+                else {                    
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )                    
+                }            	                                                                                                       
+            }
+   }); 
+        //
+}
+
+function ConfirmAdditionalCancel(DOC_NO,SEQ_NO,CONFIRM_FLAG,AMOUNT,DIVISION_ID,DT_MONTH,DST_TYPE)
+{ 
+    $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("ConfirmAdditionalCancel")",
+            data: {
+                    DOC_NO : DOC_NO, 
+                    SEQ_NO:  SEQ_NO,
+                    CONFIRM_FLAG: CONFIRM_FLAG,
+                    Amount : AMOUNT,
+                    DIVISION_ID : DIVISION_ID,
+                    DT_MONTH : DT_MONTH, 
+                    DST_TYPE : DST_TYPE                                                                                 
+            },                
+            success: function (data) { 
+                var result = data.message.split('|');
+                if(result[0] == 'True') {                     
+                        $.messagebox.show(
+                        "Info",
+                        result[1],
+                        "SUC",
+                        "SINGLE",
+                        "",
+                        ""
+                        )  
+                        AdditionalConfirmRefresh(DT_MONTH,DIVISION_ID,DST_TYPE);                                   
+                }              
+                else {                    
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )                    
+                }            	                                                                                                       
+            }
+   }); 
+        //
+}
+
+function GetListPeriode(CONSUME_MONTH) {   
+    $.ajax({
+        type: "POST",
+        url: "@Html.Toyota().Page.GetActionUrl("GetListPeriode")",
+        data: { CONSUME_MONTH : CONSUME_MONTH },
+        success: function (resultMessage) {
+            $('#txtSourceAdd').empty();
+            if (resultMessage != "") {
+                var rows = resultMessage.split('|');
+                var cols = "";
+                //$('#txtSourceAdd').addOption("", "");
+                for (i = 0; i < rows.length; i++) {
+                    if (rows[i] != '') 
+                    {
+                        cols = rows[i].split(';');   //TEXT , Value
+                        $('#txtSourceAdd').addOption(cols[1], cols[0]);
+                    }
+                } 
+                //$("#txtSourceAdd").val(STORAGE_LOCATION);               
+            }
+            else {
+                $('#txtSourceAdd').addOption("", "");
+            }                              
+        }
+    });
+}
+
+function GetListSourceOrderType(DIVISION_ID) {   
+    $.ajax({
+        type: "POST",
+        url: "@Html.Toyota().Page.GetActionUrl("GetListSourceOrderType")",
+        data: { DIVISION_ID : DIVISION_ID },
+        success: function (resultMessage) {
+            $('#txtSourceOrderType').empty();
+            if (resultMessage != "") {
+                var rows = resultMessage.split('|');
+                var cols = "";
+                //$('#txtStorage').addOption("", "");
+                for (i = 0; i < rows.length; i++) {
+                    if (rows[i] != '') 
+                    {
+                        cols = rows[i].split(';');         //TEXT , Value
+                        $('#txtSourceOrderType').addOption(cols[1], cols[0]);
+                    }
+                } 
+                //$("#txtStorage").val(STORAGE_LOCATION);               
+            }
+            else {
+                $('#txtSourceOrderType').addOption("", "");
+            }                              
+        }
+    });
+}
+
+
+ function Periode(CONSUME_MONTH) {  
+            var periode = "";           
+            var yyyy = CONSUME_MONTH.substring(0,4);
+            var mm = CONSUME_MONTH.substring(CONSUME_MONTH.length - 2,CONSUME_MONTH.length);                    
+            var month = "";
+            
+            if (mm == '01') {
+                month = "January";
+            }
+            else if (mm == '02') {
+                month = "February";
+            }
+            else if (mm == '03') {
+                month = "March";
+            }
+            else if (mm == '04') {
+                month = "April";
+            }
+            else if (mm == '05') {
+                month = "May";
+            }
+            else if (mm == '06') {
+                month = "June";
+            }
+            else if (mm == '07') {
+                month = "July";
+            }
+            else if (mm == '08') {
+                month = "August";
+            }
+            else if (mm == '09') {
+                month = "September";
+            }
+            else if (mm == '10') {
+                month = "October";
+            }
+            else if (mm == '11') {
+                month = "November";
+            }
+            else if (mm == '12') {
+                month = "December";
+            }          
+            periode = month + " " + yyyy; 
+            
+            return  periode;           
+        }
+    
+        function chop(value) {
+            return value.substr(1);
+        }
+
+        function hapus(id, value) {
+            if (value == "0") {
+                id.value = "";
+                return 0;
+            }
+        }
+
+        function muncul(id, value) {
+            if (value == "") {
+                id.value = "0";
+                return 0;
+            }
+        }
+
+        function detectComma(lvalue, lfield) {
+            if (lvalue.length > 1) {
+                var temp = removeComma(lvalue);
+                if (temp.substr(0, 1) == "0" || temp.substr(0, 1) == ",") {
+                    var temp2 = chop(temp);
+                    detectComma(temp2, lfield);
+                }
+                else {
+                    lfield.value = putComma(temp);
+                }
+            }
+            else {
+                lfield.value = putComma(lvalue);
+            }
+        }
+
+        function putComma(in_fld) {
+            var t = 0;
+            var o_fld = "";
+            var w_fld = "";
+
+            min_sign = minus_sign(in_fld)
+            period_fld = removeperiod(in_fld)
+            in_fld = removeComma2(in_fld)
+
+            t = in_fld.length;
+            for (t; t > 3; (t = t - 3)) {
+                w_fld = "," + in_fld.substring(t - 3, t);
+                o_fld = w_fld + o_fld;
+            }
+            w_fld = in_fld.substring(0, t);
+            o_fld = min_sign + w_fld + o_fld + period_fld;
+
+            in_fld = o_fld;
+            return (o_fld);
+        }
+
+        function minus_sign(in_fld) {
+            var w_fld = "";
+            var o_fld = "";
+
+            w_fld = in_fld.substring(0, 1);
+            if (w_fld == "-") {
+                o_fld = "-"
+            }
+            return (o_fld);
+        }
+
+        function removeperiod(in_fld) {
+            var t = 0;
+            t = in_fld.length;
+            var o_fld = "";
+            var w_fld = "";
+            var trig = 0;
+            for (var i = 0; i < t; i++) {
+                w_fld = in_fld.substring(i, i + 1);
+                if ((w_fld >= "0" && w_fld <= "9" && trig == 1) || (w_fld == "." && trig == 0)) {
+                    o_fld = o_fld + w_fld;
+                    if (w_fld == ".") trig = 1;
+                }
+            }
+            return (o_fld);
+        }
+
+        function removeComma2(in_fld) {
+            var t = 0;
+            t = in_fld.length;
+            var o_fld = "";
+            var w_fld = "";
+            var trig = 0;
+            for (var i = 0; i < t; i++) {
+                w_fld = in_fld.substring(i, i + 1);
+                if ((w_fld >= "0" && w_fld <= "9" && trig == 0) || (w_fld == "." && trig == 0)) {
+                    if (w_fld == ".") {
+                        trig = 1;
+                    } else o_fld = o_fld + w_fld;
+                }
+            }
+            return (o_fld);
+        }
+
+        function fixNumber(theinput) {
+            var str2 = theinput;
+            var oStr = "";
+            for (var i = 0; i < str2.length; i++) {
+                var ch = str2.substring(i, i + 1)
+                if ((ch >= "0" && ch <= "9") || ch == '.') {
+                    oStr = oStr + ch;
+                }
+            }
+            return eval(oStr);
+        }
+
+        function removeComma(in_fld) {
+            var t = 0;
+            t = in_fld.length;
+            var o_fld = "";
+            var w_fld = "";
+
+            for (var i = 0; i < t; i++) {
+                w_fld = in_fld.substring(i, i + 1);
+                if ((w_fld >= "0" && w_fld <= "9") || (w_fld == ".")) {
+                    o_fld = o_fld + w_fld;
+                }
+            }
+            return (o_fld);
+        }   
+     
+</script>

@@ -1,0 +1,491 @@
+﻿@using GPS.Constants
+@using GPS.Controllers.PO
+@using GPS.Controllers.PR
+@using GPS.Core.ViewModel
+@using GPS.ViewModels.PO
+@model GPS.ViewModels.GenericViewModel<UrgentSPKViewModel>
+@{
+    Layout = CommonPage.MainLayout;
+}
+
+@section HeadScript {
+    <!-- Bootstrap Datepicker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/datepicker.css")" />
+    <!-- Daterange picker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/js/jquery.filedownload.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/tdk.lookup.js")"></script>
+    <!-- Bootstrap Datepicker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+    <!-- Daterange picker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        /* ============================== Init: begin ============================== */
+
+        function GetDisableList() {
+            return [
+                "#txt-prno",
+                "#cmb-prstatus",
+                "#txt-spkno",
+                "#btn-search",
+                "#btn-clearsearch",
+                "[id^=btnurgentspk-add-]",
+                "[id^=btnurgentspk-edit-]",
+                "#cmb-perpage-urgentspk"
+            ];
+        }
+
+        function DisableAllFeatures() {
+            $.Disable(GetDisableList());
+            $("[id^=lnk-page-urgentspk-]").addClass("_pagination-disabled");
+        }
+
+        function EnableAllFeatures() {
+            $.Enable(GetDisableList());
+            $("[id^=lnk-page-urgentspk-]").removeClass("_pagination-disabled");
+        }
+
+        function OnAjaxBegin(title) {
+            $.progressbox.show($tdk.PageTitle, title);
+            DisableAllFeatures();
+        }
+
+        function OnAjaxComplete() {
+            EnableAllFeatures();
+            $.progressbox.hide();
+        }
+
+        function OnAjaxError(data) {
+            var result = $.ValidateASPError(data.responseText);
+            $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+        }
+
+        function ResetForm() {
+            $.Clear([
+                "#txt-prno",
+                "#cmb-prstatus",
+                "#txt-spkno"
+            ]);
+        }
+
+        function DisplayVendor() {
+            [
+                "#lookup-spkvendor",
+                "#txtspk-vendoraddr",
+                "#txtspk-vendorpostal",
+                "#txtspk-vendorcity"
+            ].forEach(function (el) {
+                $(el).closest(".form-group").removeClass("hidden");
+            });
+
+            $("#lookup-spkvendor").lookup({
+                IsSingleSelection: true,
+                LookupOpenUrl: "@POCreationController.Action.OpenCreationVendorLookup",
+                LookupSearchUrl: "@POCreationController.Action.SearchCreationVendorLookup",
+                OnBeginCallback: function () { OnAjaxBegin("Search Vendor"); },
+                OnEndCallback: OnAjaxComplete,
+                OnSearchButtonClick: function () { $.ClearLookup(["#lookup-spkvendor"]); },
+                OnRowSelected: function (selected) {
+                    OnAjaxBegin("Get Vendor Info");
+                    $.ajax({
+                        type: "POST",
+                        url: "@UrgentSPKCreationController.Action.GetVendorInfo",
+                        data: { vendorCode: selected.Value },
+                        success: function (data) {
+                            if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                                var vendor = JSON.parse(data.Message);
+                                ViewData.Add("VendorInfo", {
+                                    Code: selected.Value,
+                                    Name: selected.Name,
+                                    Address: vendor.VendorAddress,
+                                    Postal: vendor.VendorPostal,
+                                    City: vendor.VendorCity
+                                });
+                                $("#txtspk-vendoraddr").val(vendor.VendorAddress);
+                                $("#txtspk-vendorpostal").val(vendor.VendorPostal);
+                                $("#txtspk-vendorcity").val(vendor.VendorCity);
+
+                                $("#popuplookup-spkvendor").modal("hide");
+                            }
+                            else {
+                                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                            }
+                        },
+                        complete: OnAjaxComplete,
+                        error: OnAjaxError
+                    });
+                }
+            });
+        }
+
+        function OnAjaxBegin(title) {
+            $.progressbox.show($tdk.PageTitle, title);
+            DisableAllFeatures();
+        }
+
+        function OnAjaxComplete() {
+            EnableAllFeatures();
+            $.progressbox.hide();
+        }
+
+        function OnAjaxError(data) {
+            var result = $.ValidateASPError(data.responseText);
+            $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+        }
+
+        ResetForm();
+        DisplayVendor();
+        EnableAllFeatures();
+
+        var InitSPKForm, FillSPKInfo;
+        var initSPKTimer = setInterval(function () {
+            InitSPKForm = ViewData.Get("InitSPKForm");
+            if (InitSPKForm !== undefined) {
+                clearInterval(initSPKTimer);
+            }
+        }, 30);
+        var fillSPKTimer = setInterval(function () {
+            FillSPKInfo = ViewData.Get("FillSPKInfo");
+            if (FillSPKInfo !== undefined) {
+                clearInterval(fillSPKTimer);
+            }
+        }, 30);
+
+        var curdate = new Date();
+        curdate.getDate();
+        curdate.setMonth(curdate.getMonth() - 3);
+
+        $('input[name=date-range-picker]').daterangepicker({
+            format: 'DD.MM.YYYY',
+            'applyClass': 'btn-sm btn-success',
+            'cancelClass': 'btn-sm btn-default',
+            startDate: curdate,
+            locale: {
+                applyLabel: 'Apply',
+                cancelLabel: 'Cancel',
+            }
+        })
+			.prev().on(ace.click_event, function () {
+			    $(this).next().focus();
+			});
+
+        var dt = new Date();
+        dt.getDate();
+        $("#docdate").val(("0" + curdate.getUTCDate()).slice(-2) + '.' + ("0" + (curdate.getUTCMonth() + 1).toString()).slice(-2) + '.' + curdate.getUTCFullYear() + " - " + ("0" + dt.getUTCDate()).slice(-2) + '.' + ("0" + (dt.getUTCMonth() + 1).toString()).slice(-2) + '.' + dt.getUTCFullYear());
+
+        /* =============================== Init: end =============================== */
+
+        /* ============================= Search: begin ============================= */
+
+        $(document).on("click", "[id^=lnkurgentspk-]", function () {
+            OnAjaxBegin("Open PR Inquiry");
+            var embedded = $(this).data("embedded");
+            $.ajax({
+                type: "POST",
+                url: "@PRInquiryController._ShowLatestPR",
+                data: {
+                    PR_NO: embedded.PRNo,
+                    DIVISION_ID: 0
+                },
+                success: function (data) {
+                    window.open("/PRInquiry", '_blank');
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        function GetValidDate(date) {
+            if (date != "") {
+                date = date.split('.');
+                var date = date[2] + '-' + date[1] + '-' + date[0];
+            }
+            return date;
+        }
+
+        function GetSearchCriteria(page, pageSize) {
+            page = page || 1;
+            pageSize = pageSize || $("#cmb-perpage-urgentspk").GetPageSize();
+
+            var docdate = $("#docdate").val().split('-') || "";
+            var datefrom = docdate != "" ? GetValidDate(docdate[0].trim()) : "";
+            var dateto = docdate != "" ? GetValidDate(docdate[1].trim()) : "";
+
+            return {
+                PRNo: $("#txt-prno").valOrDefault(),
+                PRStatus: $("#cmb-prstatus").valOrDefault(),
+                SPKNo: $("#txt-spkno").valOrDefault(),
+                SPKDateFrom: datefrom,
+                SPKDateTo: dateto,
+                CurrentPage: page,
+                PageSize: pageSize
+            };
+        }
+
+        function SPKSearchCriteriaIsValid(page) {
+            var criteria = GetSearchCriteria(page);
+            if (criteria.PRNo === "" &&
+                criteria.PRStatus === "" &&
+                criteria.SPKNo === "" &&
+                criteria.SPKDateFrom === "" &&
+                criteria.SPKDateTo === "") {
+                return false;
+            }
+
+            return true;
+        }
+
+        var Search = window["Searchurgentspk"] = function (page, pageSize, responseCallback) {
+            OnAjaxBegin("Search");
+            $.ajax({
+                type: "POST",
+                url: "@UrgentSPKCreationController.Action.Search",
+                data: JSON.stringify(GetSearchCriteria(page, pageSize)),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: responseCallback,
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        };
+
+        var SearchResponseCallback = window["SearchurgentspkResponseCallback"] = function (data) {
+            if (!data.ResponseType) {
+                $("#grid-urgentspk").html(data);
+            }
+            else {
+                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+            }
+        };
+
+        $("#btn-search").click(function (e) {
+            OnAjaxBegin("Search");
+            if (SPKSearchCriteriaIsValid(undefined)) {
+                Search(undefined, undefined, SearchResponseCallback);
+            }
+            else {
+                $.displaymessagebox.show("@DisplayMessageId.SelectOneCriteria");
+
+                OnAjaxComplete();
+            }
+        });
+
+        $("#btn-clearsearch").click(function (e) {
+            OnAjaxBegin("Clear Search");
+            ResetForm();
+
+            $.ajax({
+                type: "POST",
+                url: "@UrgentSPKCreationController.Action.ClearSearch",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#grid-urgentspk").html(data);
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        /* ============================== Search: end ============================== */
+
+        /* =============================== SPK: begin =============================== */
+
+        $(document).on("click", "[id^=imgurgentspk-]", function (e) {
+            e.preventDefault();
+            OnAjaxBegin("Get SPK file");
+
+            var embedded = $(this).data("embedded");
+            $.fileDownload("@UrgentSPKCreationController.Action.DownloadSPKPdf", {
+                httpMethod: "POST",
+                async: false,
+                data: {
+                    prNo: embedded.PRNo,
+                    spkNo: embedded.SPKNo
+                }
+            });
+
+            OnAjaxComplete();
+        });
+
+        ViewData.Add("OnOKSPOKConfirmButtonClick", function () {
+            $("#pop-createspkconfirm").modal("hide");
+            $("#pop-spkform").modal();
+        });
+
+        ViewData.Add("OnCancelSPKConfirmButtonClick", function () {
+            $("#pop-createspkconfirm").modal("hide");
+        });
+
+        ViewData.Add("OnOKSPKButtonClick", function () {
+            $("#pop-savespkconfirm").modal();
+        });
+
+        ViewData.Add("OnCancelSPKButtonClick", function () {
+            $("#pop-cancelspkconfirm").modal();
+        });
+
+        ViewData.Add("OnOKSaveSPKConfirmButtonClick", function () {
+            $("#pop-savespkconfirm").modal("hide");
+            $("#pop-spkform").modal("hide");
+            var currentMode = ViewData.Get("SPKSaveMode");
+            var postUrl = currentMode === "@EditMode.Add" ? "@UrgentSPKCreationController.Action.Save" : "@UrgentSPKCreationController.Action.Update"
+            var currentEmbedded = ViewData.Get("CurrentEmbedded");
+            $.ajax({
+                type: "POST",
+                url: postUrl,
+                data: JSON.stringify({
+                    ProcessId: ViewData.Get("ProcessId"),
+                    PRNo: currentEmbedded.PRNo,
+                    PONo: currentEmbedded.PONo,
+                    SPKNo: currentEmbedded.SPKNo,
+                    SPKInfo: ViewData.Get("SPKInfo")
+                }),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: function (data) {
+                    if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                        $.messagebox.show("@ActionResponseViewModel.Success", data.Message, "@ActionResponseViewModel.Success");
+                        window.location.href = "@Url.Action("Index","UrgentSPKCreation")";
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        ViewData.Add("OnCancelSaveSPKConfirmButtonClick", function () {
+            $("#pop-savespkconfirm").modal("hide");
+        });
+
+        ViewData.Add("OnOKCancelSPKConfirmButtonClick", function () {
+            var oriSPK = ViewData.Get("OriginalSPKInfo");
+            if (oriSPK !== undefined) {
+                ViewData.Add("SPKInfo", oriSPK);
+                InitSPKForm();
+                FillSPKInfo(oriSPK);
+            }
+
+            $("#pop-cancelspkconfirm").modal("hide");
+            $("#pop-spkform").modal("hide");
+        });
+
+        ViewData.Add("OnCancelCancelSPKConfirmButtonClick", function () {
+            $("#pop-cancelspkconfirm").modal("hide");
+        });
+
+        function SetSPKInitialData(mode, currentEmbedded) {
+            ViewData.Add("SPKSaveMode", mode);
+            ViewData.Add("CurrentEmbedded", currentEmbedded);
+            $("#txtspk-amount").val($.AsPrice(currentEmbedded.Amount));
+
+            $("#pop-createspkconfirm").modal();
+        }
+
+        $(document).on("click", "[id^=btnurgentspk-add-]", function (e) {
+            $("#spkmode").text("create");
+            InitSPKForm();
+            SetSPKInitialData("@EditMode.Add", $(this).data("embedded"));
+        });
+
+        $(document).on("click", "[id^=btnurgentspk-edit-]", function (e) {
+            $("#spkmode").text("update");
+            var currentEmbedded = $(this).data("embedded");
+            InitSPKForm();
+
+            $.ajax({
+                type: "POST",
+                url: "@UrgentSPKCreationController.Action.GetSPKInfo",
+                data: {
+                    prNo: currentEmbedded.PRNo,
+                    spkNo: currentEmbedded.SPKNo
+                },
+                success: function (data) {
+                    if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                        var spk = JSON.parse(data.Message);
+                        FillSPKInfo(spk);
+                        ViewData.Add("OriginalSPKInfo", spk);
+                        ViewData.Add("SPKInfo", spk);
+                        SetSPKInitialData("@EditMode.Edit", currentEmbedded);
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        /* ================================ SPK: end ================================ */
+    });
+</script>
+
+<div class="form-horizontal">
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-prno" class="col-xs-5 col-sm-4 control-label required-left text-muted">PR No</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-prno" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="cmb-prstatus" class="col-xs-5 col-sm-4 control-label required-left text-muted">PR Status</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-prstatus", PRInquiryController.SelectPRStatus("DOC"), new {@class = "form-control"})
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-spkno" class="col-xs-5 col-sm-4 control-label required-left text-muted">SPK No</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-spkno" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-spkno" class="col-xs-5 col-sm-4 control-label required-left text-muted">SPK Date</label>
+                <div class="col-xs-7 col-sm-8">
+                    <div class="input-group">
+						<span class="input-group-addon" style="cursor: pointer;padding:4px 10px;">
+							<i class="fa fa-calendar bigger-110"></i>
+						</span>
+						<input style = "width:100%"" type="text" name="date-range-picker" id="docdate" data-date-format="dd.mm.yyyy"/>
+					</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div class="col-xs-12 text-right">
+            <button id="btn-search" class="btn btn-primary btn-xs btn-std">Search</button>
+            <button id="btn-clearsearch" class="btn btn-default btn-xs btn-std">Clear</button>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="line-br"></div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div id="grid-urgentspk" class="col-xs-12">
+            @Html.Partial(UrgentSPKCreationController.Partial.CreationSPKGrid, Model)
+        </div>
+    </div>
+</div>
+
+@Html.Partial(POCommonController.Partial.CommonSPKForm)

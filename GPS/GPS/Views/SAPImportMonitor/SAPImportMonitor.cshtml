@@ -1,0 +1,405 @@
+﻿@using GPS.CommonFunc.WebControl
+@using GPS.Constants
+@using GPS.Controllers
+@using GPS.Controllers.Master
+@using GPS.Core.ViewModel
+@using GPS.Models.SAPImportMonitor
+@model GPS.ViewModels.SAPImportMonitor.SAPImportMonitorViewModel
+@{
+    Layout = CommonPage.MainLayout;
+}
+
+@section HeadScript {
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/bootstrap-datetimepicker.css")" />
+
+    <!-- NOTE: moment.js is referenced by daterangepicker -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datetimepicker.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+
+    <link rel="stylesheet" href="@Url.Content("~/Content/afixedtable/afixedtable.css")"/>
+    <script type="text/javascript" src="@Url.Content("~/Content/afixedtable/afixedtable.js")"></script>
+}
+
+<div class="form-horizontal">
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-processid" class="col-xs-5 col-sm-4 control-label text-muted">Process Id</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-processid" tabindex="1" autofocus class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-pono" class="col-xs-5 col-sm-4 control-label text-muted">PO No</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-pono" tabindex="2" class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="cmb-status" class="col-xs-5 col-sm-4 control-label text-muted">Status</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-status", SAPImportMonitorController.StatusSelectList, new {tabindex = "3", @class = "form-control"})
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="cmb-purchasinggrp" class="col-xs-5 col-sm-4 control-label text-muted">Purch. Group</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-purchasinggrp", PurchasingGroupController.PurchasingGroupSelectList, new {tabindex = "4", @class = "form-control"})
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6">
+            <div class="form-group form-group-xs">
+                <label for="txt-execdate" class="col-xs-5 col-sm-2 control-label text-muted">Exec Date</label>
+                <div class="col-xs-6 col-sm-5">
+                    @Html.DateInputBox("execdatefrom")
+                </div>
+                <div class="col-xs-6 col-sm-5">
+                    @Html.DateInputBox("execdateto")
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div class="col-sm-6 hidden-xs">
+        </div>
+        <div class="col-xs-12 col-sm-6 text-right">
+            <button id="btn-detail" tabindex="7" class="btn btn-primary btn-xs btn-std">Show Detail</button>
+            <button id="btn-search" tabindex="8" class="btn btn-primary btn-xs btn-std">Search</button>
+            <button id="btn-clearsearch" tabindex="9" class="btn btn-default btn-xs btn-std">Clear</button>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="line-br"></div>
+    <div class="row">
+        <div id="grid-sapimport" class="col-xs-12">
+            @Html.Partial(SAPImportMonitorController.Partial.Grid, Model)
+        </div>
+    </div>
+</div>
+
+@section BodyScript{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            /* ============================== Init: begin ============================== */
+
+            function GetDisableList() {
+                return [
+                    "#txt-processid",
+                    "#cmb-purchasinggrp",
+                    "#txt-pono",
+                    "#txtdateinput-execdatefrom",
+                    "#txtdateinput-execdateto",
+                    "#cmb-status",
+                    "btn-search",
+                    "btn-clearsearch",
+                    "btn-detail"
+                ];
+            }
+
+            function DisableAllFeatures() {
+                $.Disable(GetDisableList());
+            }
+
+            function EnableAllFeatures() {
+                $.Enable(GetDisableList());
+            }
+
+            function ResetForm() {
+                $.Clear(GetDisableList());
+            }
+
+            function Init() {
+                ResetForm();
+                EnableAllFeatures();
+
+                $("#txtdateinput-execdatefrom").datetimepicker({
+                    format: "dd.mm.yyyy hh:ii",
+                    autoclose: true
+                })
+                .on("changeDate", function (e) {
+                    $("#txtdateinput-execdateto").datetimepicker("setStartDate", $("#txtdateinput-execdatefrom").valOrDefault());
+                });
+
+                $("#txtdateinput-execdateto").datetimepicker({
+                    format: "dd.mm.yyyy hh:ii",
+                    autoclose: true
+                })
+                .on("changeDate", function (e) {
+                    $("#txtdateinput-execdatefrom").datetimepicker("setEndDate", $("#txtdateinput-execdateto").valOrDefault());
+                });
+            }
+
+            function OnAjaxBegin(title) {
+                $.progressbox.show($tdk.PageTitle, title);
+                DisableAllFeatures();
+            }
+
+            function OnAjaxComplete() {
+                EnableAllFeatures();
+                $.progressbox.hide();
+            }
+
+            function OnAjaxError(data) {
+                var result = $.ValidateASPError(data.responseText);
+                $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+            }
+
+            Init();
+
+            /* =============================== Init: end =============================== */
+
+            /* ============================= Search: begin ============================= */
+
+            function GetSearchCriteria(page, pageSize) {
+
+                page = page || 1;
+                pageSize = pageSize || $("#cmb-perpage-sapimport").GetPageSize();
+                return {
+                    ProcessId: $("#txt-processid").valOrDefault(),
+                    PONo: $("#txt-pono").valOrDefault(),
+                    Status: $("#cmb-status").valOrDefault(),
+                    PurchasingGroup: $("#cmb-purchasinggrp").valOrDefault(),
+                    ExecDateFromString: $("#txtdateinput-execdatefrom").valOrDefault(),
+                    ExecDateToString: $("#txtdateinput-execdateto").valOrDefault(),
+
+                    CurrentPage: page,
+                    PageSize: pageSize
+                };
+            }
+
+            // NOTE: this method is used in Paging
+            var Search = window["Search" + "@SAPImportMonitorRepository.DataName"] = function (page, pageSize, responseCallback) {
+                OnAjaxBegin("Search");
+                $.ajax({
+                    type: "POST",
+                    url: "@SAPImportMonitorController.Action.Search",
+                    data: JSON.stringify(GetSearchCriteria(page, pageSize)),
+                    contentType: "@CommonFormat.JsonMimeType",
+                    success: responseCallback,
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            };
+
+            var SearchResponseCallback = window["Search" + "@SAPImportMonitorRepository.DataName" + "ResponseCallback"] = function (data) {
+                if (!data.ResponseType) {
+                    $("#grid-sapimport").html(data);
+                    //$.remakeFixedTable();
+                }
+                else {
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                }
+            };
+
+            $("#btn-search").click(function (e) {
+                OnAjaxBegin("Search");
+
+                Search(undefined, undefined, SearchResponseCallback);
+
+                OnAjaxComplete();
+            });
+
+            $("#btn-clearsearch").click(function (e) {
+                OnAjaxBegin("Clear Search");
+                ResetForm();
+
+                $.ajax({
+                    type: "POST",
+                    url: "@SAPImportMonitorController.Action.ClearSearch",
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            $("#grid-sapimport").html(data);
+                            //$.remakeFixedTable();
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            });
+
+            Search(undefined, undefined, SearchResponseCallback);
+
+            /* ============================== Search: end ============================== */
+
+            /* @*
+            var freezeTable = {
+                init: function () {
+                    $(document).find('.fixed-columns').each(function (i, elem) {
+                    freezeTable.fixColumns(elem);
+                    });
+                },
+
+                fixColumns: function (table, columns) {
+                    var $table = $(table);
+                    $table.removeClass('fixed-columns');
+                    $table.css('overflow-y', 'hidden');
+                    $table.css('max-height', '446px');
+                    var $fixedColumns = $table.clone().attr('id', $table.attr('id') + '-fixed').insertBefore($table).addClass('fixed-columns-fixed');
+
+                    $fixedColumns.find('*').each(function (i, elem) {
+                        if ($(this).attr('id') !== undefined) {
+                            $table.find("[id='" + $(this).attr("id") + "']").attr('id', $(this).attr('id') + '-hidden');
+                        }
+                        if ($(this).attr('name') !== undefined) {
+                            $table.find("[name='" + $(this).attr("name") + "']").attr('name', $(this).attr('name') + '-hidden');
+                        }
+                    });
+
+                    if (columns !== undefined) {
+                        $fixedColumns.find('tr').each(function (x, elem) {
+                            $(elem).find('th,td').each(function (i, elem) {
+                                if (i >= columns) {
+                                    $(elem).remove();
+                                }
+                            });
+                        });
+                    } else {
+                        $fixedColumns.find('tr').each(function (x, elem) {
+                            $(elem).find('th,td').each(function (i, elem) {
+                                if (!$(elem).hasClass('fixed-column')) {
+                                    $(elem).remove();
+                                } else {
+                                    /*
+                                    * Updated by : alira.salman
+                                    * Updated dt : 11.08.2015
+                                    * Description :
+                                    * To maintain freeze-column size when window resized. remember to give id
+                                    * both freezing table and related freeze column.
+                                    */
+                                    var $baseColumn = $table.find("[id='" + $(elem).attr('id') + "-hidden" + "']");
+                                    $(elem).width($baseColumn.width());
+
+                                    //$(elem).width($(elem).width());
+                                }
+                            });
+                        });
+                    }
+
+                    $fixedColumns.find('tr').each(function (i, elem) {
+                        $(this).height($table.find('tr:eq(' + i + ')').height());
+                    });
+                }
+            };
+
+            function hideColumn(btn) {
+
+                if ($("._hide").is(":visible")) {
+                    $("._hide").hide();
+                    if (btn != undefined) $(btn).html("Show Detail");
+                    $(document).find('.fixed-columns').each(function (i, elem) {
+                        freezeTable.fixColumns(elem);
+                    });
+                    $.initFixedTable();
+                    $.resetFixedTable();
+                } else {
+                    $("._hide").show();
+                    if (btn != undefined) $(btn).html("Hide Detail");
+                    $(document).find('.fixed-columns').each(function (i, elem) {
+                        freezeTable.fixColumns(elem);
+                    });
+                    $.initFixedTable();
+                    $.resetFixedTable();
+                }
+            }
+
+            function toogleTableMode(mode, table) {
+                var $table = $("#" + table);
+
+                if (mode === "show") {
+                    $table.find(".toogle-column").each(function (index, element) {
+                        $(element).show();
+                    });
+                }
+                else {
+                    $table.find(".toogle-column").each(function (index, element) {
+                        $(element).hide();
+                    });
+                }
+            }
+
+            function toogleTable(button, table) {
+                var $table = $("#" + table);
+                var $button = $(button);
+                var mode = $button.data("mode");
+
+                if (mode === "show") {
+                    $button.data("mode", "hide");
+                    $button.html("Sembunyi Detil");
+                }
+                else {
+                    $button.data("mode", "show");
+                    $button.html("Tampil Detil");
+                }
+
+                toogleTableMode(mode, table);
+
+                if ($table.find("td#blank-col")) {
+                    var $blankCol = $table.find("td#blank-col");
+                    var spanColumn = parseInt($blankCol.attr("colspan")) || 0;
+                    var toogleColumn = parseInt($blankCol.data("tooglecolumn")) || 0;
+
+                    if (mode === "show") {
+                        spanColumn = spanColumn + toogleColumn;
+                        $blankCol.attr("colspan", spanColumn);
+                    }
+                    else {
+                        spanColumn = spanColumn - toogleColumn;
+                        $blankCol.attr("colspan", spanColumn);
+                    }
+                }
+
+                if ($table.hasClass("afixed-table")) {
+                    $.remakeFixedTable();
+                }
+            }
+
+            $("#btn-detail").click(function (e) {
+                OnAjaxBegin("Show Detail");
+
+                hideColumn($(this));
+
+                OnAjaxComplete();
+            });
+
+            *@ */
+
+            $("#btn-detail").click(function (e) {
+                OnAjaxBegin("Show Detail");
+
+                var eventSource = $(this);
+                $("#grid-sapimport")
+                    .toggledetail(
+                        function (datarow) {
+                            eventSource.text("Show Detail");
+
+                            if (datarow.html() === "@CommonDisplayMessage.NoData")
+                                $(datarow[0]).attr("colspan", 6);
+                        },
+                        function (datarow) {
+                            eventSource.text("Hide Detail");
+
+                            if (datarow.html() === "@CommonDisplayMessage.NoData")
+                                $(datarow[0]).attr("colspan", 10);
+                        }
+                    );
+
+                OnAjaxComplete();
+            });
+        });
+    </script>
+}

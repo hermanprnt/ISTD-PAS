@@ -1,0 +1,22 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="hidden-xs">
+    @Html.Partial("_PartialScript")
+    @Html.Partial("_SearchCriteria")
+    <div class="text-center" style="margin-bottom: 3px;">
+        <hr id="hrsrc" style="margin: 0; padding: 0;" />       
+    </div>
+    <div id="divtable">
+        @Html.Partial("_Grid")
+    </div>
+    <div class="modal fade" id="basicModal" data-backdrop="static" data-keyboard="false">
+        @Html.Partial("_AddEditPopUp")
+    </div>
+</div>
+
+<div class="visible-xs">
+</div>          
+
+           

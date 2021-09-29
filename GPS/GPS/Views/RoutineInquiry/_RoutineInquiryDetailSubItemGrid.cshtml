@@ -1,0 +1,40 @@
+﻿@using GPS.Constants
+@using GPS.Models.Master
+@model  GPS.Models.Master.Routine
+@{
+    List<Routine> data = ViewData["Routine_SubItem"] != null ?
+                            (List<Routine>)ViewData["Routine_SubItem"] :
+                            new List<Routine>(new List<Routine>());      
+}
+
+@if(data.Count > 0)
+{
+    int i = 1;
+    foreach(var si in data) 
+    {
+    <tr class="subitemgrid-@si.ITEM_NO">
+        @if(i == 1) {
+            <td colspan="4" rowspan="@data.Count"></td>
+        }
+        <td class="text-left" colspan="2">@si.SUBITEM_MAT_DESC</td>
+        <td class="text-right">@String.Format("{0:#,0.00}", si.SUBITEM_QTY)</td>
+        <td class="text-center">@si.SUBITEM_UOM</td>
+        <td></td>
+        <td class="text-right">@String.Format("{0:#,0.00}", si.PRICE_PER_UOM)</td>
+        <td class="text-right">@String.Format("{0:#,0.00}", si.SUBITEM_AMOUNT)</td>
+        <td class="text-center">@si.SUBITEM_WBS_NO</td>
+        <td class="text-center">@si.SUBITEM_COST_CENTER</td>
+        <td class="text-center">@si.SUBITEM_GL_ACCOUNT</td>
+        @if(i == 1) {
+            <td colspan="8" rowspan="@data.Count"></td>
+        }
+        @{i++;}
+    </tr>
+    }
+}
+else
+{
+    <tr class="removed text-center subitemgrid">
+        <td colspan="8">@CommonDisplayMessage.NoData</td>
+    </tr>
+}

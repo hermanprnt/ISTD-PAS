@@ -1,0 +1,26 @@
+﻿@using GPS.Models.Common
+@{
+    List<Announcement> announcementList = (List<Announcement>)ViewData["HomeAnnouncement"];
+}
+
+@if (announcementList.Count > 0)
+{
+    foreach (Announcement item in announcementList)
+    {
+        <div style="width:100%;overflow:auto;border:0.1em solid #DDD;">
+            <table id="table-HomeAnnouncement" class="table table-bordered table-condensed">
+                <tbody>
+                        <tr>
+                            <td>
+                                <div class="label-success" style="width:20px;display:inline-block;text-align:center;">
+                                    <span class="fa fa-check"></span>
+                                </div>
+                                <span>@item.MSG_CONTENT</span>
+                            </td>
+                        </tr>                
+                </tbody>
+            </table>
+        </div>
+    } 
+}
+

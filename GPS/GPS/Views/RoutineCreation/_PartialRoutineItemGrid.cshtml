@@ -1,0 +1,83 @@
+@using GPS.Constants
+@using GPS.Models.PR.PRCreation
+@using GPS.Models.Master
+@model  GPS.Models.Master.Routine
+@{
+    List<Routine> ItemTemp = (List<Routine>)ViewData["ITEM_TEMP_DATA"] != null ? (List<Routine>)ViewData["ITEM_TEMP_DATA"] : new List<Routine>();
+}
+@if (ItemTemp.Count > 0)
+{
+    int i = 0;
+    
+    foreach (var item in ItemTemp)
+    {
+        string a = String.Format("{0:0.####}", item.PRICE);
+        <tr class="removed isrow" id="row-@item.ITEM_NO">
+            <td class="text-center custom-creation-datagrid" id="tcollapse-@item.ITEM_NO">
+                @{ string classHide = "";
+                    if (item.ITEM_CLASS != "S") { classHide = "hidden"; }
+                }
+                <div id="collapseitem-@item.ITEM_NO" class="@classHide" onclick="javascript:collapseItem('N', '-@item.ITEM_NO');">
+                    <span id="icon-class" class="fa fa-plus-square-o" style="cursor: pointer;"></span>
+                </div>
+            </td>
+            <td class="text-center custom-creation-datagrid" id="tno-@item.ITEM_NO" style="display:none">@item.ITEM_NO</td>
+            <td class="text-center custom-creation-datagrid" id="tclass-@item.ITEM_NO">
+                <span class="text tclass-@item.ITEM_NO">@item.ITEM_CLASS</span>
+            </td>
+            <td class="text-center custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text titem-@item.ITEM_NO">@item.VALUATION_CLASS</span>
+                <span class="text tvaldesc-@item.ITEM_NO hidden">@item.VALUATION_CLASS_DESC</span>
+                <span class="text tvalitemtype-@item.ITEM_NO hidden">@item.ITEM_TYPE</span>
+            </td> 
+            <td width="100px" class="text-left custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text tmatno-@item.ITEM_NO">@if(item.MAT_NUMBER != "X"){ @item.MAT_NUMBER }</span>
+                <span class="text tcar-@item.ITEM_NO" style="display:none">@item.CAR_FAMILY_CD</span>
+                <span class="text tgrp-@item.ITEM_NO" style="display:none" >@item.MAT_GRP_CD</span>
+                <span class="text ttype-@item.ITEM_NO" style="display:none" >@item.MAT_TYPE_CD</span>
+                <span class="text tquotaflag-@item.ITEM_NO" style="display:none" >@item.QUOTA_FLAG</span>
+            </td>  
+            <td width="180px" class="text-left custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text tmatdesc-@item.ITEM_NO">@item.MAT_DESC</span>
+            </td>            
+            <td width="50px" class="text-right custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text-center tqty-@item.ITEM_NO">@item.QTY</span>
+            </td>
+            <td width="70px" class="text-center custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text tuom-@item.ITEM_NO">@item.UOM</span>
+                <span class="text hcalvalue-@item.ITEM_NO hidden">@item.CALC_VALUE</span>
+             </td>
+            <td width="70px" class="text-center custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text tcurr-@item.ITEM_NO">@item.CURR</span>
+            </td>
+            <td width="90px" class="text-right custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text-right tprice-@item.ITEM_NO">@(String.Format("{0:#,0.00##}", item.PRICE_PER_UOM))</span>
+                <span class="text-right hprice-@item.ITEM_NO hidden">@item.PRICE_PER_UOM</span>
+            </td>
+            <td width="90px" class="text-right custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text-right tamount-@item.ITEM_NO">@(String.Format("{0:#,0.00##}", item.AMOUNT))</span>
+                <span class="text-right hamount-@item.ITEM_NO hidden">@item.AMOUNT</span>
+            </td> 
+            <td class="text-center custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text twbs-@item.ITEM_NO">@if(item.WBS_NO != "X") { @item.WBS_NO }</span>
+                <span class="text twbsname-@item.ITEM_NO hidden">@item.WBS_NAME</span>
+            </td>
+            <td class="text-center custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text tcost-@item.ITEM_NO">@if(item.COST_CENTER != "X") { @item.COST_CENTER }</span>
+            </td>  
+            <td width="100px" class="text-center custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text tgl-@item.ITEM_NO">@if(item.GL_ACCOUNT_CD != "X") { @item.GL_ACCOUNT_CD }</span>
+            </td>
+            <td width="120px" class="text-left custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text-center tvendor-@item.ITEM_NO">@item.VENDOR_CD</span>
+                <span class="text-left tvendorcd-@item.ITEM_NO hidden">@item.VENDOR_CD</span>
+                <span class="text-left tvendorname-@item.ITEM_NO hidden">@item.VENDOR_NAME</span>
+            </td>
+            <td class="text-center custom-creation-datagrid">
+                <i class="fa fa-pencil btn btn-xs btn-primary" id="editlink" onclick="javascript:EditItem('@item.ITEM_NO')"></i>
+                <i class="fa fa-trash btn btn-xs btn-danger" id="dellink" onclick="javascript:DeleteItem('@item.ITEM_NO')"></i>
+            </td>
+        </tr>
+        i++;
+    }
+}

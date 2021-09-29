@@ -1,0 +1,8 @@
+INSERT INTO TB_M_COST_CENTER
+SELECT * FROM #tmpCostCenter
+;
+
+IF OBJECT_ID('tempdb..#tmpCostCenter') IS NOT NULL
+BEGIN
+	DROP TABLE #tmpCostCenter
+END

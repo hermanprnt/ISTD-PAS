@@ -1,0 +1,43 @@
+﻿@using GPS.Constants
+@using GPS.Models.PRPOApproval
+@{
+    List<PRApprovalSubItem> data = ViewData["PRApprovalSubItem"] != null ?
+                            (List<PRApprovalSubItem>)ViewData["PRApprovalSubItem"] :
+                            new List<PRApprovalSubItem>(new List<PRApprovalSubItem>());
+    string ITEM_NO = ViewData["ItemNo"].ToString();  
+}
+
+@if(data.Count > 0)
+{
+    int i = 1;
+    foreach(var si in data) 
+    {
+    <tr class="subitemgrid-@si.ITEM_NO">
+        @if(i == 1) {
+            <td colspan="3" rowspan="@data.Count"></td>
+        }
+        <td class="text-left" colspan="2">@si.MAT_DESC</td>
+        <td class="text-right">@String.Format("{0:#,0.00}", si.QTY)</td>
+        <td class="text-center">@si.UOM</td>
+        <td></td>
+        <td class="text-right">@String.Format("{0:#,0.00}", si.PRICE_PER_UOM)</td>
+        <td class="text-right">@String.Format("{0:#,0.00}", si.AMOUNT)</td>
+        <td class="text-center"></td>
+        <td class="text-center">@si.WBS_NO</td>
+        <td class="text-center">@si.COST_CENTER</td>
+        <td class="text-center">@si.GL_ACCOUNT</td>
+        @if(i == 1) {
+            <td colspan="7" rowspan="@data.Count"></td>
+        }
+        @{i++;}
+    </tr>
+    }
+}
+else
+{
+    <tr class="removed text-center subitemgrid-@ITEM_NO">
+        <td colspan="5"></td>
+        <td colspan="8">@CommonDisplayMessage.NoData</td>
+        <td colspan="7"></td>
+    </tr>
+}

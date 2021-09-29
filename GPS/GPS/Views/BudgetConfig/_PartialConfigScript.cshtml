@@ -1,0 +1,258 @@
+﻿@using GPS.Controllers.Master
+@{
+    string fiyear = ViewData["FI_YEAR"] == null ? "" : ViewData["FI_YEAR"].ToString();
+    int DIVISION_ID = TempData["DIVISION_ID"] != null ? Convert.ToInt32(TempData["DIVISION_ID"]) : 0;
+}
+<script type="text/javascript" id="Common-PR">
+    $tdk.AjaxMethod = "POST";
+    $tdk.Alert = "#alert-search";
+    $tdk.AlertDetail = "#alert-detail";
+    $tdk.Success = "#success-search";
+    $tdk.Warning = "#warning-search";
+    $tdk.Division = "";
+    $tdk.isDetail = 0;
+    messagelife = 1;
+    
+</script>
+
+<script type="text/javascript" id="Search">
+    function ClearCriteria() {
+        $("#wbsyear").val("@fiyear");
+        $("#division").val("@DIVISION_ID");
+        $("#wbs").val('');
+
+        Search(1);
+    }
+
+    function ValidateYear() {
+        var res = "";
+        var date = $("#wbsyear").val();
+
+        if (date != "") {
+            if (date.length != 4)
+                res = "WBS Year not in correct format. Allowed format is 'YYYY'";
+            else if (isNaN(parseFloat(date)) && isFinite(date))
+                res = "Year should be in numeric";
+        }
+        return res;
+    }
+
+    function GetSearchParameters() {
+        return {
+            WBS_YEAR: $("#wbsyear").val(),
+            DIV_CD: $("#division").val(),
+            WBS_NO: $("#wbs").val()
+        };
+    }
+
+    function Search(isbutton) {
+        var param = GetSearchParameters();
+        var msg = ValidateYear();
+
+        if (msg != "") {
+            $.messagebox.show(
+                "Search WBS",
+                msg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+            if(isbutton === 1)
+                messagelife = 1;
+
+
+            $.progressbox.show("Search WBS", "Loading Data...");
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@BudgetConfigController._getdata",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (resultMessage) {
+                    $('.TableList').html(resultMessage);
+
+                    //wait until bind data finished
+                    $('.TableList').trigger("loaded");
+                    $.progressbox.hide();
+                },
+                error: function (resultMessage) {
+                    $.messagebox.show(
+                        "Error",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+                    $.progressbox.hide();
+                }
+            });
+        }
+
+        $('.TableList').bind("loaded", function () {
+            $.progressbox.hide();
+        });
+    }
+</script>
+
+<script type="text/javascript" id="Update">
+    function UpdateFlag(fromtype)
+    {
+        var checked = [];
+        $("input[name='chkwbs-" + fromtype.toLowerCase() + "[]']:checked").each(function () { checked.push($(this).val()); });
+
+        if (checked.length <= 0) {
+            $.messagebox.show(
+                "Warning",
+                "Please select at least one data " + fromtype + " budget to be updated",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+            $.progressbox.show("Update WBS", "Updating Data...");
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@BudgetConfigController._updatedata",
+                data: {
+                    TYPE: fromtype,
+                    WBS_YEAR: $("#wbsyear").val(),
+                    WBS_NO: checked.toString()
+                },
+                success: function (resultMessage) {
+                    $.progressbox.hide();
+                    if (resultMessage == "SUCCESS") {
+                        $.messagebox.show(
+                            "Info",
+                            "Data updated successfully",
+                            "SUC",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                        Search(1);
+                    }
+                    else {
+                        $.messagebox.show(
+                            "Error",
+                            resultMessage,
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                    }
+                },
+                error: function (resultMessage) {
+                    $.messagebox.show(
+                        "Error",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+                    $.progressbox.hide();
+                }
+            });
+        }
+    }
+</script>
+
+@*add : 20190703 : isid.rgl : fungsi download template & upload file*@
+<script type="text/javascript" id="upload">
+    function OnDownloadTemplate() {
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("CekTemplate")",
+            success: function (data) {
+                if(data == 'False'){
+                     $.messagebox.show(
+                        "Error",
+                        "Template Not Found",
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                 }
+                 else {
+                     $.fileDownload("BudgetConfig/DownloadTemplate/");
+                 }
+             }
+        });
+    }
+
+    $('#upfile').on('change', function (e) {
+        var fileName = $('#upfile').val();
+        var xls = fileName.match(/\.(xls?)$/i);
+        if (xls != null) {
+            var files = e.target.files;
+            if (files.length > 0) {
+                if (window.FormData !== undefined) {
+                    var data = new FormData();
+                    for (var x = 0; x < files.length; x++) {
+                        data.append("file" + x, files[x]);
+                    }
+
+                    $.progressbox.show("Upload", "Loading Data...");
+
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Content("~/BudgetConfig/UploadFile")",
+                        contentType: false,
+                    processData: false,
+                    data: data,
+                    success: function (data) {
+                        $.progressbox.hide();
+                        var result = data.message.split('|');
+                        if (result[0] == 'Error') {
+                            $.messagebox.show(
+                                "Error",
+                                result[1],
+                                "ERR",
+                                "SINGLE",
+                                "",
+                                ""
+                            )
+                        }
+                        else if (result[0] == 'Success') {
+                            $('#upfile').val('');
+                            window.location = "BudgetConfig/DownloadUploadedResult?path=" + result[1];
+                            onGetData(1);
+                        }
+                    },
+                    error: function (xhr, status, p3, p4) {
+                        var err = "Error " + " " + status + " " + p3 + " " + p4;
+                        if (xhr.responseText && xhr.responseText[0] == "{")
+                            err = JSON.parse(xhr.responseText).Message;
+                        console.log(err);
+                    }
+                });
+            } else {
+                $.messagebox.show(
+                    "Error",
+                    "This browser doesn't support HTML5 file uploads!",
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+            }
+        }
+    }
+    else {
+            $.messagebox.show(
+               "Error",
+               "Please select an excel file with format xls",
+               "ERR",
+               "SINGLE",
+               "",
+               ""
+           )
+    }
+    });
+</script>
+@*end : 20190703 : isid.rgl : fungsi download template & upload file*@

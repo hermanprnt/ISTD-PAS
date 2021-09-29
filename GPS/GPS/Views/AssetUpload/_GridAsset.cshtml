@@ -1,0 +1,150 @@
+﻿@using GPS.Constants
+@using GPS.Models.Asset
+@{
+    Tuple<List<AssetUpload>, int, string> GridData = ViewData["GridData"] != null ? 
+                            (Tuple<List<AssetUpload>, int, string>)ViewData["GridData"] : 
+                            new Tuple<List<AssetUpload>, int, string>(new List<AssetUpload>(), 0, "");
+                            
+    string errormessage = ViewData["Message"] != null ? ViewData["Message"].ToString() : String.Empty;
+}
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <div style="border: 1pt solid #ccc;">
+        <div id="tScrollHead" style="width: 98.65%; overflow: hidden;">
+            <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1360px;">
+                <thead>
+                    <tr>
+                        <th width="20px"></th>
+                        <th width="30px">No</th>
+                        <th width="80px">PR No.</th>
+                        <th width="50px">Item No.</th>
+                        <th width="50px">Seq No.</th>
+                        <th width="152px">Description</th>
+                        <th width="70px">Reg. Date</th>
+                        <th width="90px">Asset Class</th>
+                        <th width="110px">Asset Location</th>
+                        <th width="90px">Asset No</th>
+                        <th width="90px">Sub-asset</th>
+                        <th width="90px">Serial No.</th>
+                        <th class="_toggle-detail" width="120px;">Created By</th>
+                        <th class="_toggle-detail" width="80px;">Created Date</th>
+                        <th class="_toggle-detail" width="120px;">Changed By</th>
+                        <th class="_toggle-detail" width="80px;">Changed Date</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div id="tScrollBody" style="overflow: scroll; height: 270px;">
+            <table id="tblScroll" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1360px;">
+                <tbody>
+                    @if ((GridData.Item1.Count() > 0) && (GridData.Item1 != null) && (errormessage == ""))
+                    {
+                        foreach (AssetUpload item in GridData.Item1)
+                        {
+                            item.CREATED_DT = ((item.CREATED_DT != "01.01.0001") && (item.CREATED_DT != "01.01.1900")) ? item.CREATED_DT : "";
+                            item.CHANGED_DT = ((item.CHANGED_DT != "01.01.0001") && (item.CHANGED_DT != "01.01.1900")) ? item.CHANGED_DT : "";
+                            
+                            <tr>
+                                <td width="20px" class="text-center">
+                                    <input type="checkbox" class="check" name="checkasset[]" value="@item.PR_NO;@item.ITEM_NO;@item.SEQ_NO" style="height:11px"/>
+                                </td>
+                                <td width="30px" class="text-center">@item.NUMBER</td>
+                                <td width="80px" class="text-center">@item.PR_NO</td>
+                                <td width="50px" class="text-center">@item.ITEM_NO</td>
+                                <td width="50px" class="text-center">@item.SEQ_NO</td>
+                                <td width="152px" class="text-left">@item.DESCRIPTION</td>
+                                <td width="70px" class="text-center">@item.REGISTRATION_DATE</td>
+                                <td width="90px" class="text-center">@item.ASSET_CLASS</td>
+                                <td width="110px" class="text-left">@item.ASSET_LOCATION</td>
+                                <td width="90px" class="text-center">@item.ASSET_NO</td>
+                                <td width="90px" class="text-center">@item.SUBASSET_NO</td>
+                                <td width="90px" class="text-center">@item.SERIAL_NO</td>
+                                <td class="_toggle-detail text-left" width="120px">@item.CREATED_BY</td>
+                                <td class="_toggle-detail text-center" width="80px">@item.CREATED_DT</td>
+                                <td class="_toggle-detail text-left" width="120px">@item.CHANGED_BY</td>
+                                <td class="_toggle-detail text-center" width="80px">@item.CHANGED_DT</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="15" style="text-align:center">@CommonDisplayMessage.NoData</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                <tfoot>
+                    <tr>
+                        <td colspan="13">
+                            <div class="col-xs-8" style="margin-bottom: 20px;">
+                                @Html.Partial("_UIPaging")
+                            </div>
+                            <div class="col-xs-8 col-sm-4">
+                                @if ((GridData.Item1.Count() > 0) && (GridData.Item1 != null) && (errormessage == ""))
+                                {
+                                    <div id="prc-pagesize" class="form-inline text-right">
+                                        <label>
+                                            Page Size
+                                            <select class="cursor-1 page" onchange="javascript: SearchPRHeader(1)" style="height:25px;">
+                                                <option>10</option>
+                                                <option>25</option>
+                                                <option>50</option>
+                                                <option>100</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+    
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var errormessage = "@errormessage";
+        var page = Number("@GridData.Item2");
+        var warningmessage = "@GridData.Item3";
+
+        if ((errormessage !== "") && ((page === 1) || (page === 0)) && (messagelife !== 0)) {
+            $.messagebox.show(
+                "Search Asset",
+                errormessage,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+            messagelife--;
+        }
+
+        if ((warningmessage !== "") && ((page === 1) || (page === 0)) && (messagelife !== 0)) {
+            $.messagebox.show(
+                "Search PR",
+                warningmessage,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+            messagelife--;
+        }
+    })
+
+
+    $("#tScrollBody").scroll(function () {
+        $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+    });
+    
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip({ placement: 'right' });
+    });
+</script>

@@ -1,0 +1,1 @@
+﻿EXEC sp_MaterialPrice_GetListBySearch @MaterialNo, @Vendor, @SourceType, @PriceStatus, @PriceType, @ProdPurpose, @PartColorSfx, @PackingType, @DateFrom, @DateTo, @CurrentPage, @PageSize

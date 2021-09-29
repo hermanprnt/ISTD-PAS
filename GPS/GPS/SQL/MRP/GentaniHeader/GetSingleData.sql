@@ -1,0 +1,17 @@
+﻿Select  A.PROC_USAGE_CD,
+		A.GENTANI_HEADER_TYPE,
+		A.GENTANI_HEADER_CD,				  		  
+		REPLACE(CONVERT(varchar(10),A.VALID_DT_FR,102),'.','-') VALID_DT_FR,	
+	    REPLACE(CONVERT(varchar(10),A.VALID_DT_TO,102),'.','-') VALID_DT_TO	,[MODEL]
+      ,[TRANSMISSION]
+      ,[ENGINE]
+      ,[DE]
+      ,[PROD_SFX]
+      ,[COLOR]		  
+FROM TB_M_GENTANI_HEADER A
+WHERE A.PROC_USAGE_CD = @ProcUsage AND
+	  A.GENTANI_HEADER_TYPE = @HeaderType AND
+	  A.GENTANI_HEADER_CD = @HeaderCd AND	 
+	  A.VALID_DT_FR = @ValidDt	
+
+

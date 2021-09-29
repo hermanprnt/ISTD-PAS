@@ -1,0 +1,20 @@
+ALTER PROCEDURE [dbo].[sp_POCreation_ValidateEdit]
+	@poNo VARCHAR(20),
+	@username VARCHAR(20),
+    @noreg VARCHAR(20)
+AS
+BEGIN
+	DECLARE @purchGroup VARCHAR(5) = (SELECT ISNULL(PURCHASING_GRP_CD, '') FROM TB_R_PO_H WHERE PO_NO = @poNo)
+
+    IF((SELECT CREATED_BY FROM TB_R_PO_H WHERE PO_NO = @poNo) <> @username)
+	BEGIN
+		IF NOT EXISTS(SELECT 1 FROM TB_R_WORKFLOW WHERE DOCUMENT_NO = @poNo AND APPROVED_BY = @noreg)
+		BEGIN
+			IF NOT EXISTS(SELECT 1 FROM TB_M_COORDINATOR_MAPPING WHERE COORDINATOR_CD = @purchGroup AND NOREG = @noreg)
+			BEGIN
+				DECLARE @MESSAGE VARCHAR(MAX) = 'User <b>' + @username + '</b> is not authorize to edit this document.'
+				RAISERROR(@MESSAGE, 16, 1)
+			END
+		END
+	END
+END

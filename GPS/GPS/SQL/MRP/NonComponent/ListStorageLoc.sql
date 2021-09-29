@@ -1,0 +1,2 @@
+﻿select SLOC_CD as STORAGE_LOCATION,SLOC_NAME from TB_M_SLOC
+where PLANT_CD = @PlantCd

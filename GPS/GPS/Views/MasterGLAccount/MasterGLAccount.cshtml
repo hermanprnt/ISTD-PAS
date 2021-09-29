@@ -1,0 +1,260 @@
+﻿@using GPS.Controllers.Master
+@using GPS.Models.Common
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Paging pg = (Paging)ViewData["Paging"];
+}
+
+
+@Html.Partial("_SearchCriteria")
+
+<div id="gridViewTable">
+    @Html.Partial("_GridView")
+</div>
+
+
+    @Html.Partial("_AddEditPopUp")
+
+
+@section HeadScript {
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+
+    <!-- NOTE: moment.js is referenced by daterangepicker -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+}
+
+@section BodyScript{
+<!-- Bootstrap Datepicker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/dropzone.js")"></script>
+
+    <script type="text/javascript">
+        var gScreenMode = null;
+
+        $(document).ready(function () {
+            refreshSearch();
+        });
+
+        function detailGrid() {
+            if ($tdk.isDetail > 0) {
+                $("#btn-detail").html('Show Detail');
+                $("._toggle-detail").hide();
+                $tdk.isDetail = 0;
+                $("#dynamic-table").css("width", "100%");
+                $("#tblScroll").css("width", "100%");
+            }
+            else {
+                $("#btn-detail").html('Hide Detail');
+                $("._toggle-detail").show();
+                $tdk.isDetail = 1;
+                $("#dynamic-table").css("width", "1270px");
+                $("#tblScroll").css("width", "1270px");
+            }
+        }
+        
+        function onGetData(page) {
+            $.disable_enable_button.disable();
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+                data: {
+                    GL_ACCOUNT_CD: $("#txt-GlAccountCD").val(),
+                    GL_ACCOUNT_DESC: $("#txt-GlAccountDesc").val(),
+                    PLANT_CD: $("#txt-GlPlantCode").val(),
+                    recordPerPage: $("#cbodisplay").val(),
+                    currentPage: page
+                },
+                success: function (data) {
+                    $("#gridViewTable").html(data);
+                    $.disable_enable_button.enable();
+                }
+            });
+        }
+
+        function refreshSearch()
+        {
+            $("#txt-GlAccountCD").val('')
+            $("#txt-GlAccountDesc").val('')
+            $("#txt-GlPlantCode").val('')
+        }
+
+        function onClear()
+        {
+            $("#txt-GlAccountCD").val('')
+            $("#txt-GlAccountDesc").val('')
+            $("#txt-GlPlantCode").val('')
+
+            onGetData(1);
+        }
+
+
+        function onAddData()
+        {
+            SetScreenToAddMode();
+            $("#modalAddEdit").modal();
+        }
+
+
+        function SetScreenToAddMode()
+        {
+            gScreenMode = 'ADD'
+            clearAddEditScreen()
+
+        }
+
+        function clearAddEditScreen()
+        {
+            $("#txtedit-glAccountCD").val('')
+            $("#txtedit-Gldescription").val('')
+            $("#txtedit-PlantCD").val('')
+        }
+
+        function onSaveData()
+        {
+                    
+            var isValid = $.ValidateMandatory(['#txtedit-glAccountCD', '#txtedit-PlantCD', '#txtedit-Gldescription']);
+            
+                $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
+                data: {
+                 GL_ACCOUNT_CD:     $("#txtedit-glAccountCD").val()
+                , GL_ACCOUNT_DESC:  $("#txtedit-Gldescription").val()
+                , PLANT_CD:         $("#txtedit-PlantCD").val()
+                , gscreen : gScreenMode
+                },
+                success: function (data)
+                {
+                    var result = data.message.split('|');
+                    if (result[0] == 'True') {
+                        
+                        $.messagebox.show(
+                            "Success",
+                            result[1],
+                            "SUC",
+                            "SINGLE",
+                            "OkInfoSave()",
+                            ""
+                        )
+                        onGetData(1);
+                    }
+                    else if (result[0] == 'False') {
+                        $.messagebox.show(
+                            "Error",
+                            result[1],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                            )
+                    }
+                        else {
+                            $.messagebox.show(
+                            "Error",
+                            result[1],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                            )
+                        }
+                }              
+                  
+            })
+            
+            if (!isValid) return;
+            
+        }
+
+        function OkInfoSave() {
+            $("#modalAddEdit").modal('hide');
+        }
+
+        function onDeleteData()
+        {
+            if ($(".grid-checkbox-body:checked").length == 0) {
+                $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be deleted",
+                "WRN",
+                "SINGLE",
+                "",
+                "")
+            } else {
+
+                $.messagebox.show(
+               "Confirmation",
+               "Are You Sure You Want to Delete this Item ?",
+               "INF",
+               "CONFIRM",
+               "onYesDelete()",
+               ""
+                )
+            }
+        }
+
+        function GetSelectGridKey()
+        {
+            var ids = [];
+            $("input[id^=cb-]").each(function (i, a) {
+                if (a.id != null && a.id.length > 0 && a.checked) {
+                    ids.push({
+                        gl_cd: $('#' + a.id).data('glcode'),
+                        gl_desc: $('#' + a.id).data('gldesc'),
+                        plant: $('#' + a.id).data('plantcd')
+                    });
+                }
+            });
+            return ids;
+        }
+
+
+        function onYesDelete()
+        {
+            var selectedData = GetSelectGridKey()
+            var keyArray = [];
+            for (var i = 0 ; i < selectedData.length; i++)
+            {
+                keyArray.push(selectedData[i].gl_cd+";" + selectedData[i].gl_desc);
+            }
+
+            var selectedKey = keyArray.join(",")
+
+            console.log(selectedKey)
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("Deletedata")",
+                data: {
+                    key: selectedKey
+                },
+                success: function (data)
+                {
+                    var result = data.split('|')
+                    if (result[0] == 'True')
+                    {
+                        $.messagebox.show("Info", result[1], "SUC", "SINGLE", "", "")
+                        onGetData(1);
+                    }
+                }
+            })
+        }
+
+        function download()
+        {
+            $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadReport")", {
+                data: {
+                    GL_ACCOUNT_CD: $("#txt-GlAccountCD").val(),
+                    GL_ACCOUNT_DESC: $("#txt-GlAccountDesc").val(),
+                    @*//Page : @pg.PositionPage,*@
+                    PLANT_CD: $("#txt-GlPlantCode").val(),
+                    recordPerPage: $("#cbodisplay").val(),
+                    currentPage: 1
+                    
+                }
+            });
+        }
+    </script>    
+}

@@ -1,0 +1,1 @@
+﻿EXEC sp_common_getListDivision2 @NO_REG

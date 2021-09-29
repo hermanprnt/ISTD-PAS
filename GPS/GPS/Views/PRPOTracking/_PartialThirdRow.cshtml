@@ -1,0 +1,47 @@
+﻿@using GPS.Constants
+@using GPS.Models.Common
+@model  GPS.Models.Common.PRPOTrackingList
+@{
+    List<PRPOTrackingList> data = ViewData["ThirdRow"] != null ?
+                            (List<PRPOTrackingList>)ViewData["ThirdRow"] :
+                            new List<PRPOTrackingList>(new List<PRPOTrackingList>());      
+}
+@if(data.Count > 0)
+{
+    int i = 1;
+    foreach(var si in data) 
+    {
+        <tr class="lvl3grid-@si.REFERENCE_DOC_NO-@si.DOC_ITEM_NO-@si.DOC_TYPE">
+            @if(i <= 1)
+            {
+                <td rowspan="@data.Count" style="width:20px"></td>
+                i = i + 1;
+            }
+            <td class="text-center" style="width:90px"></td>
+            <td class="text-center" style="width:90px">@si.DOC_NO</td>
+            <td class="text-left" style="width:200px">@si.DOC_DESC</td>
+            <td class="text-center" style="width:75px">@si.DOC_DATE</td>
+            <td class="text-left" style="width:110px">@si.DOC_STATUS</td>
+            <td class="text-left" style="width:200px">@si.REGISTERED_BY</td>
+            <td class="text-center" style="width:75px">@si.REGISTERED_DT</td>
+            <td class="text-left" style="width:200px">@si.ORG_SH_BY</td>
+            <td class="text-center" style="width:75px">@si.ORG_SH_DT</td>
+            <td class="text-left" style="width:200px">@si.ORG_DPH_BY</td>
+            <td class="text-center" style="width:75px">@si.ORG_DPH_DT</td>
+            <td class="text-left" style="width:200px">@si.ORG_DH_BY</td>
+            <td class="text-center" style="width:75px">@si.ORG_DH_DT</td>
+            <td class="text-left" style="width:200px"></td>
+            <td class="text-center" style="width:75px"></td>
+            <td class="text-left" style="width:200px"></td>
+            <td class="text-center" style="width:75px"></td>
+            <td class="text-left" style="width:200px"></td>
+            <td class="text-center" style="width:75px"></td>
+            <td class="text-left" style="width:200px"></td>
+            <td class="text-center" style="width:75px"></td>
+            <td class="text-left" style="width:200px"></td>
+            <td class="text-center" style="width:75px"></td>
+            <td class="text-left" style="width:200px"></td>
+            <td class="text-center" style="width:75px"></td>
+        </tr>
+   }
+}

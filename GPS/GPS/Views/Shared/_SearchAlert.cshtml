@@ -1,0 +1,20 @@
+﻿@model GPS.ViewModels.ActionResponseViewModel
+@if (Model.IsDisplayed)
+{
+    if (Model.IsError)
+    {
+        <div class="alert alert-danger" role="alert">
+            <span>
+                <strong>@Model.Message</strong>
+            </span>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success" role="alert">
+            <span>
+                <strong>@Model.Message</strong>
+            </span>
+        </div>
+    }
+}

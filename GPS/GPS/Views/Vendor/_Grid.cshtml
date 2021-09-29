@@ -1,0 +1,275 @@
+﻿@using GPS.Models.Master
+@{
+    List<Vendor> ListVendor = ViewData["ListVendor"] != null ? (List<Vendor>)ViewData["ListVendor"] : new List<Vendor>();
+}
+
+<style type="text/css">
+    .close 
+    {
+        opacity: 1;    
+    }
+</style>
+
+<div class="row">       
+    <div class="col-xs-12 col-sm-6 text-left">
+        <div class="form-group form-group-xs" style="margin-bottom: 3px;">       
+            <button type="button" onclick="onAddData()" class="btn btn-primary btn-xs btndisable">
+                Add</button>
+            <button type="button" onclick="onEditData()" class="btn btn-primary btn-xs btndisable">
+                Edit</button>
+            <button type="button" onclick="onCopyData()" class="btn btn-primary btn-xs btndisable">
+                Copy</button>
+            <button type="button" onclick="onDeleteData()" class="btn btn-danger btn-xs btndisable">
+                Delete</button>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 text-right">
+        <div class="form-group form-group-xs" style="margin-bottom: 3px;">
+             <a href="javascript:OnDownloadTemplate()"><span style="font-family: Open Sans; font-size: 12px">Download Template</span></a>  
+            <input type="file" id="upfile" name="upfile" style="display: none" />                 
+            <button type="button" class="btn btn-warning btn-xs btndisable" id="btnUpload" onclick="$('input[id=upfile]').click();">
+                <span style="font-family: Open Sans; font-size: 12px">Upload</span>
+            </button>
+            <button id="btnDownload" class="btn btn-success btn-xs btndisable" onclick="onDownloadData()">
+                <span style="font-family: Open Sans; font-size: 12px">Download</span>
+            </button>  
+       </div>
+    </div>
+</div>
+<div class="row">
+    <div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+        <div style="border: 1pt solid #ccc;">
+            <div id="tScrollHead" style="width: 98.65%; overflow: hidden;">
+                <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 100%;">
+                    <thead>
+                        <tr>
+                            <th width="20px" rowspan="2" class="grid-checkbox-col">
+                                <input class="grid-checkbox" type="checkbox" style="height: 12px;" id="checkall" onclick="onCekAll()"/>
+                            </th>                            
+                            <th width="30px" rowspan="2">No</th>
+                            <th width="400px" colspan="3">Vendor</th>
+                            <th width="100px" rowspan="2">SAP Vendor ID</th> 
+                            <th width="100px" rowspan="2">Payment Method</th>
+                            <th width="100px" rowspan="2">Payment Term</th>
+                            <th width="100px" rowspan="2">Deletion</th>
+                            <th width="200px" colspan="2">Created</th>
+                            <th width="200px" colspan="2">Changed</th>                                           
+                        </tr>
+                        <tr>
+                            <th width="80px">Code</th>
+                            <th width="70px">Plant</th>
+                            <th width="250px">Name</th>
+                            <th width="100px">By</th>
+                            <th width="100px">Date</th>
+                            <th width="100px">By</th>
+                            <th width="100px">Date</th>            
+                        </tr>                       
+                    </thead>
+                </table>
+            </div>
+            <div id="tScrollBody" style="overflow: scroll; height: 270px;">
+                <table id="tblScroll" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 100%;">
+                    <tbody>
+                       @if (ListVendor.Count > 0)
+                       {
+                           foreach (Vendor item in ListVendor)
+                           {
+                            <tr>
+                                <td width="20px" class="text-center grid-checkbox-col">
+                                  <input id="cb-@item.Number" class="grid-checkbox grid-checkbox-body" type="checkbox" data-pc_cd="@item.VendorCd"/>
+                                </td>
+                                <td width="30px" class="text-center">@item.Number</td> 
+                                <td width="80px" class="text-center">@item.VendorCd</td>
+                                <td width="70px" class="text-center">@item.VendorPlant</td>  
+                                <td width="250px" class="text-left">@item.VendorName</td> 
+                                <td width="100px" class="text-center">@item.SAPVendorID</td> 
+                                <td width="100px" class="text-center">@item.PaymentMethodCd</td> 
+                                <td width="100px" class="text-center">@item.PaymentTermCd</td> 
+                                
+                                @if(item.DeletionFlag == "1")
+                                {
+                                    <td width="100px" class="text-center">
+                                    <img alt="" src="@Url.Content("~/Content/img/check.png")" width="10" height="10" />
+                                    </td> 
+                                }
+                                else
+                                {
+                                    <td width="100px" class="text-center"></td>
+                                }
+                                <td width="100px" class="text-left">@item.CreatedBy</td>
+                                <td width="100px" class="text-center">@if (item.CreatedDt.ToString("dd.MM.yyyy") != "01.01.0001")
+                                                                      { @item.CreatedDt.ToString("dd.MM.yyyy");
+                                                                      }</td>
+                                <td width="100px" class="text-left">@item.ChangedBy</td> 
+                                <td width="100px" class="text-center">@if (item.ChangedDt.ToString("dd.MM.yyyy") != "01.01.0001")
+                                                                      { @item.ChangedDt.ToString("dd.MM.yyyy");
+                                                                      }</td>
+                            </tr>  
+                           }
+                       }
+                       else
+                       {
+                        <tr>
+                            <td colspan="12" class="text-center">
+                                No data retrieved.
+                            </td>
+                        </tr>
+                       }
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <table class="table table-striped table-bordered table-condensed " style="width: 100%">
+                    <tfoot>
+                        <tr>
+                            <td colspan="12">
+                                <div class="col-xs-12" >
+                                    @Html.Partial("_Paging")
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">   
+   $(document).ready(function () {        
+        $('#upfile').val('');                                
+   }); 
+
+    $("#tScrollBody").scroll(function () {
+        $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+    });
+
+    var table = document.getElementById("dynamic-table");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+
+    function tableText(tableCell) {
+        var removeClass;
+        var addClass;
+        var dataSort;
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            if (tableCell.getAttribute("class").indexOf('sorting_asc') >= 0) {
+                removeClass = 'sorting_asc';
+                addClass = 'sorting_desc';
+                dataSort = 'desc';
+            } else if (tableCell.getAttribute("class").indexOf('sorting_desc') >= 0) {
+                removeClass = 'sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+            } else {
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'asc';
+            }
+        }
+
+        //reset all
+        var tableReset = document.getElementById("dynamic-table");
+        if (tableReset != null) {
+            for (var i = 0; i < tableReset.rows.length; i++) {
+                for (var j = 0; j < tableReset.rows[i].cells.length; j++) {
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_asc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_asc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_desc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_desc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+                }
+            }
+        }
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            tableCell.classList.remove(removeClass);
+            tableCell.classList.add(addClass);
+            tableCell.dataset.sort = dataSort;
+
+            $.ajax({
+                type: "GET",
+                url: '@Html.Toyota().Page.GetActionUrl("GetPRInquirySort")',
+                data: {
+                    field: tableCell.dataset.field,
+                    sort: dataSort
+                },
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    $("#tblScroll")
+                            .find('tbody')
+                            .html(
+                                result
+                            );
+                }
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        $('#upfile').val('');
+    });
+
+    $('#upfile').on('change', function (e) {
+        var fileName = $('#upfile').val();
+        var xls = fileName.match(/\.(xls?)$/i);
+        if (xls != null) {
+            var files = e.target.files;
+            if (files.length > 0) {
+                if (window.FormData !== undefined) {
+                    var data = new FormData();
+                    for (var x = 0; x < files.length; x++) {
+                        data.append("file" + x, files[x]);
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Content("~/Vendor/UploadFile")",
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        success: function (data) {
+                            var result = data.message.split('|');
+                            if (result[0] == 'Error') {
+                                $.messagebox.show("Upload Vendor Master", result[1], "ERR", "SINGLE", "", "");
+                            }
+                            else if (result[0] == 'War') {
+                                onGetData(1);
+                                $.messagebox.show("Upload Vendor Master", result[1], "WRN", "SINGLE", "", "");
+                            }
+                            else {
+                                $('#upfile').val('');
+                                onGetData(1);
+                                $.messagebox.show("Upload Vendor Master", "Upload Process Finished Successfully", "INF", "SINGLE", "", "");
+                            }
+                        },
+                        error: function (xhr, status, p3, p4) {
+                            var err = "Error " + " " + status + " " + p3 + " " + p4;
+                            if (xhr.responseText && xhr.responseText[0] == "{")
+                                err = JSON.parse(xhr.responseText).Message;
+                            console.log(err);
+                        }
+                    });
+                } else {
+                    $.messagebox.show("Upload Vendor Master", "This browser doesn't support HTML5 file uploads!", "ERR", "SINGLE", "", "");
+                }
+            }
+        }
+        else {
+            $.messagebox.show("Upload Vendor Master", "Please select an excel file with format xls", "ERR", "SINGLE", "", "");
+        }
+    });
+</script>

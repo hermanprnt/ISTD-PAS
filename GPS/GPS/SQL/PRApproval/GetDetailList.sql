@@ -1,0 +1,1 @@
+﻿EXEC [sp_PRApproval_GetDetailList] @DOC_NO, @DOC_TYPE, @REG_NO, @USER_TYPE, @PAGE_INDEX, @PAGE_SIZE

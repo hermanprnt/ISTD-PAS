@@ -1,0 +1,122 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Models.SAPImportMonitor
+@using GPS.ViewModels.SAPImportMonitor
+@model SAPImportMonitorViewModel
+
+<!-- @*
+<div class="col-xs-12">
+    <div id="main-container" class="afixed-main-container">
+        <div id="sapimport-fixed-table-container" class="table-responsive _table-flow-2 afixed-table-container">
+            <div id="sapimport-fixed-table-viewport" class="afixed-table-viewport"></div>
+            <table id="sapimport-fixed-table" class="table table-striped table-bordered table-hover afixed-table">
+                <col style="width:75px;" />
+                <col style="width:75px;" />
+                <col style="width:75px;" />
+                <col style="width:150px;" />
+                <col style="width:75px;" />
+                <col style="width:235px" />
+                <col class="toogle-column" style="width:48px" />
+                <col class="toogle-column" style="width:48px" />
+                <thead>
+                    <tr class="afixed-header" id="sapimport-headerlevel1">
+                        <th width="75px;" rowspan="2">Process Id</th>
+                        <th width="75px;" rowspan="2">PO No</th>
+                        <th width="75px" rowspan="2">Purchasing Group</th>
+                        <th width="150px" rowspan="2">Execution Date</th>
+                        <th width="75px;" rowspan="2">Status</th>
+                        <th width="235px;" rowspan="2">Message</th>
+                        <th class="toogle-column" width="106px" colspan="2">Created</th>
+                        <th class="toogle-column" width="106px" colspan="2">Changed</th>
+                    </tr>
+                    <tr class="afixed-header" id="sapimport-headerlevel2">
+                        <th class="toogle-column">By</th>
+                        <th class="toogle-column">Date</th>
+                        <th class="toogle-column">By</th>
+                        <th class="toogle-column">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.DataList.Any())
+                    {
+                        foreach (SAPImportMonitor item in Model.DataList)
+                        {
+                            <tr>
+                                <td class="text-center">@item.ProcessId</td>
+                                <td class="text-center">@item.PONo</td>
+                                <td class="text-center">@item.PurchasingGroup</td>
+                                <td>@item.ExecutionDate.ToStandardFormatWithTime()</td>
+                                <td>@item.Status</td>
+                                <td>@item.Message</td>
+                                <td class="toogle-column">@item.CreatedBy</td>
+                                <td class="text-center toogle-column">@item.CreatedDate.ToStandardFormat()</td>
+                                <td class="toogle-column">@item.ChangedBy</td>
+                                <td class="text-center toogle-column">@item.ChangedDate.ToStandardFormat()</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="afixed-column text-center" data-tooglecolumn="10">@CommonDisplayMessage.NoData</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="v-space"></div>
+@Html.Partial(CommonPage.GridPagination, Model.GridPaging)
+*@ -->
+
+<div style="overflow: auto;">
+    <table class="table table-striped table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th width="75px;" rowspan="2">Process Id</th>
+                <th width="75px;" rowspan="2">PO No</th>
+                <th width="75px" rowspan="2">Purchasing Group</th>
+                <th width="85px" rowspan="2">Execution Date</th>
+                <th width="75px;" rowspan="2">Status</th>
+                <th width="170px;" rowspan="2">Message</th>
+                <th width="90px" class="col-hidden hidden" colspan="2">Created</th>
+                <th width="90px" class="col-hidden hidden" colspan="2">Changed</th>
+            </tr>
+        <tr>
+            <th width="45px" class="col-hidden hidden">By</th>
+            <th width="45px" class="col-hidden hidden">Date</th>
+            <th width="45px" class="col-hidden hidden">By</th>
+            <th width="45px" class="col-hidden hidden">Date</th>
+        </tr>
+        </thead>
+        <tbody>
+            @if (Model.DataList.Any())
+            {
+                foreach (SAPImportMonitor item in Model.DataList)
+                {
+                    <tr>
+                        <td class="text-center">@item.ProcessId</td>
+                        <td class="text-center">@item.PONo</td>
+                        <td class="text-center">@item.PurchasingGroup</td>
+                        <td>@item.ExecutionDate.ToStandardFormatWithTime()</td>
+                        <td>@item.Status</td>
+                        <td>@item.Message</td>
+                        <td class="col-hidden hidden">@item.CreatedBy</td>
+                        <td class="text-center col-hidden hidden">@item.CreatedDate.ToStandardFormat()</td>
+                        <td class="col-hidden hidden">@item.ChangedBy</td>
+                        <td class="text-center col-hidden hidden">@item.ChangedDate.ToStandardFormat()</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center">@CommonDisplayMessage.NoData</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div class="v-space"></div>
+@Html.Partial(CommonPage.GridPagination, Model.GridPaging)

@@ -1,0 +1,243 @@
+﻿@using GPS.Constants
+@using GPS.Constants.MRP
+@model GPS.ViewModels.MRP.MRPInquiryViewModel
+@{
+    Layout = CommonPage.MainLayout;
+}
+
+@section HeadScript {
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/tdk.lookupgrid.js")"></script>
+}
+
+<div class="form-horizontal">
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="form-group form-group-xs">
+                <label for="txtlookup-procgroup" class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Procurement Usage Group</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    <div id="cmb-procgroup" class="input-group input-group-xs lookup-grid">
+                        <input id="txtlookup-procgroup" class="form-control" type="text" placeholder="Select item" readonly="readonly"/>
+                        <div class="input-group-btn">
+                            <button id="btnlookup-procgroup" class="btn btn-default btn-sm">
+                                <i class="fa fa-caret-down"></i>
+                            </button>
+                        </div>
+
+                        <div class="popup-lookup-grid">
+                            <div class="form-horizontal multiselect multiselect-container dropdown-toggle dropdown-menu">
+                                <div class="form-group form-group-xs">
+                                    <div class="input-group">
+                                        <input id="txtfilter-procgroup" class="form-control" type="text" placeholder="Filter item"/>
+                                        <div class="input-group-btn">
+                                            <button id="btnfilter-procgroup" class="btn btn-default btn-sm">
+                                                <i class="fa fa-search"></i>
+                                            </button>
+                                            <button id="btnclearfilter-procgroup" class="btn btn-default btn-sm">
+                                                <i class="fa fa-eraser"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-group-xs">
+                                    <div class="table-responsive multiselect-item filter" style="overflow: hidden;">
+                                        @Html.Partial(MRPCommonPage.ProcUsageGroupLookupGridPartial, Model.ProcurementUsageGroup)
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-group-xs">
+                                    <div class="text-right">
+                                        <button type="button" class="btn btn-primary btn-xs btn-action btn-std" data-role="select-lookupgrid">OK</button>
+                                        <button type="button" class="btn btn-danger btn-xs btn-action btn-std" data-role="dismiss-lookupgrid">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div class="col-sm-6">
+            <button id="btnapproval-pad" class="btn btn-primary btn-xs btn-std" type="button">PAD Approval</button>
+            <button id="btnapproval-pud" class="btn btn-primary btn-xs btn-std" type="button">PUD Approval</button>
+        </div>
+        <div class="col-xs-12 col-sm-6 text-right">
+            <button id="btn-search" class="btn btn-primary btn-xs btn-std" type="button">Search</button>
+            <button id="btn-clearsearch" class="btn btn-default btn-xs btn-std" type="button">Clear</button>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="line-br"></div>
+    <div class="row">
+        <div id="grid-mrp" class="col-xs-12">
+            @Html.Partial(MRPPage.InquiryGridPartial, Model)
+        </div>
+    </div>
+</div>
+
+<div id="pop-mrpdetail" class="modal fade" data-backdrop="static" data-keyboard="false"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        /* ============================== Init: begin ============================== */
+
+        function DisableAllFeatures() {
+            $("#btnlookup-procgroup").prop("disable", true);
+            $("#btn-search").prop("disable", true);
+            $("#btn-clearsearch").prop("disable", true);
+        }
+
+        function EnableAllFeatures() {
+            $("#btnlookup-procgroup").prop("disable", false);
+            $("#btn-search").prop("disable", false);
+            $("#btn-clearsearch").prop("disable", false);
+        }
+
+        function ResetForm() {
+            $("#txtlookup-procgroup").val("");
+        }
+
+        function Init() {
+            $("#cmb-procgroup").lookupgrid();
+
+            ResetForm();
+            EnableAllFeatures();
+        }
+
+        Init();
+
+        /* =============================== Init: end =============================== */
+
+        /* ======================== Search and Paging: begin ======================== */
+
+        function GetSearchCriteria(page, pageSize) {
+
+            page = page || 1;
+            pageSize = pageSize || $("#cmbperpage-purchaseorder").GetPageSize();
+            return {
+                ProcUsageGroupCode: $("#txtlookup-procgroup").valOrDefault(),
+
+                CurrentPage: page,
+                PageSize: pageSize
+            };
+        }
+
+        function SearchCriteriaIsValid(page) {
+            var criteria = GetSearchCriteria(page);
+            if (criteria.ProcUsageGroup === "") {
+                return false;
+            }
+
+            return true;
+        }
+
+        // NOTE: this method is used in Paging
+        var Search = window.Searchpurchaseorder = function (page, pageSize, responseCallback) {
+            $.progressbox.show($tdk.PageTitle, "Search");
+            DisableAllFeatures();
+            $.ajax({
+                type: "POST",
+                url: "@MRPPage.InquirySearchAction",
+                data: JSON.stringify(GetSearchCriteria(page, pageSize)),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: responseCallback,
+                complete: function() {
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                },
+                error: function(data) {
+                    $.messagebox.show(data.responseText, "ERR");
+                    $.progressbox.hide();
+                }
+            });
+        };
+
+        var SearchResponseCallback = window.SearchpurchaseorderResponseCallback = function(data) {
+            if (!data.ResponseType) {
+                $("#grid-mrp").html(data);
+            } else {
+                $.messagebox.show(data.Message, data.ResponseType);
+            }
+        };
+
+        $("#btn-search").click(function(e) {
+            $.progressbox.show($tdk.PageTitle, "Search");
+            DisableAllFeatures();
+            if (SearchCriteriaIsValid(undefined)) {
+                Search(undefined, undefined, SearchResponseCallback);
+            } else {
+                @*ShowDisplayMessage($("#alert-inquiry"), "@DisplayMessageId.SelectOneCriteria");*@
+                EnableAllFeatures();
+                $.progressbox.hide();
+            }
+        });
+
+        $("#btn-clearsearch").click(function (e) {
+            $.progressbox.show($tdk.PageTitle, "Clear Search");
+            DisableAllFeatures();
+            ResetForm();
+
+            $.ajax({
+                type: "POST",
+                url: "@MRPPage.InquiryClearSearchAction",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#grid-mrp").html(data);
+                    }
+                    else {
+                        $.messagebox.show(data.Message, data.ResponseType);
+                    }
+                },
+                complete: function () {
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    $.messagebox.show(data.responseText, "ERR");
+                }
+            });
+        });
+
+        /* ========================= Search and Paging: end ========================= */
+
+        /* =========================== Get Detail: begin =========================== */
+
+        $(document).on("click", "[id^=lnk-mrp-]", function (e) {
+            e.preventDefault();
+            $.progressbox.show($tdk.PageTitle, "Get MRP Detail");
+            DisableAllFeatures();
+            var selectedProcUsageGroup = $("#txtlookup-procgroup").val();
+            var selectedMRPMonth = $(this).data("mrpmonth");
+            $.ajax({
+                type: "POST",
+                url: "@MRPPage.InquiryGetMRPAction",
+                data: {
+                    procUsageGroup: selectedProcUsageGroup,
+                    mrpMonth: selectedMRPMonth
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#pop-mrpdetail").html(data);
+                        $("#pop-mrpdetail").modal();
+                    }
+                    else {
+                        $.messagebox.show("Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: function () {
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    $.messagebox.show("Error", data.responseText, "ERR");
+                }
+            });
+        });
+
+        /* ============================ Get Detail: end ============================ */
+    });
+</script>

@@ -1,0 +1,364 @@
+﻿<script type="text/javascript">
+    function _lookupShow() {
+        _getMaterialNo(1);
+        $('#material-popup').modal();
+    }
+
+    function _clearValueLookup()
+    {
+        if ($("#txtMatNo").val() != "") {
+            $("#txtMatDesc").val("");
+        }
+    }
+
+    function _getMaterialNo(page) {
+        var _maxRowperPage = 5;
+        $.ajax({
+            type: "POST", url: "@Url.Content("~/QuotaCreation/getMaterialNo")",
+            data: {
+                pageSize: _maxRowperPage,
+                page: page,
+                matno: $('#matnolook').val(),
+                matdesc: $('#matdesclook').val(),
+                car: $('#carlook').val(),
+                type: $('#typelook').val(),
+                grp: $('#grplook').val(),
+                val: $('#aitemcat').val()
+            },
+            datatype: "json",
+            traditional: true,
+            success: function (data) {
+            //alert("masuk sukses getmaterialno");
+                var items = JSON.parse(data);
+                var item = [];
+                var i = 0;
+                var grid = ""
+                $("#bodylookup-matno").empty();
+                $.each(items, function () {
+                    grid = grid + "<tr>";
+                    grid = grid + "<td><button style='width:100%;font-size:7pt:vertical-align:center:text-align:center' class='btn btn-grid btn-primary ' data-dismiss='modal' onclick='javascript:_moveMatno(&#39;" +
+                           items[i].MAT_NO + "&#39;,&#39;" +
+                           items[i].MAT_DESC + "&#39;,&#39;" +
+                           items[i].UOM + "&#39;,&#39;" + 
+                           items[i].CAR_FAMILY_CD + "&#39;,&#39;" +
+                           items[i].MAT_TYPE_CD + "&#39;,&#39;" +
+                           items[i].MAT_GRP_CD + "&#39;,&#39;" +
+                           items[i].VALUATION_CLASS + "&#39;)'>Select</button></td>"
+                    grid = grid + "<td>" + items[i].MAT_NO + "</td>";
+                    grid = grid + "<td>" + items[i].MAT_DESC + "</td>";
+                    grid = grid + "<td style=text-align:center>" + items[i].CAR_FAMILY_CD + "</td>";
+                    grid = grid + "<td style=text-align:center>" + items[i].MAT_TYPE_CD + "</td>";
+                    grid = grid + "<td style=text-align:center>" + items[i].MAT_GRP_CD + "</td>";
+                    grid = grid + "<td style=text-align:center>" + items[i].UOM + "</td>";
+                    grid = grid + "</tr>";
+                    i++;
+                });
+                $("#bodylookup-matno").append(grid);
+                $(".paging-index-selected").html(page);
+                _getPagingindex(_maxRowperPage, page);
+            },
+            error: function (data) {
+            alert("Fail Get Material Data");
+            }
+        });
+    }
+
+    //paging popup
+        function _getPagingindex(_maxRowperPage, page) {
+        $.ajax({
+            type: "POST", url: "@Url.Content("~/QuotaCreation/LookupPaging")",
+            data: {
+                pageSize: _maxRowperPage,
+                valcd   : $('#valcdlook').val(),
+                valdesc : $('#valdesclook').val(),
+                matno   : $('#matnolook').val(),
+                matdesc : $('#matdesclook').val(),
+                car     : $('#carlook').val(),
+                type    : $('#typelook').val(),
+                grp     : $('#grplook').val(),
+                val     : $('#aitemcat').val(),
+                glcd    : $('#glcd').val(),
+                gldesc  : $('#gldesc').val(),
+                plant   : $('#aplntno').val(),
+                purchasing: $("#apurchasing").val()
+            },
+            datatype: "json",
+            traditional: true,
+            success: function (data) {
+                var items = JSON.parse(data);
+                var i = 0;
+                var paging = "";
+                var _function = "";
+                var _id = "";
+                $(".lookupremove").remove();
+                _function = "_getMaterialNo";
+                _id = "#mat-paging";
+                
+                var prev = 0;
+                if ((parseInt(page) - 1) <= 0) prev = 1;
+                else prev = parseInt(page) - 1;
+
+                var next = 0;
+                if ((parseInt(page) + 1) > items.IndexList.length) next = parseInt(page);
+                else next = parseInt(page) + 1;
+
+                paging = paging + "<li class='lookupremove'><a href='#' onclick='javascript:" + _function + "(" +
+                         1 + ")'>First</a></li>";
+                paging = paging + "<li class='lookupremove'><a href='#' onclick='javascript:" + _function + "(" +
+                         prev + ")'>Prev</a></li>";
+                for (i = 0; i < items.IndexList.length; i++) {
+                    paging = paging + "<li class='lookupremove'><a href='#' onclick='javascript:" + _function + "(" +
+                             items.IndexList[i] + ")'>" + items.IndexList[i] + "</a></li>";
+                }
+                paging = paging + "<li class='lookupremove'><a href='#' onclick='javascript:" + _function + "(" +
+                         next + ")'>Next</a></li>";
+                paging = paging + "<li class='lookupremove'><a href='#' onclick='javascript:" + _function + "(" +
+                         items.IndexList.length + ")'>Last</a></li>";
+                $(_id).append(paging);
+                $(".page-no").html($(".paging-index-selected").html());
+                $(".page-total").html(items.IndexList.length);
+                $(".paging-label").show();
+            },
+            error: function (data) {
+            }
+        });
+    }
+
+    //disable header
+    function disableHeader()
+    {
+         $('#txtDivisionAdd').attr('readonly', 'readonly');
+         $('#txtYearAdd').attr('readonly', 'readonly');
+    }
+
+    //enable disable
+    function enabledHeader()
+    {
+        $("#txtDivisionAdd").removeAttr("readonly");
+        $("#txtYearAdd").removeAttr("readonly");
+    }
+
+
+    //add row for detail
+     function AddDetail() {
+       $("#alert-search").css("display", "none");
+        var blank = 0;
+        var msg = "";
+        selectedindex = 0;
+        if ($("#txtDivisionAdd").val() == '') { blank++; msg = msg + "<p><strong>Division</strong> is Mandatory</p>"; }
+        if ($("#txtYearAdd").val() == '') { blank++; msg = msg + "<p><strong>Year</strong> is Mandatory</p>"; }
+        
+
+        if (blank > 0) {
+            msg = "<p>Please fill <strong>mandatory field</strong> in header data first.</p>" + msg;
+            $("#alert-search").css("display", "inherit");
+            $("#alert-search").html(msg);
+        }
+        else {
+            $("#txtMonth").removeAttr("disabled");
+            $("#txtQuota").removeAttr("disabled");
+           
+            $("#txtMonth").val("");
+            $("#txtMatNo").val("");
+            $("#txtMatDesc").val("");
+            $("#txtQuota").val("");
+            
+            $("#addrow").show();
+            $('#btnAddDetail').attr('disabled', 'disabled');
+            $('#btnEditDetail').attr('disabled', 'disabled');
+            $('#btnDeleteDetail').attr('disabled', 'disabled');
+            $('#btnShowDetail').attr('disabled', 'disabled');
+            $('#btnSaveDetail').removeAttr("disabled");
+            $('#btnCancelDetail').removeAttr("disabled");
+            }
+        }
+
+    //delete row for add detail
+    function CancelDetail() {
+    $("#alert-search").css("display", "none");
+    $('#btnSaveDetail').attr('disabled', 'disabled');
+    $('#btnCancelDetail').attr('disabled', 'disabled');
+    $('#btnAddDetail').removeAttr("disabled");
+    $('#btnEditDetail').removeAttr("disabled");
+    $('#btnDeleteDetail').removeAttr("disabled");
+    $('#btnShowDetail').removeAttr("disabled");
+    $("#addrow").hide();
+    }
+
+    //for display in grid
+    function _moveMatno(matno, matdesc, UOM, CAR, type, group, val) {
+        $('#txtMatNo').val(matno);
+        $('#txtMatDesc').val(matdesc);
+        _lookupShow();
+    }
+
+    function SaveDetail() {
+        var NewDate = new Date();
+        var MonthDate = NewDate.getMonth()+1;
+
+        var checked = []
+        var checkbox = $("input[name='checkadd[]']");
+
+        $("input[name='checkadd[]']:checked").each(function () {
+            checked.push($(this).val());
+        });
+
+        var seqno = selectedindex;
+        var blank = 0;
+        var notnumb = 0;
+        var reg = new RegExp(/^\d+(?:\.\d{1,2})?$/);
+        var msg = "";
+
+         if ($("#txtMonth").val() != '')
+         {  
+            if (reg.test($("#txtMonth").val()) == true)
+            {
+                if ($("#txtMonth").val() < 13 && $("#txtMonth").val() > 0 )
+                {
+                    if ($("#txtMonth").val() >= MonthDate)
+                        {msg = msg}
+                    else
+                        {notnumb++; msg = msg + '<p><strong>Month</strong> at least current month</p>'; }
+                }
+                else
+                { notnumb++; msg = msg + '<p><strong>Month</strong> Must be range 1 and 12</p>'; }
+            }
+            else
+            { notnumb++; msg = msg + '<p><strong>Month</strong> Must be a number</p>'; }
+        }
+     else
+          { msg = msg + '<p><strong>Month</strong> is Mandatory</p>'; blank++; }
+
+          if ($("#txtQuota").val() != '')
+          {
+                if (reg.test($("#txtQuota").val()) == true)
+                {msg = msg;}
+                else
+                { notnumb++; msg = msg + '<p><strong>Quota</strong> Must be a number</p>'; }
+          }
+          else
+           { msg = msg + '<p><strong>Quota</strong> is Mandatory</p>'; blank++; }
+         
+        if ($("#txtMatNo").val() == '') { msg = msg + '<p><strong>Material Code</strong> is Mandatory</p>'; blank++; }
+
+
+        if (blank > 0) { $("#alert-search").css("display", "inherit"); $("#alert-search").html(msg); return false; }
+        if (notnumb > 0) { $("#alert-search").css("display", "inherit"); $("#alert-search").html(msg); return false; }
+
+        $.ajax({
+            type: "POST", url: "@Url.Content("~/QuotaCreation/SaveDetail")",
+            data: {
+                aQuotaNo    : $("#txtQuotaNoDetail").val(),
+                aMonth      : $("#txtMonth").val(),
+                aMatNo      : $("#txtMatNo").val(),
+                aMatDesc    : $("#txtMatDesc").val(),
+                aQuota      : $("#txtQuota").val(),
+                aUsage      : $("#txtUsage").val(),
+                aAdditional : $("#txtAdditional").val()
+            },
+            success: function (resultMessage) {
+           $("#alert-search").css("display", "none");
+           $("#alert-search").css("display", "inherit");
+           $("#alert-search").html(resultMessage);
+           $("#addrow").hide();
+              $.ajax({
+                        type: "POST", 
+                        url: "@Url.Content("~/QuotaCreation/GetDetailList")", 
+                        data: { QUOTA_NO : $("#txtQuotaNoDetail").val()}, success: function (resultMessage) {
+                            $('.removed').remove();
+                            $('.appended-table').append(resultMessage);
+                            $('#btnSaveDetail').attr('disabled', 'disabled');
+                            $('#btnCancelDetail').attr('disabled', 'disabled');
+                            $('#btnAddDetail').removeAttr("disabled");
+                            $('#btnEditDetail').removeAttr("disabled");
+                            $('#btnDeleteDetail').removeAttr("disabled");
+                            $('#btnShowDetail').removeAttr("disabled");
+                        },
+                        error: function (resultMessage) { }
+                    });
+            },
+            error: function (resultMessage) {
+                alert();
+            }
+        });
+    }
+
+    function ShowDetail()
+    {
+        if ($("#btnShowDetail").text() != 'Show Detail') {
+            $(".initial-hide").hide();
+            $("#addTable").width(1310);
+            $("#btnShowDetail").html('Show Detail');
+            showDetail = 0;
+        } //detail show
+        else {
+            $(".initial-hide").show();
+            $("#addTable").width(2300);
+            $("#btnShowDetail").html('Hide Detail');
+            showDetail = 1;
+        }
+    }
+
+
+        function GetListQuota(){
+        var ids=[];
+        $("input[id^=chk-]").each(function(i, a){
+            if (a.id!=null && a.id.length > 0 && a.checked) {
+                ids.push($('#'+a.id).data('no'));
+            }
+        });
+        var h = ids.length;
+        var w = ids.join();
+        return [h,w];
+        }
+
+        function DeleteDetail() {
+         var quota_no = GetListQuota();
+            var count = quota_no[Object.getOwnPropertyNames(quota_no)[0]];
+            var value = quota_no[Object.getOwnPropertyNames(quota_no)[1]];
+            //alert(value);
+ 
+        if (count > 1) {
+            $("#alert-search").css("display", "inherit");
+            $("#alert-search").html("<span>Please select <strong>only one record</strong> to be <strong>deleted</strong></span>");
+        }
+        else if (count <= 0) {
+            $("#alert-search").css("display", "inherit");
+            $("#alert-search").html("<span>Please select <strong>one record</strong> to be <strong>deleted</strong></span>");
+        }
+        else {
+     $("#alert-search").css("display", "none");
+            if (!confirm('Delete selected data detail?')) return;
+            $.ajax({
+                type: "POST", url: "@Url.Content("~/QuotaCreation/DeleteQuota")",
+                data: {
+                    QUOTA_NO    : $('#txtQuotaNoDetail').val(),
+                    MONTH       : $('#tmonth-'+value+'').text(),
+                    MAT_NO      : $('#tmatno-'+value+'').text()
+                },
+                success: function (resultMessage) {
+                        $("#alert-search").css("display", "inherit");
+                        $("#alert-search").html(resultMessage);
+                      
+                        $.ajax({
+                            type: "POST",
+                            url: "@Url.Content("~/QuotaCreation/GetDetailList")",
+                            data: { QUOTA_NO: $("#txtQuotaNoDetail").val() },
+                            success: function (resultMessage) {
+                                $('.removed').remove();
+                                $('.appended-table').append(resultMessage);
+                            $('#btnSaveDetail').attr('disabled', 'disabled');
+                            $('#btnCancelDetail').attr('disabled', 'disabled');
+                            $('#btnAddDetail').removeAttr("disabled");
+                            $('#btnEditDetail').removeAttr("disabled");
+                            $('#btnDeleteDetail').removeAttr("disabled");
+                            $('#btnShowDetail').removeAttr("disabled");
+                            },
+                            error: function (resultMessage) { }
+                        });
+                    }
+                });
+        }
+    }
+
+</script>

@@ -1,0 +1,7 @@
+CREATE PROCEDURE [dbo].[sp_POCommon_GetPOItemInfo]
+    @poNo VARCHAR(11),
+    @poItemNo INT
+AS
+BEGIN
+    SELECT PO_QTY_ORI Qty, VALUATION_CLASS ValuationClass FROM TB_R_PO_ITEM WHERE PO_NO = @poNo AND PO_ITEM_NO = @poItemNo
+END

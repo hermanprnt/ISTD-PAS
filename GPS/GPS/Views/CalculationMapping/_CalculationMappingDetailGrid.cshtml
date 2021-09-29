@@ -1,0 +1,69 @@
+﻿@using GPS.Models.Master
+@model  GPS.Models.Master.CalculationMapping
+@{
+    List<CalculationMapping> CMData  = (List<CalculationMapping>)ViewData["AddEditDetail"] != null ? (List<CalculationMapping>)ViewData["AddEditDetail"] : new List<CalculationMapping>();
+}
+@if (CMData.Count > 0)
+{
+    int i = 0;
+    
+    foreach (var item in CMData)
+    {
+        <tr class="removed isrow" id="row-@item.SEQ_NO">
+            <td class="text-center custom-creation-datagrid" id="tno-@item.SEQ_NO">@item.SEQ_NO</td>
+            <td class="text-center custom-creation-datagrid" id="tactive-@item.SEQ_NO">
+                @if(item.ITEM_STATUS == "A")
+                {
+                    <a href=""><i class="fa fa-circle active-item"></i></a>
+                }
+                else
+                {
+                    <a href=""><i class="fa fa-circle inactive-item"></i></a>
+                }
+            </td>
+            <td class="text-center custom-creation-datagrid col-@item.SEQ_NO">
+                <span class="text tcompcd-@item.SEQ_NO">@item.COMP_PRICE_CD</span>
+            </td>
+            <td class="text-left custom-creation-datagrid col-@item.SEQ_NO">
+                <span class="text tcompdesc-@item.SEQ_NO">@item.COMP_PRICE_TEXT</span>
+            </td>       
+            <td class="text-center custom-creation-datagrid col-@item.SEQ_NO">
+                <span class="text tbasefrom-@item.SEQ_NO">@item.BASE_VALUE_FROM</span>
+            </td>  
+            <td class="text-center custom-creation-datagrid col-@item.SEQ_NO">
+                <span class="text tbaseto-@item.SEQ_NO">@if(item.BASE_VALUE_TO != 0){ @item.BASE_VALUE_TO }</span>
+            </td>  
+            <td class="text-center custom-creation-datagrid col-@item.SEQ_NO">
+                <span class="text tqty-@item.SEQ_NO">@item.QTY_PER_UOM</span>
+            </td>
+            <td class="text-center custom-creation-datagrid col-@item.SEQ_NO">
+                <span class="text tinventory-@item.SEQ_NO">@item.INVENTORY_FLAG</span>
+            </td>  
+            <td class="text-center custom-creation-datagrid col-@item.SEQ_NO">
+                <span class="text tcaltype-@item.SEQ_NO" data-calculation_type="@item.CALCULATION_TYPE">@item.CALCULATION_TYPE_DESC</span>
+            </td>
+            <td class="text-center custom-creation-datagrid col-@item.SEQ_NO">
+                <span class="text tplusminus-@item.SEQ_NO" data-plusminus_sign="@item.PLUS_MINUS_FLAG">@item.PLUS_MINUS_SIGN</span>
+            </td>            
+            <td class="text-left custom-creation-datagrid col-@item.SEQ_NO">
+                <span class="text tconcat-@item.SEQ_NO" data-condition_cd="@item.CONDITION_CATEGORY_CD">@item.CONDITION_CATEGORY</span>
+            </td>
+            <td class="text-center custom-creation-datagrid col-@item.SEQ_NO">
+                <span class="text taccrual-@item.SEQ_NO">@item.ACCRUAL_FLAG_TYPE</span>
+             </td>
+            <td class="text-center custom-creation-datagrid col-@item.SEQ_NO">
+                <span class="text tconrule-@item.SEQ_NO">@item.CONDITION_RULE</span>
+            </td>
+            <td class="text-center custom-creation-datagrid">
+                <i class="fa fa-pencil btn btn-xs btn-primary" id="editlink" onclick="javascript:EditDetail('@item.SEQ_NO')"></i>
+                <i class="fa fa-trash btn btn-xs btn-danger" id="dellink" onclick="javascript:DeleteDetail('@item.SEQ_NO')"></i>
+            </td>
+        </tr>
+        i++;
+    }
+}
+else { 
+    <tr class="removed text-center">
+        <td colspan="14">No Data Created</td>
+    </tr>
+}

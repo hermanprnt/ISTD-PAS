@@ -1,0 +1,286 @@
+﻿/*
+    Decription  : Override tdk.css for new layout
+    Modify by   : Rahmat (Arkamaya)
+    Modify date : 15.03.2015
+*/
+
+.dropdown-menu 
+{
+    z-index: 100000;
+}
+
+.navbar-brand 
+{
+    font-size : 12pt;
+}
+
+.navbar-ncp 
+{
+    border-color: #45CCBC;
+    color: #fff;
+    background: rgb(69, 205, 188); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(69, 205, 188, 0.9) 0%, rgba(69, 146, 143, 0.9) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(69, 205, 188, 0.9)), color-stop(100%,rgba(69, 146, 143, 0.9))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(69, 205, 188, 0.9) 0%,rgba(69, 146, 143, 0.9) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(69, 205, 188, 0.9) 0%,rgba(69, 146, 143, 0.9) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(69, 205, 188, 0.9) 0%,rgba(69, 146, 143, 0.9) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(69, 205, 188, 0.9) 0%,rgba(69, 146, 143, 0.9) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d31515', endColorstr='#b50303',GradientType=0 ); /* IE6-9 */
+}
+
+.nav>li>a {
+  position: relative;
+  display: block;
+  padding: 5px 15px;
+}
+
+.navbar-ncp a
+{
+    color: #fff;
+}
+
+.navbar-ncp-fix 
+{
+    position: fixed;
+    width: 100%;
+    top: 50px;
+    z-index: 1030;
+}
+
+.navbar-nav > li > .dropdown-menu 
+{
+    font-size: 11px;
+    background-color: #222;
+    border-color: #080808;
+}
+
+.navbar-inverse .navbar-nav>li>a {
+    color: #A2C1C8;
+    top : 0px;
+}
+
+.navbar-inverse {
+  background-color: #222;
+  border-color: #080808;
+  height: 28px;
+  margin-bottom: 15px;
+}
+
+.navbar-nav>li>a {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  line-height: 17.15px;
+}
+
+.dropdown-menu > li > a 
+{
+    color: #A2C1C8;
+}
+
+.container-fluid 
+{
+    margin-top: 40px;
+}
+
+.page-header 
+{
+    padding-top: 9px;
+    padding-bottom: 9px;
+    margin : 15px auto;
+    border-bottom: 1px solid #eee;
+    font-weight : bold;
+    font-style: italic;
+}
+
+body 
+{
+    font-size : 9pt;
+    padding-top: 50px;
+}
+
+/* Control */
+
+.form-group-xs .control-label {
+  font-size: 9pt;
+  padding-top: 5px;
+  padding : 1px 7px;
+}
+
+.form-horizontal .control-label {
+  text-align: left;
+}
+
+.input-xs, .form-horizontal .form-group-xs .form-control, .form-group-xs .form-control, .input-group-xs > .input-group-addon 
+{
+    font-size : 9pt;
+    height : 21px;
+    padding : 1px 7px;
+}
+
+select.input-xs {
+  height: 24px;
+  padding : 1px 7px;
+}
+
+/* Masking combobox */
+
+.masking-combo 
+{
+    position: absolute;
+    width: 68%;
+    float: left;
+}
+
+.masking-combo-btn
+{
+    position: relative;
+    height: 21px;
+    left: 79%;
+}
+
+/* End masking combobox */
+
+.btn 
+{
+    font-size : 9pt;
+    padding : 4px 10px;
+    height : 25px;
+}
+
+.btn-grid
+{
+    font-size : 8pt;
+    padding : 0px;
+    height : 20px;
+}
+
+.pagination-sm>li>a, .pagination-sm>li>span {
+  font-size: 9pt;
+}
+
+/* End control */
+
+/* Grid */
+
+.grid-overflow {
+  /*height: 300px;*/
+  border-style: solid;
+  border-width: 1px;
+  border-color: #ddd;
+}
+
+/* End grid */
+
+/* Popup */
+.modal-header {
+  padding: 8px;
+  font-size: 10pt;
+  font-weight: bold;
+  text-indent: 10px;
+  font-style: italic;
+}
+
+/* End popup */
+
+.table 
+{
+    margin-bottom : 0px;
+}
+
+.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th {
+  line-height: 0px;
+  padding : 6px;
+  height : 25px;
+  font-size : 8pt;
+  background: linear-gradient(to bottom, rgba(91, 116, 160, 1) 0%,rgba(91, 116, 160, 1) 100%);
+  vertical-align : middle;
+}
+
+.table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td {
+  line-height: 1.5em;
+  padding: 0px 5px 0px 5px;
+  height : 25px;
+  font-size : 8pt;
+}
+
+/*.seacrch-box
+{  
+    border: 1px solid #eee;
+    padding: 10px 10px 10px 10px;
+}
+
+.form-group {
+    margin-bottom: 5px;
+}
+
+.input-sm, .form-horizontal .form-group-sm .form-control 
+{
+    height: 27px;
+}
+
+.font-small
+{
+    font-size: 9pt;
+}
+
+.font-grid
+{
+    font-size: 8pt;
+}
+
+.btn-standard
+{
+    width: 100px;
+    padding: 4px 12px;
+}
+
+.inline-grid
+{
+    width: 100%;
+}
+
+.table {
+    table-layout: fixed;
+}
+
+.table > thead > tr > th {
+    vertical-align : middle;    
+}
+
+.row .btn + .btn {
+    margin-left: 5px;
+}
+
+.table .table-lg {
+    width: 1500px;
+    max-width: 1500px;
+}*/
+
+/*
+.object-loss-left {
+    padding-left: 0px;
+}
+
+.object-loss-right {
+    padding-right: 0px;
+}
+
+.form-group-sm-box-search {
+    margin-top: 5px;  
+    padding-left: 15px;
+}
+
+.form-button-group-box-search {
+    margin: 5px 0px 10px 20px;
+}
+
+.form-main-group-box-search {
+    margin: 5px 0px 10px 0px;
+}
+
+
+.btn 
+{
+    width: 100px;
+}
+*/

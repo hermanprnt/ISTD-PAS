@@ -1,0 +1,43 @@
+﻿@using GPS.Constants
+@using GPS.Models.Common
+@{
+    List<Attachment> poApprovalAttachmentList = (List<Attachment>)ViewData["POApprovalAttachment"];
+}
+
+<style>
+    .table > tr > td, 
+    .table > thead > tr > th {
+        vertical-align : middle;    
+        line-height: 100%;
+    }
+</style>
+<div style="width:100%;">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr style="width:100%;">
+                <th style="width:7em;">Doc. Type</th>
+                <th>File Name</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (poApprovalAttachmentList.Count > 0)
+        {
+            foreach (Attachment item in poApprovalAttachmentList)
+            {
+                <tr>
+                    <td class="text-center">@item.DOC_TYPE</td>
+                    <td class="text-left">
+                        @Html.ActionLink(item.FILE_NAME_ORI, "DownloadPOApprovalAttachment", "POApproval", new { docNo = item.DOC_NO, docSource = item.DOC_SOURCE, fileName = item.FILE_PATH, fileNameOri = item.FILE_NAME_ORI, docYear = item.DOC_YEAR}, new { id="lnk-attachment-" + item.SEQ_NO })
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">@CommonDisplayMessage.NoData</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,722 @@
+﻿@using GPS.Controllers.Asset
+<script type="text/javascript" id="Common">
+    $tdk.AjaxMethod = "POST";
+    $tdk.Alert = "#alert-search";
+    $tdk.AlertDetail = "#alert-detail";
+    $tdk.Success = "#success-search";
+    $tdk.Warning = "#warning-search";
+    $tdk.Division = "";
+    $tdk.isDetail = 0;
+    messagelife = 1;
+
+    var File = {
+        ASSET: { size: 0, count: 0, validext: "", max: 0 }
+    };
+
+    function toggleSearch() {
+        $("._criteria").toggle(200, "linear");
+        if ($("#toogle-search").hasClass("fa-angle-double-up")) {
+            $("#toogle-search").removeClass("fa-angle-double-up");
+            $("#toogle-search").addClass("fa-angle-double-down");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            //$("#tScrollBody").height(300);
+            $("#toogle-search").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-search").removeClass("fa-angle-double-down");
+            $("#toogle-search").addClass("fa-angle-double-up");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            //$("#tScrollBody").height(190);
+            $("#toogle-search").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+
+    function toggleDetail() {
+        $("._detailpr").toggle(200, "linear");
+        if ($("#toogle-detail").hasClass("fa-angle-double-up")) {
+            $("#toogle-detail").removeClass("fa-angle-double-up");
+            $("#toogle-detail").addClass("fa-angle-double-down");
+            $("#toogle-detail").removeClass("btn-tiny-down");
+            $("#toogle-detail").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            $("#toogle-detail").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-detail").removeClass("fa-angle-double-down");
+            $("#toogle-detail").addClass("fa-angle-double-up");
+            $("#toogle-detail").removeClass("btn-tiny-down");
+            $("#toogle-detail").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            $("#toogle-_detail").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+
+    function toogle(_class, displaytext) {
+        var _criteria = $("." + _class);
+        var text = $("#lnsearch-toggle-" + _class).text();
+        _criteria.toggle(200, "linear");
+        $("#lnsearch-toggle-" + _class).text(text == "More " + displaytext ? "Less " + displaytext : "More " + displaytext);
+    }
+
+    function detailGrid() {
+        if ($tdk.isDetail > 0) {
+            $("#btnToggleDetail").html('Show Detail');
+            $("._toggle-detail").hide();
+            $tdk.isDetail = 0;
+            $("#dynamic-table").css("width", "100%");
+            $("#tblScroll").css("width", "100%");
+        }
+        else {
+            $("#btnToggleDetail").html('Hide Detail');
+            $("._toggle-detail").show();
+            $tdk.isDetail = 1;
+            $("#dynamic-table").css("width", "1360px");
+            $("#tblScroll").css("width", "1360px");
+        }
+    }
+</script>
+
+<script type="text/javascript" id="Search">
+    function ClearCriteria() {
+        $.progressbox.show("Search Asset", "Clearing Data...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@AssetUploadController._Search",
+            data: { issearch: 'N' },
+            success: function (resultMessage) {
+                $('.TableList').html(resultMessage);
+                messagelife = 1;
+                $.Clear(["#prno", "#status", "#itemno", "#assetno", "#assetcat", "#subassetno", "#assetclass", "#registerdate"]);
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function onDownloadData()
+    {
+        alert("download");
+        var regdate = $("#registerdate").val().split('-') || "";
+
+        var datefrom = regdate != "" ? GetValidDate(regdate[0].trim()) : "";
+        var dateto = regdate != "" ? GetValidDate(regdate[1].trim()) : "";
+        $.fileDownload("@Html.Toyota().Page.GetActionUrl("Download")", 
+        {
+            data: {
+                    PR_NO: $("#prno").val(),
+                    STATUS_CD: $("#status").val(),
+                    ITEM_NO: $("#itemno").val(),
+                    ASSET_NO: $("#assetno").val(),
+                    ASSET_CATEGORY: $("#assetcat").val(),
+                    SUBASSET_NO: $("#subassetno").val(),
+                    ASSET_CLASS: $("#assetclass").val(),
+                    REGISTRATION_DATE_FROM: datefrom,
+                    REGISTRATION_DATE_TO: dateto
+            }
+        })
+    }
+
+    function ValidateDate() {
+        var datemsg = "";
+        var regdate = $("#registerdate").val().split('-') || "";
+        var datefrom = regdate != "" ? GetValidDate(regdate[0].trim()) : "";
+        var dateto = regdate != "" ? GetValidDate(regdate[1].trim()) : "";
+
+        if (datefrom != '') {
+            if (dateto == '') {
+                datemsg = "Register Date To is mandatory if Register Date From is not empty";
+            }
+        }
+        else if (dateto != '') {
+            if (datefrom == '') {
+                datemsg = "Register Date From is mandatory if Register Date To is not empty";
+            }
+        }
+        return datemsg;
+    }
+
+    function GetValidDate(date) {
+        if (date != "") {
+            date = date.split('.');
+            var date = date[1] + '-' + date[0] + '-' + date[2];
+        }
+        return date;
+    }
+
+    function GetSearchParameters(page) {
+        var regdate = $("#registerdate").val().split('-') || "";
+
+        var datefrom = regdate != "" ? GetValidDate(regdate[0].trim()) : "";
+        var dateto = regdate != "" ? GetValidDate(regdate[1].trim()) : "";
+
+        return {
+            PR_NO: $("#prno").val(),
+            STATUS_CD: $("#status").val(),
+            ITEM_NO: $("#itemno").val(),
+            ASSET_NO: $("#assetno").val(),
+            ASSET_CATEGORY: $("#assetcat").val(),
+            SUBASSET_NO: $("#subassetno").val(),
+            ASSET_CLASS: $("#assetclass").val(),
+            REGISTRATION_DATE_FROM: datefrom,
+            REGISTRATION_DATE_TO: dateto,
+            issearch: 'Y',
+            page: page,
+            pageSize: $('.page').val() || 10
+        };
+    }
+
+    function Search(page, isbutton) {
+        var param = GetSearchParameters(page);
+        var msg = ValidateDate();
+        if (msg != "") {
+            $.messagebox.show(
+                "Search Asset",
+                msg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+            if(isbutton === 1)
+                messagelife = 1;
+
+            $.progressbox.show("Search Asset", "Loading Data...");
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@AssetUploadController._Search",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (resultMessage) {
+                    var maxperpage = $('.page').val() || 10;
+                    $('.TableList').html(resultMessage);
+                    $("#btnToggleDetail").html('Show Detail');
+                    $tdk.isDetail = 0;
+                    $('.page').val(maxperpage);
+                    $.progressbox.hide();
+                },
+                error: function (resultMessage) {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Error",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            });
+        }
+    }
+</script>
+
+<script type="text/javascript" id="Upload Asset">
+    function openPopupUpload() {
+        $.progressbox.show("Upload Asset", "Initializing Upload Asset...");
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@AssetUploadController._UploadInit",
+            data: {},
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                $("#upload-popup-container").html(data);
+                $.progressbox.hide();
+                $("#upload-popup-container").modal();
+            },
+            error: function (data) {
+                $.progressbox.hide();
+                alert(data);
+            }
+        });
+    }
+
+    function validateFile() {
+        var file = $("#asset").get(0).files[0];
+
+        if ((file === null) || (file === "")) {
+            $.messagebox.show(
+                "Upload Asset",
+                "File is NULL, please Upload Another File",
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+
+            return
+        }
+
+        var filecounter = 0;
+        var filemaxsize = 0;
+        var filemax = 0;
+        var filetypeori = "";
+        var filevalidextension = null;
+
+        filecounter = File.ASSET.count;
+        filecounter++;
+        filemaxsize = File.ASSET.size;
+        filemax = File.ASSET.max;
+        filevalidextension = File.ASSET.validext.split(',');
+
+        if (filecounter > filemax) {
+            $.messagebox.show(
+                "Upload Attachment",
+                "maximum file for asset is " + filemax + ", Upload Failed",
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+
+            return;
+        }
+
+        var oriextension = file.name.split('.');
+        if ($.inArray("." + oriextension[oriextension.length - 1], filevalidextension) === -1) {
+            var strmsg = "Invalid File Extension for asset, Allowed file extension for asset are : " + filevalidextension.join(',');
+
+            $.messagebox.show(
+                "Upload Asset",
+                strmsg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+
+            return;
+        }
+
+        if (file.size > filemaxsize) {
+            var strmsg = "File " + file.name + " size (" + (file.size / 1000000) +
+                         "MB) is Reaching Limit, Maximum File Size for asset is " + (filemaxsize / 1000000);
+
+            $.messagebox.show(
+                "Upload Asset",
+                strmsg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+
+            return;
+        }
+
+        var filedata = new FormData();
+        filedata.append("file", file);
+        filedata.append("PROCESS_ID", $("#procid").val());
+
+        $.progressbox.show("Upload Asset", "Uploading . . .");
+        var html = "";
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@AssetUploadController._SaveFileTemp",
+            data: filedata,
+            contentType: false, // NOTE: disable header to include content-type
+            processData: false, // NOTE: disabe jquery to convert data to string
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] != "SUCCESS") {
+                    $.messagebox.show(
+                        "Upload Asset",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+
+                    $.progressbox.hide();
+                    return;
+                }
+                $('.remove-list-asset').remove();
+                html = html + "<span class='remove-list-asset' id='isrow-asset'>" +
+                                "<a href='#' onclick='deleteFiles(\"" + resultMessage.split('|')[1] + "\")'>" +
+                                    "<img width='15' height='15' src='@Url.Content("../Content/img/error.png")' title='Delete " + file.name + "'>" +
+                                "</a>";
+                html = html + "<a href='#' onclick='javascript:downloadFile(\"" + resultMessage.split('|')[1] + "\")'>" +
+                                    (file.name.length > 20 ? file.name.substring(0, 20) + ". . ." : file.name) +
+                                "</a></span>";
+
+                if (filecounter === File.ASSET.max)
+                    $("#asset").hide();
+                File.ASSET.count = filecounter;
+
+                $('.appended-file-asset').append(html);
+                $('.appended-file-asset').show();
+                $.Enable(["#btn-uploadfile"]);
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.messagebox.show(
+                    "Upload Asset",
+                    "Cannot Upload File. Cannot connect to server",
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function downloadFile(path) {
+        window.open("@Url.Content("~/AssetUpload/DownloadFile?")" + "PROCESS_ID=" + $("#procid").val() + "&FILE_PATH=" + path, '_self');
+    }
+
+    function deleteFiles(path) {
+        $.progressbox.show("Delete File", "Deleting file...");
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@AssetUploadController._DeleteFileTemp",
+            data: {
+                PROCESS_ID: $("#procid").val(),
+                FILE_PATH: path
+            },
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] == "SUCCESS") {
+                    File.ASSET.count--;
+                    $("#asset").show();
+                    $('.appended-file-asset').hide();
+                    $("#asset").val("");
+
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Upload Asset",
+                        "File Has Been Removed",
+                        "SUC",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+
+                    $.Disable(["#btn-uploadfile"]);
+                    $("#isrow-asset").css("display", "none");
+                }
+                else {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Upload Asset",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                alert(resultMessage);
+            }
+        });
+    }
+
+    function uploadFile() {
+        $.progressbox.show("Upload Asset", "Uploading and Validating data from given file...");
+
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@AssetUploadController._SaveTemp",
+            data: { PROCESS_ID: $("#procid").val() },
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] == "SUCCESS") {
+                    $.ajax({
+                        type: $tdk.AjaxMethod,
+                        url: "@AssetUploadController._UploadValidation",
+                        data: { PROCESS_ID: $("#procid").val() },
+                        success: function (data) {
+                            $("#upload-popup-container").modal('hide');
+                            $("#upload-validation-popup-container").html(data);
+                            $.progressbox.hide();
+                            $("#upload-validation-popup-container").modal();
+                        },
+                        error: function (data) {
+                            $.progressbox.hide();
+                            alert(data);
+                        }
+                    });
+                }
+                else {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Upload Asset",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                alert(resultMessage);
+            }
+        });
+    }
+
+    function DeleteItem(PR_NO, ITEM_NO, SEQ_NO) {
+        $.progressbox.show("Delete Item", "Deleting data asset...");
+
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@AssetUploadController._DeleteTemp",
+            data: {
+                PR_NO: PR_NO,
+                ITEM_NO: ITEM_NO,
+                SEQ_NO: SEQ_NO,
+                PROCESS_ID: $("#procid").val()
+            },
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] == "SUCCESS") {
+                    $.ajax({
+                        type: $tdk.AjaxMethod,
+                        url: "@AssetUploadController._GetTemp",
+                        data: { PROCESS_ID: $("#procid").val() },
+                        success: function (data) {
+                            $.progressbox.hide();
+                            $("#grid-validation").html(data);
+
+                            if ($('.row-data').length == 0) $.Disable(["#btn-save"]);
+                        },
+                        error: function (data) {
+                            $.progressbox.hide();
+                            alert(data);
+                        }
+                    });
+                }
+                else {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Delete Item",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                alert(resultMessage);
+            }
+        });
+    }
+
+    function CancelUpload() {
+        $.progressbox.show("Cancel Upload Asset", "Abort All Changed Data...");
+
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@AssetUploadController._CancelUpload",
+            data: { PROCESS_ID: $("#procid").val() },
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] == "SUCCESS") {
+                    $.progressbox.hide();
+                    $("#upload-popup-container").modal('hide');
+                }
+                else {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Cancel Upload Asset",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                alert(resultMessage);
+            }
+        });
+    }
+
+    function CancelSave() {
+        $.messagebox.show(
+            "Cancel Asset Upload",
+            "Are You Sure You Want to Cancel All Changes ?",
+            "INF",
+            "CONFIRM",
+            "doCancelSave()",
+            ""
+        )
+    }
+
+    function doCancelSave() {
+        $.progressbox.show("Cancel Save Asset", "Abort All Changed Data...");
+
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@AssetUploadController._CancelSave",
+            data: { PROCESS_ID: $("#procid").val() },
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] == "SUCCESS") {
+                    $.progressbox.hide();
+                    $("#upload-validation-popup-container").modal('hide');
+                }
+                else {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Cancel Save Asset",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                alert(resultMessage);
+            }
+        });
+    }
+
+    function SaveData() {
+        $.messagebox.show(
+            "Save Asset",
+            "Are You Sure You Want to Save Data ?",
+            "INF",
+            "CONFIRM",
+            "doSaveData()",
+            ""
+        )
+    }
+
+    function doSaveData() {
+        $.progressbox.show("Save Asset", "Saving Asset Data...");
+
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@AssetUploadController._SaveData",
+            data: { PROCESS_ID: $("#procid").val() },
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] == "SUCCESS") {
+                    $("#upload-validation-popup-container").modal('hide');
+
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Save Asset",
+                        "Asset Data saved successfully",
+                        "SUC",
+                        "SINGLE",
+                        "Search(1,1)",
+                        ""
+                    )
+                }
+                else {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Save Asset",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                alert(resultMessage);
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript" id="DELETE">
+    function ValidChecked(checked, method) {
+        return checked.length > 1 ? "Please select only one record to be deleted." : 
+                  (checked.length <= 0 ? "Please select at least one record to be deleted" : "");
+    }
+
+    function Delete() {
+        var checked = []
+        $("input[name='checkasset[]']:checked").each(function () { checked.push($(this).val()); });
+        var validmsg = ValidChecked(checked, "canceled");
+        if (validmsg != "") {
+            $.messagebox.show(
+                "Delete Asset",
+                validmsg,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+            $.messagebox.show(
+                "Info",
+                "Are you sure you want to delete this asset?",
+                "INF",
+                "CONFIRM",
+                "doDelete()",
+                ""
+            )
+        }
+    }
+
+    function doDelete() {
+        var checked = []
+        $("input[name='checkasset[]']:checked").each(function () { checked.push($(this).val()); });
+
+        var PR_NO = checked[0].split(';')[0];
+        var ITEM_NO = checked[0].split(';')[1];
+        var SEQ_NO = checked[0].split(';')[2];
+
+        $.progressbox.show("Delete Asset", "Deleting Selected Asset...");
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@AssetUploadController._DeleteData",
+            data: { 
+                PR_NO: PR_NO, 
+                ITEM_NO: ITEM_NO,
+                SEQ_NO: SEQ_NO
+            },
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] == "SUCCESS") {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Delete Asset",
+                        "Data deleted successfully",
+                        "SUC",
+                        "SINGLE",
+                        "Search(1,1)",
+                        ""
+                    )
+                }
+                else {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Delete Asset",
+                        "Delete Asset Failed : " + resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                alert(resultMessage);
+            }
+        });
+    }
+</script>

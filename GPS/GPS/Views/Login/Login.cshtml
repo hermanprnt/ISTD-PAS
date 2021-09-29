@@ -1,0 +1,695 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta charset="utf-8" />
+
+        <title>@Html.Toyota().Application.Alias - Login</title>
+
+        <meta name="description" content="User login page" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+
+        <!-- bootstrap & fontawesome -->
+        <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/bootstrap.css")" />
+        <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/font-awesome.css")" />
+
+        <!-- text fonts -->
+        <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/ace-fonts.css")" />
+
+        <!-- ace styles -->
+        <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/ace.css")" />
+
+        <!--[if lte IE 9]-->
+        <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/ace-part2.css")" />
+        <!--[endif]-->
+        <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/ace-rtl.css")" />
+
+        <!--[if lte IE 9]-->
+        <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/ace-ie.css")" />
+        <!--[endif]-->
+
+        <style>
+            .login-container
+            {
+                width: auto;
+                max-width: 900px;
+            }
+            #carousel-login
+            {
+                max-width: 470px;
+                margin: 0 auto;
+            }
+            #forgot-box, #signup-box
+            {
+                max-width: 375px;
+                margin: 0 auto;
+            }
+            .login-main
+            {
+                padding-bottom: 36px !important;
+                padding-top: 36px !important;
+            }
+            .logo-title
+            {
+                width: 32px;
+            }
+            .login-app
+            {
+                font-family: LeagueSpartan;
+            }
+
+            /* ============================ Login box: begin ============================ */
+
+            .login-box .toolbar {
+                background: transparent;
+                border-top: 0 solid transparent;
+            }
+
+            .login-layout .widget-box .widget-body .toolbar > div > a {
+                font-size: 15px;
+                font-weight: 400;
+                text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+            }
+
+            .login-box .toolbar > div:first-child + div > a {
+                margin-right: 11px;
+            }
+
+            .login-box .toolbar > div:first-child + div {
+                float: right;
+                text-align: left;
+            }
+
+            /* ============================= Login box: end ============================= */
+
+            /* =============================== say: begin =============================== */
+
+            .warn, .yell {
+                background-color: #d15b47;
+                color: #fff
+            }
+
+            .done {
+                background-color: #629b58;
+                color: #fff
+            }
+
+            /* ================================ say: end ================================ */
+        </style>
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+
+        <!--[if lt IE 9]-->
+        <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/html5shiv.js")"></script>
+        <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/respond.js")"></script>
+        <!--[endif]-->
+    </head>
+
+    <body class="login-layout light-login" id="ceklogin">
+        <div class="main-container" >
+            <div class="main-content">
+                <div class="row">
+                    <div class="col-sm-10 col-sm-offset-1">
+                        <div class="login-container">
+                            <div class="center">
+                            <div class="hidden-xs">
+                                <h1>
+                                    <img src="@Url.Content("~/Content/Bootstrap/img/app-logo.png")" class="logo-title" alt="ISTD Logo" />
+                                    <span class="login-app red">@Html.Toyota().Application.Name</span>
+                                </h1>
+                            </div>
+                             <div class="visible-xs">
+                                <h1>
+                                    <img src="@Url.Content("~/Content/Bootstrap/img/app-logo.png")" class="logo-title" alt="ISTD Logo" />
+                                    <span class="login-app red">@Html.Toyota().Application.Alias</span>
+                                </h1>
+                            </div>
+                                <h4 class="blue" id="id-company-text">&copy; @Html.Toyota().Application.OwnerName</h4>
+                            </div>
+
+                            <div class="space-6"></div>
+
+                            <div class="position-relative">
+                                <div id="login-box" class="login-box visible widget-box no-border">
+                                    <div class="widget-body">
+                                        <div class="widget-main login-main">
+                                            <div class="row">
+                                                <div class="col-sm-5">
+                                                    <h4 class="header blue lighter bigger">
+                                                        <i class="ace-icon fa fa-coffee green"></i>
+                                                        Please Enter Your Information
+                                                    </h4>
+
+                                                    <div class="space-6"></div>
+
+                                                    <form id="login-form" role="form" class="form" method="post">
+                                                        <fieldset>
+                                                            <label class="block clearfix">
+                                                                <span class="block input-icon input-icon-right">
+                                                                    <input type="text" class="form-control" placeholder="Username" name="username" id="tfUsername"/>
+                                                                    <i class="ace-icon fa fa-user"></i>
+                                                                </span>
+                                                            </label>
+
+                                                            <label class="block clearfix">
+                                                                <span class="block input-icon input-icon-right">
+                                                                    <input type="password" class="form-control" placeholder="Password" name="password" id="tfPassword" autocomplete="off"/>
+                                                                    <i class="ace-icon fa fa-lock"></i>
+                                                                </span>
+                                                            </label>
+
+                                                            <div id="feedback">&nbsp;</div>
+
+                                                            <div class="clearfix">
+                                                                <button type="submit" id="login-button" class="width-35 pull-right btn btn-sm btn-primary">
+                                                                    <i class="ace-icon fa fa-key"></i>
+                                                                    <span class="bigger-110">Login</span>
+                                                                </button>
+                                                            </div>
+
+                                                            <div class="space-4"></div>
+                                                        </fieldset>
+                                                    </form>
+
+                                                    <div class="toolbar clearfix">
+                                                        <div>
+                                                            &nbsp;
+                                                        </div>
+                                                        <div>
+                                                            <a href="#" data-target="#signup-box" class="blue lighter">
+                                                                 @*Change password*@
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div><!-- /.col -->
+
+                                                <div class="col-sm-7 hidden-xs">
+                                                    @Html.Partial("_Carousel")
+                                                </div><!-- /.col -->
+                                            </div><!-- /.row -->
+                                        </div><!-- /.widget-main -->
+                                           <div class="toolbar clearfix" style="background:#3F51B5 !important;">
+                                        <div>
+                                            <a href="#" data-target="#forgot-box" class="forgot-password-link">
+                                              @* <i class="ace-icon fa fa-arrow-left"> </i>I forgot my password </a>*@
+                                        </div>
+                                        <div>
+                                            <a href="#" data-target="#signup-box" class="user-signup-link">
+                                            @*<i class="ace-icon fa fa-arrow-right"></i>I want to register </a>*@
+                                        </div>
+                                    </div>
+                                    </div><!-- /.widget-body -->
+                                </div><!-- /.login-box -->
+
+                                <div id="forgot-box" class="forgot-box widget-box no-border">
+                                    <div class="widget-body">
+                                        <div class="widget-main">
+                                            <h4 class="header red lighter bigger">
+                                                <i class="ace-icon fa fa-key"></i>
+                                                Retrieve Password
+                                            </h4>
+
+                                            <div class="space-6"></div>
+                                            <p>
+                                                Enter your email and to receive instructions
+                                            </p>
+
+                                            <form>
+                                                <fieldset>
+                                                    <label class="block clearfix">
+                                                        <span class="block input-icon input-icon-right">
+                                                            <input type="email" class="form-control" placeholder="Email" />
+                                                            <i class="ace-icon fa fa-envelope"></i>
+                                                        </span>
+                                                    </label>
+
+                                                    <div id="forgot-feedback">&nbsp;</div>
+
+                                                    <div class="clearfix">
+                                                        <button type="button" class="width-35 pull-right btn btn-sm btn-danger">
+                                                            <i class="ace-icon fa fa-lightbulb-o"></i>
+                                                            <span class="bigger-110">Send Me!</span>
+                                                        </button>
+                                                    </div>
+                                                </fieldset>
+                                            </form>
+                                        </div><!-- /.widget-main -->
+
+                                        <div class="toolbar center">
+                                            <a href="#" data-target="#login-box" class="back-to-login-link">
+                                                Back to login
+                                                <i class="ace-icon fa fa-arrow-right"></i>
+                                            </a>
+                                        </div>
+                                    </div><!-- /.widget-body -->
+                                </div><!-- /.forgot-box -->
+
+                                <div id="signup-box" class="signup-box widget-box no-border">
+                                    <div class="widget-body">
+                                        <div class="widget-main">
+                                            <h4 class="header green lighter bigger">
+                                                <i class="ace-icon fa fa-users blue"></i>
+                                                Change password
+                                            </h4>
+
+                                            <div class="space-6"></div>
+                                            <p> Enter your details to begin: </p>
+
+                                            <form id="form-passchange">
+                                                <fieldset>
+                                                    <label class="block clearfix">
+                                                        <span class="block input-icon input-icon-right">
+                                                            <input id="txtpassch-username" type="text" class="form-control" placeholder="Username" />
+                                                            <i class="ace-icon fa fa-user"></i>
+                                                        </span>
+                                                    </label>
+
+                                                    <label class="block clearfix">
+                                                        <span class="block input-icon input-icon-right">
+                                                            <input id="txtpassch-oldpass" type="password" class="form-control" placeholder="Old Password" />
+                                                            <i class="ace-icon fa fa-lock"></i>
+                                                        </span>
+                                                    </label>
+
+                                                    <label class="block clearfix">
+                                                        <span class="block input-icon input-icon-right">
+                                                            <input id="txtpassch-newpass" type="password" class="form-control" placeholder="New Password" />
+                                                            <i class="ace-icon fa fa-lock"></i>
+                                                        </span>
+                                                    </label>
+
+                                                    <label class="block clearfix">
+                                                        <span class="block input-icon input-icon-right">
+                                                            <input id="txtpassch-confnewpass" type="password" class="form-control" placeholder="Confirm new password" />
+                                                            <i class="ace-icon fa fa-lock"></i>
+                                                        </span>
+                                                    </label>
+
+                                                    <div id="passch-feedback">&nbsp;</div>
+
+                                                    <div class="space-24"></div>
+
+                                                    <div class="clearfix">
+                                                        <button id="btnpassch-change" type="submit" class="width-35 pull-right btn btn-sm btn-success">
+                                                            <span class="bigger-110">Change</span>
+
+                                                            <i class="ace-icon fa fa-arrow-right icon-on-right"></i>
+                                                        </button>
+                                                    </div>
+                                                </fieldset>
+                                            </form>
+                                        </div>
+
+                                        <div class="toolbar center">
+                                            <a href="#" data-target="#login-box" class="back-to-login-link">
+                                                <i class="ace-icon fa fa-arrow-left"></i>
+                                                Back to login
+                                            </a>
+                                        </div>
+                                    </div><!-- /.widget-body -->
+                                </div><!-- /.signup-box -->
+                            </div><!-- /.position-relative -->
+
+                            <div class="navbar-fixed-top align-right hidden-xs">
+                                <br />
+                                &nbsp;
+                                <a id="btn-login-dark" href="#">Dark</a>
+                                &nbsp;
+                                <span class="blue">/</span>
+                                &nbsp;
+                                <a id="btn-login-blur" href="#">Blur</a>
+                                &nbsp;
+                                <span class="blue">/</span>
+                                &nbsp;
+                                <a id="btn-login-light" href="#">Light</a>
+                                &nbsp; &nbsp; &nbsp;
+                            </div>
+                        </div>
+                    </div><!-- /.col -->
+                </div><!-- /.row -->
+            </div><!-- /.main-content -->
+        </div><!-- /.main-container -->
+
+        @Html.Partial("_Agreement")
+
+         @{
+            string autolog = (string)ViewData["autologin"];
+            string username = (string)ViewData["username"];
+            string password = (string)ViewData["password"];
+            }
+
+        <!-- basic scripts -->
+
+        <!--[if !IE]-->
+        <script type="text/javascript">
+            window.jQuery || document.write("<script src='/content/Bootstrap/js/jquery.js'>" + "<" + "/script>");
+            if ('ontouchstart' in document.documentElement) document.write("<script src='/content/Bootstrap/js/jquery.mobile.custom.js'>" + "<" + "/script>");
+        </script>
+        <!--[endif]-->
+
+        <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/bootstrap.js")"></script>
+        <script type="text/javascript" src="@Url.Content("~/Content/Common/tdk.util.js")"></script>
+
+        <!-- inline scripts related to this page -->
+        <script type="text/javascript">
+
+            var autologin = '@autolog';
+            var username = '@username';
+            var password = '@password';
+
+            $(document).ready(function () {
+                $("#ceklogin").hide();
+
+                if (autologin == 'yes') {
+                     //popUpProgressShow();
+                    //alert('tes')
+                   // window.location.href = "@Html.Toyota().Page.GetActionUrl("/Logout")"
+		            //alert('work')
+		            var user = username
+		            var pass = password
+		            //alert(user +' '+ pass)
+		            Callajaxlogin(user, pass)
+		            //console.log(user + ' ' + pass)
+		        }
+		        else {
+		            if (!window.location.hash) {
+		                window.location = window.location + '#r';
+		                location.reload();
+		            }
+		            $("#ceklogin").show()
+		        }
+            });
+
+
+            function Callajaxlogin(user, pass)
+            {
+                say('Please Wait ...').with("tell").to("#feedback");
+                $("#login-button").prop('disabled', true);
+                $.ajax({
+                    method: "POST",
+                    url: "@Html.Toyota().Page.AjaxLoginActionUrl",
+                    data:
+                    {
+                        username: user,
+                        password: pass
+                    },
+                    success:
+                        function (feedback) {
+                            if (feedback == "true") {
+                                say('Redirecting to Homepage.').with("done").to("#feedback");
+                                $('#login-button').hide();
+                                window.location.href = "@Html.Toyota().Page.HomeUrl";
+                            } else {
+                                say('Incorrect Username and/or password.').with("yell").to("#feedback");
+                            }
+                        },
+                    error:
+                        function (x, t, e) {
+                            say('Incorrect Username and/or password.').with("yell").to("#feedback");
+                        },
+                    complete:
+                        function (x, t, e) {
+                            $("#login-button").prop('disabled', false);
+                        }
+                });
+
+            }
+
+            jQuery(function ($) {
+                $(document).on('click', '.toolbar a[data-target]', function (e) {
+                    e.preventDefault();
+                    var target = $(this).data('target');
+                    $('.widget-box.visible').removeClass('visible'); //hide others
+                    $(target).addClass('visible'); //show target
+                });
+            });
+
+            jQuery(function ($) {
+                $(document).on("keydown", "#tfUsername", function (e) {
+                    $("#feedback").html("&nbsp;");
+                });
+            });
+
+            function say(s) {
+                var pesan = s;
+                var $this = this;
+                $this.with = function(tone) {
+                    pesan = '<span class="' + tone + '">' + s + '</span>';
+                    return $this;
+                }
+
+                $this.to = function (id) {
+                    $(id).html(pesan);
+                }
+
+                return $this;
+            }
+
+            $("#login-form").submit(function (e) {
+                e.preventDefault();
+
+                var tfu = $('#tfUsername').valOrDefault();
+                var tfp = $('#tfPassword').valOrDefault();
+                var pesan = 'Incorrect Username and/or password.';
+                if (tfu.length > 1 && tfp.length < 1) {
+                    say(pesan).with("yell").to("#feedback");
+                    $('#tfPassword').focus();
+                    return false;
+                }
+                else if (tfu.length < 1 && tfp.length > 0) {
+                    say(pesan).with("yell").to("#feedback");
+                    $('#tfUsername').focus();
+                    return false;
+                }
+                else if (tfu.length < 1 || tfp.length < 1) {
+                    say(pesan).with("yell").to("#feedback");
+                    $('#tfUsername').focus();
+                    return false;
+                }
+
+                say('Please Wait ...').with("tell").to("#feedback");
+                $("#login-button").prop('disabled', true);
+                $.ajax({
+                    method: "POST",
+                    url: "@Html.Toyota().Page.AjaxLoginActionUrl",
+                    data:
+                    {
+                        username: tfu,
+                        password: tfp
+                    },
+                    success:
+                        function (feedback) {
+                            if (feedback == "true") {
+                                say('Redirecting to Homepage.').with("done").to("#feedback");
+                                $('#login-button').hide();
+                                window.location.href = "@Html.Toyota().Page.HomeUrl";
+                            } else {
+                                say('Incorrect Username and/or password.').with("yell").to("#feedback");
+                            }
+                        },
+                    error:
+                        function (x, t, e) {
+                            say('Incorrect Username and/or password.').with("yell").to("#feedback");
+                        },
+                    complete :
+                        function (x, t, e) {
+                            $("#login-button").prop('disabled', false);
+                        }
+                });
+            });
+
+            function changePassword() {
+                var uname = $('#txtpassch-username').valOrDefault();
+                var newpass = $("#txtpassch-newpass").valOrDefault();
+                var confirmpass = $("#txtpassch-confnewpass").valOrDefault();
+                if (newpass.length < 1) {
+                    say("Invalid new password.").with("yell").to("#passch-feedback");
+                    $("#txtpassch-newpass").focus();
+                    $("#btnpassch-change").prop('disabled', false);
+                    return false;
+                }
+                else if (confirmpass.length < 1) {
+                    say("Invalid confirm password.").with("yell").to("#passch-feedback");
+                    $("#txtpassch-confnewpass").focus();
+                    $("#btnpassch-change").prop('disabled', false);
+                    return false;
+                }
+                else if (newpass.length < 5) {
+                    say("New password min. 5 character.").with("yell").to("#passch-feedback");
+                    $("#txtpassch-newpass").focus();
+                    $("#btnpassch-change").prop('disabled', false);
+                    return false;
+                }
+                else if (confirmpass.length < 5) {
+                    say("Confirm password min. 5 character.").with("yell").to("#passch-feedback");
+                    $("#txtpassch-confnewpass").focus();
+                    $("#btnpassch-change").prop('disabled', false);
+                    return false;
+                }
+                else if (newpass !== confirmpass) {
+                    say("Confirm password must be same to new password.").with("yell").to("#passch-feedback");
+                    $("#txtpassch-confnewpass").focus();
+                    $("#btnpassch-change").prop('disabled', false);
+                    return false;
+                }
+                else if (newpass === uname) {
+                    say("New password can't be same to username.").with("yell").to("#passch-feedback");
+                    $("#txtpassch-newpass").focus();
+                    $("#btnpassch-change").prop('disabled', false);
+                    return false;
+                }
+
+                $("#btnpassch-change").prop('disabled', true);
+                $.ajax({
+                    method: "POST",
+                    url: "@Html.Toyota().Page.GetActionUrl("OnChange")",
+                    data: {
+                        newpassword: newpass,
+                        confirmpassword: confirmpass
+                    },
+                    success: function (feedback) {
+                        if (feedback.ResponseType !== "E") {
+                            say(feedback.Message).with("tell").to("#passch-feedback");
+                            $("#btnpassch-change").prop('disabled', false);
+                        }
+                        else {
+                            say('error.').with("yell").to("#passch-feedback");
+                            ViewData.Add("Error", feedback);
+                        }
+                    },
+                    error: function (x, t, e) {
+                        say('error.').with("yell").to("#passch-feedback");
+                        ViewData.Add("Error", e);
+                    },
+                    complete : function (x, t, e) {
+                        $("#btnpassch-change").prop('disabled', false);
+                    }
+                });
+            }
+
+            $("#signup-box").submit(function (e) {
+                e.preventDefault();
+
+                var uname = $('#txtpassch-username').valOrDefault();
+                var passw = $('#txtpassch-oldpass').valOrDefault();
+                var pesan = 'Incorrect Username and/or password.';
+                if (uname.length > 1 && passw.length < 1) {
+                    say(pesan).with("yell").to("#passch-feedback");
+                    $('#txtpassch-oldpass').focus();
+                    return false;
+                }
+                else if (uname.length < 1 && passw.length > 0) {
+                    say(pesan).with("yell").to("#passch-feedback");
+                    $('#txtpassch-username').focus();
+                    return false;
+                }
+                else if (uname.length < 1 || passw.length < 1) {
+                    say(pesan).with("yell").to("#passch-feedback");
+                    $('#txtpassch-username').focus();
+                    return false;
+                }
+
+                $("#btnpassch-change").prop('disabled', true);
+                $.ajax({
+                    method: "POST",
+                    url: "@Html.Toyota().Page.AjaxLoginActionUrl",
+                    data: {
+                        username: uname,
+                        password: passw
+                    },
+                    success: function (feedback) {
+                        if (feedback == "true") {
+                            changePassword();
+                        }
+                        else {
+                            say('Incorrect Username and/or password.').with("yell").to("#passch-feedback");
+                            $("#btnpassch-change").prop('disabled', false);
+                        }
+                    },
+                    error: function (x, t, e) {
+                        say('Incorrect Username and/or password.').with("yell").to("#passch-feedback");
+                        $("#btnpassch-change").prop('disabled', false);
+                    }
+                });
+            });
+
+            //you don't need this, just used for changing background
+            jQuery(function ($) {
+                $('#btn-login-dark').on('click', function (e) {
+                    setCookie('login_skin', 'login-layout');
+                    $('body').attr('class', 'login-layout');
+                    $('#id-text2').attr('class', 'white');
+                    $('#id-company-text').attr('class', 'blue');
+
+                    e.preventDefault();
+                });
+
+                $('#btn-login-light').on('click', function (e) {
+                    setCookie('login_skin', 'light-login');
+                    $('body').attr('class', 'login-layout light-login');
+                    $('#id-text2').attr('class', 'grey');
+                    $('#id-company-text').attr('class', 'blue');
+
+                    e.preventDefault();
+                });
+
+                $('#btn-login-blur').on('click', function (e) {
+                    setCookie('login_skin', 'blur-login');
+                    $('body').attr('class', 'login-layout blur-login');
+                    $('#id-text2').attr('class', 'white');
+                    $('#id-company-text').attr('class', 'light-blue');
+
+                    e.preventDefault();
+                });
+
+                $('#btn-login-light').click();
+            });
+
+            $("#link-agreement").click(function () {
+                $("#agreement-popup").modal();
+            });
+
+            /** Skin layout **/
+            function setCookie(cname, cvalue) {
+                document.cookie = cname + '=' + cvalue;
+            }
+
+            function getCookie(cname) {
+                var name = cname + "=";
+                var ca = document.cookie.split(';');
+                for (var i = 0; i < ca.length; i++) {
+                    var c = ca[i];
+                    while (c.charAt(0) == ' ') c = c.substring(1);
+                    if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+                }
+                return "";
+            }
+
+            //---=== Cookie reader
+            var bodySkin = getCookie("login_skin");
+
+            switch (bodySkin) {
+                case 'login-layout': $('body').attr('class', 'login-layout');
+                    $('#id-text2').attr('class', 'white');
+                    $('#id-company-text').attr('class', 'blue');
+                    break;
+                case 'light-login': $('body').attr('class', 'login-layout light-login');
+                    $('#id-text2').attr('class', 'grey');
+                    $('#id-company-text').attr('class', 'blue');
+                    break;
+                case 'blur-login': $('body').attr('class', 'login-layout blur-login');
+                    $('#id-text2').attr('class', 'white');
+                    $('#id-company-text').attr('class', 'light-blue');
+                    break;
+                default:
+                    $('body').attr('class', 'login-layout');
+                    $('#id-text2').attr('class', 'white');
+                    $('#id-company-text').attr('class', 'blue');
+                    break;
+            }
+            //---=== End cookie reader
+        </script>
+    </body>
+</html>

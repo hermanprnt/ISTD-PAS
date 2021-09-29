@@ -1,0 +1,34 @@
+﻿@using GPS.Constants
+@model GPS.ViewModels.MRP.ProcUsageGroupCheckViewModel
+
+<div class="col-xs-6">
+    <div class="form-group form-group-xs">
+        <label for="txtlookup-procgroup" class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">MRP Month</label>
+        <div class="col-xs-8 col-sm-9 col-md-8">
+            @Html.Partial(CommonPage.DropdownList, Model.MRPMonth)
+        </div>
+    </div>
+</div>
+<div class="col-xs-6">
+    <div class="well well-lg">
+        <table>
+            <tbody>
+                <tr>
+                    <td>Last PO Approval</td>
+                    <td></td>
+                    <td>@Model.LastPOApproval</td>
+                </tr>
+                <tr>
+                    <td>MRP Month</td>
+                    <td></td>
+                    <td>@Model.LastMRPMonth</td>
+                </tr>
+                <tr>
+                    <td>MRP Created</td>
+                    <td></td>
+                    <td>@Model.LastMRPCreated</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

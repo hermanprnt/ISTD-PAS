@@ -1,0 +1,12 @@
+﻿DECLARE @@DB_CONNECTION VARCHAR(30),
+        @@SQL_QUERY VARCHAR(MAX),
+		@@DIV_PARAMETER VARCHAR(10)
+            
+SELECT @@DB_CONNECTION =  SYSTEM_VALUE FROM TB_M_SYSTEM WHERE SYSTEM_CD = 'BudgetControl'
+
+SET @@SQL_QUERY = '
+		EXEC ' + @@DB_CONNECTION + '.[BMS_DB].[dbo].[sp_BudgetControlGetSingleDataWBS] '''+@WBS_NO+'''
+	'
+EXEC(@@SQL_QUERY)
+
+

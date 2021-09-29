@@ -1,0 +1,193 @@
+﻿@using GPS.Constants
+@using GPS.Models.PR.PRInquiry
+@{
+    Tuple<List<PRInquiry>, int, string> GridData = ViewData["GridData"] != null ? 
+                            (Tuple<List<PRInquiry>, int, string>)ViewData["GridData"] : 
+                            new Tuple<List<PRInquiry>, int, string>(new List<PRInquiry>(), 0, "");
+                            
+    string errormessage = ViewData["Message"] != null ? ViewData["Message"].ToString() : String.Empty;
+}
+
+<table id="tblScroll" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1588px;">
+    <tbody>
+        @if ((GridData.Item1.Count() > 0) && (GridData.Item1 != null) && (errormessage == ""))
+        {
+            foreach (PRInquiry item in GridData.Item1)
+            {
+                item.CREATED_DT = ((item.CREATED_DT != "01.01.0001") && (item.CREATED_DT != "01.01.1900")) ? item.CREATED_DT : "";
+                item.CHANGED_DT = ((item.CHANGED_DT != "01.01.0001") && (item.CHANGED_DT != "01.01.1900")) ? item.CHANGED_DT : "";
+                            
+                if(item.STATUS_CD == "95")
+                {
+                    @:<tr class="cancel">
+                }
+                else
+                {
+                    @:<tr>
+                }
+                    <td width="20px" class="text-center">
+                        <input type="checkbox" class="check" name="checkpr[]" value="@item.PR_NO" style="height:11px"/>
+                    </td>
+                    <td width="31px" class="text-center">
+                        @if(item.PROCESS_ID == null) 
+                        {
+                            <a class="ref"><i class="fa fa-unlock" id="unlock"></i></a>
+                        }
+                        else 
+                        { 
+                            <a class="ref" href="#" onclick="javascript:onUnlock('@item.PR_NO', '@item.PROCESS_ID')"><i class="fa fa-lock" id="lock" data-toggle="tooltip" title="Document still used by @item.LOCKED_BY"></i></a>
+                        }
+                    </td>
+                    <td width="30px" class="text-center hidden">@item.NUMBER</td>
+                    <td width="100px" class="text-left" id="prtype">@item.PR_TYPE</td>
+                    <td width="80px" class="text-center" id="pr">
+                        <a href="#" id="prdetail" onclick="javascript:showDetail('@item.PR_NO')">@item.PR_NO</a>
+                    </td>
+                    <td width="40px" class="text-center">
+                        @if(item.DOC_NO == null)
+                        {
+                            <i class="fa fa-comment" style="display:none"></i>
+                        }
+                        else
+                        {
+                            <i class="fa fa-comment"></i>
+                        }
+                    </td>
+                    <td width="200px" class="text-left">@item.PR_DESC</td>
+                    <td width="70px" class="text-center">@item.DOC_DT</td>
+                    <td width="70px" class="text-left">@item.STATUS_DESC</td>
+                    <td width="130px" class="text-left">@item.PR_COORDINATOR</td>
+                    <td width="50px" class="text-center">@item.PLANT_CD</td>
+                    <td width="57px" class="text-center">@item.SLOC_CD</td>
+                    <td width="150px" class="text-left">@item.DIVISION_NAME</td>
+                    <td width="90px" class="_toggle-detail text-center">@item.PROJECT_NO</td>
+                    <td class="_toggle-detail text-center" width="90px">
+                        @if ((item.CANCEL_BY != null) && (item.CANCEL_BY != ""))
+                        {
+                            <a href="#" onclick="ShowCancelReason('@item.CANCEL_REASON', '@item.PR_NO')">@item.CANCEL_BY</a>
+                        }
+                    </td>
+                    <td class="_toggle-detail text-center" width="80px">@item.CANCEL_DT</td>
+                    <td class="_toggle-detail text-center" width="90px">@item.CREATED_BY</td>
+                    <td class="_toggle-detail text-center" width="80px">@item.CREATED_DT</td>
+                    <td class="_toggle-detail text-center" width="90px">@item.CHANGED_BY</td>
+                    <td class="_toggle-detail text-center" width="80px">@item.CHANGED_DT</td>
+                @:</tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="15" style="text-align:center">@CommonDisplayMessage.NoData</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var errormessage = "@errormessage";
+        var page = Number("@GridData.Item2");
+        var warningmessage = "@GridData.Item3";
+
+        if ((errormessage !== "") && ((page === 1) || (page === 0)) && (messagelife !== 0)) {
+            $.messagebox.show(
+                "Search PR",
+                errormessage,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+            messagelife--;
+        }
+
+        if ((warningmessage !== "") && ((page === 1) || (page === 0)) && (messagelife !== 0)) {
+            $.messagebox.show(
+                "Search PR",
+                warningmessage,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+            messagelife--;
+        }
+
+        $('[data-toggle="tooltip"]').tooltip({ placement: 'right' });
+
+        setSortSymbol();
+    })
+
+    /* =============================== Sort: begin =============================== */
+    var table = document.getElementById("header-row");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+
+    function tableText(tableCell) {
+        var removeClass;
+        var addClass;
+        var dataSort;
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            if (tableCell.getAttribute("class").indexOf('sorting_asc') >= 0) {
+                removeClass = 'sorting_asc';
+                addClass = 'sorting_desc';
+                dataSort = 'DESC';
+            } else if (tableCell.getAttribute("class").indexOf('sorting_desc') >= 0) {
+                removeClass = 'sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+            } else {
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'ASC';
+            }
+        }
+
+        //reset all
+        var tableReset = document.getElementById("header-row");
+        if (tableReset != null) {
+            for (var i = 0; i < tableReset.rows.length; i++) {
+                for (var j = 0; j < tableReset.rows[i].cells.length; j++) {
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_asc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_asc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_desc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_desc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                }
+            }
+        }
+        // end
+
+        var orderby = tableCell.dataset.field + '|' + dataSort;
+        var page = $('.pagination > li.active > a').html();
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            tableCell.classList.remove(removeClass);
+            tableCell.classList.add(addClass);
+            tableCell.dataset.sort = dataSort;
+
+            $.progressbox.show("PR Inquiry", "Sort PR Inquiry Grid. . .")
+            SortGrid(orderby, page);
+            $.progressbox.hide();
+        }
+    }
+
+    /* =============================== Sort: end =============================== */
+</script>

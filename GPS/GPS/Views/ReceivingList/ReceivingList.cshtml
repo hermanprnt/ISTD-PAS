@@ -1,0 +1,532 @@
+﻿@using GPS.Core.ViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadScript{
+    <!-- Bootstrap Datepicker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/datepicker.css")" />
+    <!-- Daterange picker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+}
+
+<div >
+    @Html.Partial("_SearchCriteria")
+    <div class="text-center">
+        <hr id="hrsrc" style="margin: 0; padding: 0;" />
+    </div>
+    <div class="row" style="margin-top:5px">
+    <div class="col-xs-4 col-sm-4 col-md-4">
+        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("ReceivingList","btn-cancel"))
+        {
+            <button type="button" class="btn btn-danger btn-xs btn-std" onclick="javascript:cancelGR()">Cancel</button>
+        }
+    </div>
+    <div class="col-xs-4 col-sm-4 col-md-4 text-center">
+        <button data-rel="tooltip" title="Hide filter" onclick="javascript:toggleSearch()"
+            type="button" class="ace-icon fa fa-angle-double-up btn btn-default btn-xs btn-tiny-down" id="toogle-search">
+        </button>
+        <input type="text" id="btnLostFocus" style="display: block; height: 1px; width: 1px;border: none;" />
+    </div>
+    <div class="col-xs-4 col-sm-4 col-md-4 text-right">
+        <button data-rel="tooltip" title="Download files" id="btn-download" class="btn btn-success btn-xs btn-std"
+            onclick="javascript:Download()">
+            <span style="font-family: Open Sans; font-size: 12px">Download</span>
+        </button>
+    </div>
+</div>
+    <div id="tablegrid">
+        @Html.Partial("_GridView")
+    </div>
+</div>
+<div id="matDocDetailPopUp">
+    @Html.Partial("_MatDocDetailPopUp")
+</div>
+
+@Html.Partial("_CancelPopUp")
+
+<div id="selected-0-confirm" class="modal fade">
+    <div class="modal-dialog modal-md" style="width: 300px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="close" style="opacity: 1 !important; margin-top: -7px;">
+                    <span aria-hidden="true">
+                        <img src="@Url.Content("~/Content/Bootstrap/img/Warning.png")" class="modal-icon" /></span>
+                    <span class="sr-only">Close</span>
+                </div>
+                <h4 class="modal-title" id="popup-title">
+                    Warning</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row" style="padding-left: 10px;">
+                    <div id="msgWarningId">
+                        &nbsp;</div>
+                </div>
+                <div class="row" style="text-align: right; padding-right: 10px; padding-top: 5px;">
+                    <button type="button" class="btn btn-primary btn-xs" data-dismiss="modal" style="width: 60px;">
+                        OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="cancel-confirm" class="modal fade">
+    <div class="modal-dialog modal-md" style="width: 400px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="close" style="opacity: 1 !important; margin-top: -7px;">
+                    <span aria-hidden="true">
+                        <img src="@Url.Content("~/Content/Bootstrap/img/question.png")" class="modal-icon" /></span>
+                    <span class="sr-only">Close</span>
+                </div>
+                <h4 class="modal-title" id="popup-title">
+                    Confirmation</h4>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body">
+                    <div class="row" style="padding-left: 10px;">
+                        Are you sure want to cancel(s)?
+                    </div>
+                    <div class="row" style="text-align: right; padding-right: 10px; margin-top: 10px;">
+                        <button type="button" class="btn btn-primary btn-xs" data-dismiss="modal" style="width: 60px;"
+                            onclick="javascript:confirmCancelGR()">
+                            Yes</button>
+                        <button class="btn btn-danger btn-xs" data-dismiss="modal" style="width: 60px;">
+                            No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="approve-confirm" class="modal fade">
+    <div class="modal-dialog modal-md" style="width: 400px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="close" style="opacity: 1 !important; margin-top: -7px;">
+                    <span aria-hidden="true">
+                        <img src="@Url.Content("~/Content/Bootstrap/img/question.png")" class="modal-icon" /></span>
+                    <span class="sr-only">Close</span>
+                </div>
+                <h4 class="modal-title" id="popup-title">
+                    Confirmation</h4>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body">
+                    <div class="row" style="padding-left: 10px;">
+                        Are you sure want to approve(s)?
+                    </div>
+                    <div class="row" style="text-align: right; padding-right: 10px; margin-top: 10px;">
+                        <button type="button" class="btn btn-primary btn-xs" data-dismiss="modal" style="width: 60px;"
+                            onclick="javascript:confirmApproveGR()">
+                            Yes</button>
+                        <button class="btn btn-danger btn-xs" data-dismiss="modal" style="width: 60px;">
+                            No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section BodyScript{
+    <script type="text/javascript" src="@Url.Content("~/Content/js/jquery.filedownload.js")"></script>
+    <!-- Bootstrap Datepicker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+    <!-- Daterange picker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/tdk.util.js")"></script>
+    <script type="text/javascript">
+
+
+
+        //datepicker plugin [start]
+        //link
+        $("#txtdateinput-receivingdate").todaterangepicker();
+        $("#matDocPostDate").todatepicker();
+        function OnAjaxBegin(title) {
+            $.progressbox.show($tdk.PageTitle, title);
+            DisableAllFeatures();
+        }
+
+        function OnAjaxComplete() {
+            EnableAllFeatures();
+            $.progressbox.hide();
+        }
+
+        function OnAjaxError(data) {
+            var result = $.ValidateASPError(data.responseText);
+            $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+        }
+
+        //datepicker plugin [end]
+
+        ViewData.Clear();
+        ViewData.Add("ProcessId", "@ViewBag.ProcessId");
+        ViewData.Add("UserName", "@ViewBag.UserName");
+
+        function toggleSearch() {
+            $("._criteria").toggle(200, "linear");
+            var htable = $(window).height() - 170;
+            if ($("#toogle-search").hasClass("fa-angle-double-up")) {
+                $("#toogle-search").removeClass("fa-angle-double-up");
+                $("#toogle-search").addClass("fa-angle-double-down");
+                $("#toogle-search").removeClass("btn-tiny-down");
+                $("#toogle-search").addClass("btn-tiny-down");
+                document.getElementById('hrsrc').style.display = 'none';
+                $("#tScrollBody").height(htable);
+                $("#toogle-search").prop('title', 'Show filter');
+            }
+            else {
+                $("#toogle-search").removeClass("fa-angle-double-down");
+                $("#toogle-search").addClass("fa-angle-double-up");
+                $("#toogle-search").removeClass("btn-tiny-down");
+                $("#toogle-search").addClass("btn-tiny-down");
+                document.getElementById('hrsrc').style.display = 'block';
+                $("#tScrollBody").height(360);
+                $("#toogle-search").prop('title', 'Hide filter');
+            }
+            $("#toogle-search").blur();
+        }
+
+        function detailGrid() {
+            if ($tdk.isDetail > 0) {
+                $("#btnToggleDetail").html('Show Detail');
+                $("._toggle-detail").hide();
+                $tdk.isDetail = 0;
+                $("#dynamic-table").css("width", "100%");
+                $("#tblScroll").css("width", "100%");
+            }
+            else {
+                $("#btnToggleDetail").html('Hide Detail');
+                $("._toggle-detail").show();
+                $tdk.isDetail = 1;
+                $("#dynamic-table").css("width", "1388px");
+                $("#tblScroll").css("width", "1388px");
+            }
+        }
+
+        // Function Search [start]
+        function onEnterSearchData(e) {
+            var key = e.keyCode || e.which;
+            if (key === 13) {
+                searchData(1);
+            }
+        }
+
+        $("#txt-receivingno, #txtdateinput-receivingdate, #txt-vendor, #txt-pono").on("keypress", onEnterSearchData);
+
+        function GetSearchCriteria(page, pageSize) {
+
+            page = page || 1;
+            pageSize = pageSize || $("#pageSize").valOrDefault();
+            var receivingDate = $("#txtdateinput-receivingdate").parsedaterange();
+
+            ViewData.Add("PagingInfo", { CurrentPage: page, PageSize: pageSize });
+            return {
+                ReceivingNo: $("#txt-receivingno").valOrDefault(),
+                ReceivingDateFromString: receivingDate.From,
+                ReceivingDateToString: receivingDate.To,
+                PONo: $("#txt-pono").valOrDefault(),
+                Vendor: $("#txt-vendor").valOrDefault(),
+                Status: $("#txt-status").valOrDefault(),
+                HeaderText: $("#txt-headertext").valOrDefault(),
+                SAPDocNo: $("#txt-sapdocno").valOrDefault(),
+                CurrentPage: page,
+                PageSize: pageSize
+            };
+        }
+
+        function searchData(page) {
+            var undefined = $('#cbodisplay').val();
+            $.progressbox.show($tdk.PageTitle, "Search");
+
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("search")",
+                data: GetSearchCriteria(page, undefined),
+                beforeSend: function () {
+                    $('#btnSearch').button('loading');
+                },
+                success: function (data) {
+                    $("#tablegrid").html(data);
+                    $.progressbox.hide();
+                },
+                complete: function () {
+                    $('#btnSearch').button('reset');
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    $('#btnSearch').button('reset');
+                    $.progressbox.hide();
+                }
+            });
+        }
+
+        // Approve GR [start]
+        function approveGR() {
+            var row = 0;
+            var flag = false;
+
+            var selected = [];
+            $("[id^=chk-receivinglist-]:checked").each(function () {
+                var embedded = $(this).data("embedded");
+                selected.push({
+                    PO_NUMBER: $(this).parent().siblings('td').eq(0).text().trim(),
+                    PO_ITEM: $(this).parent().siblings('td').eq(1).text().trim(),
+                    PO_DATE_STRING: $(this).parent().siblings('td').eq(3).text().trim(),
+                    VEND_CODE: $(this).parent().siblings('td').eq(4).text().trim(),
+                    GR_STATUS: $(this).parent().siblings('td').eq(10).text().trim()
+                });
+                row++;
+            });
+
+            if (row < 1) {
+                $.messagebox.show(
+                    "Approve GR",
+                    "Please select at least one record data",
+                    "WRN",
+                    "SINGLE",
+                    "",
+                    ""
+                );
+            }
+            else {
+                if (!jQuery.isEmptyObject(selected)) {
+                    ViewData.Add("SelectedToApprove", selected);
+                    $.messagebox.show(
+                        "Approve GR",
+                        "Are You Sure You Want to Approve Selected Data ?",
+                        "INF",
+                        "CONFIRM",
+                        "confirmApproveGR()",
+                        ""
+                    );
+                }
+                else {
+                    $.messagebox.show(
+                        "Approve GR",
+                        "Error Data Model",
+                        "WRN",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+                }
+            }
+        }
+
+        function confirmApproveGR() {
+            var dataList = ViewData.Get("SelectedToApprove");
+
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("ApproveGR")",
+                contentType: 'application/json',
+                data: JSON.stringify(dataList),
+                beforeSend: function () {
+                    $('#approveGR').button('loading');
+                },
+                success: function (returnResult) {
+                    var message = returnResult.split('|');
+                    if (message[0] === 'SUCCESS') {
+                        $.messagebox.show(
+                            "Approve GR",
+                            "Approve GR Success",
+                            "SUC",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                    } else {
+                        $.messagebox.show(
+                           "Approve GR",
+                           message[1],
+                           "ERR",
+                           "SINGLE",
+                           "",
+                           ""
+                        );
+                    }
+                    searchData(1);
+                },
+                complete: function () {
+                    $('#approveGR').button('reset');
+                },
+                error: function (returnResult) {
+                    $('#approveGR').button('reset');
+                    $.messagebox.show(
+                        "Approve GR",
+                        returnResult,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+                }
+            });
+        }
+        // Appove GR [end]
+
+        // Cancel GR [start]
+        function cancelGR() {
+            var row = $("[id^=chk-receivinglist-]:checked").length;
+            var flag = false;
+
+            //var selected = [];
+            /*$("[id^=chk-receivinglist-]:checked").each(function () {
+                var embedded = $(this).data("embedded");
+                selected.push({
+                    MATDOC_NUMBER: $(this).parent().siblings('td').eq(6).text().trim(),
+                    MATDOC_YEAR: $(this).parent().siblings('td').eq(5).text().trim()
+                });
+                $('#matDocNumber').val($(this).parent().siblings('td').eq(12).text().trim());
+                $('#entrySheetNum').val("");
+                $('#matDocYear').val($(this).parent().siblings('td').eq(12).text().trim());
+                $('#matDocDocdate').val($(this).parent().siblings('td').eq(3).text().trim());
+                $('#statusCd').val($(this).parent().siblings('td').eq(11).text().trim());
+                $('#processId').val($(this).parent().siblings('td').eq(13).text().trim());
+                row++;
+            });*/
+            if (row != 1) {
+                $.messagebox.show(
+                    "Cancel GR/SA",
+                    "Please select at least one record to be canceled.",
+                    "WRN",
+                    "SINGLE",
+                    "",
+                    ""
+                );
+            }
+            else {
+                var firstEmbedded = $($("[id^=chk-receivinglist-]:checked")[0]).data("embedded");
+                var currentUser = ViewData.Get("UserName");
+                console.log(currentUser);
+                if (firstEmbedded.CreatedBy != currentUser) {
+                    $.messagebox.show(
+                        "Cancel GR/SA",
+                        "User ID " + currentUser + " doesn't have authorize to cancel Receiving No : " + firstEmbedded.ReceivingNo,
+                        "WRN",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+                }
+                else
+                {
+                    ViewData.Add("SelectedToCancel", firstEmbedded);
+                    if (firstEmbedded.StatusCode === "61" && firstEmbedded.ProcessId !== "") { // add process id checking
+                        $.messagebox.show(
+                            "Cancel GR/SA",
+                            "Data still in progress posting to SAP. Please try again later.",
+                            "WRN",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                    }
+                    else if (firstEmbedded.StatusCode === "62") {
+                        $.messagebox.show(
+                            "Cancel GR/SA",
+                            "Data in SAP still needs to be cancelled manually.",
+                            "WRN",
+                            "SINGLE",
+                            "$('#cancelpopup').modal()",
+                            ""
+                        );
+                    }
+                    else if (firstEmbedded.StatusCode === "69") {
+                        $.messagebox.show(
+                            "Cancel GR/SA",
+                            "Data already cancelled.",
+                            "WRN",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                    }
+                    else {
+                        $('#cancelpopup').modal();
+                    }
+                }
+            }
+        }
+
+        function confirmCancelGR() {
+            if ($.ValidateMandatory(["#matDocPostDate", "#matDocText"]))
+                $.progressbox.show($tdk.PageTitle, "Cancelling GR/SA");
+            {
+                var selected = ViewData.Get("SelectedToCancel");
+                $.ajax({
+                    type: "POST",
+                    url: "@Html.Toyota().Page.GetActionUrl("CancelGR")",
+                    data: {
+                        matDocNumber: selected.ReceivingNo,
+                        cancelDate: $('#matDocPostDate').valOrDefault(),
+                        cancelReason: $('#matDocText').valOrDefault(),
+                        ProcessId: $("#txtProcessId").val()
+                    },
+                    success: function (returnResult) {
+                        var message = returnResult.split('|');
+                        if (message[0] === 'SUCCESS') {
+                            $.progressbox.hide();
+                            $.messagebox.show(
+                                "Cancel GR/SA",
+                                "Cancel GR/SA Success",
+                                "SUC",
+                                "SINGLE",
+                                "",
+                                ""
+                            );
+                        } else {
+                            $.progressbox.hide();
+                            $.messagebox.show(
+                                "Cancel GR/SA",
+                                message[1],
+                                "ERR",
+                                "SINGLE",
+                                "",
+                                ""
+                            );
+                        }
+                        searchData(1);
+                    },
+                    error: function (returnResult) {
+                        $.progressbox.hide();
+                        $.messagebox.show(
+                            "Cancel GR",
+                            returnResult,
+                            "WRN",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                    }
+                });
+                $('#cancelForm')[0].reset();
+                //$("#cancelpopup").hide();
+
+            }
+        }
+        // Cancel GR [end]
+
+        // Download data [start]
+        function Download() {
+            $.fileDownload("ReceivingList/DownloadReceivingListExcel", {
+                data: GetSearchCriteria(undefined, undefined),
+                prepareCallback: function (url) {
+                    $('#btn-download').button('loading');
+                },
+                successCallback: function (url) {
+                    $('#btn-download').button('reset');
+                },
+                failCallback: function (responseHtml, url) {
+                    $('#btn-download').button('reset');
+                }
+            });
+        }
+        // Download data [start]
+    </script>
+}

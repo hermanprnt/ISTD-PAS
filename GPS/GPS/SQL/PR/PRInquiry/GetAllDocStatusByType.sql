@@ -1,0 +1,8 @@
+﻿select * from (
+	SELECT STATUS_CD, STATUS_DESC, DOC_TYPE 
+	FROM TB_M_STATUS 
+	WHERE DOC_TYPE = @DocType
+) tb
+UNION ALL
+select '92','Open','PR'
+ORDER BY STATUS_CD

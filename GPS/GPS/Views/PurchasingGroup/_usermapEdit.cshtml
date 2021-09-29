@@ -1,0 +1,196 @@
+﻿@using GPS.Controllers.Master
+@using GPS.Core.ViewModel
+<div class="modal-dialog modal-md">
+    <div class="modal-content">
+        <div class="modal-header">
+            <p class="modal-title">
+                Map User
+            </p>
+        </div>
+        <div class="modal-body">
+            <div class="form-horizontal">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-3 col-sm-2 control-label text-muted">Reg. No</label>
+                            <div class="col-xs-7 col-sm-8">
+                                <div class="input-group input-group-xs">
+                                    <input type="text" id="txt-regno" autofocus class="form-control"/>
+                                    <span id="regnocheck-container" class="input-group-addon">
+                                        <i id="regnocheck-icon" class="fa"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-xs-2">
+                                <button id="btnusermapedit-check" type="button" class="btn btn-primary btn-xs btn-std">Check</button>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-3 col-sm-2 control-label text-muted">Division</label>
+                            <div class="col-xs-9 col-sm-10">
+                                @Html.DropDownList("cmb-division", PurchasingGroupController.DivisionSelectList, new {@class = "form-control"})
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-3 col-sm-2 control-label text-muted">Department</label>
+                            <div id="cmb-department-container" class="col-xs-9 col-sm-10">
+                                <select id="cmb-department" class="form-control">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-3 col-sm-2 control-label text-muted">Section</label>
+                            <div id="cmb-section-container" class="col-xs-9 col-sm-10">
+                                <select id="cmb-section" class="form-control">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="btn-group-xs text-right">
+                <button id="btnusermapedit-save" type="button" class="btn btn-primary btn-xs btn-std">Save</button>
+                <button id="btnusermapedit-cancel" type="button" class="btn btn-danger btn-xs btn-std" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var OnAjaxBegin = ViewData.Get("OnAjaxBegin"),
+            OnAjaxComplete = ViewData.Get("OnAjaxComplete"),
+            OnAjaxError = ViewData.Get("OnAjaxError");
+
+        $("#pop-purchgrpusermapedit").onOnce("click", "#btnusermapedit-check", function () {
+            OnAjaxBegin("Check Reg. No");
+
+            $.ajax({
+                type: "POST",
+                url: "@PurchasingGroupController.Action.RegNoCheck",
+                data: {
+                    regNo: $("#txt-regno").valOrDefault()
+                },
+                success: function (data) {
+                    $("#regnocheck-container").removeClass("alert-success alert-danger");
+                    $("#regnocheck-icon").removeClass("fa-times fa-check");
+                    switch (data.ResponseType) {
+                        case "@ActionResponseViewModel.Success":
+                            $("#regnocheck-container").addClass("alert-success");
+                            $("#regnocheck-icon").addClass("fa-check");
+                            break;
+                        case "@ActionResponseViewModel.Warning":
+                            $("#regnocheck-container").addClass("alert-danger");
+                            $("#regnocheck-icon").addClass("fa-times");
+                            break;
+                        default:
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                            break;
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        $("#pop-purchgrpusermapedit").onOnce("click", "#btnusermapedit-save", function () {
+            var isValid = $.ValidateMandatory([
+                "#txt-regno",
+                "#cmb-division",
+                "#cmb-department",
+                "#cmb-section"
+            ]);
+
+            if (isValid) {
+                OnAjaxBegin("Save");
+                $.ajax({
+                    type: "POST",
+                    url: "@PurchasingGroupController.Action.UserMapSave",
+                    data: {
+                        purchasingGroup: ViewData.Get("PurchasingGroup"),
+                        regNo: $("#txt-regno").valOrDefault(),
+                        divisionId: $("#cmb-division").valOrDefault(),
+                        deptId: $("#cmb-department").valOrDefault(),
+                        sectionId: $("#cmb-section").valOrDefault()
+                    },
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            $("#pop-purchgrpusermapedit").modal("hide");
+                            $("#grid-usermap").html(data);
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            }
+        });
+
+        function RefreshDepartment(division) {
+            OnAjaxBegin("Refresh Department");
+
+            $.ajax({
+                type: "POST",
+                url: "@PurchasingGroupController.Action.RefreshDepartment",
+                data: {
+                    dropdownId: "department",
+                    divisionId: division
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        var container = $("#cmb-department-container");
+                        container.html(data);
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        }
+
+        function RefreshSection(division, department) {
+            OnAjaxBegin("Refresh Section");
+
+            $.ajax({
+                type: "POST",
+                url: "@PurchasingGroupController.Action.RefreshSection",
+                data: {
+                    dropdownId: "section",
+                    divisionId: division,
+                    departmentId: department
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        var container = $("#cmb-section-container");
+                        container.html(data);
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        }
+
+        $("#pop-purchgrpusermapedit").onOnce("change", "#cmb-division", function () {
+            RefreshDepartment($(this).valOrDefault());
+        });
+
+        $("#pop-purchgrpusermapedit").onOnce("change", "#cmb-department", function () {
+            RefreshSection($("#cmb-division").valOrDefault(), $(this).valOrDefault());
+        });
+
+        $("#pop-purchgrpusermapedit #cmb-division").trigger("change");
+    });
+
+    //# sourceURL=_usermapEdit.cshtml
+</script>

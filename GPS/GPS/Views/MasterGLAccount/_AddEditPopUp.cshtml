@@ -1,0 +1,83 @@
+﻿@using GPS.CommonFunc
+@using GPS.Controllers.Master
+@*@using GPS.Models.GLACCOUNT;*@
+@{
+    //masterGLAccount data = ViewData["CostCenterData"] == null ? new masterGLAccount() : (masterGLAccount)ViewData["CostCenterData"];
+    string edit = (string)ViewData["edit"];
+    string title = "GL Account";
+    if (edit == "")
+    {
+        title = "Edit" + title;      
+    } 
+    else {
+        title = "Add" + title;
+    }
+}
+
+<div class="modal fade" id="modalAddEdit" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+<div class="modal-dialog" style="width:800px">
+    <form  method="post" action="javascript: onSaveData();" >
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>@title</div>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="txtEdit" value="@edit"/>
+            <div class="form-horizontal">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group form-group-xs">
+                            <div class="col-xs-5 col-sm-4 text-right">
+                                <label class="control-label text-muted">GL Account Code</label>
+                            </div>
+                            <div class="col-xs-7 col-sm-8">
+                                <input type="text" id="txtedit-glAccountCD" class="form-control mandatory" maxlength="8" value="" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group form-group-xs">
+                            <div class="col-xs-5 col-sm-4 text-right">
+                                <label class="control-label text-muted">Plant Code</label>
+                            </div>
+                            <div class="col-xs-7 col-sm-8">
+                                <input type="text" id="txtedit-PlantCD" class="form-control mandatory" maxlength="4" value="" />
+                                
+
+                                @*@Html.DropDownList("cmbedit-division", DivisionController.GetDivisionList(), new {@class = "cursor-1", @style="width:100%;"})*@
+                            </div>
+                        </div>
+                    </div>                 
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group form-group-xs">
+                            <div class="col-xs-5 col-sm-4 text-right">
+                                <label class="control-label text-muted ">GL Account Description</label>
+                            </div>
+                            <div class="col-xs-7 col-sm-8">
+                                @*<input type="text" id="txtedit-Gldescription" class="form-control mandatory" maxlength="50" value="" />*@
+                                <textarea id="txtedit-Gldescription" class="form-control mandatory" maxlength="50">
+                                    </textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+               
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col-xs-12 text-right">
+                <div class="form-group-xs">
+                    <button type="submit" class="btn btn-primary btn-xs btn-std"> Save </button>
+                    <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+</div>
+
+

@@ -1,0 +1,1 @@
+﻿EXEC sp_Vendor_GetVendorSearchList @VendorCode, @VendorName, @CurrentPage, @PageSize

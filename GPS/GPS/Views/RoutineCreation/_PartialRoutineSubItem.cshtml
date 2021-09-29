@@ -1,0 +1,130 @@
+﻿@using GPS.Constants.Master
+@using GPS.Controllers.Master
+@using GPS.Models.Common
+@using GPS.Models.Master
+@model GPS.Models.Master.Routine
+@{
+    string ITEM_NO = ViewData["ITEM_NO"] == null ? "" : ViewData["ITEM_NO"].ToString();
+    List<UnitOfMeasure> UOM = ViewData["UOM"] == null ? new List<UnitOfMeasure>() : (List<UnitOfMeasure>)ViewData["UOM"];
+    string addeditflag = ViewData["ADDEDIT_FLAG"].ToString();    
+}
+
+
+@if(addeditflag == "Y") {
+<tr id="addrowdetail-@ITEM_NO" class="subitem-@ITEM_NO">
+    <td class="text-center" id="subitem_no" style="display:none"></td>
+    <td colspan="3" rowspan="2"></td>
+    <td class="text-center" colspan="2">
+        <div class="input-group pos-rel" style="width: 100%;">
+            @Html.TextBoxFor(m => m.MAT_DESC, 
+                                new {
+                                    id = "amatdescsubitem", 
+                                    @class = "addinput form-control matdesc custom-text", 
+                                    maxlength="50"
+                                })
+        </div>
+    </td>
+    <td class="text-right">
+        <div class="input-group pos-rel" style="width: 100%;">
+            @Html.TextBoxFor(m => m.QTY, 
+                                new {
+                                    id = "aqtysubitem", 
+                                    @class = "addinput form-control custom-text",
+                                    onkeyup = "GetAmount('subitem')", 
+                                    type = "text",
+                                    @Value = "0",
+                                    @text = "0",
+                                    onkeydown="javascript:$.NumericKey(event)"
+                                })
+        </div>
+    </td>
+    <td class="text-center">
+        <select id="auomsubitem" class="cursor-1 custom-combo" style="width:100%;" onchange="javascript:onChangeUOM('subitem')">
+            @if ((UOM != null) && (UOM.Count > 0))
+            {
+                <option id="0" value="" class="cursor-1" data-calc_value="1"></option>
+                int i = 1;
+                foreach (UnitOfMeasure uom in UOM)
+                {
+                    <option class="cursor-1" id="@i" data-calc_value ="@uom.CALC_VALUE" value="@uom.UNIT_OF_MEASURE_CD">@uom.UNIT_OF_MEASURE_CD</option>
+                    i++;
+                }
+            }
+            else { 
+                <option id="0" value="" class="cursor-1" data-calc_value="1"></option>
+            }
+        </select>
+        <input type="text" class="form-control addinput" id="acalcvaluesubitem" value="1" style="display:none"/>
+    </td>
+    <td></td>
+    <td class="text-center">
+        <div class="input-group pos-rel" style="width: 100%;">
+        @Html.TextBoxFor(m => m.PRICE, 
+                            new {
+                                id = "apricesubitem", 
+                                @class = "addinput form-control custom-text", 
+                                onkeyup = "GetAmount('subitem')", 
+                                @Value = "0",
+                                type = "text",
+                                onkeydown="javascript:$.NumericKey(event)"
+                            })
+        </div>
+    </td>
+    <td class="text-right">
+        <div class="input-group pos-rel" style="width: 100%;">
+            @Html.TextBoxFor(m => m.AMOUNT, 
+                                new {
+                                    id = "aamountsubitem", 
+                                    @class = "addinput form-control custom-text", 
+                                    @readonly="readonly",
+                                    onkeydown="javascript:$.NumericKey(event)"
+                                })
+        </div>
+    </td>
+    <td class="text-center">
+        <div id="lookupwbssubitem" class="input-group input-group-xs lookup">
+            <input type="text" class="form-control addinput" id="awbsnosubitem" readonly="readonly"/>
+            <span class="input-group-btn">
+                <button id="wbsbuttonsubitem" class="addinput custom-button-grid btn btn-warning btn-xs" type="button" onclick="javascript:getWBS(1, 'subitem')">&nbsp<i class="fa fa-search"></i>&nbsp</button>
+            </span>
+            <input type="text" class="form-control addinput" id="awbsnamesubitem" style="display:none" readonly="readonly">
+        </div>
+    </td>
+    <td class="text-center">
+        <div id="cascade-costcenter-subitem" class ="cost">
+            @Html.Partial(RoutinePage._CascadeCostCenter)
+        </div>
+    </td>
+    <td class="text-center">
+        <div class="input-group pos-rel" style="width: 100%;">
+            <div id="lookupglsubitem" class="input-group input-group-xs lookup">
+                <input type="text" class="form-control custom-text addinput" id="aglsubitem" readonly="readonly"/>
+                <span class="input-group-btn">
+                    <button id="glbuttonsubitem" class="addinput custom-button-grid btn btn-warning btn-xs" type="button" onclick="javascript:getGLAccount(1, 'subitem')">&nbsp<i class="fa fa-search"></i>&nbsp</button>
+                </span>
+            </div>
+        </div>
+    </td>
+    <td class="text-center">
+        <i class="btnsavesubitem fa fa-save btn btn-xs btn-primary" onclick="javascript:SaveSubItem('1')"></i>
+        <i class="btncancelsubitem fa fa-remove btn btn-xs btn-danger" onclick="javascript:CancelSaveSubItem()"></i>
+    </td>
+    <td></td>
+</tr>
+}
+<tr id="hiddenrowdetail" class="hidden subitem-@ITEM_NO"></tr>
+<tr class="subitem-@ITEM_NO">
+    @if (addeditflag == "N")
+    {
+        <td colspan="3"></td>
+    }
+    <td colspan="11" style="padding:0px;">
+        <div id="detail-subitem-grid-creation">
+            @Html.Partial(RoutinePage._SubItemGrid)
+        </div>
+    </td>
+    @if (addeditflag == "N")
+    {
+        <td></td>
+    }
+</tr>

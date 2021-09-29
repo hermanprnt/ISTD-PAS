@@ -1,0 +1,14 @@
+﻿[dbo].[sp_PRApproval_RejectHeader]
+	@DOC_NO,
+    @DOC_TYPE,
+    @VENDOR_CD,
+    @DIVISION_ID,
+    @DATE_FROM,
+    @DATE_TO,
+	@HEADER_MODE,
+	@DOC_LIST,
+	@DOC_ITEM_LIST,
+	@USER_NAME,
+    @REG_NO,
+	@USER_TYPE,
+	@TYPEREJECT

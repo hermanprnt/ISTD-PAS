@@ -1,0 +1,2 @@
+﻿select distinct PROC_USAGE_CD,DESCRIPTION 
+from TB_M_PROC_USAGE 

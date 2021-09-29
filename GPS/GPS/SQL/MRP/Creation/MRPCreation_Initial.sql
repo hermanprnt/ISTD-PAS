@@ -1,0 +1,1 @@
+﻿EXEC sp_MRPCreation_Initial @CurrentUser, 0, @ModuleId, @FunctionId

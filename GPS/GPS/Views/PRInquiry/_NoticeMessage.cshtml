@@ -1,0 +1,204 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Models.PRPOApproval
+@{    
+    List<CommonApprovalNotice> prInquiryNoticeList = (List<CommonApprovalNotice>)ViewData["PRInquiryNotice"];
+    string prInquiryNoticeCurrentUser = (string)ViewData["PRInquiryNoticeCurrentUser"];  
+}
+
+<style type="text/css">
+    .notice-message-action-link:hover,
+    .notice-message-replyfor-link:hover
+    {
+        cursor: pointer;
+    }
+    #notice-message-container
+    {
+        font-size:x-small;
+    }
+</style>
+
+@{
+    if (prInquiryNoticeList.Count > 0)
+    {
+        string backgroundColor = "";
+        string marginLeft = "";
+        foreach (CommonApprovalNotice prInquiryNotice in prInquiryNoticeList)
+        {
+            switch (prInquiryNotice.NOTICE_IMPORTANCE)
+            {
+                case "H":
+                    backgroundColor = "#FD696D";
+                    break;
+                case "N":
+                    backgroundColor = "#B7F8C2";
+                    break;
+                case "L":
+                    backgroundColor = "#A8DBB1";
+                    break;
+            }
+            if (prInquiryNotice.NOTICE_FROM_USER.Equals(prInquiryNoticeCurrentUser))
+            {
+                marginLeft = "29.50%";
+            }
+            else
+            {
+                marginLeft = "0%";
+            }
+
+            <div id="notice-message-@prInquiryNotice.SEQ_NO" style="position:relative;padding:5px;color:#263088;">
+                <div style="background-color: @backgroundColor;
+                        border-top-left-radius: 4px;
+                        border-top-right-radius: 4px;
+                        padding: 5px;
+                        width: 70%;
+                        margin-left: @marginLeft;
+                        word-wrap: normal;
+                        margin-bottom:2px;
+                        font-size: 9px;
+                        position: relative;
+                        min-height: 60px;
+                    ">
+                    From : @(CaseConverter.ToPascalCase(prInquiryNotice.NOTICE_FROM_ALIAS ))
+                    &nbsp;
+                    To : 
+                        @{  
+                            string noticeToAliasList = string.Empty;
+                            if (prInquiryNotice.NOTICE_TO_ALIAS != string.Empty)
+                            {
+                                noticeToAliasList = prInquiryNotice.NOTICE_TO_ALIAS.Replace("[", string.Empty).Replace("]", string.Empty);
+                                noticeToAliasList = noticeToAliasList.Substring(0, noticeToAliasList.Length - 1);
+                                <text>@(CaseConverter.ToPascalCase(noticeToAliasList))</text>
+                            }
+                        }
+                    - @(prInquiryNotice.CREATED_DT != DateTime.MinValue ? prInquiryNotice.CREATED_DT.ToString(CommonFormat.CommDateTime) : "")
+                    <hr style="margin: 2px;border-color: #7A7A7A;"/>
+                    <div>
+                        &nbsp;&nbsp;@prInquiryNotice.NOTICE_MESSAGE
+                    </div>
+                    <div style="position:absolute;bottom:0;right:0;padding:5px;font-size:x-small;font-weight:bold;">
+                        @{
+                            if (prInquiryNotice.NOTICE_FROM_USER.Equals(prInquiryNoticeCurrentUser))
+                            {
+                                <label id="notice-message-delete-link-@prInquiryNotice.SEQ_NO" class="notice-message-action-link" data-docno="@prInquiryNotice.DOC_NO" data-seqno="@prInquiryNotice.SEQ_NO" data-noticefromuser="@prInquiryNotice.NOTICE_FROM_USER" data-noticefromalias="@(CaseConverter.ToPascalCase(prInquiryNotice.NOTICE_FROM_ALIAS))" style="color:#263088;">Delete</label>
+                                <text>&nbsp;|&nbsp;</text>
+                            }
+                        }
+                        <label id="notice-message-reply-link-@prInquiryNotice.SEQ_NO" class="notice-message-action-link" 
+                            data-docno="@prInquiryNotice.DOC_NO" data-seqno="@prInquiryNotice.SEQ_NO" 
+                            data-noticefromuser="@prInquiryNotice.NOTICE_FROM_USER" 
+                            data-noticefromalias="@(CaseConverter.ToPascalCase(prInquiryNotice.NOTICE_FROM_ALIAS))" 
+                            style="color:#263088;">Reply</label>
+                    </div>
+                </div>
+                
+                @{  
+                    if (prInquiryNotice.REPLY_FOR != 0 
+                        && !String.IsNullOrEmpty(prInquiryNotice.NOTICE_REPLY_FROM_ALIAS)
+                        && !String.IsNullOrEmpty(prInquiryNotice.NOTICE_REPLY_MESSAGE))
+                    {
+                        <div 
+                            id="notice-message-replyfor-message-@prInquiryNotice.SEQ_NO"  
+                            style="background-color: #555; 
+                                color: white;
+                                padding: 5px 5px 8px 5px;
+                                width: 60%;
+                                margin-left: @marginLeft;
+                                word-wrap: normal;
+                                position: relative;
+                                font-size:x-small;
+                                font-weight:bold;
+                                margin-top: -0.3em;
+                                border-bottom-right-radius: 4px;
+                                border-bottom-left-radius: 4px;
+                                display: none;
+                            "
+                        >
+                            From : @(CaseConverter.ToPascalCase(prInquiryNotice.NOTICE_REPLY_FROM_ALIAS))<br />
+                            @prInquiryNotice.NOTICE_REPLY_MESSAGE
+                        </div>
+                        <div 
+                            id="notice-message-replyfor-link-@prInquiryNotice.SEQ_NO"
+                            class="notice-message-replyfor-link"
+                            style="background-color: #333;
+                                color: white;
+                                padding: 5px;
+                                width: 60%;
+                                margin-left: @marginLeft;
+                                word-wrap: normal;
+                                position: relative;
+                                text-align: center;
+                                font-size:x-small;
+                                font-weight:bold;
+                                margin-top: -0.3em;
+                                border-bottom-right-radius: 4px;
+                                border-bottom-left-radius: 4px;
+                            "
+                            data-seqno="@prInquiryNotice.SEQ_NO"
+                        >
+                            Reply For
+                        </div>
+                    }
+                }
+            </div>
+        }
+    }
+}
+
+<script type="text/javascript">
+    var docNo;
+    var seqNo;
+    var noticeFromUser;
+    var noticeFromAlias;
+    
+    $(document).ready(function () {
+        $("[id^=notice-message-reply-message-]").css("display", "none");
+    });
+
+    $("[id^=notice-message-delete-link-]").click(function (e) {
+        docNo = $(this).data("docno");
+        seqNo = $(this).data("seqno");
+
+        DeletePRApprovalNotice(function (data) {
+            resetNotice();
+            $("#notice-message-container").html(data);
+        });
+    });
+
+    $("[id^=notice-message-reply-link-]").click(function (e) {
+        docNo = $(this).data("docno");
+        seqNo = $(this).data("seqno");
+        noticeFromUser = $(this).data("noticefromuser");
+        noticeFromAlias = $(this).data("noticefromalias");
+
+        $("#btn-post-notice").text("Reply");
+
+        noticeToUserList = $("#notice-to-user-list").val()
+        noticeToAliasList = $("#notice-to-alias-list").val()
+        noticeToUser = noticeFromUser;
+        noticeToAlias = noticeFromAlias;
+        if (noticeToUser != '' && noticeToUser != undefined) {
+            var noticeToIndex = noticeToUserList.indexOf("[" + noticeToUser + "]");
+            if (noticeToIndex == -1) {
+                var html = '<div id="notice-list-container-' + noticeToUser + '" style="float:left;vertical-align:middle;padding:0.2em;line-height:1.5em;">' +
+                    '<label class="text-muted" style="margin:0;"><span>' + noticeToAlias + '</span></label>' +
+                    '</div>'
+                $("#notice-list-container").append(html);
+                $("#notice-list-container").show();
+
+                noticeToUserList = noticeToUserList + "[" + noticeToUser + "],";
+                $("#notice-to-user-list").val(noticeToUserList);
+                noticeToAliasList = noticeToAliasList + "[" + noticeToAlias + "],";
+                $("#notice-to-alias-list").val(noticeToAliasList);
+
+                $("#cmb-notice-to").val($("#cmb-notice-to")[0].defaultValue);
+            }
+        }
+    });
+
+    $("[id^=notice-message-replyfor-link-]").click(function (e) {
+        seqNo = $(this).data("seqno");
+
+        $("#notice-message-replyfor-message-" + seqNo).toggle(0, "linear");
+    });
+</script>

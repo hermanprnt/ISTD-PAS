@@ -1,0 +1,1032 @@
+﻿@using GPS.Constants.PR
+@using GPS.Controllers.PR
+@using GPS.Core.ViewModel
+<script type="text/javascript" id="Common-PR">
+    $tdk.AjaxMethod = "POST";
+    $tdk.Alert = "#alert-search";
+    $tdk.AlertDetail = "#alert-detail";
+    $tdk.Success = "#success-search";
+    $tdk.Warning = "#warning-search";
+    $tdk.Division = "";
+    $tdk.isDetail = 0;
+    messagelife = 1;
+    currentTab = '00'; //id tab on detail, Initialize with tab PR Detail = 00
+
+    function toggleSearch() {
+        $("._criteria").toggle(200, "linear");
+        //var htable = $(window).height() - 170;
+        if ($("#toogle-search").hasClass("fa-angle-double-up")) {
+            $("#toogle-search").removeClass("fa-angle-double-up");
+            $("#toogle-search").addClass("fa-angle-double-down");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            //$("#tScrollBody").height(htable);
+            $("#toogle-search").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-search").removeClass("fa-angle-double-down");
+            $("#toogle-search").addClass("fa-angle-double-up");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            $("#tScrollBody").height(300);
+            $("#toogle-search").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+
+    function toggleDetail() {
+        $("._detailpr").toggle(200, "linear");
+        if ($("#toogle-detail").hasClass("fa-angle-double-up")) {
+            $("#toogle-detail").removeClass("fa-angle-double-up");
+            $("#toogle-detail").addClass("fa-angle-double-down");
+            $("#toogle-detail").removeClass("btn-tiny-down");
+            $("#toogle-detail").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            $("#toogle-detail").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-detail").removeClass("fa-angle-double-down");
+            $("#toogle-detail").addClass("fa-angle-double-up");
+            $("#toogle-detail").removeClass("btn-tiny-down");
+            $("#toogle-detail").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            $("#toogle-_detail").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+
+    function toogle(_class, displaytext) {
+        var _criteria = $("." + _class);
+        var text = $("#lnsearch-toggle-" + _class).text();
+        _criteria.toggle(200, "linear");
+        $("#lnsearch-toggle-" + _class).text(text == "More " + displaytext ? "Less " + displaytext : "More " + displaytext);
+    }
+
+    function detailGrid() {
+        if ($tdk.isDetail > 0) {
+            $("#btnToggleDetail").html('Show Detail');
+            $("._toggle-detail").hide();
+            $tdk.isDetail = 0;
+            $("#dynamic-table").css("width", "100%");
+            $("#tblScroll").css("width", "100%");
+        }
+        else {
+            $("#btnToggleDetail").html('Hide Detail');
+            $("._toggle-detail").show();
+            $tdk.isDetail = 1;
+            $("#dynamic-table").css("width", "1588px");
+            $("#tblScroll").css("width", "1588px");
+        }
+    }
+
+    function onDownload() {
+        var orderby = null;
+        if (ViewData.Get("OrderBy") !== undefined && ViewData.Get("OrderBy") !== null && ViewData.Get("OrderBy") !== "")
+            orderby = ViewData.Get("OrderBy");
+
+        var param = GetSearchPRHParameters(orderby, 1);
+
+        $.progressbox.show($tdk.PageTitle, "Download File");
+        $.fileDownload("@PRInquiryController._OnDownloadExcel", {
+            data: param,
+            successCallback: function (responseHtml, url) {
+                $.progressbox.hide();
+            },
+            failCallback: function (responseHtml, url) {
+                $.progressbox.hide();
+                alert("A file download error has occured, please try again");
+            }
+        });
+    }
+
+    function downloadFile(filename, id) {
+        $.progressbox.show("Download File", "Downloading...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._ValidateDownload",
+            data: { id: id, filename: filename },
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] === 'E') {
+                    $.messagebox.show(
+                        "Download File",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+                else
+                    window.open("@Url.Content("~/PRInquiry/DownloadFile?")" +
+                "filepath=" + resultMessage +
+                "&filename=" + filename, '_self');
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                $.messagebox.show(
+                    "Error",
+                    resultMessage,
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+            }
+        });
+}
+
+function MessageFormat(message, param) {
+    for (var i = 0; i < param.length; i++) {
+        message = message.replace("{" + i + "}", param[i].toString());
+    }
+    return message;
+}
+
+function IgnoreInput(e) {
+    if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+        (e.keyCode == 65 && e.ctrlKey === true) ||
+        (e.keyCode >= 35 && e.keyCode <= 40)) {
+        e.preventDefault();
+    }
+    if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+        e.preventDefault();
+    }
+    if ((e.shiftKey >= 48) || (e.shiftKey <= 57))
+    { e.preventDefault(); }
+}
+
+function Messages(id, display, msg) {
+    $(id).css("display", display);
+    $(id).html(msg);
+}
+
+function populateComboBox(id) {
+    var target = "";
+    var source = "";
+    var url = "";
+    switch (id) {
+        case "sloc": {
+            target = "#cascade-sloc";
+            source = $("#plant").val();
+            url = "GetSlocbyPlant";
+            break;
+        }
+    }
+
+    $.ajax({
+        type: $tdk.AjaxMethod, url: "@PRInquiryController._PRInquiryController" + url,
+        data: { param: source },
+        success: function (resultMessage) {
+            $(target).html(resultMessage);
+        },
+        error: function (resultMessage) {
+            alert(resultMessage.responseText);
+        }
+    });
+}
+</script>
+
+<script type="text/javascript" id="Search-PR">
+    function SortGrid(orderby, page) {
+        var param = GetSearchPRHParameters(orderby, page);
+
+        $.ajax({
+            type: "POST",
+            url: "@PRInquiryController._SortPR",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (result) {
+                $("#tScrollBody").html(result);
+            },
+            error: function (result) {
+                alert("error");
+            }
+        });
+    }
+
+    function setSortSymbol() {
+        if (ViewData.Get("OrderBy") !== undefined && ViewData.Get("OrderBy") !== null) {
+            var orderby = ViewData.Get("OrderBy");
+
+            if (orderby.substring(orderby.indexOf('|') + 1, orderby.length) == 'DESC') {
+                removeClass = 'sorting_none';
+                addClass = 'sorting_desc';
+                dataSort = 'DESC';
+            } else if (orderby.substring(orderby.indexOf('|') + 1, orderby.length) == 'ASC') {
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'ASC';
+            }
+            else {
+                removeClass = 'sorting_asc sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+            }
+
+            $('*[data-field="' + orderby.substring(0, orderby.indexOf('|')) + '"]').removeClass(removeClass);
+            $('*[data-field="' + orderby.substring(0, orderby.indexOf('|')) + '"]').addClass(addClass);
+            $('*[data-field="' + orderby.substring(0, orderby.indexOf('|')) + '"]').data("sort", dataSort);
+        }
+    }
+
+    function ClearCriteria() {
+        $.progressbox.show("Search PR", "Clearing Data...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._SearchPR",
+            data: { issearch: 'N' },
+            success: function (resultMessage) {
+                $('.TableList').html(resultMessage);
+                messagelife = 1;
+                $("#prno").val("");
+                $("#vendor").val("");
+                $("#createdby").val("");
+                $("#plant").val("");
+                $("#projectno").val("");
+                $("#status").val("");
+                $("#docdate").val("");
+                $("#prdesc").val("");
+                $("#prchecker").val("");
+                $("#createdby").val("");
+                $("#awbsno").val("");
+                $("#detstatusfrom").val("");
+                $("#detstatusto").val("");
+                $("#division").val($tdk.Division);
+                $("#po_No").val("");
+                $("#cmb-procchannel").val("");
+                populateComboBox('division');
+                populateComboBox('sloc');
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function ValidateCriteria() {
+        var validMsg = "";
+
+        //Basic Validation : Mandatory Check
+        if (($("#prno").val() == '') &&
+            ($("#prtype").val() == '') &&
+            ($("#prdesc").val() == '') &&
+            ($("#vendor").val() == '') &&
+            ($("#plant").val() == '') &&
+            ($("#astorage").val() == '') &&
+            ($("#division").val() == '0') &&
+            ($("#docdate").val() == '') &&
+            ($("#projectno").val() == '') &&
+            ($("#status").val() == '') &&
+            ($("#prchecker").val() == '') &&
+            ($("#createdby").val() == '') &&
+            ($("#awbsno").val() == '') &&
+            ($("#detstatusfrom").val() == ''))
+        { validMsg = "@PurchasingRequisitionMessages.invalidCriteria"; }
+        return validMsg;
+    }
+
+    function ValidateDate() {
+        var datemsg = "";
+        var docdate = $("#docdate").val().split('-') || "";
+        var datefrom = docdate != "" ? GetValidDate(docdate[0].trim()) : "";
+        var dateto = docdate != "" ? GetValidDate(docdate[1].trim()) : "";
+
+        if (datefrom != '') {
+            if (dateto == '') {
+                datemsg = MessageFormat("@PurchasingRequisitionMessages.invalidDate", ["PR Date To", "PR Date From"]);
+            }
+        }
+        else if (dateto != '') {
+            if (datefrom == '') {
+                datemsg = MessageFormat("@PurchasingRequisitionMessages.invalidDate", ["PR Date From", "PR Date To"]);
+            }
+        }
+    return datemsg;
+}
+
+function GetValidDate(date) {
+    if (date != "") {
+        date = date.split('.');
+        var date = date[1] + '-' + date[0] + '-' + date[2];
+    }
+    return date;
+}
+
+function GetSearchPRHParameters(orderby, page) {
+
+    var docdate = $("#docdate").val().split('-') || "";
+
+    var datefrom = docdate != "" ? GetValidDate(docdate[0].trim()) : "";
+    var dateto = docdate != "" ? GetValidDate(docdate[1].trim()) : "";
+
+    ViewData.Add("OrderBy", orderby);
+
+    return {
+        PR_NO: $("#prno").val(),
+        VENDOR_CD: $("#vendor").val(),
+        PLANT_CD: $("#plant").val(),
+        SLOC_CD: $("#astorage").val(),
+        DIVISION_ID: $("#division").val(),
+        DOC_DATE_FROM_STRING: datefrom,
+        DOC_DATE_TO_STRING: dateto,
+        PROJECT_NO: $("#projectno").val(),
+        PR_STATUS: $("#status").val(),
+        PR_STATUS_DESC: $("#status option:selected").text(),
+        PR_DESC: $("#prdesc").val(),
+        PR_COORDINATOR: $("#prchecker").val(),
+        PR_TYPE: $("#prtype").val(),
+        WBS_NO: $("#awbsno").val(),
+        PR_DETAIL_STS: $("#detstatusfrom").val(),
+        CREATED_BY: $("#createdby").val(),
+        ORDER_BY: orderby,
+        PO_NO: $("#po_No").val().trim(),
+        PROCUREMENT_CHANNEL: $("#cmb-procchannel").val(),
+        issearch: 'Y',
+        page: page,
+        pageSize: $('.page').val() || 10
+    };
+}
+
+function SearchPRHeader(page, isbutton) {
+    var orderby = null;
+    if (ViewData.Get("OrderBy") !== undefined && ViewData.Get("OrderBy") !== null && ViewData.Get("OrderBy") !== "")
+        orderby = ViewData.Get("OrderBy");
+
+    var param = GetSearchPRHParameters(orderby, page);
+    var msg = ValidateCriteria() == "" ? ValidateDate() : ValidateCriteria();
+    if (msg != "") {
+        $.messagebox.show(
+            "Search PR",
+            msg,
+            "ERR",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else {
+        if (isbutton == 1)
+            messagelife = 1;
+
+        $.progressbox.show("Search PR", "Loading Data...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._SearchPR",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (resultMessage) {
+                var maxperpage = $('.page').val() || 10;
+                $('.TableList').html(resultMessage);
+                $("#btnToggleDetail").html('Show Detail');
+                //$tdk.isDetail = 0;
+                $('.page').val(maxperpage);
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                $.messagebox.show(
+                    "Error",
+                    resultMessage,
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+            }
+        });
+    }
+}
+</script>
+
+<script type="text/javascript" id="Show-Detail-PR">
+    function GetPRApprovalHistoryParameter(docNo, itemNo, pageIndex, pageSize) {
+        return {
+            DOC_NO: docNo,
+            ITEM_NO: itemNo,
+            DOC_TYPE: 'PR',
+            pageIndex: pageIndex || 1,
+            pageSize: pageSize || 10
+        };
+    }
+
+    function DisplayWorkList(docNo, itemNo, pageIndex, pageSize) {
+        $.progressbox.show("Display Worklist", "Get Worklist Data for Doc. No " + docNo + "...");
+        var param = GetPRApprovalHistoryParameter(docNo, itemNo, pageIndex, pageSize);
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@PRInquiryController._getPRApprovalHistory",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                $("#history-popup-container").html(data);
+                $.progressbox.hide();
+                $("#history-popup-container").modal();
+            },
+            error: function () {
+                $.progressbox.hide();
+                //Display Ajay Error Message 
+            }
+        });
+    }
+
+    function showDetail(PR_NO) {
+        $.progressbox.show("Display Detail PR No " + PR_NO, "Get Detail PR Data...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._getDetailPRH",
+            data: { PR_NO: PR_NO },
+            success: function (data) {
+                $("#detail-popup-container").html(data);
+                $('.dettitle').html('Detail PR No ' + PR_NO);
+                $('#detail-popup-container').modal();
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                //Display Ajay Error Message
+            }
+        });
+    }
+
+    function SearchPRItem(page, PR_NO) {
+        $.progressbox.show("Display Detail PR No " + PR_NO, "Get Detail PR Data...");
+        var maxRowperPage = $("#detail-pagesize").val() == null ? "10" : $("#detail-pagesize").val();
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._getDetailPRItem",
+            data: { PR_NO: PR_NO, pageSize: maxRowperPage, page: page, docNo: PR_NO },
+            success: function (data) {
+                $("#detail-grid-container").html(data);
+                $("#detail-pagesize").val(maxRowperPage);
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        })
+    }
+
+    function SearchApprovalDivision(page, PR_NO) {
+        $.progressbox.show("Display Approval Division for PR No " + PR_NO, "Get Approval Division Data...");
+        var maxRowperPage = $("#approvdiv-pagesize").val() == null ? "10" : $("#approvdiv-pagesize").val();
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._getApproval",
+            data: { type: "Division", PR_NO: PR_NO, pageSize: maxRowperPage, page: page },
+            success: function (data) {
+                $("#approvaldiv-grid-container").html(data);
+                $("#approvdiv-pagesize").val(maxRowperPage);
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        })
+    }
+
+    function SearchApprovalCoordinator(page, PR_NO) {
+        $.progressbox.show("Display Approval Coordinator for PR No " + PR_NO, "Get Approval Coordinator Data...");
+        var maxRowperPage = $("#approvcoord-pagesize").val() == null ? "10" : $("#approvcoord-pagesize").val();
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._getApproval",
+            data: { type: "Coordinator", PR_NO: PR_NO, pageSize: maxRowperPage, page: page },
+            success: function (data) {
+                $("#approvalcoord-grid-container").html(data);
+                $("#approvcoord-pagesize").val(maxRowperPage);
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        })
+    }
+
+    function SearchApprovalFinance(page, PR_NO) {
+        $.progressbox.show("Display Approval Finance for PR No " + PR_NO, "Get Approval Finance Data...");
+        var maxRowperPage = $("#approvfinance-pagesize").val() == null ? "10" : $("#approvfinance-pagesize").val();
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._getApproval",
+            data: { type: "Finance", PR_NO: PR_NO, pageSize: maxRowperPage, page: page },
+            success: function (data) {
+                $("#approvalfinance-grid-container").html(data);
+                $("#approvfinance-pagesize").val(maxRowperPage);
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        })
+    }
+
+    function changeIcon(PR_ITEM_NO, PR_NO) {
+        if ($("#" + PR_ITEM_NO).children('.fa').hasClass("fa-plus-square-o")) {
+            // expand grid
+            $("#" + PR_ITEM_NO).children('.fa').removeClass("fa-plus-square-o");
+            $("#" + PR_ITEM_NO).children('.fa').addClass("fa-minus-square-o");
+
+            $.progressbox.show("Get Sub Item", "Get Sub Item onprogress . . .");
+            if ($('#tScrollBodyItem').find('.subitemgrid-' + PR_ITEM_NO).length == 0) {
+                $.ajax({
+                    type: $tdk.AjaxMethod, url: "@PRInquiryController._getDetailPRSubItem",
+                    data: {
+                        PR_NO: PR_NO,
+                        PR_ITEM_NO: PR_ITEM_NO
+                    },
+                    success: function (data) {
+                        $("#" + PR_ITEM_NO).closest('tr').after(data);
+                        $.progressbox.hide();
+                    }
+                });
+        }
+        else {
+            $('.subitemgrid-' + PR_ITEM_NO).css("display", "");
+            $.progressbox.hide();
+        }
+    } else {
+            // collapse grid
+        $("#" + PR_ITEM_NO).children('.fa').removeClass("fa-minus-square-o");
+        $("#" + PR_ITEM_NO).children('.fa').addClass("fa-plus-square-o");
+        $(".subitemgrid-" + PR_ITEM_NO).css("display", "none");
+    }
+}
+
+function onUnlock(PR_No, ProcessId) {
+    $.progressbox.show("Unlock PR", "Unlocking PR Starting...");
+    $.ajax({
+        type: $tdk.AjaxMethod, url: "@PRInquiryController._UnlockPR",
+        data: { pPR_NO: PR_No, pPROCESS_ID: ProcessId },
+        success: function (data) {
+            $.progressbox.hide();
+            if (data != "SUCCESS") {
+                $.messagebox.show(
+                    "Unlock PR",
+                    data,
+                    "WRN",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+            }
+            else {
+                $.messagebox.show(
+                    "Unlock PR",
+                    "PR No " + PR_No + " successfully unlocked.",
+                    "INF",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+                SearchPRHeader(1, 1);
+            }
+        },
+        error: function (resultMessage) {
+            $.progressbox.hide();
+        }
+    })
+}
+
+function onChangeTab(type) {
+    if (currentTab != type) {
+        $("#" + currentTab, $(".nav")).removeClass("active");
+        $("#" + type, $(".nav")).addClass("active");
+
+        var id = "";
+        switch (type) {
+            case "00": {
+                id = "#detail-grid-container";
+                break;
+            }
+            case "01": {
+                id = "#approvaldiv-grid-container";
+                break;
+            }
+            case "02": {
+                id = "#approvalcoord-grid-container";
+                break;
+            }
+            case "03": {
+                id = "#approvalfinance-grid-container";
+                break;
+            }
+            case "04": {
+                id = "#worklisthistory-grid-container";
+                break;
+            }
+            default: {
+                id = "#detail-grid-container";
+                break;
+            }
+        }
+
+        $(".grid-detail:not(" + id + ")").css("display", "none");
+        $(id).css("display", "");
+        currentTab = type;
+    }
+}
+</script>
+
+<script type="text/javascript" id="CRUDS-PR">
+    function ValidChecked(checked, method) {
+        return checked.length > 1 ? MessageFormat("@PurchasingRequisitionMessages.singleChecked", [method]) :
+                  (checked.length <= 0 ? MessageFormat("@PurchasingRequisitionMessages.selectRecord", [method]) : "");
+    }
+
+    function Add(PR_NO, title) {
+        title = title == "" ? "Create New PR" : title;
+        $.progressbox.show(title, "Initialize PR Creation Screen...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._AddPR",
+            data: { PR_NO: PR_NO },
+            success: function (resultMessage) {
+
+                if (resultMessage == "") {
+                    $.progressbox.hide();
+                    window.open("PRCreation", '_blank');
+                }
+                else {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Error",
+                        "Error : " + resultMessage + ", Please Contact your Administrator",
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function EditDetail(PRNO) {
+        $.progressbox.show("Edit PR", "Checking PR No " + PRNO + "...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._EditPR",
+            data: { pPR_NO: PRNO },
+            success: function (resultMessage) {
+                $.progressbox.hide();
+                if (resultMessage == 'SUCCESS') {
+                    setTimeout(function () {
+                        Add(PRNO, "Update PR");
+                    }, 500);
+                }
+                else {
+                    $.messagebox.show(
+                        "Edit PR",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function Edit(e, PRNO) {
+        var checked = []
+        $("input[name='checkpr[]']:checked").each(function () { checked.push($(this).val()); });
+        var validmsg = ValidChecked(checked, "edited");
+        if (validmsg != "") {
+            $.messagebox.show(
+                "Edit PR",
+                validmsg,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+            $.progressbox.show("Edit PR", "Checking PR No " + checked[0] + "...");
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@PRInquiryController._EditPR",
+                data: { pPR_NO: checked[0] },
+                success: function (resultMessage) {
+                    $.progressbox.hide();
+                    if (resultMessage == 'SUCCESS') {
+                        setTimeout(function () {
+                            Add(checked[0], "Update PR");
+                        }, 500);
+                    }
+                    else {
+                        $.messagebox.show(
+                            "Edit PR",
+                            resultMessage,
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                },
+                error: function (resultMessage) {
+                    $.progressbox.hide();
+                }
+            });
+        }
+    }
+
+    function Cancel() {
+        var checked = []
+        $("input[name='checkpr[]']:checked").each(function () { checked.push($(this).val()); });
+        var validmsg = ValidChecked(checked, "canceled");
+        if (validmsg != "") {
+            $.messagebox.show(
+                "Cancel PR",
+                validmsg,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+            //$.messagebox.show(
+            //    "Info",
+            //    "Are you sure you want to cancel Document No : <b>" + checked[0] + "</b>?",
+            //    "INF",
+            //    "CONFIRM",
+            //    "doCancelValidationPR()",
+            //    ""
+            //)
+            $("#cancel-lbl-pr_no").html(checked[0]);
+            $("#cancel-popup-container").modal();
+        }
+    }
+
+    function doCancelValidationPR(PR_NO) {
+
+        var reason = $("#input-reason-container").val();
+        var reasontrimmed = reason.trim();
+
+        if ((reasontrimmed == "") || (reasontrimmed == null) || (reasontrimmed == undefined)) {
+            $.messagebox.show(
+                        "Cancel PR",
+                        "Cancel Reason is Mandatory!",
+                        "WRN",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+            return;
+        }
+
+        if ((reasontrimmed.length < 10) || (reasontrimmed.length > 100)) {
+            $.messagebox.show(
+                        "Cancel PR",
+                        "Cancel Reason Minimum length is 10 character and Maximum length is 100 character",
+                        "WRN",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+            return;
+        }
+
+        var checked = []
+        $("input[name='checkpr[]']:checked").each(function () { checked.push($(this).val()); });
+
+        var PR_NO = checked[0];
+
+        $.progressbox.show("Cancel PR", "Checking Document No " + PR_NO + "...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._CancelValidation",
+            data: { pPR_NO: PR_NO },
+            success: function (resultMessage) {
+                $.progressbox.hide();
+                if (resultMessage == 'SUCCESS') {
+                    setTimeout(function () {
+                        doCancelPR(PR_NO, reasontrimmed);
+                    }, 500);
+                }
+                else {
+                    $.messagebox.show(
+                        "Cancel PR",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function doCancelPR(PR_NO, CANCEL_REASON) {
+        $.progressbox.show("Cancel PR", "Cancelling Document No " + PR_NO + "...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._CancelPR",
+            data: {
+                pPR_NO: PR_NO,
+                pCANCEL_REASON: CANCEL_REASON
+            },
+            success: function (resultMessage) {
+                $.progressbox.hide();
+                var result = resultMessage.split('|');
+                if (result[0] == 'SUCCESS') {
+                    $("#prno").val(PR_NO);
+                    $("#cancel-popup-container").modal('hide');
+                    $.messagebox.show(
+                        "Cancel PR",
+                        "Document No <b>" + result[1] + "</b> Cancelled Successfully",
+                        "SUC",
+                        "SINGLE",
+                        "SearchPRHeader(1, 1)",
+                        ""
+                    )
+                }
+                else {
+                    $.messagebox.show(
+                        "Cancel PR",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function ShowCancelReason(CANCEL_REASON, PR_NO) {
+        $("#reason-popup-title").html("Cancel Reason for PR No. " + PR_NO);
+        $("#reason-container").val(CANCEL_REASON);
+        $("#cancelreason-popup-container").modal();
+    }
+
+    function doCancelAbort() {
+        $("#input-reason-container").val('');
+    }
+
+    function SearchWorklistHistory(page, PR_NO) {
+        $.progressbox.show("Display Worklist History for PR No " + PR_NO, "Get Worklist History Data...");
+        var maxRowperPage = $("#worklisthistory-pagesize").val() == null ? "10" : $("#worklisthistory-pagesize").val();
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._getWorklistHistory",
+            data: { PR_NO: PR_NO, pageSize: maxRowperPage, page: page },
+            success: function (data) {
+                $("#worklisthistory-grid-container").html(data);
+                $("#worklisthistory-pagesize").val(maxRowperPage);
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        })
+    }
+
+    function OnCloseDetailPopup() {
+        currentTab = '00';
+    }
+</script>
+
+@*//20191004*@
+<script type="text/javascript">
+    function PostPRApprovalNotice(responseCallback) {
+        var param = GetPRApprovalNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("PostPRApprovalNotice")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval", "Post PR Approval Notice. . ."),
+            success: function (data) {
+                if (data.ResponseType == "@ActionResponseViewModel.Error")
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                else
+                    responseCallback(data);
+                $.progressbox.hide();
+            }
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+
+    function ReplyPRApprovalNotice(responseCallback) {
+        var param = GetPRApprovalReplyNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("ReplyPRApprovalNotice")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval", "Reply PR Approval Notice. . ."),
+            success: function (data) {
+                if (data.ResponseType == "@ActionResponseViewModel.Error")
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                else
+
+                    responseCallback(data);
+                $.progressbox.hide();
+            }
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+
+    function DeletePRApprovalNotice(responseCallback) {
+        var param = GetPRApprovalDeleteNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("DeletePRApprovalNotice")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval", "Delete PR Approval Notice. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+
+    function GetPRApprovalNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            DOC_TYPE: docType,
+            NOTICE_TO_USER: $("#notice-to-user-list").val(),
+            NOTICE_TO_ALIAS: $("#notice-to-alias-list").val(),
+            NOTICE_IMPORTANCE: "N",//$("#cmb-notice-importance").val(),
+            NOTICE_MESSAGE: $("#txt-notice-message").val()
+        };
+    }
+
+    function GetPRApprovalReplyNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            DOC_TYPE: 'PR',
+            REPLY_FOR: seqNo,
+            NOTICE_TO_USER: $("#notice-to-user-list").val(),
+            NOTICE_TO_ALIAS: $("#notice-to-alias-list").val(),
+            NOTICE_IMPORTANCE: "N",//$("#cmb-notice-importance").val(),
+            NOTICE_MESSAGE: $("#txt-notice-message").val()
+        };
+    }
+
+    function GetPRApprovalDeleteNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            SEQ_NO: seqNo
+        };
+    }
+    //20191014
+    function DeleteRem() {
+        var prNo = $('input[name="chkRow"]:checked').data('prno');
+        var itemNo = $('input[name="chkRow"]:checked').data('itemno');
+        var checked = [];
+        $("input[name='chkRow']:checked").each(function () { checked.push($(this).data('prno')); });
+        var validmsg = ValidChecked(checked, "Budget");
+        if (validmsg != "") {
+            $.messagebox.show(
+                "Delete Remaining Budget PR",
+                validmsg,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else
+        {
+            $.progressbox.show("Delete", "Checking PR No ...");
+            $.ajax({
+                type: $tdk.AjaxMethod,
+                url: '@Html.Toyota().Page.GetActionUrl("DeleteRemPR")',
+                data: { PR_NO: prNo, ITEM_NO: itemNo },
+                success: function (resultMessage) {
+                    $.progressbox.hide();
+                    if (resultMessage == 'SUCCESS') {
+                        setTimeout(function () {
+                            Add(PRNO, "Delete remaining budget PR");
+                        }, 5000);
+                    }
+                    else {
+                        $.messagebox.show(
+                            "Delete Remaining PR",
+                            resultMessage,
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                },
+                error: function (resultMessage) {
+                    $.progressbox.hide();
+                }
+            });
+        }
+    }
+
+</script>

@@ -1,0 +1,42 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadScript{
+    <style>
+  #addrow {
+        display:none;
+    }
+       
+    .table > tr > td {
+        vertical-align : middle;    
+    }
+
+    .table > thead > tr > th {
+        vertical-align : middle;    
+    }
+
+    </style>
+}
+
+<div class="alert alert-danger" role="alert" style="display:none" id="alert-search"></div>
+<div class="alert alert-success" role="alert" style="display:none" id="success-search"></div>
+<div class="alert alert-warning" role="alert" style="display:none" id="warning-search"></div>
+@Html.Partial("_QuotaDetailHeader")
+<br />
+<br />
+<br />
+<div class="_line-br"></div>
+
+@Html.Partial("_QuotaDetailGrid")
+
+@section BodyScript{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("._datePicker").datepicker();
+        });
+        ToYearOnlyDatePicker($("#txtYearAdd"));
+        </script>
+}
+
+        @Html.Partial("_LookupMaterial")

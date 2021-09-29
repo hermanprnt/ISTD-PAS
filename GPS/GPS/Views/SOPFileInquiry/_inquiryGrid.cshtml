@@ -1,0 +1,24 @@
+﻿@using GPS.Constants;
+@using GPS.Controllers.SOP;
+@model GPS.ViewModels.SOP.SOPFileViewModel
+
+<div style="overflow: auto;">
+    <table id="dynamic-table" class="table table-striped table-bordered table-condensed">
+        <thead id="header-row">
+            <tr>
+                <th width="20px"></th>
+                <th width="70px">No.</th>
+                <th width="250px">File Name</th>
+                <th >Description</th>
+                <th width="120px">Size</th>
+                <th width="150px">Create Date</th>
+                <th width="50px" class="authorized_delete"><i class="fa fa-times" aria-hidden="true"></i></th>
+            </tr>
+        </thead>
+        <tbody>
+            @Html.Partial(SOPFileInquiryController.Partial.InquiryGridBody, Model)          
+        </tbody>
+    </table>
+</div>
+<div class="v-space"></div>
+@Html.Partial(CommonPage.GridPagination, Model.GridPaging)

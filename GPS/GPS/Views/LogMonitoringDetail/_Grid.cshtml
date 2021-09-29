@@ -1,0 +1,169 @@
+﻿@using GPS.Models.Home
+@{
+    List<LogMonitoringDetail> ListLogDetail = ViewData["ListLogDetail"] != null ? (List<LogMonitoringDetail>)ViewData["ListLogDetail"] : new List<LogMonitoringDetail>();
+}
+
+<style type="text/css">
+    .close 
+    {
+        opacity: 1;    
+    }
+</style>
+
+<div class="row">
+    <div class="col-xs-12 col-sm-6 text-left"></div>
+    <div class="col-xs-12 col-sm-6 text-right">
+        <div class="form-group form-group-xs" style="margin-bottom: 3px;"> 
+            <button id="btnDownload" style="padding: 6px;" class="fa fa-download btn btn-success btn-xs" onclick="onDownloadData()">
+                <span style="font-family: Open Sans; font-size: 12px">Download</span>
+            </button>      
+            <button type="button" class="btn btn-default btn-xs" onclick="onBack()">
+                Back
+            </button>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+        <div style="border: 1pt solid #ccc;">
+            <div id="tScrollHead" style="width: 98.5%; overflow: hidden;">
+                <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 1282px; max-width: 1282px !important;">
+                    <thead>
+                        <tr>
+                            <th width="100px">Sequence No</th>
+                            <th width="250px">Message Date Time</th>
+                            <th width="150px">Message Type</th>
+                            <th width="282px">Location</th>
+                            <th width="500px">Message Detail</th>  
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div id="tScrollBody" style="overflow: scroll; height: 300px;">
+                <table id="tblScroll" class="table table-striped table-bordered table-condensed table-fixed" style="width: 1282px; max-width: 1282px !important;">
+                    <tbody>
+                       @{
+                            if (ListLogDetail.Count > 0)
+                            {
+                                foreach (LogMonitoringDetail item in ListLogDetail)
+                                {
+                                <tr>
+                                    <td class="text-center" width="100px">@item.SeqNo</td> 
+                                    <td class="text-center" width="250px">@item.CreatedDt</td> 
+                                    <td class="text-center" width="150px">@item.MessageType</td>
+                                    <td class="text-left" width="282px">@item.Location</td> 
+                                    <td class="text-left" width="500px">@item.MessageContent</td>  
+                                </tr>  
+                                }
+                            }
+                            else
+                            {
+                            <tr>
+                                <td colspan="5" class="text-center">
+                                    No data retrieved.
+                                </td>
+                            </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                    <tfoot>
+                        <tr>
+                            <td class="col-xs-8 listdata">
+                                @Html.Partial("_Paging")
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#tScrollBody").scroll(function () {
+        $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+    });
+
+    var table = document.getElementById("dynamic-table");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+
+    function tableText(tableCell) {
+        var removeClass;
+        var addClass;
+        var dataSort;
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            if (tableCell.getAttribute("class").indexOf('sorting_asc') >= 0) {
+                removeClass = 'sorting_asc';
+                addClass = 'sorting_desc';
+                dataSort = 'desc';
+            } else if (tableCell.getAttribute("class").indexOf('sorting_desc') >= 0) {
+                removeClass = 'sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+            } else {
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'asc';
+            }
+        }
+
+        //reset all
+        var tableReset = document.getElementById("dynamic-table");
+        if (tableReset != null) {
+            for (var i = 0; i < tableReset.rows.length; i++) {
+                for (var j = 0; j < tableReset.rows[i].cells.length; j++) {
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_asc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_asc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_desc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_desc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                }
+            }
+        }
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            tableCell.classList.remove(removeClass);
+            tableCell.classList.add(addClass);
+            tableCell.dataset.sort = dataSort;
+
+            $.ajax({
+                type: "GET",
+                url: '@Html.Toyota().Page.GetActionUrl("GetPRInquirySort")',
+                data: {
+                    field: tableCell.dataset.field,
+                    sort: dataSort
+                },
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    $("#tblScroll")
+                            .find('tbody')
+                            .html(
+                                result
+                            );
+                }
+            });
+        }
+    }
+</script>

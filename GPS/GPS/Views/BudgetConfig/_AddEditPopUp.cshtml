@@ -1,0 +1,125 @@
+﻿@using GPS.CommonFunc
+@using GPS.Controllers.Master
+@using GPS.Models.Master
+@model BudgetConfig
+@{
+    BudgetConfig data = ViewData["BudgetConfigData"] == null ? new BudgetConfig() : (BudgetConfig)ViewData["BudgetConfigData"];
+    string edit = (string)ViewData["edit"];
+    string title = " Budget Config";
+    if (edit == "1")
+    {
+        title = "Edit" + title;
+    }
+    else
+    {
+        title = "Add" + title;
+    }
+}
+
+<div class="modal-dialog" style="width:550px">
+    <form method="post" action="javascript: onSaveEditData();">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>@title</div>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtEdit" value="@edit" />
+                <input type="hidden" id="txtedit-divisionid" value="@data.DIVISION_ID" />
+                <div class="form-horizontal">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group form-group-xs">
+                                <div class="col-md-4 text-right">
+                                    <label class="control-label text-muted">WBS No</label>
+                                </div>
+                                <div class="col-md-8">
+                                    @*<input type="text" id="txtedit-wbsno" class="form-control mandatory" maxlength="8" value="@data.WBS_NO" />*@
+                                    <div id="lookupwbsno" class="input-group input-group-xs lookup">
+                                        <input id="txtedit-wbsno" class="form-control addinput mandatory" type="text" readonly="readonly" value="@data.WBS_NO" />
+                                        <span class="input-group-btn">
+                                            <button id="valbutton" class="addinput custom-button-grid btn btn-warning btn-xs" type="button" onclick="javascript: getWbsClass(1)">&nbsp<i class="fa fa-search"></i>&nbsp</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group form-group-xs">
+                                <div class="col-md-4 text-right">
+                                    <label class="control-label text-muted">WBS Description</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" id="txtedit-wbsname" class="form-control mandatory" maxlength="8" value="@data.WBS_NAME" readonly="readonly"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group form-group-xs">
+                                <div class="col-md-4 text-right">
+                                    <label class="control-label text-muted">Division</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" id="txtedit-division" class="form-control mandatory" maxlength="8" value="@data.DIVISION_DESC" readonly="readonly" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group form-group-xs">
+                                <div class="col-md-4 text-right">
+                                    <label class="control-label text-muted">WBS Year</label>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="input-group pos-rel" style="width: 100%;">
+                                        <span class="input-group-addon" style="cursor: pointer;padding:4px 10px;">
+                                            <i class="fa fa-calendar bigger-110"></i>
+                                        </span>
+                                        <input class="form-control date-pickerYear" type="text" name="date-range-picker" id="txtedit-wbsyear" data-date-format="yyyy" value="@data.WBS_YEAR" readonly="readonly"  />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group form-group-xs">
+                                <div class="col-md-4 text-right">
+                                    <label class="control-label text-muted ">WBS Type</label>
+                                </div>
+                                <input type="hidden" class="" id="temWbsType" value="@data.WBS_TYPE"/>
+                                <div class="col-md-4">
+                                    @Html.DropDownList("cmbedit-wbstype", BudgetConfigController.SelectWBSType(), new { @class = "cursor-1", @style = "width:100%;" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="col-xs-12 text-right">
+                    <div class="form-group-xs">
+                        <button type="submit" class="btn btn-primary btn-xs btn-std"> Save </button>
+                        <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="lookupwbs-container" class="modal fade bs-example-modal-lg" width="100%" data-backdrop="static" data-keyboard="false"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //$("#txtedit-wbstype option[value='']").remove();
+        
+        //$("#txtedit-wbsyear").todaterangepicker();
+        $("#cmbedit-wbstype").val("@data.WBS_TYPE");
+    });
+</script>
+
+

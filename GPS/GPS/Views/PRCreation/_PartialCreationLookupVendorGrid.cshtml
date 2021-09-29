@@ -1,0 +1,42 @@
+﻿@using GPS.Models.Master
+@{
+    List<Vendor> lpr = ViewData["Vendor"] != "" ? (List<Vendor>)ViewData["Vendor"] : new List<Vendor>();
+}
+<div class="table-responsive">
+    <table id="LookUpTable-glclass" class="table table-striped table-bordered table-condensed gl-lookup-table" width="100%">
+        <thead>
+            <tr>
+                <th class="text-center control-label text-muted" style="width:100%"  colspan="3">Vendor</th>
+            </tr>
+            <tr>
+                <th class="text-center control-label text-muted" style="width:30%">Code</th>
+                <th class="text-center control-label text-muted" style="width:70%" colspan="2">Name</th>
+            </tr>
+        </thead>
+        <tbody id="bodylookup-glclass">
+            @if (lpr.Count > 0)
+            {
+                foreach (Vendor pr in lpr)
+                { 
+                    <tr ondblclick="javascript:MoveVendorKey('@pr.VendorCd', '@pr.VendorName')" style="cursor:pointer">
+                        <td>@pr.VendorCd</td>
+					    <td colspan="2">@pr.VendorName</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center">No Vendor Data</td>
+                </tr> 
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    @Html.Partial("_UIPaging")
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

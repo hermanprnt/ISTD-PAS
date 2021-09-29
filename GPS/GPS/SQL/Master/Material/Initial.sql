@@ -1,0 +1,1 @@
+﻿EXEC sp_Material_Initial @CurrentUser, 0, @ModuleId, @FunctionId

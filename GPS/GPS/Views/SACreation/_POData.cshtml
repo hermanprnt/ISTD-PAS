@@ -1,0 +1,189 @@
+﻿@using GPS.Models.MRP
+@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Constants.PO
+@{
+    String information = ViewData["info"].ToString();
+    String poNo = ViewData["PONumber"].ToString();
+    String poDesc = ViewData["PODesc"].ToString();
+    String vendor = ViewData["Vendor"].ToString();
+    String month = ViewData["Month"].ToString();
+    String purchase = ViewData["Purchase"].ToString();
+    String currency = ViewData["Currency"].ToString();
+    String amount = ViewData["Amount"].ToString();
+    if(amount != "") {
+        amount = decimal.Parse(amount).ToStandardFormat().ToString();
+    }
+
+    List<SACreation> ListDetail = (List<SACreation>)ViewData["DetailList"];
+    List<SACreation> ListItem = ViewData["ListItem"] != null ? (List<SACreation>)ViewData["ListItem"] : new List<SACreation>();
+
+    String listColor = "", disable = "", icon = "";
+}
+
+<div id="a" class="form-horizontal">
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted  text-left">PO No</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@poNo" class="form-control" id="txtPoNo" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted text-left">Purch. Group</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@purchase" class="form-control" id="txtPurcGroup" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label form="txt-postingdate" class="control-label col-xs-5 col-sm-4 text-muted text-left">Posting Date</label>
+                <div class="col-xs-7 col-sm-8">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" id="txt-postingdate" class="form-control" value="@DateTime.Now.ToStandardFormat()" placeholder='@CommonDisplayMessage.DateTimePlaceholder' readonly autocomplete="off"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted  text-left">PO Desc</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@poDesc" class="form-control" id="txtPoDesc" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted  text-left">Vendor</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@vendor" class="form-control" id="txtVendorName" />
+                    <input type="hidden" id="txtVendorCode" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted text-left">Short Text</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" class="form-control" id="txt-shorttext" maxlength=30 />
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted text-left">Month</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@month" class="form-control" id="txtMonth" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted text-left">Currency</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@currency" class="form-control" id="txtCurrency" />
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label form="txt-docdate" class="control-label col-xs-5 col-sm-4 text-muted text-left">Doc Date</label>
+                <div class="col-xs-7 col-sm-8">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" id="txt-docdate" class="form-control" value="@DateTime.Now.ToStandardFormat()" placeholder='@CommonDisplayMessage.DateTimePlaceholder' readonly autocomplete="off"/>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted text-left">Amount</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@amount" class="form-control" id="txtAmount" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="v-space">
+        @if (information.Length > 1)
+        { 
+            <label class="control-label note-expired text-left" style="color:red" >This PO already Expired !!</label>
+        }
+    </div>
+    <div id="POItem">
+        <div style="border: 1pt solid #ccc;">
+            <div id="tbItem"></div>
+            <div style="overflow-x:auto" id="divItem">
+                <table id="saitem" style="width: 100%; max-width: 100% !important;" class="table table-striped table-bordered table-condensed table-fixed" style="overflow-x:auto">
+                    <thead>
+                        <tr>
+                            <th style="width:38px;"></th>
+                            <th style="width:38px;"></th>
+                            <th style="width:38px;"></th>
+                            <th style="width:280px;">Material Description</th>
+                            <th style="width:60px;">PO Qty</th>
+                            <th style="width:40px;">UOM</th>
+                            <th style="width:100px;">Price</th>
+                            <th style="width:120px;">Amount</th>
+                            <th style="width:100px;">Delivery Date</th>
+                            <th style="width:120px;">Plant</th>
+                            <th style="width:120px;">Sloc</th>
+                            <th style="width:80px;">Progress</th>
+                            <th style="width:80px;">Remain</th>
+                            <th style="width:120px;">Accepted</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ListItem.Count > 0)
+                        {
+                            int counter = 0;
+                            foreach (SACreation item in ListItem)
+                            {
+                                counter++;
+                                listColor = ""; disable = ""; icon = "45F500";
+                                if (item.PRECENTAGE == "100")
+                                {
+                                    listColor = "background-color:#E8E8E8";
+                                    disable = "disabled";
+                                    icon = "737373";
+                                }
+                                <tr style="@listColor" id="exprow-sacreation-@counter">
+                                    <td class="text-center">
+                                        <input id="chk-podata-@item.PO_ITEM_NO" type="checkbox" />
+                                    </td>
+                                    <td class="text-center"><i id="exp-sacreation-@counter" onclick="onSubItem($(this))" class="fa fa-plus-square-o"  data-checked="chk-podata-@item.PO_ITEM_NO" data-embedded="@item.AsEmbeddedData()" data-poitemno="@item.PO_ITEM_NO" style="cursor: pointer; font-size: 14px;"></i></td>
+                                    <td class="text-center"><i class="fa fa-circle text-center" style="width:10px; color:#@icon;" title="" data-toggle="tooltip" data-original-title="Enable"></i></td>
+                                    <td class="text-left">@item.MAT_DESC</td>
+                                    <td class="text-right">@item.PO_QTY_ORI</td>
+                                    <td class="text-center">@item.UOM</td>
+                                    <td class="text-right">@decimal.Parse(item.PRICE_PER_UOM).ToStandardFormat().ToString()</td>
+                                    <td class="text-right">@decimal.Parse(item.ORI_AMOUNT).ToStandardFormat().ToString()</td>
+                                    <td class="text-center">@item.DELIVERY_PLAN_DT</td>
+                                    <td class="text-left">@item.PLANT_NAME</td>
+                                    <td class="text-left">@item.SLOC_NAME</td>
+                                    <td class="text-right">@item.PRECENTAGE %</td>
+                                    <td class="text-right"></td>
+                                    <td class="text-right"></td>
+                                </tr>
+                                <script type="text/javascript">
+                                    $("[type='number']").keypress(function (evt) {
+                                        evt.preventDefault();
+                                    });
+                                </script>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="13" class="text-center">
+                                    No data found
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div id="Submit" class="col-sm-2 col-sm-offset-10 text-right">
+            <button type="button" onclick="onSubmit()" class="btn btn-primary btn-xs hidden" id="btnSubmit" >Submit</button>
+        </div>
+    </div>
+</div>

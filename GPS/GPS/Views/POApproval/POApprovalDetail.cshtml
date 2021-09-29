@@ -1,0 +1,116 @@
+﻿@using GPS.Constants.PRPOApproval
+@using GPS.Controllers.PO
+@{
+    String prpoApproval = ViewData["POApprovalType"].ToString();
+    String docNo = ViewData["POApprovalDocNo"].ToString();
+}
+
+<style type="text/css">
+    .title
+    {
+        text-align: left;
+    }
+</style>
+
+<div class="modal-dialog modal-lg" style="overflow:auto;width:90%;max-height:90%">
+    <div class="modal-content">
+        <div id="alert-container-@PRPOApprovalPage.POApprovalDetail" class="alert hidden"></div>
+        <div class="modal-header">
+            <b>
+                <h4 class="modal-title">PO Approval Detail - @docNo</h4>
+            </b>
+        </div>
+        <div class="modal-body">
+            <div class="row" id="search-container-@PRPOApprovalPage.POApprovalDetail" style="margin-left:0px; margin-right:0px">
+                @Html.Partial(PRPOApprovalPage.POApprovalDetailParam)
+            </div>
+            <div class="row data-on-tab"  id="data-container-@PRPOApprovalPage.POApprovalDetail" style="margin-left:0px; margin-right:0px">
+                @Html.Partial(PRPOApprovalPage.POApprovalDetailGrid)
+            </div>
+            <div class="row data-on-tab"  id="datacondition-container-@PRPOApprovalPage.POApprovalDetail" style="margin-left:0px; margin-right:0px; display:none">
+                @Html.Partial(PRPOApprovalPage.POApprovalConditionGrid)
+            </div>
+        </div>
+        <div class="modal-footer" style="clear:both;">
+            <div id="notice-container-@PRPOApprovalPage.POApprovalDetail" class="form-horizontal row-fluid" style="background-color:#F9F9F9;float:left;width:49%;border:0.1em solid #DDD;">
+                @Html.Partial(PRPOApprovalPage.POApprovalNotice)
+            </div>
+            <div style="float:right;width:49%;">
+                <div style="background-color: #F9F9F9;border:0.1em solid #DDD;">
+                    @Html.Partial(PRPOApprovalPage.POApprovalAttachment)
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="text-right">
+                <button id="btn-close-detail" type="button" class="btn btn-danger btn-xs btn-std" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var currentTab = "00";
+
+    $("#btn-close-detail").click(function (e) {
+        updateDetailMainList(docNo);
+    });
+
+    function onChangeTab(type) {
+        if (currentTab != type) {
+            $("#" + currentTab, $(".nav")).removeClass("active");
+            $("#" + type, $(".nav")).addClass("active");
+
+            var id = "";
+            switch (type) {
+                case "00": {
+                    id = "#data-container-@PRPOApprovalPage.POApprovalDetail";
+                    break;
+                }
+                case "01": {
+                    id = "#datacondition-container-@PRPOApprovalPage.POApprovalDetail";
+                    break;
+                }
+            }
+
+            $(".data-on-tab:not(" + id + ")").css("display", "none");
+            $(id).css("display", "");
+            currentTab = type;
+        }
+    }
+
+    function changeIcon(ITEM_NO, DOC_NO) {
+        if ($("#" + ITEM_NO).children('.fa').hasClass("fa-plus-square-o")) {
+            // expand grid
+            $("#" + ITEM_NO).children('.fa').removeClass("fa-plus-square-o");
+            $("#" + ITEM_NO).children('.fa').addClass("fa-minus-square-o");
+
+            $.progressbox.show("Get Sub Item", "Get Sub Item onprogress . . .");
+            if ($('#table-@PRPOApprovalPage.POApprovalDetailGrid').find('.subitemgrid-' + ITEM_NO).length == 0) {
+                $.ajax({
+                    type: "POST",
+                    url: "@POApprovalController._GetSubItem",
+                    data: {
+                        docNo: DOC_NO,
+                        docItemNo: ITEM_NO
+                    },
+                    success: function (data) {
+                        $("#" + ITEM_NO).closest('tr').after(data);
+                        $.progressbox.hide();
+                    }
+                });
+            }
+            else {
+                $('.subitemgrid-' + ITEM_NO).css("display", "");
+                $.progressbox.hide();
+            }
+        } else {
+            // collapse grid
+            $("#" + ITEM_NO).children('.fa').removeClass("fa-minus-square-o");
+            $("#" + ITEM_NO).children('.fa').addClass("fa-plus-square-o");
+            $(".subitemgrid-" + ITEM_NO).css("display", "none");
+        }
+    }
+
+    //# sourceURL=POApprovalDetail.cshtml
+</script>

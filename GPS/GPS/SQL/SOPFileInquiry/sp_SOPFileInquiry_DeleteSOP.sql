@@ -1,0 +1,1 @@
+﻿EXEC sp_SOPFileInquiry_DeleteSOP @DOCID, @currentUser

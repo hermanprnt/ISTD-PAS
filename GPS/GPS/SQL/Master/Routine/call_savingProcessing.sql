@@ -1,0 +1,38 @@
+﻿DECLARE @@RoutineHData AS ROUTINE_PR_H_TEMP
+
+INSERT INTO @@RoutineHData (
+		[ROUTINE_NO],
+		[PR_DESC],
+		[PR_STATUS],
+		[PLANT_CD],
+		[SLOC_CD],
+		[PR_COORDINATOR],
+		[DIVISION_ID],
+		[DIVISION_NAME],
+		[DIVISION_PIC],
+		[SCH_TYPE],
+		[SCH_TYPE_DESC],
+		[SCH_VALUE],
+		[ACTIVE_FLAG],
+		[VALID_FROM],
+		[VALID_TO],
+		[PROCESS_ID])
+	VALUES( 
+	   @ROUTINE_NO
+	   ,@PR_DESC
+	   ,@PR_STATUS
+	   ,@PLANT_CD
+	   ,@SLOC_CD
+	   ,@PR_COORDINATOR
+	   ,@DIVISION_ID
+	   ,@DIVISION_NAME
+	   ,@DIVISION_PIC
+	   ,@SCH_TYPE
+	   ,@SCH_TYPE_DESC
+	   ,@SCH_VALUE
+	   ,@ACTIVE_FLAG
+	   ,@VALID_FROM
+	   ,@VALID_TO
+	   ,@PROCESS_ID)
+
+EXEC [dbo].[sp_routinemaster_savingProcessing] @USER_ID, @ROUTINE_NO, @PROCESS_ID, @DIVISION_ID, @@RoutineHData

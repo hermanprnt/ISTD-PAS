@@ -1,0 +1,373 @@
+﻿<script type="text/javascript">
+    function openDraft() 
+    {
+        $("#price-draft-matno").val("");
+        $("#price-draft-matdesc").val("");
+        $("#price-draft-vendor").val("");
+        $("#price-draft-prod").val("");
+        $("#price-draft-curr").val("");
+        $("#price-draft-amount").val("");
+        $("#price-draft-validfrom").val("");
+        $("#price-draft-sfx").val("");
+        $("#price-draft-warpbuyer").val("");
+        $("#price-draft-sourcetype").val("");
+        $("#price-draft-pricests").val("");
+        $("#price-draft-packingtype").val("");
+        $("#price-draft-alert").hide();
+        $('#price-draft-success').hide();
+        $("#price-draft-loading-image").html("");
+        $(".price-draft-loading-save").hide();
+        $("#draft-popup-container").modal();
+    }
+
+    function openItem() {
+        $("#price-item-matno").val("");
+        $("#price-item-matdesc").val("");
+        $("#price-item-vendor").val("");
+        $("#price-item-prod").val("");
+        $("#price-item-curr").val("");
+        $("#price-item-amount").val("");
+        $("#price-item-validfrom").val("");
+        $("#price-item-alert").hide();
+        $('#price-item-success').hide();
+        $("#price-item-loading-image").html("");
+        $(".price-item-loading-save").hide();
+        $("#item-popup-container").modal();
+    }
+
+    function AssignVariable(message, param) {
+        var str = param.split(";");
+        for (var i = 0; i < str.length; i++) {
+            message = message.replace("{" + i + "}", str[i].toString());
+        }
+        return message;
+    }
+
+    function Messages(id, display, msg) {
+        //if(display != "none")
+        //ShowMessage(id, msg, display);
+        //else
+        $(id).css("display", display);
+        $(id).html(msg);
+    }
+
+    function detailGrid() {
+        if ($tdk.isDetail > 0) {
+            $("#toogle-price").html('Show Detail');
+            $(".initial-hide").hide();
+            $("#mainTable").width(1330);
+            $tdk.isDetail = 0;
+        }
+        else {
+            $("#toogle-price").html('Hide Detail');
+            $(".initial-hide").show();
+            $("#mainTable").width(1700);
+            $tdk.isDetail = 1;
+        }
+    }
+
+    function Key(e) {
+        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+			(e.keyCode == 65 && e.ctrlKey === true) ||
+			(e.keyCode >= 35 && e.keyCode <= 40)) {
+            return;
+        }
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+    }
+
+    function ClearCriteria() {
+        $.progressShow("Clear Data", "Clearing . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@Url.Content("~/Price/SearchData")",
+            data: { issearch: 'N' },
+            success: function (resultMessage) {
+                $('.TableList').html(resultMessage);
+                $("#matno").val("");
+                $("#datefrom").val("");
+                $("#dateto").val("");
+                $("#vendor").val("");
+                $("#pricests").val("");
+                $("#pricetype").val("");
+                $("#sourcetype").val("");
+                $("#prodpurpose").val("");
+                $("#partcolorsfx").val("");
+                $("#packingtype").val("");
+                $("#success-search").hide();
+                $("#alert-search").hide();
+                $.progressHide();
+            },
+            error: function (resultMessage) { $.progressHide(); }
+        });
+    }
+
+    function SearchPrice(page) {
+        $("#success-search").hide();
+        $("#alert-search").hide();
+
+        var datefrom = GetValidDate($("#datefrom").val());
+        var dateto = GetValidDate($("#dateto").val());
+        var pagesize = $('.page').val();
+        $.progressShow("Search Price", "Loading Data...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@Url.Content("~/Price/SearchData")",
+            data: {
+                page: page,
+                pageSize: pagesize,
+                issearch: 'Y',
+                MAT_NO : $("#matno").val(),
+                DATE_FROM : datefrom,
+                DATE_TO: dateto,
+                VENDOR_CD: $("#vendor").val(),
+                PRICE_STATUS: $("#pricests").val(),
+                PRICE_TYPE: $("#pricetype").val(),
+                SOURCE_TYPE: $("#sourcetype").val(),
+                PRODUCTION_PURPOSE: $("#prodpurpose").val(),
+                PART_COLOR_SFX: $("#partcolorsfx").val(),
+                PACKING_TYPE: $("#packingtype").val()
+            },
+            success: function (resultMessage) {
+                $('.TableList').html(resultMessage);
+                $('.page').val(pagesize);
+                $.progressHide();
+            },
+            error: function (resultMessage) {
+                $.progressHide();
+            }
+        });
+    }
+
+    function getMaterial(page) {
+        $.ajax({
+            type: "POST", url: "@Url.Content("~/Price/getMaterial")",
+		    data: {
+		        pageSize: 10,
+		        page: page,
+		        matno: $('#matnolook').val(),
+		        matdesc: $('#matdesclook').val()
+		    },
+		    success: function (data) {
+		        $("#material-container").html(data);
+		        $("#material-container").modal();
+		    },
+		    error: function (data) { }
+		});
+    }
+
+    function getMaterialGrid(page) {
+        var reservation = $("#aprtype").val() == "1" ? 'Y' : '';
+        $.ajax({
+            type: "POST", url: "@Url.Content("~/Price/getMaterialGrid")",
+            data: {
+                pageSize: 10,
+                page: page,
+                matno: $('#matnolook').val(),
+                matdesc: $('#matdesclook').val()
+            },
+            success: function (data) { $("#material-grid-container").html(data); },
+            error: function (data) { }
+        });
+    }
+
+    function moveMatno(MAT_NO, MAT_DESC) {
+        //ClearVal(["#matnolook", "#matdesclook"]);
+        $("#matnolook").val("");
+        $("#matdesclook").val("");
+
+        $('#price-item-matno').val(MAT_NO);
+        $('#price-item-matdesc').val(MAT_DESC);
+        $('#price-draft-matno').val(MAT_NO);
+        $('#price-draft-matdesc').val(MAT_DESC);
+
+    }
+
+    function clearfield() {
+        $("#matnolook").val("");
+        $("#matdesclook").val("");
+        getMaterialGrid(1);
+        //ClearVal(["#matnolook", "#matdesclook"]);
+    }
+
+    function clearValueLookup(_column) {
+        $("#matnolook").val("");
+        $("#matdesclook").val("");
+        $("#price-item-matno").val("");
+        $("#price-item-matdesc").val("");
+        $('#price-draft-matno').val("");
+        $('#price-draft-matdesc').val("");
+        //ClearVal(["#matnolook", "#matdesclook"]);
+    }
+
+    function GetValidDate(date) {
+        if (date != "") {
+            date = date.split('.');
+            var date = date[1] + '-' + date[0] + '-' + date[2];
+        }
+        return date;
+    }
+
+    function savePrice(type, dismiss)
+    {
+        var msg = "";
+        var fields = [];
+        var i = 0;
+
+        var reg = new RegExp(/^\d+(?:\.\d{1,18})?$/);
+
+        $("#success-search").hide();
+        $("#alert-search").hide();
+        $("#price-item-alert").hide();
+        $("#price-item-success").hide();
+        $("#price-item-loading-image").html("<img style=\"margin-top:25px;\" width=\"30\" height=\"30\" src=\"/Content/img/LoadingImage.gif\" />");
+        $(".price-item-loading-save").show();
+
+        if ($("#price-item-matno").val() == "") { fields[i] = "Mat. No"; i++; }
+        if ($("#price-item-matdesc").val() == "") { fields[i] = "Mat. Desc"; i++; }
+        if ($("#price-item-vendor").val() == "") { fields[i] = "Vendor"; i++; }
+        if ($("#price-item-prod").val() == "") { fields[i] = "Production Purpose"; i++; }
+        if ($("#price-item-curr").val() == "") { fields[i] = "Currency"; i++; }
+        if ($("#price-item-amount").val() == "") { fields[i] = "Price Amount"; i++; }
+        if ($("#price-item-validfrom").val() == "") { fields[i] = "Valid Date From"; i++; }
+
+        for (i = 0; i < fields.length; i++) {
+            msg = msg + "<p>" + fields[i] + " is mandatory</p>";
+        }
+
+        if (reg.test($("#price-item-amount").val()) == false) {
+            msg = msg + "<p>Amount Must Be A Number</p>";
+        }
+
+        if (parseFloat($("#price-item-amount").val()) <= 0)
+        {
+            msg = msg + "<p>Amount Cannot Less Than or Equal Zero</p>";
+        }
+
+        if (msg != "")
+        {
+            $("#price-item-alert").show();
+            $("#price-item-alert").html(msg);
+            $("#price-item-loading-image").html("");
+            $(".price-item-loading-save").hide();
+            return;
+        }
+
+        var date = GetValidDate($("#price-item-validfrom").val());
+        $.ajax({
+            type: "POST", url: "@Url.Content("~/Price/SavePrice")",
+            data: {
+                PRICE_TYPE: type,
+                MAT_NO: $("#price-item-matno").val(),
+                MAT_DESC: $("#price-item-matdesc").val(),
+                VENDOR_CD: $("#price-item-vendor").val(),
+                PRODUCTION_PURPOSE: $("#price-item-prod").val(),
+                CURR_CD: $("#price-item-curr").val(),
+                PRICE_AMT: $("#price-item-amount").val(),
+                VALID_DT_FROM: date,
+            },
+            async:false,
+            success: function (data) {
+                $("#price-item-loading-image").html("");
+                $(".price-item-loading-save").hide();
+                var msg = data.split('|');
+                if (msg[0] != "ERR") {
+                    $("#price-item-matno").val("");
+                    $("#price-item-matdesc").val("");
+                    $("#price-item-vendor").val("");
+                    $("#price-item-prod").val("");
+                    $("#price-item-curr").val("");
+                    $("#price-item-amount").val("");
+                    $("#price-item-validfrom").val("");
+                    if (dismiss == 'Y') {
+                        $("#item-popup-container").modal("hide");
+                        SearchPrice(1);
+                        $("#success-search").html(msg[1]);
+                        $("#success-search").show();
+                    }
+                    else {
+                        $("#price-item-success").show();
+                        $("#price-item-success").html(msg[1]);
+                        SearchPrice(1);
+                    }
+                }
+                else {
+                    $("#price-item-alert").show();
+                    $("#price-item-alert").html(msg[1]);
+                }
+            },
+            error: function (data) {
+                $("#price-item-loading-image").html("");
+                $(".price-item-loading-save").hide();
+            }
+        });
+    }
+
+    function ValidChecked(checked) {
+        return checked.length > 1 ? "Please Select Only One Record To Be Deleted" :
+                  (checked.length <= 0 ? "Please Select Only One Record To Be Deleted" : "");
+    }
+
+    function Delete() {
+
+        $("#success-search").hide();
+        $("#alert-search").hide();
+
+        var checked = [];
+        $("input[name='check[]']:checked").each(function () { checked.push($(this).val()); });
+        var validmsg = ValidChecked(checked);
+
+        if (validmsg != "")
+        {
+            $("#alert-search").html(validmsg);
+            $("#alert-search").show();
+        }
+        else {
+
+            $.msgBox({
+                title: "Info", content: "Are You Sure You Want to Delete this Data ?", type: "confirm", buttons: [{ value: "Yes" }, { value: "No" }], success: function (result) {
+                    if (result === "Yes") {
+                        var date = GetValidDate($(".price-validfrom-" + checked[0]).html());
+
+                        $("#success-search").hide();
+                        $("#alert-search").hide();
+
+                        $.progressShow("Delete Price", "Deleting . . .");
+                        $.ajax({
+                            type: $tdk.AjaxMethod, url: "@Url.Content("~/Price/DeletePrice")",
+                            data: {
+                                PRICE_TYPE: $(".price-pricetype-" + checked[0]).html(),
+                                MAT_NO: $(".price-matno-" + checked[0]).html(),
+                                VENDOR_CD: $(".price-vendorcd-" + checked[0]).html(),
+                                PRODUCTION_PURPOSE: $(".price-prodpurpose-" + checked[0]).html(),
+                                VALID_DT_FROM: date,
+                                PART_COLOR_SFX: $(".price-partcolor-" + checked[0]).html(),
+                                WARP_BUYER_CD: $(".price-warpbuyer-" + checked[0]).html(),
+                                SOURCE_TYPE: $(".price-sourcetype-" + checked[0]).html(),
+                                PACKING_TYPE: $(".price-packingtype-" + checked[0]).html(),
+                            },
+                            async: false,
+                            success: function (resultMessage) {
+                                $.progressHide();
+                                var msg = resultMessage.split('|');
+                                if (msg[0] == 'SUCCESS') {
+                                    $("#success-search").html(msg[1]);
+                                    $("#success-search").show();
+                                    setTimeout(function () {
+                                        SearchPrice(1);
+                                    }, 500);
+                                }
+                                else {
+                                    $("#alert-search").html(msg[1]);
+                                    $("#alert-search").show();
+                                }
+                            },
+                            error: function (resultMessage) { $.progressHide(); }
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    
+</script>

@@ -1,0 +1,215 @@
+﻿DECLARE @@PROCESS_ID BIGINT,
+		@@PR_STATUS_FLAG INT,
+		@@ORG_ID INT,
+		@@POSITION_LEVEL INT,
+		@@SQLTEXT NVARCHAR(MAX),
+		@@MSG VARCHAR(MAX),
+		@@MSG_ID VARCHAR(12),
+		@@LOCATION VARCHAR(50) = 'Creation Init',
+		@@MODULE VARCHAR(4) = '1',
+		@@FUNCTION VARCHAR(6) = '115001'
+
+SET NOCOUNT ON;
+
+SELECT 
+	@@POSITION_LEVEL = POSITION_LEVEL, 
+	@@ORG_ID = ORG_ID 
+FROM TB_R_SYNCH_EMPLOYEE 
+WHERE GETDATE() BETWEEN VALID_FROM AND VALID_TO 
+		AND NOREG = @NOREG
+
+DELETE FROM TB_T_PR_ITEM WHERE [CREATED_BY] = @USERID
+DELETE FROM TB_T_PR_SUBITEM WHERE [CREATED_BY] = @USERID
+
+IF(@ROUTINE_NO = '0')
+BEGIN
+	SET @@MSG = 'Routine Master Creation Process Initialization'
+	SET @@MSG_ID = 'MSG0000085'
+	EXEC dbo.sp_PutLog @@MSG, @USERID, @@LOCATION, @@PROCESS_ID OUTPUT, @@MSG_ID, 'INF', @@MODULE, @@FUNCTION, 1;
+END
+ELSE
+BEGIN
+	SET @@MSG = 'Update Routine Master for Routine No ' + @ROUTINE_NO + ' Initialized'
+	SET @@MSG_ID = 'MSG0000086'
+	EXEC dbo.sp_PutLog @@MSG, @USERID, @@LOCATION, @@PROCESS_ID OUTPUT, @@MSG_ID, 'INF', @@MODULE, @@FUNCTION, 1;
+END
+
+IF(@ROUTINE_NO <> '0')
+BEGIN
+	INSERT INTO [dbo].[TB_T_PR_ITEM]
+			   ([PROCESS_ID]
+			   ,[ITEM_NO]
+			   ,[ITEM_TYPE]
+			   ,[IS_PARENT]
+			   ,[PROCUREMENT_PURPOSE]
+			   ,[MAT_NO]
+			   ,[MAT_DESC]
+			   ,[COST_CENTER_CD]
+			   ,[WBS_NO]
+			   ,[WBS_NAME]
+			   ,[GL_ACCOUNT]
+			   ,[ITEM_CLASS]
+			   ,[ITEM_CLASS_DESC]
+			   ,[VALUATION_CLASS]
+			   ,[VALUATION_CLASS_DESC]
+			   ,[SOURCE_TYPE]
+			   ,[PACKING_TYPE]
+			   ,[PART_COLOR_SFX]
+			   ,[SPECIAL_PROC_TYPE]
+			   ,[CAR_FAMILY_CD]
+			   ,[MAT_TYPE_CD]
+			   ,[MAT_GRP_CD]
+			   ,[ORI_ITEM_QTY]
+			   ,[NEW_ITEM_QTY]
+			   ,[ITEM_UOM]
+			   ,[ORI_CURR_CD]
+			   ,[ORI_PRICE_PER_UOM]
+			   ,[NEW_PRICE_PER_UOM]
+			   ,[ORI_AMOUNT]
+			   ,[NEW_AMOUNT]
+			   ,[LOCAL_CURR_CD]
+			   ,[EXCHANGE_RATE]
+			   ,[ORI_LOCAL_AMOUNT]
+			   ,[NEW_LOCAL_AMOUNT]
+			   ,[VENDOR_CD]
+			   ,[VENDOR_NAME]
+			   ,[QUOTA_FLAG]
+			   ,[NEW_FLAG]
+			   ,[UPDATE_FLAG]
+			   ,[DELETE_FLAG]
+			   ,[CREATED_BY]
+			   ,[CREATED_DT]
+			   ,[CHANGED_BY]
+			   ,[CHANGED_DT]
+			   ,[RELEASE_FLAG])
+		SELECT @@PROCESS_ID
+			   ,[ITEM_NO]
+			   ,[ITEM_TYPE]
+			   ,[IS_PARENT]
+			   ,[PROCUREMENT_PURPOSE]
+			   ,[MAT_NO]
+			   ,[MAT_DESC]
+			   ,[COST_CENTER_CD]
+			   ,[WBS_NO]
+			   ,[WBS_NAME]
+			   ,[GL_ACCOUNT]
+			   ,[ITEM_CLASS]
+			   ,[ITEM_CLASS_DESC]
+			   ,[VALUATION_CLASS]
+			   ,[VALUATION_CLASS_DESC]
+			   ,[SOURCE_TYPE]
+			   ,[PACKING_TYPE]
+			   ,[PART_COLOR_SFX]
+			   ,[SPECIAL_PROC_TYPE]
+			   ,[CAR_FAMILY_CD]
+			   ,[MAT_TYPE_CD]
+			   ,[MAT_GRP_CD]
+			   ,[PR_QTY]
+			   ,[PR_QTY]
+			   ,[UNIT_OF_MEASURE_CD]
+			   ,[ORI_CURR_CD]
+			   ,[PRICE_PER_UOM]
+			   ,[PRICE_PER_UOM]
+			   ,[ORI_AMOUNT]
+			   ,[ORI_AMOUNT]
+			   ,[LOCAL_CURR_CD]
+			   ,[EXCHANGE_RATE]
+			   ,[LOCAL_AMOUNT]
+			   ,[LOCAL_AMOUNT]
+			   ,[VENDOR_CD]
+			   ,[VENDOR_NAME]
+			   ,[QUOTA_FLAG]
+			   ,'N'
+			   ,'N'
+			   ,'N'
+			   ,[CREATED_BY]
+			   ,[CREATED_DT]
+			   ,[CHANGED_BY]
+			   ,[CHANGED_DT]
+			   ,'N'
+		FROM [dbo].[TB_M_ROUTINE_PR_ITEM] 
+		WHERE ROUTINE_NO = @ROUTINE_NO /*AND PR_ITEM_NO IN 
+		(SELECT DISTINCT ITEM_NO FROM TB_R_WORKFLOW 
+			WHERE DOCUMENT_NO = @ROUTINE_NO AND STRUCTURE_ID = @@ORG_ID AND APPROVER_POSITION = @@POSITION_LEVEL)*/
+		ORDER BY ITEM_NO ASC
+
+	INSERT INTO [dbo].[TB_T_PR_SUBITEM]
+			   ([PROCESS_ID]
+			   ,[ITEM_NO]
+			   ,[SUBITEM_NO]
+			   ,[MAT_NO]
+			   ,[MAT_DESC]
+			   ,[COST_CENTER_CD]
+			   ,[WBS_NO]
+			   ,[GL_ACCOUNT]
+			   ,[ORI_SUBITEM_QTY]
+			   ,[NEW_SUBITEM_QTY]
+			   ,[SUBITEM_UOM]
+			   ,[ORI_PRICE_PER_UOM]
+			   ,[NEW_PRICE_PER_UOM]
+			   ,[ORI_AMOUNT]
+			   ,[NEW_AMOUNT]
+			   ,[ORI_LOCAL_AMOUNT]
+			   ,[NEW_LOCAL_AMOUNT]
+			   ,[CREATED_BY]
+			   ,[CREATED_DT]
+			   ,[CHANGED_BY]
+			   ,[CHANGED_DT])
+		SELECT @@PROCESS_ID
+			  ,A.[ITEM_NO]
+			  ,A.[SUBITEM_NO]
+			  ,A.[MAT_NO]
+			  ,A.[MAT_DESC]
+			  ,A.[COST_CENTER_CD]
+			  ,A.[WBS_NO]
+			  ,A.[GL_ACCOUNT]
+			  ,A.[SUBITEM_QTY]
+			  ,A.[SUBITEM_QTY]
+			  ,A.[SUBITEM_UOM]
+			  ,A.[PRICE_PER_UOM]
+			  ,A.[PRICE_PER_UOM]
+			  ,A.[ORI_AMOUNT]
+			  ,A.[ORI_AMOUNT]
+			  ,A.[LOCAL_AMOUNT]
+			  ,A.[LOCAL_AMOUNT]
+			  ,A.[CREATED_BY]
+			  ,A.[CREATED_DT]
+			  ,A.[CHANGED_BY]
+			  ,A.[CHANGED_DT]
+		  FROM [dbo].[TB_M_ROUTINE_PR_SUBITEM] A
+		  INNER JOIN [dbo].[TB_M_ROUTINE_PR_ITEM] B
+			  ON A.ROUTINE_NO = @ROUTINE_NO AND A.ROUTINE_NO = B.ROUTINE_NO AND A.ITEM_NO = B.ITEM_NO /*AND 
+			  B.PR_ITEM_NO IN 
+				(SELECT DISTINCT ITEM_NO FROM TB_R_WORKFLOW 
+					WHERE DOCUMENT_NO = @ROUTINE_NO AND STRUCTURE_ID = @@ORG_ID AND APPROVER_POSITION = @@POSITION_LEVEL)*/
+				ORDER BY A.ITEM_NO, SUBITEM_NO ASC
+
+	UPDATE TB_M_ROUTINE_PR_H SET PROCESS_ID = @@PROCESS_ID WHERE ROUTINE_NO = @ROUTINE_NO
+	
+	SET @@MSG = 'Locking TB_M_ROUTINE_ITEM with PR No ' + @ROUTINE_NO
+	SET @@MSG_ID = 'MSG0000086'
+	EXEC dbo.sp_PutLog @@MSG, @USERID, @@LOCATION, @@PROCESS_ID , @@MSG_ID, 'SUC', @@MODULE, @@FUNCTION, 2;
+END
+
+INSERT INTO [dbo].[TB_T_LOCK]
+        ([PROCESS_ID]
+        ,[MODULE_ID]
+        ,[FUNCTION_ID]
+        ,[USER_ID]
+        ,[USER_NAME]
+        ,[CREATED_BY]
+        ,[CREATED_DT]
+        ,[CHANGED_BY]
+        ,[CHANGED_DT])
+    VALUES
+        (@@PROCESS_ID
+        ,@@MODULE
+        ,@@FUNCTION
+        ,@USERID
+        ,@USERNAME
+        ,@USERID
+        ,GETDATE()
+        ,null
+        ,null)
+
+SELECT @@PROCESS_ID

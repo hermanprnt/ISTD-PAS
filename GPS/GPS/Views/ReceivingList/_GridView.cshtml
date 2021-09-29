@@ -1,0 +1,304 @@
+﻿@using GPS.CommonFunc
+@using GPS.Models.ReceivingList
+@using GPS.Models
+
+
+@{
+    List<ReceivingList> receivingList = (List<ReceivingList>)ViewData["ReceivingListInquiry"];
+}
+@* Button Process *@
+<div class="v-space"></div>
+<div class="row">
+    <div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+        <div style="border: 1pt solid #ccc;">
+            <div id="tScrollHead" style="width: 100%; overflow: scroll;">
+                <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1403px;">
+                    <thead>
+                    <th width="25px" class="grid-checkbox-col" rowspan="2"></th>
+                    <th width="100px" rowspan="2">Receiving No</th>
+                    <th width="100px" rowspan="2">Receiving Date</th>
+                    <th width="250px" rowspan="2">Header Text</th>
+                    <th width="75px" rowspan="2">PO No</th>
+                    <th width="270px" rowspan="2">Vendor</th>
+                    <th width="60" rowspan="2">Currency</th>
+                    <th width="105px" rowspan="2">Status</th>
+                    <th width="100px" rowspan="2" class="_toggle-detail text-left">Doc No</th>
+                    <th width="80px" class="_toggle-detail text-left">Created By</th>
+                    <th width="80px" class="_toggle-detail text-left">Created Date</th>
+                    <th width="80px" class="_toggle-detail text-left">Changed By</th>
+                    <th width="80px" class="_toggle-detail text-left">Changed Date</th>
+                    </thead>
+
+
+                    <tbody>
+                        @{
+                            if (receivingList.Count > 0)
+                            {
+                                foreach (ReceivingList item in receivingList)
+                                {
+
+                                    <tr>
+                                        <td width="25px" class="text-center grid-checkbox-col">
+                                            <input type="checkbox" id="chk-receivinglist-@item.ReceivingNo" data-embedded="@item.AsEmbeddedData()" class="check" @Html.Raw(item.TotalQty <= 0 ? "disabled" : String.Empty) />
+                                        </td>
+                                        <td width="100px" class="text-center">
+                                            <a href="javascript:void(0)" onclick="openPopupMaterial(1,10, '@item.ReceivingNo')">@item.ReceivingNo</a>
+                                        </td>
+                                        <td width="100px" class="text-center">
+                                            @item.ReceivingDate.ToStandardFormat()
+                                        </td>
+                                        <td width="250px" class="text-left ellipsis" title="@item.PO_TEXT">
+                                            @item.HeaderText
+                                        </td>
+                                        <td width="75px" class="text-center">
+                                            @item.PONo
+                                        </td>
+                                        <td width="270px" class="text-left">
+                                            @item.Vendor
+                                        </td>
+                                        <td width="60" class="text-center" title="@item.Currency">
+                                            @item.Currency
+                                        </td>
+                                        <td width="105px" class="text-left">
+                                            @if (@item.Status.Equals("GR/SA Error Posting"))
+                                            {
+                                                @*<a href="javascript:void(0)" onclick="openPopUpErrorPosting(@item.ReceivingNo)">@item.Status</a>*@
+                                                <a href="javascript:void(0)" class="clicked" data-receive="@item.ReceivingNo">@item.Status</a>
+                                            }
+                                            else
+                                            {
+                                                @item.Status
+                                            }
+                                        </td>
+                                        <td width="100px" class="_toggle-detail text-left">
+                                            @item.SAPDocNo
+                                        </td>
+                                        <td width="80px" class="_toggle-detail text-left">
+                                            @item.CreatedBy
+                                        </td>
+                                        <td width="80px" class="_toggle-detail text-center">
+                                            @item.CreatedDate.ToStandardFormat()
+                                        </td>
+                                        <td width="80px" class="_toggle-detail text-left">
+                                            @item.ChangedBy
+                                        </td>
+                                        <td width="80px" class="_toggle-detail text-center">
+                                            @item.ChangedDate.ToStandardFormat()
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="14" class="text-center">
+                                        No data retrieved.
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                    <tfoot>
+                        <tr>
+                            <td colspan="13">
+                                <div class="col-xs-8" style="margin-bottom: 20px;">
+                                    @Html.Partial("_UIPaging")
+                                </div>
+                                <div class="col-xs-8 col-sm-4">
+                                    <div id="prc-pagesize" class="form-inline text-right">
+                                        <label>
+                                            Page Size
+                                            <select class="cursor-1 page" id="cbodisplay" onchange="javascript: searchData(1)" style="height:25px;">
+                                                <option>10</option>
+                                                <option>25</option>
+                                                <option>50</option>
+                                                <option>100</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $("document").ready(function () {
+        $("#checkall").click(function () {
+            $(".check:enabled").prop("checked", $("#checkall").is(":checked"));
+        });
+
+        $(document).on("click", ".clicked", function () {
+            var test = $(this).attr("data-receive");
+            //console.log("test: " + test);
+            openPopUpErrorPosting(test);
+        })
+    });
+
+    $("#tScrollBody").scroll(function () {
+        $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+        $("#tScrollFilter").scrollLeft($("#tScrollBody").scrollLeft());
+    });
+
+
+    var table = document.getElementById("dynamic-table");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+
+    function tableText(tableCell) {
+        var removeClass;
+        var addClass;
+        var dataSort;
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            if (tableCell.getAttribute("class").indexOf('sorting_asc') >= 0) {
+
+                removeClass = 'sorting_asc';
+                addClass = 'sorting_desc';
+                dataSort = 'desc';
+
+            } else if (tableCell.getAttribute("class").indexOf('sorting_desc') >= 0) {
+
+                removeClass = 'sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+
+            } else {
+
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'asc';
+
+            }
+        }
+
+        //reset all
+        var tableReset = document.getElementById("dynamic-table");
+        if (tableReset != null) {
+            for (var i = 0; i < tableReset.rows.length; i++) {
+                for (var j = 0; j < tableReset.rows[i].cells.length; j++) {
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_asc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_asc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_desc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_desc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                }
+            }
+        }
+        // end
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            tableCell.classList.remove(removeClass);
+            tableCell.classList.add(addClass);
+            tableCell.dataset.sort = dataSort;
+
+            $.ajax({
+                type: "GET",
+                url: '@Html.Toyota().Page.GetActionUrl("GetInvoiceReceivingSort")',
+                data: {
+                    field: tableCell.dataset.field,
+                    sort: dataSort
+                },
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    $("#tblScroll")
+                                .find('tbody')
+                                .html(
+                                    result
+                                );
+                }
+            });
+        }
+    }
+
+
+    // open popup preview material [start]
+    function openPopupMaterial(page, pageSize, receivingNo) {
+        page = page || 1;
+        pageSize = $("#cbodisplaydetail").valOrDefault() || pageSize;
+        $.ajax({
+            type: "POST",
+            url: "/ReceivingList/GetReceivingListDetail",
+            data: {
+                CurrentPage : page,
+                PageSIZE: pageSize,
+                receivingNo: receivingNo
+            },
+            //beforeSend:function () {$('#btnSearch').button('loading');},
+            success: function (data) {
+                $("#matDocDetailPopUp").html(data);
+                $('.dettitle').html('Receiving List Detail');
+                $("#modal-preview-material").modal();
+                $("#poNumber").text(poNumber);
+                $("#poItem").text(poItem);
+                $("#poText").text(poText);
+
+            }
+
+        });
+
+    }
+    // open popup preview material [end]
+
+    //20191127
+    // open popup preview error posting [start]
+    function openPopUpErrorPosting(receivingNo) {
+        var text;
+        $.ajax({
+
+            type: "POST",
+            @*url: "@GPS.Controllers.PO.POInquiryController.Action.Error_GRSA",*@
+            url: "@Url.Content("~/ReceivingList/errorPosting")",
+            data: { receivingNo: receivingNo },
+            success: function (data) {  
+                $.messagebox.show(
+                    "Detail Error Posting" + " " + receivingNo,
+                    data,
+                    "WRN",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+                if (data[1] != null) {
+                    $('#messagebox-text').html('<h1 style="font-size: 25px;"><strong>' + data[1] + "</strong></h1>" + "<br />" + data[0]);
+                }
+               
+                //alert(text);
+            },
+            error: function (data) {
+                $.messagebox.show(
+                        "Detail Error Posting",
+                        data,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+            }
+        });
+    }
+    // open popup preview error posting [end]
+</script>

@@ -1,0 +1,193 @@
+﻿@using GPS.Controllers.PR
+@using GPS.Controllers.Master
+@using GPS.Models.PR.PRStatusMonitoring;
+@model  GPS.Models.PR.PRStatusMonitoring.PRStatusMonitoringParam
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    PRSummaryMonitoring summaryData = ViewData["SummaryData"] != null ?
+                            (PRSummaryMonitoring)ViewData["SummaryData"] :
+                            new PRSummaryMonitoring();
+}
+@section HeadScript{
+
+    <style>
+        #toogle-search{
+            top: 6px;
+            position: absolute;
+            right: 15px;
+        }
+
+        .custom-date{
+          position: relative;
+        }
+
+        .custom-date .slash {
+            height: 1px;
+            width: 20px;
+            background: black;
+            position: absolute;
+            top: 0;
+            left: -13px;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            transform: rotate(-60deg);
+        }
+
+        .custom-date .slash.f-white {
+            background: #fff;
+        }
+
+        .custom-date sup,
+        .custom-date sub{
+            font-size: 08px;
+        }
+
+        .custom-date sup{
+            color: #000;
+        }
+
+        div.f-white,
+        .custom-date sub.f-white,
+        .custom-date sup.f-white{
+            color: #fff;
+        }
+
+        .bg-red{
+            background-color: #ec2b2b;
+        }
+
+        .bg-green{
+            background-color: #23b31a;
+        }
+
+        .custom-date .small-num{
+            margin-right: 3px;
+        }
+
+        .custom-date .total-num{
+            margin-left: 2px;
+        }
+
+        .border5{
+            border-left-width: 5px !important;
+            border-left-color: #999 !important;
+        }
+
+        .box-linear1{
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #8c8484;
+            border: 1px solid #e3e3e3;
+            padding: 3px;
+            background: -moz-linear-gradient(top, #eee 0%, #e5e5e5 100%);
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#e5e5e5));
+            background: -webkit-linear-gradient(top, #ffffff 0%,#e5e5e5 100%);
+            background: -o-linear-gradient(top, #ffffff 0%,#e5e5e5 100%);
+            background: -ms-linear-gradient(top, #ffffff 0%,#e5e5e5 100%);
+            background: linear-gradient(to bottom, #ffffff 0%,#e5e5e5 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 );
+        }
+    </style>
+}
+
+@section BodyScript{
+    @Html.Partial("_PartialStatusMonitoringScript")
+}
+<div class="form-horizontal" id="searchForm">
+    <form>
+        <div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-3">
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">PR.Div</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <div class="input-group pos-rel" style="width: calc(100% - 30px);">
+                            @Html.DropDownListFor(m => m.DIVISION_ID, DivisionController.GetDivisionList(), new { id = "division", @class = "cursor-1", onchange = "javascript:populateComboBox('division')", @style = "width:100%;", @disabled = "disabled" })
+                        </div>
+                    </div>
+                    <button data-rel="tooltip" title="Hide filter" onclick="javascript:toggleSearch()" type="button" class="ace-icon fa fa-angle-double-right btn btn-default btn-xs btn-tiny-down" id="toogle-search"></button>
+                </div>
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">PO No.</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <div class="input-group pos-rel" style="width: 100%;">
+                            @Html.TextBoxFor(m => m.PR_NO, new { id = "pono", @style = "width:100%", @class = "input_keyup" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-3">
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">PR No.</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <div class="input-group pos-rel" style="width: 100%;">
+                            @Html.TextBoxFor(m => m.PO_NO, new { id = "prno", @style = "width:100%", @class = "input_keyup" })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Vendor</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <div class="input-group pos-rel" style="width: 100%;">
+                            @Html.TextBoxFor(m => m.VENDOR, new { id = "vendor", @style = "width:100%", @class = "input_keyup" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-3">
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Desc.</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <div class="input-group pos-rel" style="width: 100%;">
+                            @Html.TextBoxFor(m => m.PR_DESC, new { id = "prdescription", @style = "width:100%", @class = "input_keyup" })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Order By</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <div class="input-group pos-rel" style="width: calc(100%);">
+                            @Html.DropDownListFor(m => m.ORDER_BY, PRStatusMonitoringController.GetFilterDelayStatus(), new { id = "orderBy", @class = "input_keyup", @style = "width:100%;"})
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-3">
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Created By</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <div class="input-group pos-rel" style="width: 100%;">
+                            @Html.TextBoxFor(m => m.CREATED_BY, new { id = "createdby", @style = "width:100%", @class = "input_keyup" })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-xs _criteria text-right">
+                    <button type="button" class="btn btn-warning btn-xs" style="margin-right: 12px;width: 80px;" onclick="javascript: DownloadPRDetail()">Download</button>
+                    <button type="button" class="btn btn-primary btn-xs" style="margin-right: 12px;width: 80px;" onclick="javascript: SearchPRDetail(1)">Search</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@*<div class="row">
+    <div class="col-xs-12 col-sm-12 text-center">
+        <button data-rel="tooltip" title="Hide filter" onclick="javascript:toggleSearch()" type="button" class="ace-icon fa fa-angle-double-up btn btn-default btn-xs btn-tiny-down"
+            id="toogle-search" style="top: 6px;">
+        </button>
+    </div>
+</div>*@
+<div class="row">
+    <div class="col-xs-12 col-sm-12">
+        <div class="box-linear1">Total Delayed PR : <label style="font-weight: bold;color: black;">@summaryData.TOTAL_PR</label> Item |  Total Amount Delayed PR : <label style="font-weight: bold;color: black;">RP. @String.Format("{0:#,0.00}", summaryData.TOTAL_AMOUNT_PR)</label></div>
+    </div>
+</div>
+<div class="text-center" style="margin-bottom: 3px;">
+    <hr id="hrsrc" style="margin:0;padding:0;" />
+</div>
+
+<div class="row TableList">
+    @Html.Partial("_PartialStatusMonitoringGrid")
+</div>

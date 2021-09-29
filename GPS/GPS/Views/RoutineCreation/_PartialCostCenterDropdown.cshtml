@@ -1,0 +1,18 @@
+﻿@using GPS.Models.Master
+@{
+    List<Routine> costCenterList = ViewData["CostCenter"] != null ? (List<Routine>)ViewData["CostCenter"] : new List<Routine>();
+}
+
+<select id="acost" class="cursor-1 blank" style="width:100%;">
+@if ((costCenterList != null) && (costCenterList.Count > 0))
+{
+    <option value="" class="cursor-1">None</option>
+    foreach (Routine cl in costCenterList)
+    {
+        <option class="cursor-1" value="@cl.COST_CENTER">@cl.COST_CENTER - @cl.COST_CENTER_DESC</option>
+    }
+}
+else { 
+    <option value="" class="cursor-1">Select Division</option>
+}
+</select>

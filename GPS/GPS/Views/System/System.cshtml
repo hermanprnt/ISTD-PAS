@@ -1,0 +1,19 @@
+﻿﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";     
+}
+<script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+
+@Html.Partial("_PartialScript")
+@Html.Partial("_SearchCriteria")      
+<div class="text-center" style="margin-bottom: 3px;">
+    <hr id="hrsrc" style="margin: 0; padding: 0;" />       
+</div>
+<div id="divtable">
+    @Html.Partial("_Grid")
+</div>
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="basicModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+    @Html.Partial("_AddPopUp")               
+</div>
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="basicModaledit" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">        
+    @Html.Partial("_EditPopUp")        
+</div>

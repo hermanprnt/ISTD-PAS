@@ -1,0 +1,73 @@
+﻿@using GPS.Models.Master
+@model GPS.Models.Master.Quota
+@{
+    Quota GetHeader = (Quota)ViewData["GetHeader"] != null ? (Quota)ViewData["GetHeader"] : new Quota();
+}
+@Html.Partial("_QuotaCreationScript")
+<script>
+    $(document).ready(function () {
+        $('#btnSaveDetail').attr('disabled', 'disabled');
+        $('#btnCancelDetail').attr('disabled', 'disabled');
+        $("#txtQuotaNoDetail").val("@GetHeader.QUOTA_NO.ToString()");
+        $("#txtYearDetail").val("@GetHeader.YEAR.ToString()");
+        $("#txtDivisionDetail").val("@GetHeader.DIVISION_NAME.ToString()");
+        $("#txtWBSNoDetail").val("@GetHeader.WBS_NO.ToString()");
+        $("#txtOrdCoorDetail").val("@GetHeader.ORDER_COORD_NAME.ToString()");
+        $("#txtTypeDetail").val("@GetHeader.TYPE.ToString()");
+    });
+</script>
+<form role="form" class="form-horizontal" id="searchForm" enctype="multipart/form-data">
+<div class="row-fluid">
+    <div class="col-xs-12 col-sm-8 col-md-3">
+        <div class="form-group form-group-xs">
+            <label class="col-xs-7 col-sm-6 col-md-4 control-label text-muted" style="vertical-align: top">
+                Quota No</label>
+            <div class="col-xs-8 col-sm-9 col-md-6">
+                <input type="text" id="txtQuotaNoDetail" disabled class="form-control blank" />
+            </div>
+        </div>
+                <div class="form-group form-group-xs">
+            <label class="col-xs-7 col-sm-6 col-md-4 control-label text-muted" style="vertical-align: top">
+                Year</label>
+            <div class="col-xs-8 col-sm-9 col-md-5">
+                <input type="text" id="txtYearDetail" disabled class="form-control blank" />
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-5">
+        <div class="form-group form-group-xs">
+            <label class="col-xs-4 col-sm-3 col-md-2 control-label text-muted">
+                Division</label>
+            <div class="col-xs-8 col-sm-9 col-md-9">
+                    <input type="text" id="txtDivisionDetail" disabled class="form-control blank" />
+            </div>
+        </div>
+        <div class="form-group form-group-xs">
+            <label class="col-xs-4 col-sm-3 col-md-2 control-label text-muted">
+                WBS No</label>
+            <div class="col-xs-8 col-sm-9 col-md-8">
+              
+                    <input type="text" id="txtWBSNoDetail" disabled class="form-control blank" />
+             
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-8 col-md-4">
+        <div class="form-group form-group-xs">
+            <label class="col-xs-7 col-sm-6 col-md-4 control-label text-muted" style="vertical-align: top">
+                Type</label>
+            <div class="col-xs-8 col-sm-9 col-md-5">
+                <input type="text" id="txtTypeDetail" disabled class="form-control blank" />
+            </div>
+        </div>
+        <div class="form-group form-group-xs">
+            <label class="col-xs-7 col-sm-6 col-md-4 control-label text-muted" style="vertical-align: top">
+                Order Coordinator</label>
+            <div class="col-xs-8 col-sm-9 col-md-8">
+                <input type="text" id="txtOrdCoorDetail" disabled class="form-control blank" />
+            </div>
+        </div>
+    </div>
+
+</div>
+</form>

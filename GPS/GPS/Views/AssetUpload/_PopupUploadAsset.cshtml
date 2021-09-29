@@ -1,0 +1,64 @@
+﻿@{
+    Tuple<string, long, int, string> VALIDATION_FILE = 
+                            (Tuple<string, long, int, string>)ViewData["ValidationTemp"] != null ?
+                            (Tuple<string, long, int, string>)ViewData["ValidationTemp"] :
+                            new Tuple<string, long, int, string>("", 0, 0, "");
+
+    string PROCESS_ID = (string)ViewData["ProcessId"] != null ? (string)ViewData["ProcessId"] : "0";
+}
+
+<script>
+    $(document).ready(function () {
+        $.Disable(["#btn-uploadfile"]);
+
+        var message = "@VALIDATION_FILE.Item4.ToHtmlString()";
+
+        if (message == "") {
+            File = {
+                ASSET: { size: Number("@VALIDATION_FILE.Item2.ToString()"), count: 0, validext: "@VALIDATION_FILE.Item1.ToString()", max: Number("@VALIDATION_FILE.Item3.ToString()") }
+            };
+
+            $("#procid").val("@PROCESS_ID");
+        }
+        else {
+            $.messagebox.show(
+                "Error",
+                "Error : " + message + ", Please Contact your Administrator",
+                "ERR",
+                "SINGLE",
+                "$('#upload-popup-container').hide()",
+                ""
+            )
+        }
+    });
+</script>
+
+<div class="modal-dialog modal-md" style="width:400px">
+    <div class="modal-content">
+        <div class="modal-header">
+            Upload Asset Screen
+        </div>
+        <div class="modal-body">
+            <div class="form-horizontal">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="form-group form-group-xs">
+                            <input type="text" id="procid" style="display:none">
+                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Asset</label>
+                            <div class="col-xs-8 col-sm-9 col-md-8">
+                                <input type="file" value="" name="asset" id="asset" class="custom-file" onchange="javascript:validateFile()"/>
+                                <div class="appended-file-asset" style="font-size:x-small;margin-top:5px;display:none">
+			                    
+		                        </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary btn-xs" id="btn-uploadfile" onclick="javascript:uploadFile()">Upload</button>
+            <button type="button" class="btn btn-danger btn-xs" onclick="javascript:CancelUpload()">Cancel</button>
+        </div>
+    </div>
+</div>

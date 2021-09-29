@@ -1,0 +1,243 @@
+﻿@using GPS.Constants
+@using GPS.Models.Common
+@{
+    List<Worklist> ApprovalCoordinator = ViewData["Approval_Coordinator"] != null ? (List<Worklist>)ViewData["Approval_Coordinator"] : new List<Worklist>();
+    string errormessage = ViewData["Message"] != null ? ViewData["Message"].ToString() : "";
+    string PR_NO = ViewData["PR_NO"] != null ? ViewData["PR_NO"].ToString() : "";
+    ViewData["TypePaging"] = "Coordinator";
+}
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <div style="border: 1pt solid #ccc;">
+        <div id="tScrollHeadApprovalCoord" style="width: 100%; overflow: scroll;">
+            <table id="dynamic-table" class="table table-striped table-bordered table-condensed appended-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="text-center" style="min-width:35px;">Item</th>
+                        <th colspan="5" class="text-center" style="min-width:370px;">Checked by Staff</th>
+                        <th colspan="5" class="text-center" style="min-width:370px;">Approved By SH</th>
+                        <th colspan="5" class="text-center" style="min-width:370px;">Approved By DpH</th>
+                    </tr>
+                    <tr>
+                        <th class="text-center" style="min-width:150px;">PIC</th>
+                        <th class="text-center" style="min-width:70px;">Plan</th>
+                        <th class="text-center" style="min-width:70px;">Actual</th>
+                        <th class="text-center" style="min-width:40px;">Pln L/T</th>
+                        <th class="text-center" style="min-width:40px;">Act L/T</th>
+                        <th class="text-center" style="min-width:150px;">PIC</th>
+                        <th class="text-center" style="min-width:70px;">Plan</th>
+                        <th class="text-center" style="min-width:70px;">Actual</th>
+                        <th class="text-center" style="min-width:40px;">Pln L/T</th>
+                        <th class="text-center" style="min-width:40px;">Act L/T</th>
+                        <th class="text-center" style="min-width:150px;">PIC</th>
+                        <th class="text-center" style="min-width:70px;">Plan</th>
+                        <th class="text-center" style="min-width:70px;">Actual</th>
+                        <th class="text-center" style="min-width:40px;">Pln L/T</th>
+                        <th class="text-center" style="min-width:40px;">Act L/T</th>
+                    </tr>
+                    <tr></tr>
+</thead>
+
+                <tbody>
+                    @if ((ApprovalCoordinator.Count > 0) && (errormessage == ""))
+                    {
+                        foreach (Worklist ad in ApprovalCoordinator)
+                        { 
+                            <tr class="removedetail">
+                                <td class="text-right cold-@ad.ITEM_NO" style="min-width:35px;">@ad.ITEM_NO</td>
+                                <td class="text-left cold-@ad.ITEM_NO" style="min-width:150px;">@ad.PIC_STAFF</td>
+                                <td class="text-center cold-@ad.ITEM_NO" style="min-width:70px;">@ad.PLAN_STAFF</td>
+                                <td class="text-center cold-@ad.ITEM_NO" style="min-width:70px;">@ad.ACTUAL_STAFF</td>
+                                <td class="text-center cold-@ad.ITEM_NO" style="min-width:40px;">@ad.PLNLT_STAFF</td>
+                                @if(!String.IsNullOrEmpty(ad.ACTLT_STAFF)) {
+                                    if (Int16.Parse(ad.ACTLT_STAFF) > Int16.Parse(ad.PLNLT_STAFF))
+                                    {
+                                        <td class="text-center cold-@ad.ITEM_NO late-approve" style="min-width:40px;">@ad.ACTLT_STAFF</td>
+                                    }
+                                    else {
+                                        <td class="text-center cold-@ad.ITEM_NO ontime-approve" style="min-width:40px;">@ad.ACTLT_STAFF</td>
+                                    }
+                                }
+                                else{
+                                    <td class="text-center cold-@ad.ITEM_NO" style="min-width:40px;">@ad.ACTLT_STAFF</td>
+                                }
+                                <td class="text-left cold-@ad.ITEM_NO" style="min-width:150px;">@ad.PIC_SH</td>
+                                <td class="text-center cold-@ad.ITEM_NO" style="min-width:70px;">@ad.PLAN_SH</td>
+                                <td class="text-center cold-@ad.ITEM_NO"style="min-width:70px;">@ad.ACTUAL_SH</td>
+                                <td class="text-center cold-@ad.ITEM_NO" style="min-width:40px;">@ad.PLNLT_SH</td>
+                                @if(!String.IsNullOrEmpty(ad.ACTLT_SH)) {
+                                    if (Int16.Parse(ad.ACTLT_SH) > Int16.Parse(ad.PLNLT_SH))
+                                    {
+                                        <td class="text-center cold-@ad.ITEM_NO late-approve" style="min-width:40px;">@ad.ACTLT_SH</td>
+                                    }
+                                    else {
+                                        <td class="text-center cold-@ad.ITEM_NO ontime-approve" style="min-width:40px;">@ad.ACTLT_SH</td>
+                                    }
+                                }
+                                else{
+                                    <td class="text-center cold-@ad.ITEM_NO" style="min-width:40px;">@ad.ACTLT_SH</td>
+                                }
+                                <td class="text-left cold-@ad.ITEM_NO" style="min-width:150px;">@ad.PIC_DPH</td>
+                                <td class="text-center cold-@ad.ITEM_NO" style="min-width:70px;">@ad.PLAN_DPH</td>
+                                <td class="text-center cold-@ad.ITEM_NO"style="min-width:70px;">@ad.ACTUAL_DPH</td>
+                                <td class="text-center cold-@ad.ITEM_NO" style="min-width:40px;">@ad.PLNLT_DPH</td>
+                                @if(!String.IsNullOrEmpty(ad.ACTLT_DPH)) {
+                                    if (Int16.Parse(ad.ACTLT_DPH) > Int16.Parse(ad.PLNLT_DPH))
+                                    {
+                                        <td class="text-center cold-@ad.ITEM_NO late-approve" style="min-width:40px;">@ad.ACTLT_DPH</td>
+                                    }
+                                    else {
+                                        <td class="text-center cold-@ad.ITEM_NO ontime-approve" style="min-width:40px;">@ad.ACTLT_DPH</td>
+                                    }
+                                }
+                                else{
+                                    <td class="text-center cold-@ad.ITEM_NO" style="min-width:40px;">@ad.ACTLT_DPH</td>
+                                }
+                            </tr>
+                        }
+                    }
+                    else
+                    { 
+                        <tr class="removedetail">
+                            <td colspan="16" class="text-center">@CommonDisplayMessage.NoData</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                <tfoot>
+                    <tr>
+                        <td colspan="12">
+                            <div class="col-xs-10 col-sm-10 col-md-10">
+                                @Html.Partial("_UIPaging")
+                            </div>
+                            <div class="col-xs-2 col-sm-2 col-md-2">
+                                @if ((ApprovalCoordinator.Count() > 0) && (ApprovalCoordinator != null) && (errormessage == ""))
+                                {
+                                    <div id="prapprovcoord-pagesize" class="form-inline text-right">
+                                        <label>
+                                            Page Size
+                                            <select class="cursor-1 page" id="approvcoord-pagesize"  onchange="javascript: SearchApprovalCoordinator(1, '@PR_NO')" style="height:25px;">
+                                                <option>10</option>
+                                                <option>25</option>
+                                                <option>50</option>
+                                                <option>100</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var errormessage = "@errormessage";
+        if (errormessage !== "") {
+            $("#alert-detail").css("display", "inherit");
+            $("#alert-detail").html(errormessage);
+        }
+    })
+
+    $("#tScrollBodyApprovalCoord").scroll(function () {
+        $("#tScrollHeadApprovalCoord").scrollLeft($("#tScrollBodyApprovalCoord").scrollLeft());
+    });
+
+    var table = document.getElementById("dynamic-table");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+
+    function tableText(tableCell) {
+        var removeClass;
+        var addClass;
+        var dataSort;
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            if (tableCell.getAttribute("class").indexOf('sorting_asc') >= 0) {
+
+                removeClass = 'sorting_asc';
+                addClass = 'sorting_desc';
+                dataSort = 'desc';
+
+            } else if (tableCell.getAttribute("class").indexOf('sorting_desc') >= 0) {
+
+                removeClass = 'sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+
+            } else {
+
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'asc';
+
+            }
+        }
+
+        //reset all
+        var tableReset = document.getElementById("dynamic-table");
+        if (tableReset != null) {
+            for (var i = 0; i < tableReset.rows.length; i++) {
+                for (var j = 0; j < tableReset.rows[i].cells.length; j++) {
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_asc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_asc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_desc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_desc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                }
+            }
+        }
+        // end
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            tableCell.classList.remove(removeClass);
+            tableCell.classList.add(addClass);
+            tableCell.dataset.sort = dataSort;
+
+            $.ajax({
+                type: "GET",
+                url: '@Html.Toyota().Page.GetActionUrl("GetPRInquirySort")',
+                    data: {
+                        field: tableCell.dataset.field,
+                        sort: dataSort
+                    },
+                    contentType: "application/json; charset=utf-8",
+                    success: function (result) {
+                        $("#tblScroll")
+                                .find('tbody')
+                                .html(
+                                    result
+                                );
+                    }
+                });
+            }
+        }
+
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({ placement: 'right' });
+        });
+</script>

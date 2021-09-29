@@ -1,0 +1,223 @@
+﻿@using GPS.Constants
+@using GPS.Constants.PRPOApproval
+@using GPS.Controllers.Master
+@using GPS.Core.ViewModel
+@{
+    String noreg = ViewData["Noreg"] == null ? "" : (String)ViewData["Noreg"];
+    SelectList userTypeList = new SelectList((Dictionary<string, string>)ViewData["UserType"], "Key", "Value");
+
+    HttpContext.Current.Session.Timeout = (int)TimeSpan.FromMinutes(60).TotalMinutes;
+    HttpContext.Current.Session.Add("btndetail_approve_po", Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POApproval", "btndetail-approve"));
+    HttpContext.Current.Session.Add("btndetail_reject_po", Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POApproval", "btndetail-reject"));
+}
+
+<div class="form-horizontal row-fluid">
+    <div class="row" style="padding-left:5px;">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-docno" class="col-xs-5 col-sm-4 control-label text-muted">PO No</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-docno" name="txt-docno" tabindex="1" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="cmb-vendorcode" class="col-xs-5 col-sm-4 control-label text-muted">Vendor</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-vendorcode", VendorController.VendorSelectList, new { tabindex="5", @class = "form-control"})
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-docno" class="col-xs-5 col-sm-4 control-label text-muted">Description</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-desc" name="txt-desc" tabindex="2" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="cmb-purchgrp" class="col-xs-5 col-sm-4 control-label text-muted">Currency</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-curr", CurrencyController.CurrencySelectList, new { tabindex="6", @class = "form-control"})
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-datefrom" class="col-xs-5 col-sm-4 control-label text-muted">Doc. Date</label>
+                <div class="col-xs-7 col-sm-8">
+                    <div class="input-group">
+                        <span class="input-group-addon" style="cursor: pointer;padding:4px 10px;" tabindex="3">
+                            <i class="fa fa-calendar bigger-110"></i>
+                        </span>
+                        <input class="form-control" type="text" name="date-range-picker" id="txt-docdate" data-date-format="dd.mm.yyyy" style="font-size:12px;height:25px;"/>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="cmb-status" class="col-xs-5 col-sm-4 control-label text-muted">Status</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-status", DocStatusController.GetDocStatusSelectList("PO"), new {tabindex="5", @class = "form-control" })
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="cmb-purchgrp" class="col-xs-5 col-sm-4 control-label text-muted">Purch. Group</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-purchgrp", PurchasingGroupController.PurchasingGroupByRegNoSelectList(noreg), new {tabindex = "4", @class = "form-control"})
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="cmb-usertype" class="col-xs-5 col-sm-4 control-label text-muted">User Type</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-usertype", userTypeList, PRPOApprovalPlaceHolder.SelectOption.ToLower(), new { tabindex="8", @class = "form-control"})
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="v-space"></div>
+<div class="form-horizontal row-fluid">
+    <div class="row">
+        <div class="col-sm-6">
+        </div>
+        <div class="col-sm-6 text-right">
+            <button id="btn-search" tabindex="10" class="btn btn-primary btn-xs btn-std">Search</button>
+            <button id="btn-clearsearch" tabindex="11" class="btn btn-default btn-xs btn-std">Clear</button>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="line-br"></div>
+    <div class="row">
+        <div class="col-sm-6">
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POApproval", "btn-approve"))
+            {
+                <button id="btn-approve" tabindex="13" class="btn btn-primary btn-xs btn-std">Approve</button>
+            }
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POApproval", "btn-reject"))
+            {
+                <button id="btn-reject" tabindex="14" class="btn btn-danger btn-xs btn-std">Reject</button>
+            } 
+        </div>
+        <div class="col-sm-6 text-right">
+            <button id="btn-hideshow" tabindex="14" class="btn btn-primary btn-xs btn-std">Show Detail</button>
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POApproval", "btn-edit"))
+            {
+                <button id="btn-edit" tabindex="15" class="btn btn-primary btn-xs btn-std">Edit</button>
+            }
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $("#btn-approve").click(function (e) {
+        // Get selected item.
+        var checkedVals = 0;
+        checkedVals = $("[id^=chk-approval-]:checkbox:checked", "#table-@PRPOApprovalPage.POApprovalGrid").map(function() {
+            return { docno: $(this).data("docno"), doctype: "PO" };
+        }).get();
+        if (checkedVals.length > 0) {
+            ApprovePOApprovalHeader(function(data) {
+                if (!data.ResponseType) {
+                    $("#dialog-container").html(data);
+                    $("#dialog-container").modal();
+
+                    resetHeaderSelection();
+
+                    $_pageSize = $("#cmb-perpage-POApproval").val();
+                    SearchPOApproval(1, $_pageSize, function (data) {
+                        if (!data.ResponseType)
+                            $("#data-container-@PRPOApprovalPage.POApproval").html(data);
+                        else
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    });
+                }
+                else
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+            });
+        }
+        else
+            $.messagebox.show("@ActionResponseViewModel.Warning", "Please select at least one record to be approved.", "@ActionResponseViewModel.Warning");
+    });
+
+    $("#btn-reject").click(function (e) {
+        // Get selected item.
+        var checkedVals = 0;
+        checkedVals = $("[id^=chk-approval-]:checkbox:checked", "#table-@PRPOApprovalPage.POApprovalGrid").map(function() {
+            return { docno: $(this).data("docno"), doctype: "PO" };
+        }).get();
+        if (checkedVals.length > 0) {
+            RejectPOApprovalHeader(function(data) {
+                if (!data.ResponseType) {
+                    $("#dialog-container").html(data);
+                    $("#dialog-container").modal();
+
+                    resetHeaderSelection();
+
+                    $_pageSize = $("#cmb-perpage-POApproval").val();
+                    SearchPOApproval(undefined, $_pageSize, function (data) {
+                        if (!data.ResponseType)
+                            $("#data-container-@PRPOApprovalPage.POApproval").html(data);
+                        else
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    });
+                }
+                else
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+            });
+        }
+        else
+            $.messagebox.show("@ActionResponseViewModel.Warning", "Please select at least one record to be rejected.", "@ActionResponseViewModel.Warning");
+    });
+
+    $("#btn-search").click(function (e) {
+        $("#header-selection-mode").val("INC");
+        $("#docno-count-value").val("0");
+        $("#docno-list-value").val("");
+
+        SearchPOApproval(undefined, undefined, function (data) {
+            if (!data.ResponseType) {
+                $("#data-container-@PRPOApprovalPage.POApproval").html(data);
+                $("#btn-hideshow").html("Show Detail")
+            }
+            else
+                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+        });
+    });
+
+    $("#btn-clearsearch").click(function (e) {
+        ClearPOApproval(undefined, undefined, function (data) {
+            if (!data.ResponseType) {
+                ResetView();
+                $("#data-container-@PRPOApprovalPage.POApproval").html(data);
+            }
+            else
+                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+        });
+    });
+
+    $("#btn-edit").click(function (e) {
+        // Get selected item.
+        var checkedVals = 0;
+        checkedVals = $("[id^=chk-approval-]:checkbox:checked", "#table-@PRPOApprovalPage.POApprovalGrid").map(function () {
+            return { docno: $(this).data("docno"), doctype: "PO" };
+        }).get();
+        switch (checkedVals.length) {
+            case 1:
+                EditPOApproval(checkedVals[0]["docno"], checkedVals[0]["doctype"], null);
+                break;
+            case 0:
+                $.messagebox.show("@ActionResponseViewModel.Warning", "Please select at least one record to be edited.", "@ActionResponseViewModel.Warning");
+                break;
+            default:
+                $.messagebox.show("@ActionResponseViewModel.Warning", "Please select only one record to be edited.", "@ActionResponseViewModel.Warning");
+                break;
+        }
+    });
+
+    $("#btn-hideshow").click(function (e) {
+        showDetail();
+    });
+
+    //# sourceURL=POApprovalParam.cshtml
+</script>

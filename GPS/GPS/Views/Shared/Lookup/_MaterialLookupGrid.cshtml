@@ -1,0 +1,50 @@
+@using System.Linq
+@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Models.Master
+@using GPS.ViewModels.Lookup
+@model LookupViewModel<Material>
+
+<table class="table table-striped table-bordered table-condensed">
+    <thead>
+        <tr>
+            <th class="col-check" width="10%" rowspan="2"></th>
+            <th width="90%" colspan="6">Material</th>
+        </tr>
+        <tr>
+            <th width="10%">Material No</th>
+            <th width="35%">Material Desc</th>
+            <th width="10%">Car Family</th>
+            <th width="15%">Material Type</th>
+            <th width="15%">Material Group</th>
+            <th width="10%">UOM</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.DataList.Any())
+        {
+            foreach (Material item in Model.DataList)
+            {
+                <tr data-key="@item.MaterialNo" data-value="@item.AsEmbeddedData()">
+                    <td class="col-check text-center" width="10%">
+                        <input id="chk-@Model.GridPaging.DataName-@item.DataNo" type="checkbox" data-key="@item.MaterialNo" data-value="@item.AsEmbeddedData()"/>
+                    </td>
+                    <td class="text-center" width="10%">@item.MaterialNo</td>
+                    <td width="35%">@item.MaterialDesc</td>
+                    <td width="10%">@item.CarFamilyCode</td>
+                    <td width="15%">@item.MaterialTypeCode</td>
+                    <td width="15%">@item.MaterialGroupCode</td>
+                    <td width="10%">@item.UOM</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3" class="text-center">@CommonDisplayMessage.NoData</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="v-space"></div>
+@Html.Partial(LookupPage.GenericLookupPaging, Model.GridPaging)

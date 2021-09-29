@@ -1,0 +1,7 @@
+﻿ALTER PROCEDURE [dbo].[sp_POCreation_GetAttachedFiles]
+    @ProcessId BIGINT
+AS
+BEGIN
+    SELECT FILE_PATH
+	FROM TB_T_ATTACHMENT WHERE PROCESS_ID = @ProcessId AND DELETE_FLAG <> 'Y' AND NEW_FLAG = 'Y'
+END

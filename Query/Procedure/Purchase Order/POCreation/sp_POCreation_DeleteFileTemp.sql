@@ -1,0 +1,11 @@
+﻿ALTER PROCEDURE [dbo].[sp_POCreation_DeleteFileTemp]
+    @ProcessId BIGINT,
+	@Path VARCHAR(MAX),
+	@CurrentUser VARCHAR(50)
+AS
+BEGIN
+    UPDATE TB_T_ATTACHMENT
+		SET DELETE_FLAG = 'Y', CHANGED_DT = GETDATE(), CHANGED_BY = @CurrentUser
+	WHERE PROCESS_ID = @ProcessId AND FILE_PATH = @Path
+
+END

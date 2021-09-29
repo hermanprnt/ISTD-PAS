@@ -1,0 +1,3229 @@
+﻿@using GPS.Constants.PR
+@using GPS.Controllers.PR
+<script type="text/javascript" id="Global">
+    $tdk.AjaxMethod = "POST";
+
+    var LookupMaxRowPerPage = 10;
+    var WBS_Temp = '';
+    var CostCenter_Temp = '';
+    var Division_Temp = '';
+
+    // Temporary variable for data manipulation to screen
+    ViewData.Clear();
+    ViewData.Add("Old_PRType", "");
+    ViewData.Add("Old_PRCoordinator", "");
+    ViewData.Add("Old_NonMaterialFlag", "");
+    ViewData.Add("Old_AssetCat", "");
+    ViewData.Add("GLType", "");
+    ViewData.Add("WBSType", "");
+
+    // PR Type Defined 
+    ViewData.Add("PRType", {
+        MaintenanceOrder: "MO",
+        Standard: "RM",
+        Reservation: "RR",
+        Routine: "RT"
+    });
+
+    // Asset Category Defined
+    ViewData.Add("AssetCategory", {
+        NonAsset: "NA",
+        MainAsset: "MA",
+        SubAsset: "SA",
+        Maintenance: "MT"
+    });
+
+    // ID of input field and button in PR Creation Screen
+    var idHeader = {
+        PR_NO: "#aprno",
+        PROCESS_ID: "#aproc",
+        ORG_ID: "#org_id",
+        POSITION_LEVEL: "#position_level",
+        USER_DIVISION_ID: "#division_id",
+        PR_TYPE: "#aprtype",
+        PLANT_CD: "#aplntno",
+        SLOC_CD: "#astorage",
+        PR_DESC: "#exp",
+        PR_COORDINATOR: "#apurchasing",
+        DIVISION_ID: "#adivision",
+        PROJECT_NO: "#aprojectno",
+        DELIVERY_DATE: "#deliverydate",
+        URGENT_DOC: "#urgentpr",
+        MAIN_ASSET_NO: "#amainasset",
+        NOTE: "#anote",
+        MEMO: "#MEMO",
+        TOR: "#TOR",
+        SCH: "#SCH",
+        QUOT: "#QUOT",
+        ASSET_CLASS_HIDE: "#asclass",
+        ASSET_LOC_HIDE: "#aslocation"
+    }
+
+    var idItem = {
+        ITEM_LIST: "#item-dropdown",
+
+        NO: "#no",
+        WBS_NO: "#awbsno",
+        WBS_NAME: "#awbsname",
+        COST_CENTER: "#acost",
+        COST_CENTER_DIV: "#cascade-costcenter",
+        VALUATION_CLASS: "#aitemcat",
+        VALUATION_CLASS_DESC: "#avaldesc",
+        ITEM_CLASS: "#aclass",
+        ITEM_TYPE: "#avalitemtype",
+        ITEM_TYPE_DESC: "#avalitemdesc",
+        GL_ACCOUNT: "#agl",
+        CAR_FAMILY_CD: "#acar",
+        MAT_GRP_CD: "#agrp",
+        MAT_TYPE_CD: "#atype",
+        QUOTA_FLAG: "#aquotaflag",
+        MAT_NO: "#amatno",
+        MAT_DESC: "#amatdesc",
+        QTY: "#aqty",
+        USED_QTY: "#ausedqty",
+        UOM: "#auom",
+        CURR: "#acurr",
+        PRICE: "#aprice",
+        AMOUNT: "#aamount",
+        ASSET_CATEGORY: "#aassetcat",
+        ASSET_CLASS: "#aassetclass",
+        ASSET_LOCATION: "#aassetloc",
+        ASSET_NO: "#assetNo",
+        ASSET_NO_SUB: "#asubassetno",
+        SUBASSET_NO: "#asubassetno",
+        DELIVERY_DATE_ITEM: "#adeliverydate",
+        VENDOR_CD: "#avendor",
+        VENDOR_NAME: "#avendorname",
+        ITEM_LIST: "#itemdropdown",
+        IS_PRICE_EXIST: "#apriceexist",
+        CALC_VALUE: "#acalcvalue"
+    }
+
+    var idSubItem = {
+        NO: "#subitem_no",
+        WBS_NO: "#awbsnosubitem",
+        WBS_NAME: "#awbsnamesubitem",
+        COST_CENTER: "#acost",
+        COST_CENTER_DIV: "#cascade-costcenter-subitem",
+        GL_ACCOUNT: "#aglsubitem",
+        MAT_DESC: "#amatdescsubitem",
+        QTY: "#aqtysubitem",
+        UOM: "#auomsubitem",
+        PRICE: "#apricesubitem",
+        AMOUNT: "#aamountsubitem",
+        CALC_VALUE: "#acalcvaluesubitem"
+    }
+
+    var idBtn = {
+        SAVE_HEADER: ".btnsavehead",
+        SUBMIT_HEADER: ".btnsubmithead",
+        CANCEL_HEADER: ".btncancelhead",
+
+        SAVE_ITEM: ".btnsaveitem",
+        CANCEL_ITEM: ".btncancelitem",
+
+        SAVE_SUBITEM: ".btnsavesubitem",
+        CANCEL_SUBITEM: ".btncancelsubitem"
+    }
+
+    var idDivLookup = {
+        DIV_VALCLASS: "#lookupvalclass",
+        DIV_MATERIAL: "#lookupmaterial",
+        DIV_VENDOR: "#lookupvendor",
+        DIV_WBSITEM: "#lookupwbsitem",
+        DIV_GLITEM: "#lookupglitem",
+        DIV_ASSETLOCITEM: "#lookupassetloc",
+        DIV_ASSETNOITEM: "#lookupassetNo",
+        DIV_WBSSUBITEM: "#lookupwbssubitem",
+        DIV_GLSUBITEM: "#lookupglsubitem"
+    }
+
+    var File = {
+        TOR: { size: 0, count: 0, validext: "", max: 0 },
+        SCH: { size: 0, count: 0, validext: "", max: 0 },
+        MEMO: { size: 0, count: 0, validext: "", max: 0 },
+        QUOT: { size: 0, count: 0, validext: "", max: 0 }
+    };
+
+    function AssignVariable(message, param) {
+        for (var i = 0; i < param.length; i++) {
+            message = message.replace("{" + i + "}", param[i]);
+        }
+        return message;
+    }
+
+    function GetValidDate(date) {
+        if (date != "") {
+            date = date.split('.');
+            var date = date[1] + '-' + date[0] + '-' + date[2];
+        }
+        return date;
+    }
+
+    function ClearHtml(id) {
+        for (var i = 0; i < id.length; i++) {
+            if (id[i] != "")
+                $(id[i]).html("");
+        }
+    }
+
+    function DisableLookup(idList, isDisabled) {
+        if (GetType(idList) !== "Array")
+            throw new InvalidOperationException("idList of DisableLookup must be an Array of selector.");
+
+        idList.forEach(function (item) {
+            var $item = $(item);
+            if ($item.hasClass("lookup")) {
+                var btnlookup = $item.find("button");
+                if (isDisabled) {
+                    $item.find("input").addClass("lookup-disabled");
+                    btnlookup.addClass("lookup-disabled");
+                }
+                else {
+                    $item.find("input").removeClass("lookup-disabled");
+                    btnlookup.removeClass("lookup-disabled");
+                }
+                btnlookup.prop("disabled", isDisabled);
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript" id="Field-and-Button-Setting">
+    function getAssetLoc() {
+        $.ajax({
+            type: 'POST',
+            url: "@PRCreationController._GetAssetLocation",
+            success: function (r) {
+                $("#modal-loc").modal();
+                var parent = "";
+                var ul = $("#treeview").empty();
+
+                for (var i = 0; i < r.data.length; i++) {
+
+                    var txt = "<li title='" + r.data[i].LOCATION_ID + "'><a onclick='list_click($(this).parent())' href='javascript:;'>" + r.data[i].LOCATION_NAME + "</a></li>";
+                    var parent;
+
+                    if (r.data[i].PARENT_LOC_ID === null) {
+                        parent = ul;
+                    }
+                    else {
+                        var $elem = ul.find("li[title='" + r.data[i].PARENT_LOC_ID + "']");
+                        if ($elem.find("ul").length == 0) {
+                            $elem.append("<ul>");
+                        }
+                        parent = $elem.find("ul:first");
+                    }
+                    parent.append(txt);
+                }
+
+                $('#treeview').find('ul').css('display', 'none');
+            }
+        });
+    }
+
+    function list_click(s) {
+        if (s.has('ul').length > 0) {
+            if (s.children('ul').is(':hidden')) {
+                s.children('ul').css('display', 'block');
+            } else {
+                s.children('ul').css('display', 'none');
+            }
+        } else {
+            $(idItem.ASSET_LOCATION).val(s.prop('title'));
+            $("#modal-loc").modal('hide');
+        }
+    }
+
+    function enableMemo() {
+        if ($(idHeader.URGENT_DOC).val() === 'N')
+            $.Disable([idHeader.MEMO]);
+        else
+            $.Enable([idHeader.MEMO]);
+    }
+
+    function populateComboBox(id) {
+        var target = "";
+        var url = "";
+        var param;
+
+        switch (id) {
+            case "sloc":
+                {
+                    target = "#cascade-sloc";
+                    param = { param: $(idHeader.PLANT_CD).val() };
+                    url = "GetSlocbyPlant";
+                    break;
+                }
+            case "costcenter":
+                {
+                    if ($(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).is(':enabled'))
+                        target = target + "#cascade-costcenter, ";
+                    if ($(idItem.COST_CENTER_DIV).is(":visible"))
+                        target = target + "#cascade-costcenter-subitem, ";
+                    if (target != "")
+                        target = target.substr(0, target.length - 2);
+
+                    var divId = $(idHeader.DIVISION_ID).val() == "" ? 0 : $(idHeader.DIVISION_ID).val();
+                    if ((divId === 0) || (divId === null))
+                        divId = $(idHeader.USER_DIVISION_ID).val();
+
+                    var prCoor = $(idHeader.PR_COORDINATOR).val();
+
+                    param = { paramPrCoordinator: prCoor, paramDivId: divId };
+                    url = "SelectCostCenterByCoordinator";
+                    break;
+                }
+        }
+
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._PRCreationController" + url,
+            data: param,
+            success: function (resultMessage) {
+                $(target).html(resultMessage);
+            },
+            error: function (resultMessage) {
+                var e = resultMessage.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function onChangePRType() {
+        var prtype = $(idHeader.PR_TYPE).val();
+        var nonmaterial_flag = $('#' + prtype).data('nonmaterial_flag');
+
+        PRTypeChecking(prtype, nonmaterial_flag);
+
+        if (CountItem("procurement type") == "") {
+            ViewData.Add("Old_PRType", prtype);
+            ViewData.Add("Old_NonMaterialFlag", nonmaterial_flag);
+        }
+    }
+
+    function PRTypeChecking(prtype, nonmaterial_flag) {
+        if (prtype == ViewData.Get("PRType")["MaintenanceOrder"])
+            $.Enable([idHeader.MAIN_ASSET_NO]);
+        else {
+            $(idHeader.MAIN_ASSET_NO).val("");
+            $(idHeader.ASSET_CLASS_HIDE).val("");
+            $(idHeader.ASSET_LOC_HIDE).val("");
+            $.Disable([idHeader.MAIN_ASSET_NO]);
+        }
+
+        if (nonmaterial_flag == "N") $.Disable([idItem.MAT_DESC]);
+        else $.Enable([idItem.MAT_DESC]);
+    }
+
+    function CountItem(field) {
+        if (($('.isrow').length > 0 || $('.isrowsubitem').length > 0 || isUnsaveItem() === true) && ($(idHeader.PR_NO).val() == 0 && ViewData.Get("Old_PRType") != "")) {
+            $.messagebox.show(
+                "Info",
+                "When you change " + field + ", all items will be deleted. Are you sure you want to continue?",
+                "INF",
+                "CONFIRM",
+                "DeleteAllItem('" + $(idHeader.PROCESS_ID).val() + "')",
+                "cancelReplacement('" + field + "')"
+            )
+            return "not empty";
+        }
+        else return "";
+    }
+
+    function cancelReplacement(type) {
+        if (type == "procurement type") {
+            $(idHeader.PR_TYPE).val(ViewData.Get("Old_PRType"));
+            PRTypeChecking(ViewData.Get("Old_PRType"), ViewData.Get("Old_NonMaterialFLag"));
+        }
+        else $(idHeader.PR_COORDINATOR).val(ViewData.Get("Old_PRCoordinator"));
+    }
+
+    function PRCoordinatorChecking() {
+        var coor = $(idHeader.PR_COORDINATOR).val();
+        if (CountItem("PR Coordinator") == "") {
+            ViewData.Add("Old_PRCoordinator", coor);
+            populateComboBox('costcenter');
+        }
+    }
+
+    @*function refreshCostCenter()
+    {
+        var target = "";
+        var url = "";
+
+        if ($(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).is(':enabled'))
+            target = target + "#cascade-costcenter, ";
+        if ($(idItem.COST_CENTER_DIV).is(":visible"))
+            target = target + "#cascade-costcenter-subitem, ";
+        if (target != "")
+            target = target.substr(0, target.length - 2);
+
+        url = "SelectCostCenterByCoordinator";
+
+        var divId = $(idHeader.DIVISION_ID).val() == "" ? 0 : $(idHeader.DIVISION_ID).val();
+        if ((divId === 0) || (divId === null))
+            divId = $(idHeader.USER_DIVISION_ID).val();
+
+        var pr_coor = $(idHeader.PR_COORDINATOR).val();
+
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._PRCreationController" + url,
+            data: { paramPrCoordinator: pr_coor, paramDivId: divId },
+            success: function (resultMessage) {
+                $(target).html(resultMessage);
+            },
+            error: function (resultMessage) {
+                var e = resultMessage.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }*@
+
+    function onChangeUOM(type) {
+        var label = "#auom";
+        if (type == "subitem") label = label + type;
+
+        if (type == "item") $(idItem.CALC_VALUE).val($("#" + $(label + " option:selected").attr('id')).data("calc_value"));
+        else $(idSubItem.CALC_VALUE).val($("#" + $(label + " option:selected").attr('id')).data("calc_value"));
+
+        GetAmount(type);
+    }
+
+    function onChangeAssetCat() {
+        var assetcat = $(idItem.ASSET_CATEGORY).val();
+        var disableList = new Array();
+        var enableList = new Array();
+        var clearList = new Array();
+        var lookupDisableList = new Array();
+        var lookupEnableList = new Array();
+
+        switch (assetcat) {
+            case ViewData.Get("AssetCategory")["NonAsset"]:
+                {
+                    disableList.push(idItem.ASSET_CLASS, idItem.ASSET_NO, idItem.SUBASSET_NO);
+                    clearList.push(idItem.ASSET_CLASS, idItem.ASSET_LOCATION, idItem.ASSET_NO, idItem.SUBASSET_NO);
+                    lookupDisableList.push(idDivLookup.DIV_ASSETLOCITEM);
+
+                    ViewData.Add("Old_AssetCat", assetcat);
+
+                    if ($(idItem.ITEM_CLASS).val() == "M" && ($(idItem.WBS_NO).val().substr(0, 1) == "P") || ($(idItem.WBS_NO).val().substr(0, 1) == "S")) {
+                        clearList.push(idItem.COST_CENTER);
+                        disableList.push(idItem.COST_CENTER);
+                    }
+                    break;
+                }
+            case ViewData.Get("AssetCategory")["MainAsset"]:
+                {
+                    //disableList.push(idItem.ASSET_NO);
+                    disableList.push(idItem.SUBASSET_NO);
+                    enableList.push(idItem.ASSET_CLASS, idItem.ASSET_NO);
+                    clearList.push(idItem.ASSET_CLASS, idItem.ASSET_LOCATION, idItem.ASSET_NO);
+                    lookupEnableList.push(idDivLookup.DIV_ASSETLOCITEM);
+
+                    $(idItem.SUBASSET_NO).val("00")
+                    ViewData.Add("Old_AssetCat", assetcat);
+                    break;
+                }
+            case ViewData.Get("AssetCategory")["SubAsset"]:
+                {
+                    //$(idItem.ASSET_NO).val($(idHeader.MAIN_ASSET_NO).val();
+                    enableList.push(idItem.ASSET_CLASS, idItem.SUBASSET_NO, idItem.ASSET_NO);
+                    clearList.push(idItem.ASSET_CLASS, idItem.ASSET_LOCATION);
+                    lookupEnableList.push(idDivLookup.DIV_ASSETLOCITEM);
+                    $(idItem.ASSET_NO).val("")
+                    $(idItem.SUBASSET_NO).val("")
+
+                    ViewData.Add("Old_AssetCat", assetcat);
+                    break;
+                }
+            case ViewData.Get("AssetCategory")["Maintenance"]:
+                {
+                    if ($(idHeader.MAIN_ASSET_NO).val() == 0) {
+                        $.messagebox.show(
+                        "Select Asset Category",
+                        "Please fill Equipment No on header",
+                        "WRN",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                        $(idItem.ASSET_CATEGORY).val(ViewData.Get("Old_AssetCat"));
+                    }
+                    else {
+                        $(idItem.ASSET_CLASS).val($(idHeader.ASSET_CLASS_HIDE).val());
+                        $(idItem.ASSET_NO).val($(idHeader.MAIN_ASSET_NO).val());
+                        $(idItem.ASSET_LOCATION).val($(idHeader.ASSET_LOC_HIDE).val());
+                        disableList.push(idItem.ASSET_CLASS, idItem.ASSET_LOCATION, idItem.ASSET_NO);
+
+                        ViewData.Add("Old_AssetCat", assetcat);
+                    }
+                    break;
+                }
+            case "":
+                {
+                    enableList.push(idItem.ASSET_CLASS, idItem.ASSET_NO, idItem.COST_CENTER);
+                    lookupEnableList.push(idDivLookup.DIV_ASSETLOCITEM, idDivLookup.DIV_GLITEM);
+                    break;
+                }
+        }
+
+        if (assetcat == ViewData.Get("AssetCategory")["NonAsset"]) {
+            if ($(idItem.ITEM_CLASS).html() == "M" && ($(idItem.WBS_NO).val().substr(0, 1) == "P") || ($(idItem.WBS_NO).val().substr(0, 1) == "S")) {
+                clearList.push(idItem.COST_CENTER);
+                disableList.push(idItem.COST_CENTER);
+                lookupEnableList(idDivLookup.DIV_GLITEM);
+            }
+        }
+        else {
+            if ($(idItem.ITEM_CLASS).html() == "M" && ($(idItem.WBS_NO).val().substr(0, 1) == "P") || ($(idItem.WBS_NO).val().substr(0, 1) == "S")) {
+                clearList.push(idItem.GL_ACCOUNT);
+                enableList.push(idItem.COST_CENTER);
+                lookupDisableList(idDivLookup.DIV_GLITEM);
+            }
+        }
+
+        if (disableList[0] != "undefined" && disableList[0] != null)
+            $.Disable(disableList);
+
+        if (enableList[0] != "undefined" && enableList[0] != null)
+            $.Enable(enableList);
+
+        if (clearList[0] != "undefined" && clearList[0] != null)
+            $.Clear(clearList);
+
+        if (lookupDisableList[0] != "undefined" && lookupDisableList[0] != null)
+            DisableLookup(lookupDisableList, true);
+
+        if (lookupEnableList[0] != "undefined" && lookupEnableList[0] != null)
+            DisableLookup(lookupEnableList, false);
+    }
+
+    function onChangeMainAssetNo() {
+        var result = validateMainAssetNo();
+        if (result == null) {
+            $.messagebox.show(
+                "Main Asset No Validation",
+                "Main Asset No is not Valid",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+            $(idHeader.MAIN_ASSET_NO).val('');
+        }
+        else {
+            $(idHeader.ASSET_CLASS_HIDE).val(result.split('|')[0]);
+            $(idHeader.ASSET_LOC_HIDE).val(result.split('|')[1]);
+        }
+    }
+
+    function ClearEditorItem(checkType) {
+        var seqno = $(idItem.NO).html();
+
+        if ($('#addTable').find('.subitem-' + (seqno == "" ? "0" : seqno)).length != 0) {
+            ClearEditorSubItem();
+            $("#collapseitem").css("display", "none");
+            $(".subitem-" + (seqno == "" ? "0" : seqno)).remove();
+        }
+
+        ClearHtml([idItem.ITEM_CLASS]);
+        $.Clear([idItem.VALUATION_CLASS, idItem.ITEM_TYPE,
+                 idItem.ITEM_TYPE_DESC, idItem.WBS_NO,
+                 idItem.COST_CENTER, idItem.GL_ACCOUNT,
+                 idItem.MAT_NO, idItem.MAT_DESC,
+                 idItem.UOM, idItem.DELIVERY_DATE_ITEM, idItem.VENDOR_CD,
+                 idItem.ASSET_CATEGORY, idItem.ASSET_CLASS,
+                 idItem.ASSET_LOCATION, idItem.ASSET_NO,idItem.SUBASSET_NO,
+                 idItem.QTY, idItem.PRICE, idItem.AMOUNT]);
+        $.Disable([idItem.ASSET_NO, idItem.SUBASSET_NO]);
+        $.Enable([idItem.CURR, idItem.MAT_DESC, idItem.QTY, idItem.UOM, idItem.PRICE, idItem.COST_CENTER, idItem.MAT_DESC]);
+        DisableLookup([idDivLookup.DIV_VALCLASS, idDivLookup.DIV_MATERIAL, idDivLookup.DIV_WBSITEM, idDivLookup.DIV_GLITEM], false);
+
+        populateComboBox('costcenter');
+
+        ClearHtml([idItem.NO]);
+        $(idItem.CURR).val(ViewData.Get("DefaultCurr"));
+        $("#add-grid").css("display", "");
+        $(idItem.ITEM_LIST).val("0");
+        onClickRowItem("0");
+
+        if (checkType === "undefined") PRTypeChecking($(idHeader.PR_TYPE).val(), $('#' + $(idHeader.PR_TYPE).val()).data('nonmaterial_flag'));
+    }
+
+    function EditorInitialize(mode) {
+        switch (mode) {
+            case "EditItem":
+                {
+                    if ($(idHeader.PR_NO).val() != "0") {
+                        $.Disable([idItem.UOM]);
+                        DisableLookup([idDivLookup.DIV_VALCLASS, idDivLookup.DIV_MATERIAL], true);
+
+                        if ($(idHeader.PR_TYPE).val() != ViewData.Get("PRType")["Reservation"])
+                            DisableLookup([idDivLookup.DIV_WBSITEM], true);
+
+                        if (($(idItem.MAT_NO).val() != "") && ($(idItem.ITEM_CLASS).html() == "M"))
+                            $.Disable([idItem.CURR, idItem.PRICE]);
+
+                        if ($(idItem.ITEM_CLASS).html() == "M")
+                            $.Enable([idItem.QTY]);
+                        else {
+                            $.Disable([idItem.QTY]);
+                            DisableLookup([idDivLookup.DIV_GLITEM], true);
+                        }
+
+                        if (($(idItem.MAT_NO).val() == "" || $(idItem.MAT_NO).val() == null) && (parseInt($(idItem.USED_QTY).val()) > 0))
+                            $.Disable([idItem.MAT_DESC]);
+                    }
+
+                    if ($(idItem.MAT_NO).val() != "" && $(idItem.MAT_NO).val() != null) {
+                        $.Disable([idItem.MAT_DESC]);
+                        if ($(idItem.IS_PRICE_EXIST).val() == "" || $(idItem.IS_PRICE_EXIST).val() == null)
+                            $.Enable([idItem.CURR, idItem.PRICE]);
+                    }
+
+                    if (($(idItem.PRICE).val() == "0" || $(idItem.PRICE).val() == "") && $(idItem.ITEM_CLASS).html() == "M")
+                        $.Enable([idItem.PRICE]);
+
+                    $(idItem.ITEM_LIST).val("0");
+                    onClickRowItem("0");
+
+                    break;
+                }
+            case "EditSubItem":
+                {
+                    DisableLookup([idDivLookup.DIV_GLSUBITEM], false);
+                    if ($(idHeader.PR_NO).val() != "0") {
+//                        if ($(idHeader.PR_TYPE).val() != ViewData.Get("PRType")["Reservation"])
+//                            DisableLookup([idDivLookup.DIV_WBSSUBITEM], true);
+                        DisableLookup([idDivLookup.DIV_WBSSUBITEM], false);
+
+                        if (parseInt($(idItem.USED_QTY).val()) > 0)
+                            $.Disable([idSubItem.MAT_DESC]);
+                    }
+                    break;
+                }
+        }
+        $.Disable([idBtn.SAVE_HEADER, idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER]);
+    }
+
+    function GetAmount(type) {
+        if (type == "subitem") {
+            if ($(idSubItem.QTY).val() == "" && $(idSubItem.QTY).val().indexOf('.') <= -1) $(idSubItem.QTY).val('0')
+            else if ($(idSubItem.QTY).val().indexOf('.') <= -1) $(idSubItem.QTY).val(parseFloat($(idSubItem.QTY).val()));
+            if ($(idSubItem.PRICE).val() == "") $(idSubItem.PRICE).val('0')
+
+            var price = $.AsPrice(parseFloat($(idSubItem.PRICE).val().replace(/,/g, "")).toString());
+            $(idSubItem.PRICE).val($.AsPrice(price));
+
+            $(idSubItem.AMOUNT).val($.AsPrice((parseFloat($(idSubItem.QTY).val()).toFixed(2) * parseFloat($(idSubItem.CALC_VALUE).val()) * parseFloat($(idSubItem.PRICE).val().replace(/,/g, ""))).toString()));
+        }
+        else {
+            if ($(idItem.QTY).val() == "" && $(idItem.QTY).val().indexOf('.') <= -1) $(idItem.QTY).val('0')
+            else if ($(idItem.QTY).val().indexOf('.') <= -1) $(idItem.QTY).val(parseFloat($(idItem.QTY).val()));
+            if ($(idItem.PRICE).val() == "") $(idItem.PRICE).val('0')
+
+            var price = $.AsPrice(parseFloat($(idItem.PRICE).val().replace(/,/g, "")).toString());
+            $(idItem.PRICE).val($.AsPrice(price));
+
+            $(idItem.AMOUNT).val($.AsPrice((parseFloat($(idItem.QTY).val()).toFixed(2) * parseFloat($(idItem.CALC_VALUE).val()) * parseFloat($(idItem.PRICE).val().replace(/,/g, ""))).toString()));
+        }
+    }
+
+    function collapseItem(addedit_flag, seqno) {
+        var keyitem = addedit_flag == 'Y' ? '' : seqno;
+        var keysubitem = addedit_flag == 'Y' ? ($('#no').html() == '' ? '-0' : '-' + $('#no').html()) : seqno;
+
+        if ($("#collapseitem" + keyitem).children('.fa').hasClass("fa-plus-square-o")) {
+            // EXPAND GRID
+            $("#collapseitem" + keyitem).children('.fa').removeClass("fa-plus-square-o");
+            $("#collapseitem" + keyitem).children('.fa').addClass("fa-minus-square-o");
+
+            if ($('#detail-grid-creation').find('.subitem' + keysubitem).length == 0)
+                loadDetailGrid(addedit_flag, seqno);
+            else
+                $('.subitem' + keysubitem).css("display", "");
+        } else {
+            // COLLAPSE GRID
+            $("#collapseitem" + keyitem).children('.fa').removeClass("fa-minus-square-o");
+            $("#collapseitem" + keyitem).children('.fa').addClass("fa-plus-square-o");
+
+            $(".subitem" + keysubitem).css("display", "none");
+        }
+    }
+
+    function onClickRowItem(ITEM_NO) {
+        if (ITEM_NO == "") ITEM_NO = $(idItem.ITEM_LIST).val();
+        else $(idItem.ITEM_LIST).val(ITEM_NO);
+
+        if (ITEM_NO != "0") {
+            $("#txtdeliverydate").val($(".tdeliverydate-" + ITEM_NO).html());
+            $("#txtvendor").val($(".tvendorcd-" + ITEM_NO).html());
+            $("#txtassetcat").val($(".tassetcatdesc-" + ITEM_NO).html());
+            $("#txtassetclass").val($(".tassetclass-" + ITEM_NO).html());
+            $("#txtassetloc").val($(".tassetloc-" + ITEM_NO).html());
+            $("#txtassetno").val($(".tassetno-" + ITEM_NO).html());
+
+            $("#additional-editform").css("display", "none");
+            $("#additional-displaymode").css("display", "");
+        }
+        else {
+            $("#additional-editform").css("display", "");
+            $("#additional-displaymode").css("display", "none");
+        }
+    }
+</script>
+
+<script type="text/javascript" id="Header-Management">
+    function SavePR(SaveType, step, msg) {
+        if (step == 1) {
+            if (isUnsaveItem() === true) {
+                SaveItem(SaveType, '0');
+            }
+            else {
+                $.disable_enable_button.disable();
+                confirmSave(msg, SaveType);
+            }
+        }
+        else {
+            confirmSave(msg, SaveType);
+        }
+    }
+
+    function confirmSave(msg, SaveType) {
+        if (msg == "") {
+            msg = HeaderMandatoryValidation(msg);
+            if (msg == "" && $('.isrow').length <= 0) { msg = msg + "@PurchasingRequisitionMessages.singleRowCreated" }
+        }
+
+        if (msg != "") {
+            $.disable_enable_button.enable();
+            $.messagebox.show(
+                SaveType + " PR",
+                msg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+                )
+            $.Enable([idBtn.SAVE_HEADER, idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER]);
+            return false;
+        }
+        else {
+            $.disable_enable_button.enable();
+            msg = SaveType;
+            if (SaveType == "Save") msg = msg + " as Draft";
+
+            $.messagebox.show(
+                SaveType + " PR",
+                "Are You Sure You Want to " + msg + " Data ?",
+                "INF",
+                "CONFIRM",
+                "doSavePR('" + SaveType + "')",
+                ""
+            )
+        }
+    }
+
+    function getPRParam(SaveType) {
+        return {
+            PR_COORDINATOR: $(idHeader.PR_COORDINATOR).val(),
+            PLANT_CD: $(idHeader.PLANT_CD).val(),
+            SLOC_CD: $(idHeader.SLOC_CD).val(),
+            DIVISION_ID: $(idHeader.DIVISION_ID).val(),
+            DIVISION_NAME: $(idHeader.DIVISION_ID + " option:selected").text(),
+            PROJECT_NO: $(idHeader.PROJECT_NO).val(),
+            PR_NO: $(idHeader.PR_NO).val(),
+            PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+            PR_DESC: $(idHeader.PR_DESC).val(),
+            DELIVERY_DATE: GetValidDate($(idHeader.DELIVERY_DATE).val()),
+            PR_TYPE: $(idHeader.PR_TYPE).val(),
+            URGENT_DOC: $(idHeader.URGENT_DOC).val(),
+            PR_NOTES: $(idHeader.NOTE).val(),
+            MAIN_ASSET_NO: $(idHeader.MAIN_ASSET_NO).val(),
+
+            type: SaveType
+        }
+    }
+
+    function saveHeaderTemp() {
+        var param = getPRParam("");
+        $.progressbox.show("Save Temp Header", "Saving Temp Header onprogress . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._SaveHeader",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (resultMessage) {
+                var message = resultMessage.split('|');
+                if (message[0] != 'SUCCESS') {
+                    $.messagebox.show(
+                        "Save Temp Header",
+                        message[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+
+                    $.progressbox.hide();
+                }
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+
+        return "done";
+    }
+
+    function HeaderMandatoryValidation() {
+        var msg = "";
+        var item = "";
+
+        if (msg == "") {
+
+            var isvalid = $.ValidateMandatory([idHeader.PR_TYPE, idHeader.PLANT_CD, idHeader.SLOC_CD, idHeader.PR_DESC, idHeader.PR_COORDINATOR, idHeader.DELIVERY_DATE]);
+            if (!isvalid) {
+                if ($(idHeader.PR_TYPE).val() == '')
+                    item = item + " PR Type,";
+
+                if ($(idHeader.PLANT_CD).val() == '')
+                    item = item + " Plant Code,";
+
+                if ($(idHeader.SLOC_CD).val() == '')
+                    item = item + " Storage Code,";
+
+                if ($(idHeader.PR_DESC).val().trim() == '')
+                    item = item + " PR Desc,";
+
+                if ($(idHeader.PR_COORDINATOR).val() == '')
+                    item = item + " PR Checker,";
+
+                if ($(idHeader.DELIVERY_DATE).val() == '')
+                    item = item + " Delivery Date,";
+            }
+
+            if (item !== "")
+                msg = msg + "<p>" + AssignVariable("@PurchasingRequisitionMessages.mandatoryField",
+                                            [item.substring(0, item.length - 1)]) + "</p>";
+
+            if (($(idHeader.URGENT_DOC).val() != '') && ($(idHeader.URGENT_DOC).val() != 'N') && (File.MEMO.count == 0))
+                msg = msg + "<p>" + "@PurchasingRequisitionMessages.mandatoryMemo" + "</p>";
+
+            if (($(idHeader.PR_TYPE).val() == ViewData.Get("PRType")["MaintenanceOrder"]) && ($(idHeader.MAIN_ASSET_NO).val() == ""))
+                msg = msg + "<p>" + AssignVariable("@PurchasingRequisitionMessages.mandatoryItemIf",
+                                            ["Main Asset No", "Procurement Type is Maintenance Order"]) + "</p>";
+        }
+        return msg;
+    }
+
+    function doSavePR(SaveType) {
+        $.Disable([idBtn.SAVE_HEADER, idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+
+        var param = getPRParam(SaveType);
+        $.progressbox.show("Save PR", "Saving PR onprogress . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._SavePR",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (resultMessage) {
+                var message = resultMessage.split('|');
+                $.Enable([idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+                if ($(idHeader.PR_NO).val() == "0") $.Enable([idBtn.SAVE_HEADER]);
+                if (message[0] === 'SUCCESS') {
+                    $.progressbox.hide();
+
+                    $.messagebox.show(
+                        SaveType + " PR",
+                        AssignVariable("@PurchasingRequisitionMessages.successSavePR", [message[1]]),
+                        "SUC",
+                        "SINGLE",
+                        "ShowLatestCreation('" + message[1] + "','" + $(idHeader.DIVISION_ID).val() + "')",
+                        ""
+                    );
+                    
+                }
+                else if (message[0] === 'WARNING') {
+                    $.progressbox.hide();
+
+                    $.messagebox.show(
+                        SaveType + " PR",
+                        "Success " + SaveType + " data with PR No. " + message[1] + ", with WARNING " + message[2],
+                        "WRN",
+                        "SINGLE",
+                        "ShowLatestCreation(message[1], $(\"#adivision\").val())",
+                        ""
+                    );
+                }
+                else {
+                    $.progressbox.hide();
+
+                    console.log(message[1]);
+                    $.messagebox.show(
+                        SaveType + " PR",
+                        message[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+                }
+            },
+            error: function (resultMessage) {
+                console.log(resultMessage);
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function CancelCreation() {
+        $.messagebox.show(
+            "Cancel PR Creation",
+            "Are You Sure You Want to Cancel All Changes ?",
+            "INF",
+            "CONFIRM",
+            "doCancelCreation()",
+            ""
+            )
+    }
+
+    function doCancelCreation() {
+        $.progressbox.show("Cancel Creation / Update", "Abort all changed Data . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._CancelCreation",
+            data: {
+                PR_NO: $(idHeader.PR_NO).val(),
+                PROCESS_ID: $(idHeader.PROCESS_ID).val()
+            },
+            success: function (resultMessage) {
+                $('.removed').remove();
+                $.progressbox.hide();
+                window.close();
+                window.location = "/PRInquiry";
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function ShowLatestCreation(PR_NO, DIVISION_ID) {
+        $.progressbox.show("Get PR Data", "Get New PR Data . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._ShowLatestPR",
+            data: {
+                PR_NO: PR_NO,
+                DIVISION_ID: DIVISION_ID
+            },
+            success: function (resultMessage) {
+                $.progressbox.hide();
+                window.location = "/PRInquiry";
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript" id="Cascade-and-Validation-Combo">
+    function isUnsaveItem() {
+        if ($(idItem.ITEM_CLASS).html() != "" ||
+            $(idItem.VALUATION_CLASS).val() != "" ||
+            $(idItem.WBS_NO).val() != "" ||
+            $(idItem.GL_ACCOUNT).val() != "" ||
+            $(idItem.MAT_NO).val() != "" ||
+            $(idItem.MAT_DESC).val() != "" ||
+            ($(idItem.QTY).val() != "" && $(idItem.QTY).val() != "0") ||
+            $(idItem.UOM).val() != "" ||
+            ($(idItem.CURR).val() != ViewData.Get("DefaultCurr") && $(idItem.CURR).val() != "") ||
+            ($(idItem.PRICE).val() != "" && $(idItem.PRICE).val() != "0") ||
+            $(idItem.DELIVERY_DATE_ITEM).val() != "" ||
+            $(idItem.ASSET_CATEGORY).val() != "" ||
+            $(idItem.ASSET_CLASS).val() != "" ||
+            $(idItem.ASSET_LOCATION).val() != "" ||
+            $(idItem.ASSET_NO).val() + $(idItem.SUBASSET_NO).val() != "" ||
+            $(idItem.VENDOR_CD).val() != "")
+            return true;
+        else
+            return false;
+    }
+
+    function isUnsaveSubItem() {
+        if ($(idSubItem.WBS_NO).val() != "" ||
+            $(idSubItem.COST_CENTER, $(idSubItem.COST_CENTER_DIV)).val() != "" ||
+            $(idSubItem.GL_ACCOUNT).val() != "" ||
+            $(idSubItem.MAT_DESC).val() != "" ||
+            ($(idSubItem.UOM).val() != "AU" && $(idSubItem.UOM).val() != "") ||
+            ($(idSubItem.QTY).val() != "" && $(idSubItem.QTY).val() != "0") ||
+            ($(idSubItem.PRICE).val() != "" && $(idSubItem.PRICE).val() != "0") ||
+            ($(idSubItem.AMOUNT).val() != "" && $(idSubItem.AMOUNT).val() != "0"))
+            return true;
+        else
+            return false;
+    }
+
+    function validateMainAssetNo() {
+        var mainasset = $(idHeader.MAIN_ASSET_NO).val();
+
+        //TO DO : Checking Main Asset No
+        return '208|Sunter Plant';
+    }
+
+    function validateAssetNoItem(MainAssetNo, SubAssetNo) {
+        return true;
+    }
+</script>
+
+<script type="text/javascript" id="Item-Data-Management">
+    function DeleteAllItem(procid) {
+        if (isUnsaveItem() === true)
+            ClearEditorItem();
+
+        $.progressbox.show("Deleting Item", "Deleting Item . . .");
+        var procid = $(idHeader.PROCESS_ID).val();
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._DeleteAllItem",
+            data: { PROCESS_ID: procid },
+            success: function (resultMessage) {
+                $.ajax({
+                    type: $tdk.AjaxMethod,
+                    url: "@PRCreationController._GetItemTemp",
+                    data: { PROCESS_ID: procid },
+                    success: function (data) {
+                        if (data.PROCESS_STATUS === "ERR") {
+                            var msg = "Data Successfully Deleted" +
+                                        "Error While Get Data " + data.MESSAGE_CONTENT;
+
+                            $.messagebox.show(
+                                "Delete Detail PR",
+                                msg,
+                                "ERR",
+                                "SINGLE",
+                                "",
+                                ""
+                            )
+                            $.progressbox.hide();
+                            return;
+                        }
+
+                        $('#detail-grid-creation').html(data);
+                        if ($(".isrow").length <= 0) {
+                            $.Disable([idBtn.SAVE_HEADER, idBtn.SUBMIT_HEADER]);
+                        }
+
+                        ViewData.Add("Old_PRType", $(idHeader.PR_TYPE).val());
+                        ViewData.Add("Old_NonMaterialFlag", $('#' + ViewData.Get("Old_PRType")).data('nonmaterial_flag'));
+                        populateComboBox('costcenter');
+
+                        onClickRowItem("0");
+                        $('#itemdropdown option[value!="0"]').remove();
+
+                        $.progressbox.hide();
+                    },
+                    error: function (resultMessage) {
+                        var e = resultMessage.responseText;
+                        $.progressbox.hide();
+                        alert($(e).find("title").text());
+                    }
+                });
+            },
+            error: function (resultMessage) { }
+        });
+    }
+
+    function DeleteItem(itemno) {
+        $.messagebox.show(
+            "Delete Item",
+            "Are You Sure You Want to Delete this Item ?",
+            "INF",
+            "CONFIRM",
+            "doDeleteItem('" + itemno + "')",
+            ""
+        )
+    }
+
+    function doDeleteItem(itemno) {
+        $.progressbox.show("Deleting Item", "Deleting Item . . .");
+        var procid = $(idHeader.PROCESS_ID).val();
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._DeleteItem",
+            data: {
+                ITEM_NO: itemno,
+                PROCESS_ID: procid
+            },
+            success: function (resultMessage) {
+                if (resultMessage === "SUCCESS") {
+                    $.ajax({
+                        type: $tdk.AjaxMethod,
+                        url: "@PRCreationController._GetItemTemp",
+                        data: { PROCESS_ID: procid },
+                        success: function (data) {
+
+                            if (data.PROCESS_STATUS === "ERR") {
+                                var msg = "Data Successfully Deleted" +
+                                            "Error While Get Data " + data.MESSAGE_CONTENT;
+
+                                $.messagebox.show(
+                                    "Delete Detail PR",
+                                    msg,
+                                    "ERR",
+                                    "SINGLE",
+                                    "",
+                                    ""
+                                )
+
+                                $.progressbox.hide();
+                                return;
+                            }
+
+                            $('#detail-grid-creation').html(data);
+
+                            if ($(".isrow").length <= 0) {
+                                $.Disable([idBtn.SAVE_HEADER, idBtn.SUBMIT_HEADER]);
+                            }
+
+                            $(idItem.ITEM_LIST).val("0");
+                            onClickRowItem("0");
+
+                            $.progressbox.hide();
+                        },
+                        error: function (resultMessage) {
+                            var e = resultMessage.responseText;
+                            $.progressbox.hide();
+                            alert($(e).find("title").text());
+                        },
+                        complete: function (resultMessage) {
+                            $.ajax({
+                                type: $tdk.AjaxMethod,
+                                url: "@PRCreationController._GetListItem",
+                                data: { PROCESS_ID: procid },
+                                success: function (data) {
+                                    $(idItem.ITEM_LIST).html(data);
+                                },
+                                error: function (resultMessage) {
+                                    var e = resultMessage.responseText;
+                                    $.progressbox.hide();
+                                    alert($(e).find("title").text());
+                                }
+                            });
+                        }
+                    });
+                }
+                else {
+                    $.messagebox.show(
+                        "Delete Detail PR",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+
+                    $.progressbox.hide();
+                }
+            },
+            error: function (resultMessage) { }
+        });
+    }
+
+    function CopyItem(item_no, subitem_no, type) {
+        $.progressbox.show("Copying Data", "Copying data . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._CopyData",
+            data: {
+                ITEM_NO: item_no,
+                SUBITEM_NO: subitem_no,
+                TYPE: type,
+                PR_TYPE: $(idHeader.PR_TYPE).val(),
+                PROCESS_ID: $(idHeader.PROCESS_ID).val()
+            },
+            success: function (resultMessage) {
+                if (resultMessage === "SUCCESS") {
+                    $.progressbox.hide();
+                    if (type === "item") {
+                        $.progressbox.show("Get Data Item", "Get Data Item . . .");
+                        $.ajax({
+                            type: $tdk.AjaxMethod,
+                            url: "@PRCreationController._GetItemTemp",
+                            data: { PROCESS_ID: $(idHeader.PROCESS_ID).val() },
+                            success: function (data) {
+                                $('#detail-grid-creation').html(data);
+                                //$.progressbox.hide();
+                            },
+                            error: function (resultMessage) {
+                                var e = data.responseText;
+                                //$.progressbox.hide();
+                                alert($(e).find("title").text());
+                            }
+                        });
+                    }
+                    else {
+                        CancelSaveSubItem(item_no);
+                    }
+                }
+                else {
+                    $.messagebox.show(
+                        "Copy Data",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) { },
+            complete: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function getItemPRParam(seqno) {
+        return {
+            PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+            PR_TYPE: $(idHeader.PR_TYPE).val(),
+            ITEM_CLASS: $(idItem.ITEM_CLASS).html(),
+            ITEM_NO: seqno,
+            VALUATION_CLASS: $(idItem.VALUATION_CLASS).val().substring(0, 4),
+            VALUATION_CLASS_DESC: $(idItem.VALUATION_CLASS_DESC).val(),
+            WBS_NO: ($(idItem.ITEM_CLASS).html() == 'S' || $(idItem.WBS_NO).val() == "") ? 'X' : $(idItem.WBS_NO).val(),
+            WBS_NAME: $(idItem.ITEM_CLASS).html() == 'S' ? 'X' : $(idItem.WBS_NAME).val(),
+            COST_CENTER: $(idItem.ITEM_CLASS).html() == 'S' ? 'X' : $(idItem.COST_CENTER).val(),
+            GL_ACCOUNT_CD: $(idItem.ITEM_CLASS).html() == 'S' ? 'X' : $(idItem.GL_ACCOUNT).val(),
+            MAT_NUMBER: $(idItem.ITEM_CLASS).html() == 'S' ? 'X' : $(idItem.MAT_NO).val(),
+            CAR_FAMILY_CD: $(idItem.CAR_FAMILY_CD).val(),
+            MAT_GRP_CD: $(idItem.MAT_GRP_CD).val(),
+            MAT_TYPE_CD: $(idItem.MAT_TYPE_CD).val(),
+            ITEM_TYPE: $(idItem.ITEM_TYPE).val(),
+            MAT_DESC: $(idItem.MAT_DESC).val(),
+            QTY: $(idItem.QTY).val() || 0,
+            UOM: $(idItem.UOM).val(),
+            CURR: $(idItem.CURR).val(),
+            PRICE: $(idItem.PRICE).val().replace(/,/g, "") || 0,
+            AMOUNT: $(idItem.AMOUNT).val().replace(/,/g, "") || 0,
+            DELIVERY_DATE_ITEM: GetValidDate($(idItem.DELIVERY_DATE_ITEM).val()) == "" ? null : GetValidDate($(idItem.DELIVERY_DATE_ITEM).val()),
+            VENDOR_CD: $(idItem.VENDOR_CD).val(),
+            VENDOR_NAME: $(idItem.VENDOR_NAME).val(),
+            QUOTA_FLAG: $(idItem.QUOTA_FLAG).val(),
+            ASSET_CATEGORY_CD: $(idItem.ASSET_CATEGORY).val(),
+            ASSET_CLASS: $(idItem.ASSET_CLASS).val(),
+            ASSET_LOCATION: $(idItem.ASSET_LOCATION).val(),
+            ASSET_NO: $(idItem.ASSET_NO).val() + (!$(idItem.SUBASSET_NO).val() ? "" : "-") + $(idItem.SUBASSET_NO).val()
+        }
+    }
+
+    function validateItem() {
+        var mandatoryDetailItem = "";
+        var mandatoryItemIf = "";
+        var mandatoryAsset = "";
+        var asset = "";
+        var isNumberItem = "";
+        var isGreaterThanZero = "";
+        var msg = "";
+        var reg = new RegExp(/^\d+(?:\.\d{1,18})?$/);
+        var checkAssetNo = true;
+        var prtype = $(idHeader.PR_TYPE).val();
+
+        if ($(idItem.ITEM_CLASS).html() == "S") {
+            if (isUnsaveSubItem())
+                msg = SaveSubItem('0');
+        }
+
+        if (msg == "") {
+            if ($(idItem.ITEM_CLASS).html() != "S") {
+                if ($(idItem.WBS_NO).val() == "") {
+                    if (prtype == ViewData.Get("PRType")["Standard"] && $(idHeader.URGENT_DOC).val() == 'N')
+                        msg = msg + AssignVariable("@PurchasingRequisitionMessages.mandatoryReservation", ["WBS No", "PR Manual"]);
+
+                    if (prtype == ViewData.Get("PRType")["Routine"] && $(idHeader.URGENT_DOC).val() == 'N')
+                        msg = msg + AssignVariable("@PurchasingRequisitionMessages.mandatoryReservation", ["WBS No", "PR Routine"]);
+                }
+
+                if ($(idItem.QTY).val().indexOf('.') === 1)
+                    msg = msg + AssignVariable("@PurchasingRequisitionMessages.isDecimal", ["Item Quantity", "Item Class is Material"]);
+
+                /// Selain P/S/I/L cost center mandatory
+                if ($(idItem.WBS_NO).val().substr(0, 1) != "P" && $(idItem.WBS_NO).val().substr(0, 1) != "S" &&
+                    $(idItem.WBS_NO).val().substr(0, 1) != "I" && $(idItem.WBS_NO).val().substr(0, 1) != "L") {
+                    if ($(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).val() == '') mandatoryDetailItem = mandatoryDetailItem + "Cost Center, ";
+                }
+
+                /// WBS P/S and Asset = Non asset, Cost center should be empty.
+                if (($(idItem.WBS_NO).val().substr(0, 1) == "P" || $(idItem.WBS_NO).val().substr(0, 1) == "S")
+                    && $(idItem.ASSET_CATEGORY).val() == ViewData.Get("AssetCategory")["NonAsset"])
+                {
+                    $(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).val("X");
+                }
+                    // penambahan vaidasi cost center tidak mandatory untuk aset -- 06-09-2019 wot.rudi
+                else if (($(idItem.WBS_NO).val().substr(0, 1) == "P" || $(idItem.WBS_NO).val().substr(0, 1) == "S")
+                    && $(idItem.ASSET_CATEGORY).val() != ViewData.Get("AssetCategory")["NonAsset"])
+                {
+                    $(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).val("X");
+                }
+
+                else {
+                    if ($(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).val() == '') mandatoryDetailItem = mandatoryDetailItem + "Cost Center, ";
+                }
+
+                /// WBS I/L, GL account should be empty. WBS P/S and Asset != Non asset, GL account should be empty
+                if ($(idItem.WBS_NO).val().substr(0, 1) != "I" && $(idItem.WBS_NO).val().substr(0, 1) != "L") 
+                {
+                    if (($(idItem.WBS_NO).val().substr(0, 1) == "P" || $(idItem.WBS_NO).val().substr(0, 1) == "S") && $(idItem.ASSET_CATEGORY).val() != ViewData.Get("AssetCategory")["NonAsset"]) {
+                        //$(idItem.GL_ACCOUNT).val('X');
+
+                        //perubahan GL account mandatory untuk wbs kecuali i --  06/09/2019 wot.rudi
+                        if ($(idItem.GL_ACCOUNT).val() == '') mandatoryDetailItem = mandatoryDetailItem + "GL Account, "; 
+                    }
+                    else {
+                        if ($(idItem.GL_ACCOUNT).val() == '') mandatoryDetailItem = mandatoryDetailItem + "GL Account, ";
+                    }
+                }
+                else $(idItem.GL_ACCOUNT).val('X');
+
+                /// Check QTY > 0
+                if (parseFloat($(idItem.QTY).val()) <= 0)
+                    isGreaterThanZero = isGreaterThanZero + "Quantity, ";
+
+                if (parseFloat($(idItem.PRICE).val()) <= 0) {
+                    isGreaterThanZero = isGreaterThanZero + "Price, ";
+                }
+
+                if (parseFloat($(idItem.AMOUNT).val()) <= 0) {
+                    isGreaterThanZero = isGreaterThanZero + "Amount, ";
+                }
+
+                /// Check if PR_RESERVATION, price should > 0
+                if (prtype == ViewData.Get("PRType")["Reservation"] && parseFloat($(idItem.PRICE).val()) <= 0)
+                    isGreaterThanZero = isGreaterThanZero + "Price, ";
+            }
+
+            if ($(idItem.MAT_NO).val() == '') {
+                if (prtype == ViewData.Get("PRType")["Reservation"])
+                    msg = msg + AssignVariable("@PurchasingRequisitionMessages.mandatoryReservation", ["Material No", "PR Reservation"]);
+            }
+
+            if ($(idItem.VALUATION_CLASS).val() == '')
+                mandatoryDetailItem = mandatoryDetailItem + "Item Category, ";
+            if ($(idItem.QTY).val() == '')
+                mandatoryDetailItem = mandatoryDetailItem + "Quantity, ";
+            if ($(idItem.CURR).val() == '')
+                mandatoryDetailItem = mandatoryDetailItem + "Currency Code, ";
+            if ($(idItem.UOM).val() == '')
+                mandatoryDetailItem = mandatoryDetailItem + "UOM, ";
+            if ($(idItem.PRICE).val().replace(/,/g, "") == '')
+                mandatoryDetailItem = mandatoryDetailItem + "Price, ";
+
+            if ($(idItem.QTY).val() != '') {
+                if (reg.test($(idItem.QTY).val()) == false)
+                    isNumberItem = isNumberItem + "Quantity, ";
+            }
+
+            if ($(idItem.PRICE).val() != '') {
+                if (reg.test($(idItem.PRICE).val().replace(/,/g, "")) == false) isNumberItem = isNumberItem + "Price, ";
+            }
+
+            if ($(idItem.ITEM_CLASS).html() != "S") {
+                if ($(idItem.MAT_DESC).val() == "")
+                    msg = msg + AssignVariable("@PurchasingRequisitionMessages.mandatoryDescription", ["Material Description", "Material No"]);
+            }
+
+            if ($(idItem.ASSET_CATEGORY).val() == ViewData.Get("AssetCategory")["SubAsset"]) {
+                if ($(idItem.ASSET_CLASS).val() == "") mandatoryAsset = mandatoryAsset + "Asset Class, ";
+                if ($(idItem.ASSET_LOCATION).val() == "") mandatoryAsset = mandatoryAsset + "Asset Location, ";
+
+                if ($(idItem.ASSET_NO).val() == "") mandatoryAsset = mandatoryAsset + "Asset No, ";
+                else if ($(idItem.SUBASSET_NO).val() == "") mandatoryAsset = mandatoryAsset + "Sub Asset No, ";
+                else checkAssetNo = validateAssetNoItem($(idItem.ASSET_NO).val() + "-" + $(idItem.SUBASSET_NO).val(), "");
+            }
+
+            if ($(idItem.ASSET_CATEGORY).val() == ViewData.Get("AssetCategory")["MainAsset"] && $(idItem.ASSET_CLASS).val() == "") mandatoryAsset = mandatoryAsset + "Asset Class, ";
+            if ($(idItem.ASSET_CATEGORY).val() == ViewData.Get("AssetCategory")["MainAsset"] && $(idItem.ASSET_LOCATION).val() == "") mandatoryAsset = mandatoryAsset + "Asset Location, ";
+
+            if ($(idItem.ASSET_CATEGORY).val() == ViewData.Get("AssetCategory")["Maintenance"]) checkAssetNo = validateAssetNoItem("", $(idItem.ASSET_NO).val() + "-" + $(idItem.SUBASSET_NO).val());
+        }
+
+        if (mandatoryDetailItem != "")
+            msg = msg + AssignVariable("@PurchasingRequisitionMessages.mandatoryDetail", [mandatoryDetailItem.substr(0, mandatoryDetailItem.length - 2), "Item"]);
+
+        if (isGreaterThanZero != "")
+            msg = msg + AssignVariable("@PurchasingRequisitionMessages.greaterThanZero", [isGreaterThanZero.substr(0, isGreaterThanZero.length - 2), "Item"]);
+
+        if (isNumberItem != "")
+            msg = msg + AssignVariable("@PurchasingRequisitionMessages.isNumber", [isNumberItem.substr(0, isNumberItem.length - 2), "Item"]);
+
+        if (checkAssetNo === false)
+            msg = msg + AssignVariable("@PurchasingRequisitionMessages.assetNoValidation", [$(idItem.ASSET_NO).val() + "-" + $(idItem.SUBASSET_NO).val()]);
+
+        if (mandatoryAsset != "") {
+            switch ($(idItem.ASSET_CATEGORY).val()) {
+                case ViewData.Get("AssetCategory")["SubAsset"]: 
+                    {
+                        asset = "Sub Asset";
+                        break;
+                    }
+                case ViewData.Get("AssetCategory")["MainAsset"]: 
+                    {
+                        asset = "Main Asset";
+                        break
+                    }
+                case ViewData.Get("AssetCategory")["Maintenance"]: 
+                    {
+                        asset = "Maintenance";
+                        break;
+                    }
+            }
+
+            msg = msg + AssignVariable("@PurchasingRequisitionMessages.mandatoryItemIf", [mandatoryAsset.substr(0, mandatoryAsset.length - 2), "Asset Category is " + asset]);
+        }
+        return msg;
+    }
+
+    function CancelSaveItem() {
+        $.progressbox.show("Get Item", "Get Item Data onprogress . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@PRCreationController._GetItemTemp",
+            data: { PROCESS_ID: $(idHeader.PROCESS_ID).val() },
+            success: function (data) {
+                $.Enable([".btnadddetail", idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER]);
+                if ($(idHeader.PR_NO).val() == '0') $.Enable([idBtn.SAVE_HEADER]);
+
+                if ($("#hiddenrow").html().length > 0) {
+                    $("#addrow").html($("#row-" + ($(idItem.NO).html() == "" ? "0" : $(idItem.NO).html())).html());
+                    $("#hiddenrow").empty();
+                }
+
+                $('#detail-grid-creation').html(data);
+
+                $("[id^=copylink]").removeClass("_link-disabled");
+                $("[id^=editlink]").removeClass("_link-disabled");
+                $("[id^=dellink]").removeClass("_link-disabled");
+
+                ClearEditorItem();
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                var e = resultMessage.responseText;
+                alert($(e).find("title").text());
+                $.progressbox.hide();
+            },
+            complete: function (resultMessage) {
+                $.ajax({
+                    type: $tdk.AjaxMethod,
+                    url: "@PRCreationController._GetListItem",
+                    data: { PROCESS_ID: $(idHeader.PROCESS_ID).val() },
+                    success: function (data) {
+                        $(idItem.ITEM_LIST).html(data);
+                    },
+                    error: function (resultMessage) {
+                        var e = resultMessage.responseText;
+                        $.progressbox.hide();
+                        alert($(e).find("title").text());
+                    },
+                    complete: function (resultMessage) {
+                        $.progressbox.hide();
+                    }
+                });
+            }
+        });
+    }
+
+    function SaveItem(SaveOrSubmit, type) {
+        //type = 0 (if trigger from submit/save button); type = 1 (if trigger from saveitem button)
+
+        var seqno = $(idItem.NO).html().length <= 0 ? "0" : $(idItem.NO).html();
+        if (type != '1') $.disable_enable_button.disable();
+        $.Disable([idBtn.SAVE_HEADER, idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+        var msg = validateItem();
+        if (msg != "") {
+            if (type == '1') {
+                $.messagebox.show(
+                    "Save Item PR",
+                    msg,
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+                $.Enable([idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+                if ($(idHeader.PR_NO).val() == '0') $.Enable([idBtn.SAVE_HEADER]);
+                return false;
+            }
+        }
+
+        if (msg == '') {
+            if (type == '1') $.progressbox.show("Save Item", "Saving Item onprogress . . .");
+            var param = getItemPRParam(seqno);
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@PRCreationController._SaveItem",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (resultMessage) {
+                    if (type == '1') onResultSaveItem(resultMessage, seqno);
+                    else msg = resultMessage;
+                },
+                error: function (resultMessage) {
+                    if (type == '1') {
+                        $.progressbox.hide();
+                        alert($(e).find("title").text());
+                    }
+                    else msg = $(e).find("title").text();
+                },
+                complete: function (resultMessage) {
+                    if (type != '1') {
+                        if (msg.split('|')[0] === "SUCCESS" || msg.split('|')[0] === "WRN") {
+                            $.ajax({
+                                type: $tdk.AjaxMethod,
+                                url: "@PRCreationController._GetItemTemp",
+                                data: { PROCESS_ID: $(idHeader.PROCESS_ID).val() },
+                                success: function (data) {
+                                    ClearEditorItem("true");
+
+                                    if ($("#hiddenrow").html().length > 0) {
+                                        $("#addrow").html($("#row-" + ($(idItem.NO).html() == "" ? "0" : $(idItem.NO).html())).html());
+                                        $("#hiddenrow").empty();
+                                    }
+
+                                    msg = msg.split('|')[1];
+
+                                    $('#detail-grid-creation').html(data);
+
+                                    $("[id^=copylink]").removeClass("_link-disabled");
+                                    $("[id^=editlink]").removeClass("_link-disabled");
+                                    $("[id^=dellink]").removeClass("_link-disabled");
+                                },
+                                error: function (resultMessage) {
+                                    var e = resultMessage.responseText;
+                                    msg = e;
+                                },
+                                complete: function (resultMessage) {
+                                    SavePR(SaveOrSubmit, 2, msg);
+                                }
+                            });
+                        }
+                        else SavePR(SaveOrSubmit, 2, msg);
+                    }
+                    else {
+                        $.ajax({
+                            type: $tdk.AjaxMethod,
+                            url: "@PRCreationController._GetListItem",
+                            data: { PROCESS_ID: $(idHeader.PROCESS_ID).val() },
+                            success: function (data) {
+                                $(idItem.ITEM_LIST).html(data);
+                            },
+                            error: function (resultMessage) {
+                                var e = resultMessage.responseText;
+                                $.progressbox.hide();
+                                alert($(e).find("title").text());
+                            },
+                            complete: function () {
+                                $.progressbox.hide();
+                            }
+                        });
+                    }
+                }
+            });
+        }
+        else if (type != '1') SavePR(SaveOrSubmit, 2, msg);
+    }
+
+    function onResultSaveItem(resultMessage, seqno) {
+        if (resultMessage.split('|')[0] === 'SUCCESS') {
+            $("#add-grid").css("display", "");
+            $.Enable([idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+            if ($(idHeader.PR_NO).val() == '0') $.Enable([idBtn.SAVE_HEADER]);
+            $.ajax({
+                type: $tdk.AjaxMethod,
+                url: "@PRCreationController._GetItemTemp",
+                data: { PROCESS_ID: $(idHeader.PROCESS_ID).val() },
+                success: function (data) {
+                    if (data.PROCESS_STATUS === "ERR") {
+
+                        var msg = "Data Successfully Saved " +
+                                    "Error While Get Data " + data.MESSAGE_CONTENT;
+
+                        $.messagebox.show(
+                            "Save Item PR",
+                            msg,
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                        $.progressbox.hide();
+                        return;
+                    }
+
+                    ClearEditorItem();
+
+                    if ($("#hiddenrow").html().length > 0) {
+                        $("#addrow").html($("#row-" + (seqno)).html());
+                        $("#hiddenrow").empty();
+                    }
+
+                    $.Enable([".btnadddetail", idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER]);
+                    if ($(idHeader.PR_NO).val() == '0') $.Enable([idBtn.SAVE_HEADER]);
+
+                    $('#detail-grid-creation').html(data);
+                    $("[id^=copylink]").removeClass("_link-disabled");
+                    $("[id^=editlink]").removeClass("_link-disabled");
+                    $("[id^=dellink]").removeClass("_link-disabled");
+
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    var e = data.responseText;
+                    alert($(e).find("title").text());
+                },
+                complete: function (resultMessage) {
+
+                    if (saveHeaderTemp() == "done") {
+                        $.ajax({
+                            type: $tdk.AjaxMethod,
+                            url: "@PRCreationController._GetListItem",
+                            data: { PROCESS_ID: $(idHeader.PROCESS_ID).val() },
+                            success: function (data) {
+                                $(idItem.ITEM_LIST).html(data);
+                            },
+                            error: function (resultMessage) {
+                                var e = resultMessage.responseText;
+                                //$.progressbox.hide();
+                                alert($(e).find("title").text());
+                            }
+                        });
+                    }
+                }
+            });
+        }
+        else {
+            $.progressbox.hide();
+
+            if (resultMessage.split('|')[0] === "WRN") {
+                $.messagebox.show(
+                    "Save Item PR",
+                    resultMessage.split('|')[1],
+                    "ERR",
+                    "SINGLE",
+                    "CancelSaveItem()",
+                    ""
+                )
+            }
+            else {
+                $.messagebox.show(
+                    "Save Item PR",
+                    resultMessage.split('|')[1],
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+                $.Enable([idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+                if ($(idHeader.PR_NO).val() == '0') $.Enable([idBtn.SAVE_HEADER]);
+            }
+        }
+    }
+
+    function EditItem(thisindex) {
+        // TO DO : check authorization current user to edit this item
+
+        if ($('#detail-grid-creation').find('.subitem-' + thisindex).length != 0) //remove subitem grid before edit
+            $(".subitem-" + thisindex).remove();
+
+        $.progressbox.show("Edit Item", "Editing Item . . .");
+
+        $("[id^=copylink]").addClass("_link-disabled");
+        $("[id^=editlink]").addClass("_link-disabled");
+        $("[id^=dellink]").addClass("_link-disabled");
+
+        $("#hiddenrow").empty();
+        $("#hiddenrow").html($("#row-" + thisindex).html());
+        $("#row-" + thisindex).empty();
+        $("#row-" + thisindex).html($("#addrow").html());
+        $("#addrow").empty();
+        $("#add-grid").css("display", "none");
+        $(idItem.ITEM_CLASS).html($(".tclass-" + thisindex).html());
+        $(idItem.NO).html(thisindex);
+
+        $(idItem.VALUATION_CLASS).val($(".titem-" + thisindex).html());
+        $(idItem.ITEM_TYPE).val($(".tvalitemtype-" + thisindex).html());
+        $(idItem.VALUATION_CLASS_DESC).val(unescape($(".tvaldesc-" + thisindex).text()));
+        $(idItem.WBS_NO).val($(".twbs-" + thisindex).html());
+        $(idItem.WBS_NAME).val($(".twbsname-" + thisindex).html());
+        $(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).val($(".tcost-" + thisindex).html());
+        $(idItem.GL_ACCOUNT).val($(".tgl-" + thisindex).html());
+        $(idItem.MAT_NO).val($(".tmatno-" + thisindex).html());
+        $(idItem.CAR_FAMILY_CD).val($(".tcar-" + thisindex).html());
+        $(idItem.MAT_GRP_CD).val($(".tgrp-" + thisindex).html());
+        $(idItem.MAT_TYPE_CD).val($(".ttype-" + thisindex).html());
+        $(idItem.QUOTA_FLAG).val($(".tquotaflag-" + thisindex).html());
+        $(idItem.MAT_DESC).val(unescape($(".tmatdesc-" + thisindex).text()));
+        if ($(idItem.MAT_NO).val() != "")
+            $.Disable([idItem.MAT_DESC, idItem.UOM, idItem.CURR, idItem.PRICE]);
+        else
+            $.Enable([idItem.MAT_DESC, idItem.QTY, idItem.UOM, idItem.CURR, idItem.PRICE]);
+
+        $(idItem.QTY).val($(".tqty-" + thisindex).html());
+        $(idItem.USED_QTY).val($(".tusedqty-" + thisindex).html());
+        $(idItem.UOM).val($(".tuom-" + thisindex).html());
+        $(idItem.CALC_VALUE).val($(".hcalvalue-" + thisindex).html());
+        $(idItem.CURR).val($(".tcurr-" + thisindex).html());
+        $(idItem.PRICE).val($.AsPrice($(".hprice-" + thisindex).html()));
+        $(idItem.AMOUNT).val($.AsPrice($(".hamount-" + thisindex).html()));
+        $(idItem.DELIVERY_DATE_ITEM).val($(".tdeliverydate-" + thisindex).html());
+        $(idItem.ASSET_CATEGORY).val($(".tassetcat-" + thisindex).html());
+        
+        $(idItem.ASSET_CLASS).val($(".tassetclass-" + thisindex).html());
+        $(idItem.ASSET_LOCATION).val($(".tassetloc-" + thisindex).html());
+        var arrAsetNo = $(".tassetno-" + thisindex).html().split('-');
+        $(idItem.ASSET_NO).val(arrAsetNo[0]);
+        $(idItem.SUBASSET_NO).val(arrAsetNo[1]);
+        $(idItem.VENDOR_CD).val($(".tvendorcd-" + thisindex).html());
+        $(idItem.VENDOR_NAME).val(unescape($(".tvendorname-" + thisindex).html()));
+        $(idItem.IS_PRICE_EXIST).val($(".tpriceexist-" + thisindex).html());
+
+       
+        EditorInitialize("EditItem");
+
+        var wbs = $(idItem.WBS_NO).val();
+        var prefixWBS = wbs.substr(0, 1);
+        var isWBSContainsYear = wbs.substr(3, 1) == 'Y';
+        
+        if ($(idItem.ITEM_CLASS).html() == "S") {
+            $.Disable([idItem.GL_ACCOUNT, idItem.QTY, idItem.UOM, idItem.PRICE]);
+            DisableLookup([idDivLookup.DIV_GLITEM], true);
+            DisableLookup([idDivLookup.DIV_WBSITEM], true);
+            DisableLookup([idDivLookup.DIV_MATERIAL], true);
+            $(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).attr("disabled", "disabled");
+            $(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).addClass("disabled-control");
+
+            loadDetailGrid('Y', '-' + thisindex);
+        }
+        else {
+            if ($('#collapseitem').is(':visible') === true)
+                $('#collapseitem').css("display", "none");
+            $.Enable([idItem.GL_ACCOUNT, idItem.PRICE]);
+            if ($(idItem.MAT_NO).val() != "")
+                $.Disable([idItem.PRICE]);    
+           
+            DisableLookup([idDivLookup.DIV_WBSITEM], false);
+            $(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).removeAttr("disabled");
+
+            if (prefixWBS == 'R' || prefixWBS == 'C')
+            {
+                if (prefixWBS == 'R') {
+                    $.Disable([idItem.QTY]);
+                }
+                $.Disable([idItem.GL_ACCOUNT]);
+                $(idItem.GL_ACCOUNT).val('X');
+                DisableLookup([idDivLookup.DIV_GLITEM], true);
+            }
+
+            if (prefixWBS == 'A' ||
+                prefixWBS == 'F' ||
+                prefixWBS == 'X' || 
+                prefixWBS == 'D' )
+            {
+                DisableLookup([idDivLookup.DIV_ASSETNOITEM], true);
+            } else {
+                DisableLookup([idDivLookup.DIV_ASSETNOITEM], false);
+            }
+
+            $(".subitem-" + thisindex == "" ? "0" : thisindex).remove();
+            $.progressbox.hide();
+            
+        }
+    }
+</script>
+
+<script id="Subitem-Data-Management">
+    function loadDetailGrid(addeditflag, seqno) {
+        if (seqno == "" && $('#no').html() != "") seqno = "-" + $('#no').html();
+
+        var itemno = "0";
+        if (seqno != "") itemno = seqno.substr(1, seqno.length);
+
+        $.progressbox.show("Get Sub Item", "Get Sub Item onprogress . . .");
+        if ($('#addTable').find('.subitem-' + itemno).length == 0) {
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@PRCreationController._GetSubItemTemp",
+                data: {
+                    PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+                    ITEM_NO: itemno,
+                    type: "init",
+                    addeditflag: addeditflag
+                },
+                success: function (data) {
+                    $("#collapseitem" + (addeditflag == 'Y' ? '' : seqno)).closest('tr').after(data);
+                    if (addeditflag == 'N')
+                        $(".actiondetail-" + itemno).css("display", "none");
+                    else {
+                        $(idSubItem.UOM).val("AU");
+                        populateComboBox('costcenter');
+                    }
+                },
+                error: function (data) {
+                    alert(data);
+                },
+                complete: function (data) {
+                    $.progressbox.hide();
+                }
+            });
+        }
+        else {
+            $('.subitem-' + itemno).show();
+            $.progressbox.hide();
+        }
+    }
+
+    function validateSubItem() {
+        var mandatoryDetailItem = "";
+        var mandatoryAsset = "";
+        var isNumberItem = "";
+        var isGreaterThanZero = "";
+        var msg = "";
+        var reg = new RegExp(/^\d+(?:\.\d{1,18})?$/);
+
+        if ($(idSubItem.WBS_NO).val() == '' && $(idHeader.URGENT_DOC).val() == "N")
+            mandatoryDetailItem = mandatoryDetailItem + "WBS No, ";
+        if ($(idSubItem.COST_CENTER, $(idSubItem.COST_CENTER_DIV)).val() == '')
+            mandatoryDetailItem = mandatoryDetailItem + "Cost Center, ";
+        if ($(idSubItem.GL_ACCOUNT).val() == '')
+            mandatoryDetailItem = mandatoryDetailItem + "GL Account, ";
+        if ($(idSubItem.MAT_DESC).val() == '')
+            mandatoryDetailItem = mandatoryDetailItem + "Descricption, ";
+
+        if ($(idSubItem.QTY).val() == '') mandatoryDetailItem = mandatoryDetailItem + "Quantity, ";
+        if ($(idSubItem.UOM).val() == '') mandatoryDetailItem = mandatoryDetailItem + "UOM, ";
+        if ($(idSubItem.PRICE).val() == '') mandatoryDetailItem = mandatoryDetailItem + "Price, ";
+
+        if (reg.test($(idSubItem.QTY).val()) == false) isNumberItem = isNumberItem + "Quantity, ";
+        if (reg.test($(idSubItem.PRICE).val().replace(/,/g, "")) == false) isNumberItem = isNumberItem + "Quantity, ";
+
+        if (parseFloat($(idSubItem.QTY).val()) <= 0) {
+            isGreaterThanZero = isGreaterThanZero + "Quantity, ";
+        }
+
+        if (parseFloat($(idSubItem.PRICE).val()) <= 0) {
+            isGreaterThanZero = isGreaterThanZero + "Price, ";
+        }
+
+        if (parseFloat($(idSubItem.AMOUNT).val()) <= 0) {
+            isGreaterThanZero = isGreaterThanZero + "Amount, ";
+        }
+
+        /// WBS R/C and Asset = Non asset, Cannot Choose Asset Categoty Non-Asset 
+        if (($(idSubItem.WBS_NO).val().substr(0, 1) == "R" || $(idSubItem.WBS_NO).val().substr(0, 1) == "C")
+            && $(idItem.ASSET_CATEGORY).val() == ViewData.Get("AssetCategory")["NonAsset"])
+        {
+            mandatoryAsset = mandatoryAsset + "Asset Category ";
+        }
+
+        if (mandatoryDetailItem != "")
+            msg = msg + AssignVariable("@PurchasingRequisitionMessages.mandatoryDetail", [mandatoryDetailItem.substr(0, mandatoryDetailItem.length - 2), "sub item"]);
+
+        if (isNumberItem != "")
+            msg = msg + AssignVariable("@PurchasingRequisitionMessages.isNumber", [isNumberItem.substr(0, mandatoryDetailItem.length - 2), "sub item"]);
+
+        if (isGreaterThanZero != "")
+            msg = msg + AssignVariable("@PurchasingRequisitionMessages.greaterThanZero", [isGreaterThanZero.substr(0, isGreaterThanZero.length - 2), "Item"]);
+
+        if (mandatoryAsset != "")
+            msg = msg + "Cannot Choose " + mandatoryAsset + "Non-Asset for WBS No " + $(idSubItem.WBS_NO).val();
+        return msg;
+    }
+
+    function ClearEditorSubItem() {
+        ClearHtml([idSubItem.NO]);
+        $.Clear([idSubItem.GL_ACCOUNT, idSubItem.MAT_DESC, idSubItem.QTY, idSubItem.PRICE, idSubItem.AMOUNT]);
+        $.Enable([idSubItem.QTY, idSubItem.GL_ACCOUNT]);
+        DisableLookup([idDivLookup.DIV_GLSUBITEM], false);
+
+        populateComboBox('costcenter');
+
+        $(idSubItem.UOM).val("AU");
+        $(idSubItem.WBS_NO).val('');
+    }
+
+    function CancelSaveSubItem(itemno) {
+        if (itemno == "undefined" || itemno == "" || itemno == null)
+            itemno = $(idItem.NO).html().length <= 0 ? "0" : $(idItem.NO).html()
+
+        ClearEditorSubItem();
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@PRCreationController._GetSubItemTemp",
+            data: {
+                PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+                ITEM_NO: itemno,
+                type: "load",
+                addeditflag: "Y"
+            },
+            success: function (data) {
+                $('#tbsubitem-' + itemno).parent().html(data);
+            },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function getSubItemParam(seqno) {
+        return {
+            PR_TYPE: $(idHeader.PR_TYPE).val(),
+            PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+            SUBITEM_NO: seqno,
+            ITEM_NO: $(idItem.NO).html().length <= 0 ? "0" : $(idItem.NO).html(),
+            SUBITEM_WBS_NO: $(idSubItem.WBS_NO).val() == "" ? "X" : $(idSubItem.WBS_NO).val(),
+            SUBITEM_COST_CENTER: $(idSubItem.COST_CENTER, $(idSubItem.COST_CENTER_DIV)).val(),
+            SUBITEM_GL_ACCOUNT: $(idSubItem.GL_ACCOUNT).val(),
+            SUBITEM_MAT_DESC: $(idSubItem.MAT_DESC).val(),
+            SUBITEM_QTY: $(idSubItem.QTY).val(),
+            SUBITEM_UOM: $(idSubItem.UOM).val(),
+            PRICE_PER_UOM: $(idSubItem.PRICE).val().replace(/,/g, ""),
+            SUBITEM_AMOUNT: $(idSubItem.AMOUNT).val().replace(/,/g, "")
+        };
+    }
+
+    function SaveSubItem(type) {
+        //type = 0 (if trigger from saveitem button); type = 1 (if trigger from savesubitem button)
+        var seqno = $(idSubItem.NO).html().length <= 0 ? "0" : $(idSubItem.NO).html();
+
+        var msg = validateSubItem();
+        if (msg != "") {
+            if (type == '1') {
+                $.messagebox.show(
+					"Save Sub Item",
+					msg,
+					"ERR",
+					"SINGLE",
+					"",
+					""
+				)
+                $.Enable([idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+                if ($(idHeader.PR_NO).val() == "0") $.Enable([idBtn.SAVE_HEADER]);
+                return false;
+            }
+        }
+
+        if (msg == "") {
+            if (type == '1') {
+                $.Disable([idBtn.SAVE_HEADER, idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+                $.progressbox.show("Save Sub Item", "Saving Sub Item onprogress . . .");
+            }
+            var param = getSubItemParam(seqno);
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@PRCreationController._SaveSubItem",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (resultMessage) {
+                    if (type == '1')
+                        onResultSaveSubItem(resultMessage, seqno);
+                    else if (resultMessage === "SUCCESS") msg = "";
+                },
+                error: function (resultMessage) {
+                    var e = resultMessage.responseText;
+                    if (type == '1') {
+                        $.progressbox.hide();
+                        alert($(e).find("title").text());
+                    }
+                    else
+                        msg = $(e).find("title").text();
+                },
+                complete: function () {
+                    $.progressbox.hide();
+                }
+            });
+        }
+
+        if (type != '1') return msg;
+    }
+
+    function onResultSaveSubItem(resultMessage, seqno) {
+        if (resultMessage === 'SUCCESS') {
+            $.Enable([idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+            if ($(idHeader.PR_NO).val() == "0") $.Enable([idBtn.SAVE_HEADER]);
+            var itemno = $(idItem.NO).html().length <= 0 ? "0" : $(idItem.NO).html();
+            $.ajax({
+                type: $tdk.AjaxMethod,
+                url: "@PRCreationController._GetSubItemTemp",
+                data: {
+                    PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+                    ITEM_NO: itemno,
+                    type: "load",
+                    addeditflag: "Y"
+                },
+                success: function (data) {
+                    if (data.PROCESS_STATUS === "ERR") {
+                        var msg = "Data Successfully Saved " +
+                                    "Error While Get Data " + data.MESSAGE_CONTENT;
+
+                        $.messagebox.show(
+                            "Save Sub Item PR",
+                            msg,
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                        $.progressbox.hide();
+                        return;
+                    }
+
+                    ClearEditorSubItem();
+
+                    $('#tbsubitem-' + itemno).parent().html(data);
+
+                    $("[id^=editlink]").removeClass("_link-disabled");
+                    $("[id^=dellink]").removeClass("_link-disabled");
+
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    var e = data.responseText;
+                    alert($(e).find("title").text());
+                },
+                complete: function (data) {
+                    saveHeaderTemp();
+                }
+            });
+        }
+        else {
+            $.messagebox.show(
+                "Save Sub Item PR",
+                resultMessage,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+            $.Enable([idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
+            if ($(idHeader.PR_NO).val() == '0') $.Enable([idBtn.SAVE_HEADER]);
+        }
+    }
+
+    function DeleteSubItem(itemno, subitem_no) {
+        $.messagebox.show(
+            "Delete Sub Item",
+            "Are You Sure You Want to Delete this Sub Item ?",
+            "INF",
+            "CONFIRM",
+            "doDeleteSubItem('" + itemno + "', '" + subitem_no + "')",
+            ""
+        )
+    }
+
+    function doDeleteSubItem(itemno, subitem_no) {
+        $.progressbox.show("Delete Sub Item", "Deleting Sub Item . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._DeleteSelectedSubItemTemp",
+            data: {
+                PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+                ITEM_NO: itemno,
+                SUBITEM_NO: subitem_no
+            },
+            success: function (resultMessage) {
+                if (resultMessage == '') {
+                    $.ajax({
+                        type: $tdk.AjaxMethod,
+                        url: "@PRCreationController._GetSubItemTemp",
+                        data: {
+                            PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+                            ITEM_NO: itemno,
+                            type: "load",
+                            addeditflag: "Y"
+                        },
+                        success: function (data) {
+                            if (data.PROCESS_STATUS === "ERR") {
+
+                                var msg = "Data Successfully Deleted " +
+                                          "Error While Get Data " + data.MESSAGE_CONTENT;
+
+                                $.messagebox.show(
+                                    "Delete Sub Item PR",
+                                    msg,
+                                    "ERR",
+                                    "SINGLE",
+                                    "",
+                                    ""
+                                )
+                                $.progressbox.hide();
+                                return;
+                            }
+
+                            $('#tbsubitem-' + itemno).parent().html(data);
+                            $.progressbox.hide();
+                        },
+                        error: function (resultMessage) {
+                            var e = resultMessage.responseText;
+                            $.progressbox.hide();
+                            alert($(e).find("title").text());
+                        }
+                    });
+                }
+                else {
+                    $.messagebox.show(
+                        "Delete Sub Item PR",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    $.progressbox.hide();
+                }
+            },
+            error: function (resultMessage) {
+                var e = resultMessage.responseText;
+                alert($(e).find("title").text());
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function EditSubItem(itemno, thisindex) {
+        $.progressbox.show("Edit Item", "Editing Item . . .");
+        $("[id^=editlink]").addClass("_link-disabled");
+        $("[id^=dellink]").addClass("_link-disabled");
+
+        $("#hiddenrowdetail").empty();
+        $("#hiddenrowdetail").html($("#rowsubitem-" + itemno + "-" + thisindex).html());
+        $("#rowsubitem-" + itemno + "-" + thisindex).empty();
+        $("#rowsubitem-" + itemno + "-" + thisindex).html($("#addrowdetail").html());
+        $("#addrowdetail").empty();
+
+        $(idSubItem.NO).html(thisindex);
+        $(idSubItem.WBS_NO).val($(".iwbsnosubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.COST_CENTER, $(idSubItem.COST_CENTER_DIV)).val($(".icostcentercdsubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.GL_ACCOUNT).val($(".iglacdsubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.MAT_DESC).val(unescape($(".idescsubitem-" + itemno + "-" + thisindex).text()));
+        $(idSubItem.QTY).val($(".iqtysubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.UOM).val($(".iuomsubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.CALC_VALUE).val($(".hcalvaluesubitem-" + itemno + "-" + thisindex).html());
+        $(idSubItem.PRICE).val($.AsPrice($(".ipricesubitem-" + itemno + "-" + thisindex).html()));
+        $(idSubItem.AMOUNT).val($.AsPrice($(".iamountsubitem-" + itemno + "-" + thisindex).html()));
+
+        EditorInitialize("EditSubItem");
+
+        var wbs = $(idSubItem.WBS_NO).val();
+        var prefixWBS = wbs.substr(0, 1);
+        var isWBSContainsYear = wbs.substr(3, 1) == 'Y';
+
+        DisableLookup([idDivLookup.DIV_ASSETNOITEM], true);
+
+        if (prefixWBS == 'R' || prefixWBS == 'C') {
+
+            $.Disable([idSubItem.GL_ACCOUNT]);
+            $(idSubItem.GL_ACCOUNT).val('X');
+            DisableLookup([idDivLookup.DIV_GLSUBITEM], true);
+
+            if (prefixWBS == 'R') {
+                $.Disable([idSubItem.QTY]);
+            }
+        }
+
+        if (prefixWBS == 'A' ||
+            prefixWBS == 'F' ||
+            prefixWBS == 'X' ||
+            prefixWBS == 'D')
+        {
+            DisableLookup([idDivLookup.DIV_ASSETNOITEM], true);
+        } else {
+            DisableLookup([idDivLookup.DIV_ASSETNOITEM], false);
+        }
+
+        $.progressbox.hide();
+    }
+</script>
+
+<script type="text/javascript" id="Grid-Lookup">
+    function ClearLookupCriteria(gridID) {
+        switch (gridID) {
+            case "valuationclass":
+                {
+                    $.Clear(["#valsearchbox"]);
+                    getValClassGrid(1);
+                    break;
+                }
+            case "materialno":
+                {
+                    $.Clear(["#matsearchbox"]);
+                    getMaterialGrid(1);
+                    break;
+                }
+            case "glaccount":
+                {
+                    $.Clear(["#glsearchbox"]);
+                    getGLAccountGrid(1);
+                    break;
+                }
+            case "wbs":
+                {
+                    $.Clear(["#wbssearchbox"]);
+                    getWBSGrid(1);
+                    break;
+                }
+            case "vendor":
+                {
+                    $.Clear(["#vendorsearchbox"]);
+                    getVendorGrid(1);
+                    break;
+                }
+            case "AssetNo":
+                {
+                    $.Clear(["#AssetNosearchbox"]);
+                    getAssetNoGrid(1);
+                    break;
+                }
+        }
+    }
+
+    function ClearLookupValue(gridID) {
+        switch (gridID) {
+            case "valuationclass":
+                {
+                    MoveValuationClassKey("", "", ""); break;
+                }
+            case "materialno":
+                {
+                    ClearMaterialValue();
+                    ClearLookupCriteria('materialno');
+                    break;
+                }
+            case "glaccount":
+                {
+                    MoveGLAccountKey("", ""); break;
+                }
+        }
+    }
+
+    function ClearMaterialValue() {
+        if ($(idItem.MAT_NO).val() != "") {
+            $.Clear([idItem.MAT_NO, idItem.CAR_FAMILY_CD, idItem.MAT_GRP_CD, "#atype", idItem.MAT_DESC, idItem.UOM,
+                    idItem.QUOTA_FLAG, idItem.PRICE, idItem.AMOUNT]);
+            $.Enable([idItem.UOM, idItem.CURR, idItem.MAT_DESC, idItem.PRICE]);
+            $(idItem.CURR).val(ViewData.Get("DefaultCurr"));
+        }
+    }
+
+    function getValuationClassParam(page) {
+        return {
+            pageSize: LookupMaxRowPerPage,
+            page: page,
+            VALUATION_CLASS_PARAM: $('#valsearchbox').val(),
+            PR_COORDINATOR: $(idHeader.PR_COORDINATOR).val(),
+            PR_TYPE: $(idHeader.PR_TYPE).val()
+        };
+    }
+
+    function getMaterialParam(page) {
+        return {
+            pageSize: LookupMaxRowPerPage,
+            page: page,
+            MAT_NUMBER_PARAM: $('#matsearchbox').val(),
+            VALUATION_CLASS: $(idItem.VALUATION_CLASS).val(),
+            PLANT_CD: $(idHeader.PLANT_CD).val(),
+            PR_COORDINATOR: $(idHeader.PR_COORDINATOR).val(),
+            PR_TYPE: $(idHeader.PR_TYPE).val(),
+            ITEM_TYPE: $(idItem.ITEM_TYPE).val()
+        };
+    }
+
+    function getGLAccountParam(page, wbs_no, cost_center, division) {
+        return {
+            pageSize: LookupMaxRowPerPage,
+            page: page,
+            GL_ACCOUNT_PARAM: $('#glsearchbox').val(),
+            WBS_NO: wbs_no
+        }
+    }
+
+    function getWBSParam(page) {
+        return {
+            pageSize: LookupMaxRowPerPage,
+            page: page,
+            WBS_PARAM: $('#wbssearchbox').val(),
+            DIVISION_ID: $(idHeader.DIVISION_ID).val(),
+            PR_COORDINATOR: $(idHeader.PR_COORDINATOR).val(),
+            PR_TYPE: $(idHeader.PR_TYPE).val()
+        }
+    }
+
+    function getVendorParam(page) {
+        return {
+            pageSize: LookupMaxRowPerPage,
+            page: page,
+            VENDOR_PARAM: $('#vendorsearchbox').val(),
+            VALUATION_CLASS_PARAM: $('#aitemcat').val()
+        }
+    }
+    function getAssetNoParam(page) {
+        return {
+            pageSize: LookupMaxRowPerPage,
+            page: page,
+            ASSETNO_PARAM: $('#AssetNosearchbox').val(),
+            DIVISION_PARAM: $('#division_id').val()
+             
+        }
+    }
+
+    function getValClass(page) {
+        var mandatory_field = "";
+        if ($(idHeader.PR_TYPE).val() == "" || $(idHeader.PR_TYPE).val() == null) mandatory_field = " PR Type, ";
+        if ($(idHeader.PR_COORDINATOR).val() == "" || $(idHeader.PR_COORDINATOR).val() == null) mandatory_field = mandatory_field + " PR Coordinator, ";
+
+        if (mandatory_field != "") {
+            mandatory_field = (mandatory_field.substr(0, mandatory_field.length - 2)).replace(",", " and");
+
+            $.messagebox.show(
+                "Get Item Category",
+                "Please select " + mandatory_field,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+            var param = getValuationClassParam(page);
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@PRCreationController._GetValuationClass",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#valclass-container").html(data);
+                    $('#valclass-container').on('shown.bs.modal', function () {
+                        $("#valsearchbox").focus();
+                    });
+                    $("#valclass-container").modal();
+                },
+                error: function (data) {
+                    var e = data.responseText;
+                    alert($(e).find("title").text());
+                },
+                complete: function (data) { return false; }
+            });
+        }
+    }
+
+    function getValClassGrid(page) {
+        var param = getValuationClassParam(page);
+
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._GetValuationClassGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#valclass-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function getMaterial(page) {
+        var mandatoryfield = "";
+
+        if ($(idHeader.PLANT_CD).val() == "" || $(idHeader.PLANT_CD).val() == null)
+            mandatoryfield = mandatoryfield + "Plant";
+
+        if ($(idItem.VALUATION_CLASS).val() == "" || $(idItem.VALUATION_CLASS).val() == null)
+            mandatoryfield = (mandatoryfield != "" ? mandatoryfield + " and " : "") + "Item Category";
+
+        if (mandatoryfield != "") {
+            $.messagebox.show(
+                "Get Material No",
+                "Please select " + mandatoryfield,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+            var param = getMaterialParam(page);
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@PRCreationController._GetMaterial",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    $("#material-container").html(data);
+                    $('#material-container').on('shown.bs.modal', function () {
+                        $("#matsearchbox").focus();
+                    });
+                    $("#material-container").modal();
+                },
+                error: function (data) {
+                    var e = data.responseText;
+                    alert($(e).find("title").text());
+                },
+                complete: function (data) { return false; }
+            });
+        }
+    }
+
+    function getMaterialGrid(page) {
+        var param = getMaterialParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._GetMaterialGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#material-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function getGLAccount(page, type) {
+        Division_Temp = $(idHeader.DIVISION_ID).val();
+        var param = getGLAccountParam(page, ((type == 'item') ? $(idItem.WBS_NO).val() : $(idSubItem.WBS_NO).val()), ((type == 'item') ? $(idItem.COST_CENTER).val() : $(idSubItem.COST_CENTER).val()), Division_Temp);
+
+        if ((($(idItem.WBS_NO).val() == "") && type == 'item') || (($(idSubItem.WBS_NO).val() == "") && type == 'subitem')) {
+            $.messagebox.show(
+                    "Choose WBS No",
+                    "Please select WBS number!",
+                    "WRN",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+        }
+        else {
+            WBS_Temp = ((type == 'item') ? $(idItem.WBS_NO).val() : $(idSubItem.WBS_NO).val());
+            CostCenter_Temp = ((type == 'item') ? $(idItem.COST_CENTER).val() : $(idSubItem.COST_CENTER).val());
+            Division_Temp = $(idHeader.DIVISION_ID).val();
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@PRCreationController._GetGLAccount",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    ViewData.Add("GLType", type); ;
+                    $("#gl-container").html(data);
+                    $('#gl-container').on('shown.bs.modal', function () {
+                        $("#glsearchbox").focus();
+                    });
+                    $("#gl-container").modal();
+                },
+                error: function (data) {
+                    var e = data.responseText;
+                    //alert($(e).find("title").text());
+                },
+                complete: function (data) { return false; }
+            });
+        }
+    }
+
+    function getGLAccountGrid(page) {
+        var param = getGLAccountParam(page, WBS_Temp, CostCenter_Temp, Division_Temp);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._GetGLAccountGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#gl-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                //alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function getWBS(page, type) {
+        var param = getWBSParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._GetWBS",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                ViewData.Add("WBSType", type);
+                $("#wbs-container").html(data);
+                $('#wbs-container').on('shown.bs.modal', function () {
+                    $("#wbssearchbox").focus();
+                });
+                $("#wbs-container").modal();
+            },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function getWBSGrid(page) {
+        var param = getWBSParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._GetWBSGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#wbs-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function getVendor(page) {
+        var param = getVendorParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._GetVendor",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                console.log(data);
+                $("#vendor-container").html(data);
+                $('#vendor-container').on('shown.bs.modal', function () {
+                    $("#vendorsearchbox").focus();
+                });
+                $("#vendor-container").modal();
+            },
+            error: function (data) {
+                var e = data.responseText;
+                //alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+    function getAssetNo(page) {
+        var param = getAssetNoParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._GetAssetNo",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                $("#AssetNo-container").html(data);
+                $('#AssetNo-container').on('shown.bs.modal', function () {
+                    $("#AssetNosearchbox").focus();
+                });
+                $("#AssetNo-container").modal();
+            },
+            error: function (data) {
+                var e = data.responseText;
+                //alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function getVendorGrid(page) {
+        var param = getVendorParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._GetVendorGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#vendor-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                //alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+    function getAssetNoGrid(page) {
+        var param = getAssetNoParam(page);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._GetAssetNoGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#AssetNo-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                //alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function MoveValuationClassKey(VALUATION_CLASS, VALUATION_CLASS_DESC, ITEM_CLASS, ITEM_TYPE) {
+        if ((($(idItem.VALUATION_CLASS).val() == "") && (VALUATION_CLASS == "")) || (($(idItem.VALUATION_CLASS).val() != "") && ($(idItem.VALUATION_CLASS).val() != VALUATION_CLASS) && (VALUATION_CLASS != ""))) {
+            if ($('#collapseitem').is(':visible') === true)
+                $('#collapseitem').css("display", "none");
+
+            $(".subitem" + $(idItem.NO).html() == "" ? "0" : $(idItem.NO).html()).remove();
+        }
+
+        if (VALUATION_CLASS != "") {
+            $(idItem.VALUATION_CLASS).val(VALUATION_CLASS);
+            $(idItem.VALUATION_CLASS_DESC).val(VALUATION_CLASS_DESC);
+            $(idItem.ITEM_TYPE).val(ITEM_TYPE);
+            $(idItem.ITEM_CLASS).html(ITEM_CLASS);
+
+            if (ITEM_CLASS == "S") {
+                //if ($('#collapseitem').is(':visible') === false)
+                //    $('#collapseitem').css("display", "");
+
+                $.Disable([idItem.COST_CENTER, idItem.QTY, idItem.PRICE, idItem.UOM, idItem.ASSET_CATEGORY, idItem.ASSET_CLASS, "#aassetloc"]);
+                DisableLookup([idDivLookup.DIV_MATERIAL, idDivLookup.DIV_WBSITEM, idDivLookup.DIV_GLITEM], true);
+                $.Enable([idItem.MAT_DESC]);
+                $.Clear([idItem.ASSET_CLASS, idItem.ASSET_LOCATION, idItem.ASSET_NO, idItem.WBS_NO, idItem.WBS_NAME, idItem.MAT_DESC, idItem.MAT_NO, idItem.CAR_FAMILY_CD]);
+
+                $(idItem.UOM).val('AU');
+                $(idItem.QTY).val('1');
+                $(idItem.PRICE).val('0');
+                $(idItem.ASSET_CATEGORY).val(ViewData.Get("AssetCategory")["NonAsset"]);
+                ViewData.Add("Old_AssetCat", ViewData.Get("AssetCategory")["NonAsset"]);
+                loadDetailGrid('Y', '');
+            }
+            else if (ITEM_CLASS == "M") {
+                if ($('#collapseitem').is(':visible') === true)
+                    $('#collapseitem').css("display", "none");
+
+                //$.Enable([idItem.COST_CENTER, idItem.UOM, idItem.MAT_DESC, idItem.QTY, idItem.PRICE, idItem.ASSET_CATEGORY, idItem.ASSET_NO]);
+                $.Enable([idItem.COST_CENTER, idItem.UOM, idItem.MAT_DESC, idItem.QTY, idItem.PRICE]);
+                DisableLookup([idDivLookup.DIV_MATERIAL, idDivLookup.DIV_WBSITEM, idDivLookup.DIV_GLITEM], false);
+                $.Disable([idItem.ASSET_CLASS]);
+                DisableLookup([idDivLookup.DIV_ASSETLOCITEM], true);
+                $.Clear([idItem.UOM, idItem.ASSET_CLASS, idItem.ASSET_LOCATION, idItem.ASSET_NO]);
+
+                $(idItem.ASSET_CATEGORY).val(ViewData.Get("AssetCategory")["NonAsset"]);
+                ViewData.Add("Old_AssetCat", ViewData.Get("AssetCategory")["NonAsset"]);
+                $(idItem.QTY).val('0');
+                $(".subitem-" + ($(idItem.NO).html() == "" ? "0" : $(idItem.NO).html())).remove();
+            }
+        }
+
+        ClearLookupCriteria('valuationclass');
+        ClearMaterialValue();
+        $("#valclass-container").modal('hide');
+    }
+
+    function MoveMaterialNoKey(MAT_NO, id) {
+        $(idItem.CURR).val($(id).data("curr"));
+        $(idItem.PRICE).val($(id).data("price"));
+        $.Disable([idItem.CURR, idItem.PRICE]);
+        var isErrorType = false;
+
+        if ($(idItem.CURR).val() == "" || $(idItem.CURR).val() == null) {
+            if (($(idHeader.PR_TYPE).val() != ViewData.Get("PRType")["Reservation"]) || ($(idHeader.PR_COORDINATOR).val() != 'OFE-HO')) {
+                $.Enable([idItem.CURR]);
+            }
+            else {
+                isErrorType = true;
+            }
+        }
+
+        if ($(idItem.PRICE).val() == "" || $(idItem.PRICE).val() == "0" || $(idItem.PRICE).val() == null) {
+            if (($(idHeader.PR_TYPE).val() != ViewData.Get("PRType")["Reservation"]) || ($(idHeader.PR_COORDINATOR).val() != 'OFE-HO')) {
+                $.Enable([idItem.PRICE]);
+            }
+            else {
+                isErrorType = true;
+            }
+        }
+
+        if (isErrorType)
+        {
+            $(idItem.CURR).val('');
+            $(idItem.PRICE).val('');
+
+            $.messagebox.show(
+                "Select Material No",
+                "Currency cannot empty and Price cannot 0 for Selected Material if PR is PR Reservation and Coordinator is OFE-HO",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+
+            return;
+        }
+
+        $(idItem.MAT_NO).val(MAT_NO);
+        $(idItem.MAT_DESC).val($(id).data("materialdesc"));
+        $(idItem.VALUATION_CLASS).val($(id).data("valuationclass"));
+        $(idItem.VALUATION_CLASS_DESC).val($(id).data("valuationdesc"))
+        $(idItem.CAR_FAMILY_CD).val($(id).data("car"));
+        $(idItem.MAT_GRP_CD).val($(id).data("matgrp"));
+        $(idItem.MAT_TYPE_CD).val($(id).data("mattype"));
+        $(idItem.QUOTA_FLAG).val($(id).data("quotaflag"));
+        $(idItem.UOM).val($(id).data("uom").toUpperCase());
+        if (($(idItem.QTY).val() == "") || ($(idItem.QTY).val() == "0")) $(idItem.QTY).val(1);
+
+        GetAmount();
+        ClearLookupCriteria('materialno')
+        $.Disable([idItem.UOM, idItem.MAT_DESC]);
+        $("#material-container").modal('hide');
+    }
+
+    function MoveGLAccountKey(glcd) {
+        if (ViewData.Get("GLType") == "subitem")
+            $(idSubItem.GL_ACCOUNT).val(glcd)
+        else
+            $(idItem.GL_ACCOUNT).val(glcd);
+        ClearLookupCriteria('glaccount');
+        $("#gl-container").modal('hide');
+    }
+
+    function MoveWBSKey(wbs, wbsname) {
+        var wbstrue = 1;
+
+        if (wbs.indexOf('-') > -1)
+        {
+            @{ /* OLD WBS STRUCTURE, OLD PRODUCTION LOGIC */ }
+
+            DisableLookup([idDivLookup.DIV_ASSETNOITEM], false);
+
+            if (ViewData.Get("WBSType") == "subitem") {
+                //if (wbs.substr(0, 1) == "I" || wbs.substr(0, 1) == "L") {
+                $(idSubItem.WBS_NO).val(wbs);
+                $(idSubItem.WBS_NAME).val(wbsname);
+                //}
+                /*else {
+                wbstrue = 0;
+                $.messagebox.show(
+                "Choose WBS No",
+                "Cannot choose wbs with the prefix <b>" + wbs.substr(0, 1) + "</b> for Sub Item",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+                )
+                }*/
+                if (wbs.substr(0, 1) == "I" || wbs.substr(0, 1) == "L") {
+                    $.Clear([idSubItem.GL_ACCOUNT]);
+                    DisableLookup([idDivLookup.DIV_GLSUBITEM], true);
+                }
+                else {
+                    $.Clear([idSubItem.GL_ACCOUNT]);
+                    DisableLookup([idDivLookup.DIV_GLSUBITEM], false);
+                }
+            }
+            else
+            {
+                if (wbs.substr(0, 1) == "P" || wbs.substr(0, 1) == "S")
+                {
+                    if ($(idItem.ASSET_CATEGORY).val() == ViewData.Get("AssetCategory")["NonAsset"] && $(idItem.ITEM_CLASS).html() == "M") {
+                        $.Clear([idItem.COST_CENTER]);
+                        $.Disable([idItem.COST_CENTER]);
+                        DisableLookup([idDivLookup.DIV_GLITEM], false);
+                    }
+                    if ($(idItem.ASSET_CATEGORY).val() != ViewData.Get("AssetCategory")["NonAsset"] && $(idItem.ITEM_CLASS).html() == "M") {
+                        $.Clear([idItem.GL_ACCOUNT]);
+                        DisableLookup([idDivLookup.DIV_GLITEM], true);
+                        $.Enable([idItem.COST_CENTER]);
+                    }
+                }
+                // HANDLE JIKA SEBELUMNYA DISABLE
+                else {
+                    $.Clear([idItem.COST_CENTER]);
+                    $.Enable([idItem.COST_CENTER]);
+                }
+
+                if (wbs.substr(0, 1) == "I" || wbs.substr(0, 1) == "L") {
+                    $.Clear([idItem.GL_ACCOUNT]);
+                    DisableLookup([idDivLookup.DIV_GLITEM], true);
+                }
+                else {
+                    $.Clear([idItem.GL_ACCOUNT]);
+                    DisableLookup([idDivLookup.DIV_GLITEM], false);
+                }
+
+                $(idItem.WBS_NO).val(wbs);
+                $(idItem.WBS_NAME).val(wbsname);
+            }
+        }
+
+        @{ /* NEW WBS STRUCTURE */ }
+        else
+        {
+            var prefixWBS = wbs.substr(0, 1);
+            var isWBSContainsYear = wbs.substr(3, 1) == 'Y';
+
+            if (ViewData.Get("WBSType") == "subitem")
+            {
+                $.Enable([idSubItem.COST_CENTER]);
+
+                $.Disable([idItem.COST_CENTER]);
+                $(idItem.COST_CENTER).val('X');
+
+                $.Enable([idSubItem.QTY]);
+            }
+            else
+            {
+                $.Clear([idItem.COST_CENTER]);
+                $.Enable([idItem.COST_CENTER]);
+                $.Enable([idItem.QTY]);
+            }
+
+            if (
+                prefixWBS == "R" ||
+                prefixWBS == "C"
+            ) {
+                if (ViewData.Get("WBSType") == "subitem")
+                {
+                    $.Clear([idSubItem.GL_ACCOUNT]);
+
+                    DisableLookup([idDivLookup.DIV_GLSUBITEM], true);
+                    DisableLookup([idDivLookup.DIV_ASSETNOITEM], false);
+
+                    $(idSubItem.GL_ACCOUNT).val('X');
+
+                    $.Disable([idSubItem.GL_ACCOUNT]);
+
+                    populateComboBox('costcenter');
+
+                    if (prefixWBS == 'R')
+                    {
+                        $.Disable([idSubItem.QTY]);
+                        $(idSubItem.QTY).val(1);
+                    }
+                }
+                else
+                {
+                    $.Clear([idItem.GL_ACCOUNT]);
+
+                    DisableLookup([idDivLookup.DIV_GLITEM], true);
+                    DisableLookup([idDivLookup.DIV_ASSETNOITEM], false);
+
+                    $(idItem.GL_ACCOUNT).val('X');
+
+                    $.Disable([idItem.GL_ACCOUNT]);
+
+                    populateComboBox('costcenter');    
+
+                    if (prefixWBS == 'R') {
+                        $.Disable([idItem.QTY]);
+                        $(idItem.QTY).val(1);
+                    }
+                }
+            }
+            else if (
+                prefixWBS == "X" ||
+                prefixWBS == "D" ||
+                prefixWBS == "A" ||
+                prefixWBS == "F"
+            ) {
+                $.Clear([
+                    idItem.ASSET_CATEGORY_CD,
+                    idItem.ASSET_LOCATION,
+                    idItem.ASSET_CLASS,
+                    idItem.ASSET_CATEGORY,
+                    idItem.ASSET_NO,
+                    idItem.ASSET_NO_SUB,
+
+                    idItem.GL_ACCOUNT,
+                    idSubItem.GL_ACCOUNT
+                ]);
+
+                $.Disable([
+                    idItem.ASSET_CATEGORY_CD,
+                    idItem.ASSET_LOCATION,
+                    idItem.ASSET_CLASS,
+                    idItem.ASSET_CATEGORY,
+                    idItem.ASSET_NO,
+                    idItem.ASSET_NO_SUB
+                ], true);
+
+                $(idItem.ASSET_CATEGORY).val('NA');
+
+                DisableLookup([idDivLookup.DIV_ASSETNOITEM], true);
+
+                if (ViewData.Get("WBSType") == "subitem")
+                {
+                    DisableLookup([idDivLookup.DIV_GLSUBITEM], false);
+                }
+                else
+                {
+                    DisableLookup([idDivLookup.DIV_GLITEM], false);
+                }
+            }
+
+            if (ViewData.Get("WBSType") == "subitem")
+            {
+                $(idSubItem.WBS_NO).val(wbs);
+                $(idSubItem.WBS_NAME).val(wbsname);
+            }
+            else
+            {
+                $(idItem.WBS_NO).val(wbs);
+                $(idItem.WBS_NAME).val(wbsname);
+            }
+        }
+
+        if (wbstrue == 1) {
+            ClearLookupCriteria('wbs');
+            $("#wbs-container").modal('hide');
+        }
+    }
+
+    function MoveVendorKey(vendor_cd, vendor_name) {
+        $(idItem.VENDOR_CD).val(vendor_cd);
+        $(idItem.VENDOR_NAME).val(vendor_name);
+
+        ClearLookupCriteria('vendor');
+        $("#vendor-container").modal('hide');
+    }
+    function MoveVendorKeyAssetNo(ASSET_CATEGORY,CLASS_ID,LOCATION_ID,ASSET_NO,SUB_ASSET_NO) {
+        $(idItem.ASSET_CATEGORY).val(ASSET_CATEGORY);
+        $(idItem.ASSET_CLASS).val(CLASS_ID);
+        $(idItem.ASSET_LOCATION).val(LOCATION_ID);
+        $(idItem.ASSET_NO).val(ASSET_NO);
+        $(idItem.SUBASSET_NO).val(SUB_ASSET_NO);
+
+        ClearLookupCriteria('AssetNo');
+        $("#AssetNo-container").modal('hide');
+    }
+
+    $("#cascade-costcenter").click(function () {
+        if ($(idHeader.DIVISION_ID).val() == "0") {
+            $.messagebox.show(
+                "Get Cost Center",
+                "Please select division",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+    });
+</script>
+
+<script type="text/javascript" id="Upload-File">
+    function downloadFile(path, id) {
+        $.progressbox.show("Download Attachment", "Downloading . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._ValidateDownloadCreation",
+	        data: { id: id, path: path },
+	        success: function (resultMessage) {
+	            if (resultMessage == 'Y') {
+	                window.open("@Url.Content("~/PRCreation/DownloadFile?")" + "path=" + path + "&id=" + id, '_self');
+                    $.progressbox.hide();
+                }
+                else {
+                    $.messagebox.show(
+                        "Download Attachment",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    $.progressbox.hide();
+                }
+            },
+	        error: function (resultMessage) {
+	            $.progressbox.hide();
+	        }
+	    });
+    }
+
+    function validate(filetype) {
+        var file = $('#' + filetype).get(0).files[0];
+
+        if ((file === null) || (file === "")) {
+            $.messagebox.show(
+                "Upload Attachment",
+                "File is NULL, please Upload Another File",
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+
+            return
+        }
+
+        var filecounter = 0;
+        var filemaxsize = 0;
+        var filemax = 0;
+        var filetypeori = "";
+        var filevalidextension = null;
+
+        switch (filetype) {
+            case "TOR":
+                {
+                    filecounter = File.TOR.count;
+                    filecounter++;
+                    filemaxsize = File.TOR.size;
+                    filemax = File.TOR.max;
+                    filevalidextension = File.TOR.validext.split(',');
+                    filetypeori = "TOR"
+                    break;
+                }
+            case "SCH":
+                {
+                    filecounter = File.SCH.count;
+                    filecounter++;
+                    filemaxsize = File.SCH.size;
+                    filemax = File.SCH.max;
+                    filevalidextension = File.SCH.validext.split(',');
+                    filetypeori = "SCHEDULE ATTACHMENT";
+                    break;
+                }
+            case "MEMO":
+                {
+                    filecounter = File.MEMO.count;
+                    filecounter++;
+                    filemaxsize = File.MEMO.size;
+                    filemax = File.MEMO.max;
+                    filevalidextension = File.MEMO.validext.split(',');
+                    filetypeori = "MEMO";
+                    break;
+                }
+            case "QUOT":
+                {
+                    filecounter = File.QUOT.count;
+                    filecounter++;
+                    filemaxsize = File.QUOT.size;
+                    filemax = File.QUOT.max;
+                    filevalidextension = File.QUOT.validext.split(',');
+                    filetypeori = "QUOTATION";
+                    break;
+                }
+        }
+
+        if (filecounter > filemax) {
+            $.messagebox.show(
+                "Upload Attachment",
+                "maximum file for " + filetypeori + " is " + filemax + ", Upload Failed",
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+
+            return;
+        }
+
+        var oriextension = file.name.split('.');
+        if ($.inArray("." + oriextension[oriextension.length - 1], filevalidextension) === -1) {
+            var strmsg = "Invalid File Extension for " + filetypeori +
+                         ", Allowed file extension for " + filetypeori +
+                         " are : " + filevalidextension.join(',');
+
+            $.messagebox.show(
+                "Upload Attachment",
+                strmsg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+
+            return;
+        }
+
+        if (file.size > filemaxsize) {
+            var strmsg = "File " + file.name + " size (" + (file.size / 1000000) +
+                         "MB) is Reaching Limit, Maximum File Size for " + filetypeori +
+                         " is " + (filemaxsize / 1000000);
+
+            $.messagebox.show(
+                "Upload Attachment",
+                strmsg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+
+            return;
+        }
+
+        var filedata = new FormData();
+        filedata.append("file", file);
+        filedata.append("DOC_TYPE", filetype);
+        filedata.append("PR_NO", $(idHeader.PR_NO).val());
+        filedata.append("PROCESS_ID", $(idHeader.PROCESS_ID).val());
+
+        $.progressbox.show("Upload Attachment", "Uploading . . .");
+        var html = "";
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@PRCreationController._GetFile",
+            data: filedata,
+            contentType: false, // NOTE: disable header to include content-type
+            processData: false, // NOTE: disabe jquery to convert data to string
+            success: function (resultMessage) {
+
+                var success = false;
+                resultMessage.forEach(function (d) {
+                    if (d.PROCESS_STATUS !== null) {
+                        $.messagebox.show(
+                            "Upload Attachment",
+                            d.MESSAGE_CONTENT,
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+
+                        $.progressbox.hide();
+                        return;
+                    }
+
+                    $('.remove-list-' + filetype).remove();
+                    html = html + "<span class='remove-list-" + filetype + "' id='isrow-" + d.FILE_SEQ_NO + "'>" +
+                                    "<a href='#' onclick='deleteFiles(" + d.FILE_SEQ_NO + ",\"" + filetype + "\"" + ",\"" + d.FILE_PATH + "\")'>" +
+                                        "<img width='15' height='15' src='@Url.Content("../Content/img/error.png")' title='Delete " + d.FILE_NAME_ORI + "'>" +
+                                    "</a>";
+                    html = html + "<a href='#' onclick='javascript:downloadFile(&#39;" + d.FILE_PATH + "&#39;,&#39;" +
+                                    (d.NEW_FLAG === 'Y' ? $(idHeader.PROCESS_ID).val() : $(idHeader.PR_NO).val()) + "&#39;)'>" +
+                                        (d.FILE_NAME_ORI.length > 20 ? d.FILE_NAME_ORI.substring(0, 20) + ". . ." : d.FILE_NAME_ORI) +
+                                    "</a></span>"
+                });
+
+                switch (filetype) {
+                    case "TOR":
+                        {
+                            if (filecounter === File.TOR.max)
+                                $(idHeader.TOR).hide();
+                            File.TOR.count = filecounter;
+                            break;
+                        }
+                    case "SCH":
+                        {
+                            if (filecounter === File.SCH.max)
+                                $(idHeader.SCH).hide();
+                            File.SCH.count = filecounter;
+                            break;
+                        }
+                    case "MEMO":
+                        {
+                            if (filecounter === File.MEMO.max) {
+                                $(idHeader.MEMO).hide();
+                                $.Disable([idHeader.URGENT_DOC]);
+                            }
+                            File.MEMO.count = filecounter;
+                            break;
+                        }
+                    case "QUOT":
+                        {
+                            if (filecounter === File.QUOT.max)
+                                $(idHeader.QUOT).hide();
+                            File.QUOT.count = filecounter;
+                            File.QUOT.size = filemaxsize - file.size;
+                            break;
+                        }
+                }
+
+                $('.appended-file-' + filetype).append(html);
+                $('.appended-file-' + filetype).show();
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.messagebox.show(
+                    "Upload Attachment",
+                    "@PurchasingRequisitionMessages.errorConnectionUpload.ToString()",
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+
+                $.progressbox.hide();
+            },
+            complete: function (resultMessage) {
+                saveHeaderTemp();
+            }
+        });
+        }
+
+        function deleteFiles(seqno, filetype, filepath) {
+            $.progressbox.show("Delete Attachment", "Deleting . . .");
+            $.ajax({
+                type: "POST", url: "@PRCreationController._DeleteTempFiles",
+		    data: {
+		        SEQ_NO: seqno,
+		        PR_NO: $(idHeader.PR_NO).val(),
+		        PROCESS_ID: $(idHeader.PROCESS_ID).val(),
+		        FILE_PATH: filepath
+		    },
+		    success: function (resultMessage) {
+
+		        if (resultMessage.PROCESS_STATUS === "SUC") {
+		            switch (filetype) {
+		                case "TOR":
+		                    {
+		                        File.TOR.count--;
+		                        $(idHeader.TOR).show();
+		                        $('.appended-file-TOR').hide();
+		                        $(idHeader.TOR).val("");
+		                        break;
+		                    }
+		                case "SCH":
+		                    {
+		                        File.SCH.count--;
+		                        $(idHeader.SCH).show();
+		                        $('.appended-file-SCH').hide();
+		                        $(idHeader.SCH).val("");
+		                        break;
+		                    }
+		                case "MEMO":
+		                    {
+		                        File.MEMO.count--;
+		                        $(idHeader.MEMO).show();
+		                        $('.appended-file-MEMO').hide();
+		                        $(idHeader.MEMO).val("");
+		                        $.Enable([idHeader.MEMO, idHeader.URGENT_DOC]);
+		                        break;
+		                    }
+		                case "QUOT":
+		                    {
+		                        File.QUOT.count--;
+		                        File.QUOT.size = File.QUOT.size + resultMessage.FILE_SIZE;
+
+		                        if (File.QUOT.count < 5)
+		                            $(idHeader.QUOT).show();
+
+		                        if (File.QUOT.count === 0)
+		                            $('.appended-file-QUOT').hide();
+
+		                        $(idHeader.QUOT).val("");
+		                        break;
+		                    }
+		            }
+
+		            $.messagebox.show(
+                        "Upload Attachment",
+                        "File </strong>" + resultMessage.FILE_NAME_ORI + "</strong> Has Been Removed",
+                        "SUC",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+
+		            $("#isrow-" + seqno).css("display", "none");
+		        }
+		        else {
+		            $.messagebox.show(
+                        "Upload Attachment",
+                        resultMessage.MESSAGE_CONTENT,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+		        }
+		        $.progressbox.hide();
+		    },
+		    error: function (resultMessage) {
+		        $.progressbox.hide();
+		    }
+		});
+        }
+
+        var specialKeys = new Array();
+        specialKeys.push(8); //Backspace
+        $(function () {
+            $(".numeric").bind("keypress", function (e) {
+                var keyCode = e.which ? e.which : e.keyCode
+                var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+                return ret;
+            });
+            $(".numeric").bind("paste", function (e) {
+                return false;
+            });
+            $(".numeric").bind("drop", function (e) {
+                return false;
+            });
+        });
+</script>

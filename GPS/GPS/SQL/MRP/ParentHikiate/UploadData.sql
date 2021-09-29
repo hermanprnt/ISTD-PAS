@@ -1,0 +1,6 @@
+﻿exec [dbo].[MRP_UPLOAD_PARENT_HAKIATE] @USER_ID,@PROCESS_ID
+
+    
+
+
+

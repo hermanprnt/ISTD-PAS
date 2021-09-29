@@ -1,0 +1,213 @@
+﻿@using GPS.Models.MRP
+@using GPS.Models.MRP
+@{
+    List<MRPCreation> ListGentaniHeader = ViewData["ListMRPProcess"] != null ? (List<MRPCreation>)ViewData["ListMRPProcess"] : new List<MRPCreation>();
+    string UserName = (string)ViewData["USER_NAME"];
+    string icon = "";
+    string btn = "";
+}
+<div class="text-center" style="margin-bottom: 3px;">
+    <hr id="hrsrc" style="margin:0;padding:0;" />
+</div>
+<div class="row  text-right">  
+     <div class="col-xs-12 col-sm-12 text-right">
+       <div class="form-group form-group-xs" style="margin-bottom: 3px;">  
+         
+        @* <button id="btnDownload" style="padding: 6px;" class="fa fa-download btn btn-success btn-xs" onclick="onDownloadData()">
+            <span style="font-family: Open Sans; font-size: 12px">Download</span>
+         </button>     *@       
+       </div>
+    </div>    
+</div> 
+
+<div id="alert_box_upload" class="alert alert-danger alert-dismissable" style="display: none">
+    <button type="button" class="close" aria-hidden="true" onclick="$('#alert_box_upload').hide();">&times;</button>
+    <span id="alert_text_upload"></span>
+</div> 
+
+<div id="alert_box_message" class="alert alert-success alert-dismissable" onmouseover="$('#alert_box_message').hide();onGetData(1);" style="display: none">
+    @*<button type="button" class="close" aria-hidden="true" onclick="$('#alert_box_message').hide();onGetData(1);">&times;</button>*@
+    <span id="alert_box_message">Upload data successfully</span>
+</div> 
+
+<div class="row">
+    <div class="table-responsive col-xs-12 col-sm-12"> 
+        <div style="border: 1pt solid #ccc;">
+        
+           <div style="overflow: hidden;" id="DivHeaderRow"></div>
+           <div style="overflow:scroll;" onscroll="OnScrollDiv(this)" id="DivMainContent">          
+               <table id="tscroll" class="table table-striped table-bordered table-condensed table-fixed" style="width:100%">
+                    <thead>
+                        <tr>                      
+                            <th >Process Id</th>
+                            <th >Created</th>
+                            <th >Date</th>
+                            <th >Status</th>             
+                        </tr>
+                    </thead>   
+                    <tbody>
+                        @{
+                            if (ListGentaniHeader.Count > 0)
+                            {
+                                foreach (MRPCreation item in ListGentaniHeader)
+                                {
+                                    string reexporter = "";
+                                    if(@item.TASK_STATUS=="1")
+                                    {
+                                        icon="ace-icon fa  fa-check";
+                                        btn = "btn btn-xs btn-primary";
+                                        btn = "btn btn-sm btn-primary";
+                                    }
+                                    else if(@item.START_DT!="" && @item.END_DT=="")
+                                    {
+                                        icon = "glyphicon glyphicon-transfer";
+                                        btn = "btn btn-xs btn-success";       
+                                        btn = "btn btn-sm btn-success";     
+                                    }
+                                    else
+                                    {
+                                        icon = "ace-icon fa  fa-clock-o";
+                                        btn = "btn btn-xs btn-warning";       
+                                        btn = "btn btn-sm btn-yellow";       
+                                    }
+                                <tr>
+                                <td class="text-center">@item.PROCESS_ID </td>                               
+                                <td class="text-center">@item.CREATED_BY </td>                                                  
+                                <td class="text-center">@item.CREATED_DT </td>                                                         
+                                <td class="text-center"><button class="@btn"><i class="@icon"></i> </button></td>                                  
+                               @* <td class="text-center">@item.CREATED_BY</td>
+                                <td class="text-center">@item.CREATED_DT</td>
+                                <td class="text-center">@item.CHANGED_BY</td>
+                                <td class="text-center">@item.CHANGED_DT</td>*@
+                            </tr>  
+                                }
+                            }
+                            else
+                            {
+                            <tr>
+                                <td colspan="11" class="text-center">
+                                    No data found
+                                </td>
+                            </tr>
+                            }
+                        }
+                    </tbody>                               
+                </table>                    
+           </div>     
+                <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                    <tfoot>
+                        <tr>
+                            <td class="col-xs-8 listdata">
+                                @Html.Partial("_Paging")
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+           
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">   
+   $(document).ready(function () {        
+        $('#upfile').val('');        
+        MakeStaticHeader('tscroll', window.innerHeight, 100, 26);  
+
+        $(window).resize(function() {
+          var wHeight = $(window).height(); 
+          MakeStaticHeader('tscroll', wHeight, 100, 26);        
+        });                               
+   }); 
+   
+function OnScrollDiv(Scrollablediv) {
+    document.getElementById('DivHeaderRow').scrollLeft = Scrollablediv.scrollLeft; 
+}
+
+function MakeStaticHeader(gridId, height, width, headerHeight) { 
+        var tbl = document.getElementById(gridId);
+        if (tbl) { //
+        var DivHR = document.getElementById('DivHeaderRow');
+        var DivMC = document.getElementById('DivMainContent');
+        
+        //*** Set divheaderRow Properties ****
+        DivHR.style.height = headerHeight + 'px'; 
+        DivHR.style.width = '98.6%';
+        DivHR.style.position = 'relative';
+        DivHR.style.top = '0px';
+        DivHR.style.zIndex = '10';
+        DivHR.style.verticalAlign = 'top';                     
+
+        //*** Set divMainContent Properties ****       
+        DivMC.style.width = width + '%';
+        DivMC.style.height = height - 300 + 'px';        
+        DivMC.style.position = 'relative';
+        DivMC.style.top = -headerHeight + 'px';
+        DivMC.style.zIndex = '1';
+        
+        //****Copy Header in divHeaderRow****
+        DivHR.appendChild(tbl.cloneNode(true));
+     }
+}
+
+//.change(function () {
+$('#upfile').on('change', function (e) {
+    var fileName = $('#upfile').val();  
+    var xls = fileName.match(/\.(xls?)$/i); 
+    //var xlsx = fileName.match(/\.(xlsx?)$/i);        
+    if (xls != null) {                             
+        //awal
+        var files = e.target.files;
+        if (files.length > 0) {
+            if (window.FormData !== undefined) {
+                var data = new FormData();
+                for (var x = 0; x < files.length; x++){
+                    data.append("file" + x, files[x]);
+                }
+
+                var param = '?UserName=' + '@UserName';
+                $.progressbox.show("Upload", "Loading Data...");
+
+                $.ajax({
+                type: "POST",
+                url: "@Url.Content("~/MRPGentaniHeader/UploadFile")" + param,
+                contentType: false,
+                processData: false,
+                data: data,
+                success: function(data) {
+                    $.progressbox.hide();
+                    var result = data.message.split('|'); 
+                    if (result[0] == 'Error'){
+                            //alert('Error occured when uploading,please view logging for detail');
+                            $('#alert_text_upload').html(result[1]);
+                            $('#alert_box_upload').show();
+                    }
+                    else if (result[0] == 'False'){
+                           $('#alert_text_upload').html('Error occured when uploading, please view logging for detail');
+                           $('#alert_box_upload').show();
+                        }
+                   else{                       
+                        //$('#alert_box_message').html(result[1]);
+                        $('#alert_box_message').show();   
+                        $('#upfile').val('');                                             
+                   }
+                },
+                error: function (xhr, status, p3, p4){
+                    var err = "Error " + " " + status + " " + p3 + " " + p4;
+                    if (xhr.responseText && xhr.responseText[0] == "{")
+                        err = JSON.parse(xhr.responseText).Message;
+                        console.log(err);
+                    }
+                });                                  
+            } else {               
+                $("#selected-info").modal();
+                $("#infoModal").html("This browser doesn't support HTML5 file uploads!");
+                }
+            }
+        //akhir                                             
+    } 
+    else {        
+        $("#selected-info").modal();
+        $("#infoModal").html('Please select an excel file with format xls');                        
+    }                             
+}); 
+</script>

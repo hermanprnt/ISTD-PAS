@@ -1,0 +1,7 @@
+﻿@using GPS.Controllers.Master
+@model  GPS.Models.Common.PRPOTrackingParam
+@{
+    string doctype = ViewData["DOC_TYPE"] == null ? "DOC" : (string)ViewData["DOC_TYPE"];    
+}
+
+@Html.DropDownListFor(m => m.DOC_STATUS, DocStatusController.GetDocStatusSelectList(doctype), new {id = "cmb-status", @class = "cursor-1", @style = "width:100%"})

@@ -1,0 +1,250 @@
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+                   G P S   D E V E L O P M E N T   G U I D E
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+
+
+1. Code Location and Convention..........................................[rnvcr]
+  1a. Model..............................................................[oegol]
+  1b. View...............................................................[rukch]
+  1c. Controller.........................................................[fppgw]
+  1d. Configurations.....................................................[rfdmr]
+  1e. SQL................................................................[ntxmp]
+  1f. Constants..........................................................[jwkjq]
+  1g. ViewModels.........................................................[kubmu]
+  1h. CommonFunc.........................................................[agext]
+  
+2. Source Control........................................................[llqca]
+
+3. Common/Shared.........................................................[wqmrr]
+  3a. DummyDatabaseAgent.................................................[neajj]
+  3b. ActionResponseViewModel............................................[fjqdh]
+  3c. Current user.......................................................[nemin]
+  3d. CommonDisplayMessage & DisplayMessageId............................[enpqe]
+  3e. CommonFormat.......................................................[decfx]
+  3f. CommonPage.........................................................[aenuf]
+  3g. EditMode...........................................................[qnpvo]
+  3h. ModuleId & FunctionId..............................................[boite]
+  3i. SystemCode.........................................................[occiq]
+  3j. YesNoFlag..........................................................[brjjk]
+  3k. InvalidOperationException..........................................[bhiyc]
+  3l. GetType............................................................[hlale]
+  3m. todatepiker........................................................[dcney]
+  3n. todaterangepicker & parsedaterange.................................[pthvg]
+  3o. displaymessagebox..................................................[gaovx]
+  
+4. Saran.................................................................[ytvjs]
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+1. Code Location and Convention                                          [rnvcr]
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+    Karena system GPS ini dikembangkan menggunakan ASP MVC 3. Maka sudah jelas  
+MVC pattern digunakan disini.
+
+1a. Model =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- [oegol]
+
+    Semua class representasi dari table atau data yang di fetch dari db diletak-
+kan difolder ini, dan berakhiran Model. Termasuk juga class Repository yang ber-
+isikan Business Logic, dan berakhiran Repository.
+
+1b. View =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= [rukch]
+
+    Semua file .cshtml / razor view diletakkan disini dengan convention menggu- 
+nakan _ (underscore) untuk PartialView dan tanpa underscore untuk View biasa    
+untuk membantu pengembang lebih cepat mengidentifikasi kedua jenis View tsb.    
+
+1c. Controller =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= [fppgw]
+
+    Di ASP MVC semua controller diturunkan dari Controller class tapi di GPS    
+semua controller diturunkan dari PageController class yang merupakan controller 
+milik TDK. Dan jika ada logic yang digunakan di View ataupun mapping data dari  
+ViewModel (lihat section 1g), maka diletakkan di Controller.
+
+
+
+    TDK yang sudah disinggung diatas adalah Toyota Development Kit dan membawa  
+2 folder tambahan.
+
+1d. Configurations =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= [rfdmr]
+
+    Folder ini digunakan TDK untuk meletakkan semua file config seperti menu,   
+connectionstring dll. 
+
+1e. SQL =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- [ntxmp]
+
+    Secara default, Data Access Layer TDK yang disebut DBContext membaca string 
+dari file SQL ketimbang query string (Jika ingin menggunakan query string,      
+silakan baca dokumentasi TDK). Maka semua file SQL yang digunakan di repository,
+diletakkan disini.
+
+
+
+  Sisanya adalah folder yang disusun untuk memudahkan pengembang lain / baru    
+untuk memelihara atau mengembangkan fitur baru.
+
+1f. Constants =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- [jwkjq]
+
+    Constant digunakan untuk meminimalisir Magic String / String Gaib yang lebih
+sering menyusahkan pengembang saat men-debug program. Selain itu juga digunakan 
+untuk mengganti String yang digunakan dibanyak tempat. Misalkan lokasi file SQL 
+yang digunakan di lebih dari satu Repository maka lebih baik dijadikan constant.
+
+1g. ViewModels =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= [kubmu]
+
+    Jika Model adalah representasi kolom suatu table atau data yang ditarik dari
+db, maka ViewModel adalah representasi dari data yang ditarik atau diperuntukkan
+untuk View.
+
+1h. CommonFunc =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= [agext]
+
+    Biasanya penghuni folder ini adalah class-class yang digunakan sebagai      
+helper dan tidak ada reference terhadap semua folder diatas. Misalkan class yang
+digunakan untuk FileUpload dan reference-nya hanya ke FileSystem yang disediakan
+di namespace System.IO. Jika ada ketergantungan ke Repository misalkan maka     
+letakkan di Model. Contohnya MRPCommonRepository. Atau jika ada ketergantungan  
+dengan Controller/PageConrtoller seperti POCommonController maka letakkan di    
+Controller.
+
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+2. Source Control                                                        [llqca]
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+    Source Control yang digunakan di GPS adalah Git. Dan fase dari pengembangan 
+GPS ini diletakkan / dibagi di branch yang berbeda. Branch master adalah branch 
+yang digunakan untuk merge semua code yang telah di-test. Atau dengan kata lain 
+branch master diperuntukkan code yang sudah Production Ready. Branch kedua      
+adalah dev. Dari namanya sudah ketahuan bahwa dia digunakan untuk fase pengemba-
+ngan. Branch terakhir adalah UAT yang aka dibuat saat GPS akan di-UAT-kan. Saran
+untuk pengembang, jika ingin mengembangkan fitur / modul baru, lebih baik untuk 
+membuat branch tersendiri. Jika ada perubahan / update dari branch dev maka     
+merge dulu ke branch tersendiri tersebut lalu lanjutkan pengembangan. Jika sudah
+di-test oleh pengembang, maka silakan merge ke branch dev yang selanjutnya akan 
+di-test oleh QA.
+
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+3. Common/Shared                                                         [wqmrr]
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+    Fungsi-fungsi atau pun POCO yang umum digunakan hampir semuanya dibawa dari 
+project sebelumnya. Hanya tinggal menggunakan dan tidak perlu me-reinvent the   
+wheel.
+
+3a. DummyDatabaseAgent =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= [neajj]
+
+    Class ini dibuat karena DBContenct milik TDK tidak memiliki fungsi Fetch    
+yang mengembalikan DataTable. DataTable result digunakan untuk DataSource Report
+yang DataSource default-nya adalah DataTable.
+
+3b. ActionResponseViewModel =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- [fjqdh]
+
+    Hampir semua aplikasi internal TMMIN termasuk GPS memiliki pattern yang     
+mirip dalam hal business-process logic yang berjenis transaksi. Yaitu, disimpan 
+di Stored Procedure, menggunakan processId dan yang paling penting di-Log. Maka 
+dari itu ActionResponseViewModel merupakan representasi dari jenis Message yang 
+digunakan dalam Log. Misal, jika Error maka mengembalikan Message yang berformat
+"E|<pesan_error>". Jika Sukses maka mengembalikan "S|<pesan_sukses>". Dan begitu
+seterusnya.
+
+    Hasil kembalian SP yang ber-type String tersebut di-parse menggunakan       
+Extension Method AsActionResponseViewModel() yang berada di Class Extesions di  
+Namespace GPS.CommmonFunc. Selain menerima parameter String,                    
+AsActionResponseViewModel() juga memiliki overload yang menerima parameter      
+Exception, yang digunakan untuk meng-convert Exception yang di-catch menjadi    
+ActionResponseViewModel yang selanjutnya dikembalikan ke client berbentuk JSON. 
+
+    Selain untuk mengembalikan Exception juga bisa digunakan untuk mengembalikan
+Sukses, Info atau lainnya sebagai respon Ajax. 
+
+3c. Current user =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= [nemin]
+
+    User yang sekarang sedang login dapat diambil dengan 2 cara. Yang pertama   
+dari View melalui javascript. TDK sudah menyediakannya di $tdk.User. Cara yang  
+kedua adalah melalui Extension Method GetCurrentUsername() atau yang lain yang  
+terletak di Class PageControllerExtensions di Namespace GPS.CommonFunc.
+
+    Karena Current User lebih sering digunakan dalam SP, atau dengan kata lain  
+digunakan di back-end maka disarankan untuk menggunakan Extension Method ketim- 
+bang javascript milik TDK yang mana terletak di View atau front-end.
+
+3d. CommonDisplayMessage & DisplayMessageId =-=-=-=-=-=-=-=-=-=-=-=-=-=- [enpqe]
+
+    DisplayMessage ada 2. Yang pertama DisplayMessage yang digunakan di View    
+dan tidak digunakan di Log SP sama sekali. Maka letakkan di Class ini. Yang ke- 
+dua adalah DisplayMessage yang digunakan di View juga di Log SP menggunakan     
+MessageId sebagai reference. DisplayMessage ini disimpan di table TB_M_MESSAGE.
+
+    Jangan lupa untuk selalu meng-update Class DisplayMessageId agar selalu     
+sinkron dengan TB_M_MESSAGE. Dan selalu refactor DisplayMessage yang digunakan  
+di View agar tidak ada duplikasi.
+
+3e. CommonFormat =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= [decfx]
+
+    Constant String yang digunakan untuk meng-convert String ke Type lain atau  
+sebaliknya disimpan disini. Dan juga String yang merupakan representasi format- 
+ting atau juga MimeType.
+
+3f. CommonPage =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= [aenuf]
+
+    Constant String dari View yang umum digunakan diberbagai View lainnya       
+seperti MasterPage Layout dan View lainnya yang sering disimpan di folder Shared
+juga diletakkan disini.
+
+3g. EditMode =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= [qnpvo]
+
+    Dibeberapa View dan SP Master dan PO butuh suatu Flag atau penanda yang     
+dapat digunakan untuk membedakan aksi Add dan Edit. Gunakan Class ini untuk     
+keperluan seperti itu kedepannya.
+
+3h. ModuleId & FunctionId =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- [boite]
+
+    Sama seperti DisplayMessageId yang digunakan untuk meletakkan Id, ModuleId  
+dan FuntionId juga ditujukan untuk meletakkan Id. Dan merupakan representasi    
+dari table TB_M_MODULE dan TB_FUNCTION. Selain itu tujuan utama lainnya adalah  
+agar Code atau Id yang sering digunakan tidak bersifat MagicString atau         
+MagicNumber (String atau Number yang entah darimana datangnya dan tidak di-     
+ketahui maksudnya dengan jelas). Sehingga menjadi self-documented dan menjadi   
+jelas fungsinya hanya dengan membaca namanya.
+
+    Umumnya ModuleId dan FunctionId dikirim sebagai parameter eksekusi SP yang  
+dipaket di dalam Class ExecProcedureModel.
+
+3i. SystemCode =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= [occiq]
+
+
+
+3j. YesNoFlag =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- [brjjk]
+
+
+
+3k. InvalidOperationException =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- [bhiyc]
+
+
+
+3l. GetType =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- [hlale]
+
+
+
+3m. todatepiker =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- [dcney]
+
+
+
+3n. todaterangepicker & parsedaterange =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= [pthvg]
+
+
+
+3o. displaymessagebox =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- [gaovx]
+
+
+
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+4. Saran                                                                 [ytvjs]
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+  * Selalu periksa CommonFunction yang sudah ada terlebih dulu sebelum membuat  
+    yang baru. Jika sudah ada, gunakan yang sudah ada atau extend fungsinya.
+  * Untuk melihat contoh code atau bagian dari Common Function digunakan dimana,
+    gunakan "Find All Reference" atau Ctrl+K, R (tahan Ctrl dan tekan K lalu R).

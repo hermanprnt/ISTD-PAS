@@ -1,0 +1,103 @@
+﻿@using GPS.Constants
+@using GPS.Controllers.PO
+@using GPS.Core.ViewModel
+<div class="modal fade" id="cancelpo">
+    <div class="modal-dialog modal-md" style="width: 500px;">
+        <div class="modal-content" style="background-color:#3a87ad;color:white;">
+            <div class="modal-header" style="border-bottom: 0px !important">
+                <h4 class="modal-title dettitle popup-title" style="font-size:13px">Cancel Purchase Order</h4>
+            </div>
+            <div class="modal-body" style="padding:10px !important;background-color:white;color:black;margin:2px !important">
+                <input type="text" class="hidden" id="hidden-pono">
+                <input type="text" class="hidden" id="hidden-sappono">
+                <p style="font-size:13px;">Are you sure you want to Cancel Purchase Order <label id="lbl-pono" style="font-size:inherit"></label>?</p>
+                <p style="font-size:11px;">
+                    If you're sure to cancel this purchase order, please fill
+                    <strong>Cancel Reason<span style="color:red">*</span></strong> in text field below :
+                </p>
+                <textarea id="txt-cancel" style="width:100%;resize:none;font-size:11px" rows="3" maxlength="100"></textarea>
+                <p style="font-size:10px;font-style:italic"><span style="color:red">*</span>Mandatory, Minimum 10 Character, Maximum 100 Character</p>
+                <label id="errormsg" style="color:red;"></label>
+                <label id="postatus" class="hidden"><i class="fa fa-warning"></i>  PO already posted to SAP. Please cancel PO in SAP manually</label>
+                <div class="btn-group-xs text-right">
+                    <button id="btnget-submit" type="button" class="btn btn-primary btn-xs">Submit</button>
+                    <button id="btnget-close" type="button" class="btn btn-danger btn-xs" data-dismiss="modal" onclick="doCancelAbort()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.Disable(["#btnget-submit"]);
+
+        $(document).on("keydown", "#txt-cancel", function (e) {
+            var capttext = $("#txt-cancel").val().trim();
+            $("#errormsg").html("");
+
+            if (capttext == "")
+                $.Disable(["#btnget-submit"]);
+            else
+                $.Enable(["#btnget-submit"]);
+
+        });
+
+        function OnAjaxError(data) {
+            var result = $.ValidateASPError(data.responseText);
+            $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+        }
+
+        function doCancelPO(pono, cancelReason) {
+            $.ajax({
+                type: "POST",
+                url: "@POInquiryController.Action.Cancel",
+                data: JSON.stringify({
+                    poNo: pono,
+                    cancelReason: cancelReason
+                }),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: function (data) {
+                    $.messagebox.show(data.ResponseType, data.Message, data.ResponseType);
+                    $.progressbox.hide();
+                    $("#btnget-close").trigger("click");
+                    $("#btn-search").trigger("click");
+                },
+                //complete: $.progressbox.hide(),
+                error: OnAjaxError,
+            });
+        }
+
+        $(document).on("click", "#btnget-submit", function (e) {
+            var capttext = $("#txt-cancel").val().trim();
+            var msg = "";
+
+            if ((capttext == "") || (capttext == null) || (capttext == undefined)) {
+                $.messagebox.show(
+                            "Cancel PO",
+                            "Cancel Reason is Mandatory!",
+                            "WRN",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                return;
+            }
+
+            if ((capttext.length < 10) || (capttext.length > 100)) {
+                $.messagebox.show(
+                            "Cancel PO",
+                            "Cancel Reason Minimum length is 10 character and Maximum length is 100 character",
+                            "WRN",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                return;
+            }
+
+            doCancelPO($("#hidden-pono").val(), capttext);
+            $("#cancelpo").hide();
+        });
+    });
+</script>

@@ -1,0 +1,41 @@
+﻿@using GPS.Models.Master
+@{
+    List<QuotaDetail> QuotaListDetail = (List<QuotaDetail>)ViewData["QuotaListDetail"] != null ? (List<QuotaDetail>)ViewData["QuotaListDetail"] : new List<QuotaDetail>();
+}
+
+<tbody>
+@if (QuotaListDetail != null)
+{
+    int i = 0;
+    foreach (var item in QuotaListDetail)
+    { 
+        <tr class="removed" id="row-@i">
+            <td class="text-center"><input type="checkbox" class="check checkadd-@i" + name="checkadd[]" id="chk-@i" data-no="@i" value="@item.Number"/></td>
+            <td class="text-center" id="tmonth-@i" >@item.MONTH</td>
+            <td width="100px" class="text-left col-@i">
+                <span id="tmatno-@i" class="text ">@item.MAT_NO</span>
+            </td>
+            <td width="100px" class="text-left col-@i">
+                <span class="text tmatdesc-@i">@item.MAT_DESC</span>
+            </td>       
+            <td width="100px" class="text-right col-@i">
+                <span class="text tquota-@i">@(String.Format("{0:n}", item.QUOTA))</span>
+            </td>  
+            <td width="100px" class="text-right col-@i">
+                <span class="text taddquota-@i">@(String.Format("{0:n}", item.ADDITIONAL_QUOTA))</span>
+            </td>
+            <td width="100px" class="text-right col-@i">
+                <span class="text tusage-@i">@(String.Format("{0:n}", item.USAGE))</span>
+            </td> 
+            <td width="100px" class="initial-hide text-left col-@i">
+                <span class="text initial-hide  tcreatedby-@i">@item.CREATED_BY</span>
+            </td> 
+            <td width="50px" class="initial-hide text-center col-@i">
+                <span class="text initial-hide  tcreateddate-@i">@item.CREATED_DT</span>
+            </td>     
+        </tr>
+        i++;
+    }
+}
+</tbody>
+

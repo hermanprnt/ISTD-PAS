@@ -1,0 +1,166 @@
+﻿@using GPS.Models.Master
+@using GPS.Constants
+@{
+    List<BudgetControl> listWBS = ViewData["ListWBS"] != null ? (List<BudgetControl>)ViewData["ListWBS"] : new List<BudgetControl>();
+}
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <div style="border: 1pt solid #ccc;">
+        <div id="tScrollHead" style="width: 98.65%; overflow: hidden;">
+            <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1270px;">
+                <thead>
+                    <tr>
+                        <th style="width:37px">No</th>
+                        <th style="width:169px" class="sorting" data-field="WBS_NO" data-sort="none">WBS No</th>
+                        <th style="width:324px" class="sorting" data-field="WBS_DESCRIPTION" data-sort="none">Description</th>
+                        <th style="width:113px">Initial</th >
+                        <th style="width:113px">Commitment</th>
+                        <th style="width:113px">Actual</th>
+                        <th style="width:113px">Remaining</th>
+                        <th style="width:50px">Year</th>
+                        <th style="width:55px">Currency</th>
+                        <th style="width:113px">Amount Ori</th>
+                        <th style="width:70px">Rate Ori</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div id="tScrollBody" style="overflow: scroll; height: 270px;">
+            <table id="tblScroll" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1270px;">
+                <tbody>
+                    @{
+                        if (listWBS.Count > 0)
+                        {
+                            foreach (BudgetControl item in listWBS)
+                            {
+                                <tr>
+                                    <td style="width:37px" class="text-center" >@item.NUMBER</td>
+                                    <td style="width:169px" class="text-left"><a id="lnk-docno-@item.WBS_NO" href="#" onclick="onGetDetailWBS('@item.WBS_NO',1)">@item.WBS_NO</a></td>
+                                    <td style="width:324px" class="text-left">@item.WBS_DESCRIPTION</td>
+                                    <td style="width:113px" class="text-right">@(String.Format("{0:n0}", item.INITIAL_BUDGET))</td>
+                                    <td style="width:113px" class="text-right"><a id="lnk-docno-@item.WBS_NO" href="#" onclick="onGetDetailWBS('@item.WBS_NO',2)">@(String.Format("{0:n0}", item.COMMITMENT))</td>
+                                    <td style="width:113px" class="text-right"><a id="lnk-docno-@item.WBS_NO" href="#" onclick="onGetDetailWBS('@item.WBS_NO',3)">@(String.Format("{0:n0}", item.BUDGET_CONSUME_GR_SA))</td>
+                                    <td style="width:113px" class="text-right">@(String.Format("{0:n0}", item.REMAINING_COMMITMENT))</td>
+                                    <td style="width:50px" class="text-center">@item.WBS_YEAR</td>
+                                    <td style="width:55px" class="text-center">@item.CURR_CD</td>
+                                    <td style="width:113px" class="text-right">@(String.Format("{0:n0}", item.INITIAL_AMOUNT))</td>
+                                    <td style="width:70px" class="text-right">@item.INITIAL_RATE</td>
+                                </tr>  
+                            }
+                        }
+                        else
+                        {
+                        <tr>
+                            <td colspan="19" class="text-center">@CommonDisplayMessage.NoData</td>
+                        </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                <tfoot>
+                    <tr>
+                        <td colspan="13">
+                                @Html.Partial("_BudgetControlPaging")
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+        //for sorting
+    var table = document.getElementById("dynamic-table");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+
+    function tableText(tableCell) {
+        var removeClass;
+        var addClass;
+        var dataSort;
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            if (tableCell.getAttribute("class").indexOf('sorting_asc') >= 0) {
+
+                removeClass = 'sorting_asc';
+                addClass = 'sorting_desc';
+                dataSort = 'desc';
+
+            } else if (tableCell.getAttribute("class").indexOf('sorting_desc') >= 0) {
+
+                removeClass = 'sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+
+            } else {
+
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'asc';
+
+            }
+        }
+
+        //reset all
+        var tableReset = document.getElementById("dynamic-table");
+        if (tableReset != null) {
+            for (var i = 0; i < tableReset.rows.length; i++) {
+                for (var j = 0; j < tableReset.rows[i].cells.length; j++) {
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_asc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_asc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_desc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_desc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                }
+            }
+        }
+        // end
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            tableCell.classList.remove(removeClass);
+            tableCell.classList.add(addClass);
+            tableCell.dataset.sort = dataSort;
+            $.ajax({
+                type: "GET",
+                url: "/BudgetControl/GetHeaderSortWBS",
+                data: {
+                    field: tableCell.dataset.field,
+                    sort: dataSort,
+                    division: $("#hiddenDivision").val(),
+                    wbs_no: $("#txtWBSNo").val(),
+                    year: $("#txtYear").val(),
+                                    Display: $("#cbodisplay").val(),
+                                    Page: CurrentPage
+                },
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    $("#tblScroll")
+                                .find('tbody')
+                                .html(
+                                    result
+                                );
+                }
+            });
+        }
+    }
+</script>

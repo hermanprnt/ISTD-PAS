@@ -1,0 +1,124 @@
+﻿@using System.Linq
+@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Constants.PO
+@using GPS.Models.PO
+@using GPS.ViewModels.PO
+@model POInquiryViewModel
+
+<div style="overflow: auto;">
+    <table id="dynamic-table" class="table table-striped table-bordered table-condensed">
+        <thead id="header-row">
+            <tr>
+                <th width="20px" rowspan="2"></th>
+                <th width="30px" rowspan="2">Lock</th>
+                <th width="30px" rowspan="2" class="sorting" data-field="ATTACHMENT" data-sort="none">A</th>
+                <th width="65px" rowspan="2" class="sorting" data-field="PO" data-sort="none">PO No</th>
+                <th width="40px" rowspan="2" >Notice</th>
+                <th width="170px" rowspan="2" class="sorting" data-field="DESC" data-sort="none">Header Text</th>
+                <th width="65px" rowspan="2" class="sorting" data-field="DATE" data-sort="none">Doc. Date</th>
+                <th width="75px" rowspan="2" class="sorting" data-field="PURCH" data-sort="none">Purch. Grp</th>
+                <th width="220px" rowspan="2" class="sorting" data-field="VENDOR" data-sort="none">Vendor</th>
+                <th width="45px" rowspan="2" class="sorting" data-field="CURR" data-sort="none">Curr</th>
+                <th width="100px" rowspan="2" class="sorting" data-field="AMOUNT" data-sort="none">Amount</th>
+                <th width="100px" rowspan="2" class="sorting" data-field="STATUS" data-sort="none">Status</th>
+                <th width="50px" rowspan="2" class="sorting" data-field="SPK" data-sort="none">SPK</th>
+                <th width="60px" rowspan="2" class="sorting" data-field="LETTER" data-sort="none">Draft PO</th>
+                <th width="60px" rowspan="2" class="sorting" data-field="LETTER" data-sort="none">PO Letter</th>
+                <th width="175px" class="col-hidden hidden" colspan="2">Cancel</th>
+                <th width="175px" class="col-hidden hidden" colspan="2">Download</th>
+                <th width="175px" class="col-hidden hidden" colspan="2">Created</th>
+                <th width="175px" class="col-hidden hidden" colspan="2">Changed</th>
+            </tr>
+        <tr>
+            <th class="col-hidden hidden">By</th>
+            <th class="col-hidden hidden">Date</th>
+            <th class="col-hidden hidden">By</th>
+            <th class="col-hidden hidden">Date</th>
+            <th class="col-hidden hidden">By</th>
+            <th class="col-hidden hidden">Date</th>
+            <th class="col-hidden hidden">By</th>
+            <th class="col-hidden hidden">Date</th>
+        </tr>
+        </thead>
+        <tbody>
+            @Html.Partial(GPS.Controllers.PO.POInquiryController.Partial.InquiryGridBody, Model)            
+        </tbody>
+    </table>
+</div>
+<div class="v-space"></div>
+@Html.Partial(CommonPage.GridPagination, Model.GridPaging)
+<script>
+    /* =============================== Sort: begin =============================== */
+
+    var table = document.getElementById("header-row");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+
+    function tableText(tableCell) {
+        var removeClass;
+        var addClass;
+        var dataSort;
+        
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            if (tableCell.getAttribute("class").indexOf('sorting_asc') >= 0) {
+                removeClass = 'sorting_asc';
+                addClass = 'sorting_desc';
+                dataSort = 'DESC';
+            } else if (tableCell.getAttribute("class").indexOf('sorting_desc') >= 0) {
+                removeClass = 'sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+            } else {
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'ASC';
+            }
+        }
+
+        //reset all
+        var tableReset = document.getElementById("header-row");
+        if (tableReset != null) {
+            for (var i = 0; i < tableReset.rows.length; i++) {
+                for (var j = 0; j < tableReset.rows[i].cells.length; j++) {
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_asc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_asc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_desc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_desc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                }
+            }
+        }
+        // end
+
+        var orderby = tableCell.dataset.field + '|' + dataSort;
+        var page = $('.pagination > li.active > a').html();
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            tableCell.classList.remove(removeClass);
+            tableCell.classList.add(addClass);
+            tableCell.dataset.sort = dataSort;
+
+            $.progressbox.show("PO Inquiry", "Sort PO Inquiry Grid. . .")
+            SortGrid(orderby, page, undefined);
+            $.progressbox.hide();
+        }
+    }
+
+    /* =============================== Sort: end =============================== */
+</script>

@@ -1,0 +1,17 @@
+﻿DECLARE @@SQL VARCHAR(MAX)
+
+SET @@SQL = 'SELECT * FROM
+(
+	SELECT ROW_NUMBER() OVER (ORDER BY VENDOR_CD ASC) AS Number,
+		  VENDOR_CD AS VENDOR_CD
+		  ,VENDOR_NAME AS VENDOR_NAME
+
+	FROM TB_M_VENDOR
+	WHERE 1=1
+	'
+	IF (ISNULL(@Param, '') <> '')
+		SET @@SQL = @@SQL + ' AND (VENDOR_CD like % ''' + @Param + '''%' 
+				
+	SET @@SQL = @@SQL + ' ) TB WHERE Number BETWEEN ' + CAST(@Start AS VARCHAR) + ' AND ' + CAST(@End AS VARCHAR)
+
+EXEC (@@SQL)

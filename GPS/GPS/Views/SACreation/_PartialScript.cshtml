@@ -1,0 +1,332 @@
+﻿
+@using Toyota.Common.Credential
+@{
+    User user = Html.Toyota().Page.User;
+}
+@using GPS.Constants
+@using GPS.Core.ViewModel
+@model GPS.ViewModels.MRP.MRPCreationViewModel
+
+<script type="text/javascript">
+        /* ============================== document : begin ============================== */
+        $(document).ready(function () {
+            $(document).on("change", "[id^=chk-podata-]", function (e) {
+                var selectedDataList = $("[id^=chk-podata-]:checked");
+                if (selectedDataList.length > 1) {
+                    $.displaymessagebox.show("@DisplayMessageId.SelectOnlyOne");
+                    $(this).prop("checked", false);
+                }
+            });
+        })
+        /* ============================== Init: begin ============================== */
+        $("#txtPO").keypress(function (event) {
+            if (event.which == 13) onCheck();
+        });
+        $("#txtReffNo").keypress(function (event) {
+            if (event.which == 13) onCheck();
+        });
+         $("#txt-postingdate").todatepicker();
+        $.Clear([
+            "#txtPO",
+            "#txtReffNo",
+            "#txt-shorttext"
+        ]);
+
+        ViewData.Clear();
+        ViewData.Add("ProcessId", "@ViewBag.ProcessId");
+
+        function OnAjaxBegin(title) {
+            $.progressbox.show($tdk.PageTitle, title);
+            $.Disable([
+                "#txt-postingdate",
+                "#txt-shorttext"
+            ]);
+        }
+
+        function OnAjaxComplete() {
+            $.Enable([
+                "#txt-postingdate",
+                "#txt-shorttext"
+            ]);
+            $.progressbox.hide();
+            if ($('.note-expired').text().length > 1) {
+                $('#btnSubmit').prop('disabled', true);
+            }
+        }
+
+        function OnAjaxError(data) {
+            var result = $.ValidateASPError(data.responseText);
+            $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+        }
+
+         function onCheck()
+        {
+            var PONo = $("#txtPO").valOrDefault();
+            if (PONo == "")
+            {
+                var message = "Please input PO No.";
+                 $.messagebox.show(
+                            "Warning",
+                            message,
+                            "WRN",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+            }
+            else
+            {
+            OnAjaxBegin("Checking PO Number ...");
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("checkPO")",
+                data: {
+                    PO:$("#txtPO").valOrDefault(),
+                    REFF: $("#txtReffNo").valOrDefault(),
+                    ProcessId: $("#txtProcessId").val()
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError,
+                success: function(data) {
+                    var str =data.split("+");
+                    var message=str[1];
+                    var a=str[0];
+                    if(data!="" & a=="a"){
+
+                        if(message=="1")
+                        {
+                            message="PO number is not found or was deleted.";
+                        }
+                        else if (message=="2")
+                        {
+                            message="PO not yet release.";
+                        }
+                        else if (message=="3")
+                        {
+                            message="PO doesn't have item for SA.";
+
+                        }
+                        $.messagebox.show(
+                            "Create SA",
+                            message,
+                            "INF",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                    }
+                    else if(data!="" & a=="b") {
+//                        OnAjaxBegin("Checking PO by Reff Number ...");
+//                        $.ajax({
+//                            type: "POST",
+//                            url: "@Html.Toyota().Page.GetActionUrl("getPObyReff")",
+//                            data: {
+//                                REFF:message
+//                            },
+//                            complete: OnAjaxComplete,
+//                            error: OnAjaxError,
+//                            success: function(data){
+//                                $("#poReffGrid").html(data);
+//                                $("#pop-PObyref").modal();
+//                                document.getElementById('lblReffConfirm').innerHTML =message;
+//                            }
+//                        });
+                    }
+                    else if (a == "c") {
+                        $.messagebox.show(
+                            "Create SA",
+                            message,
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                    }
+                    else {
+                        $("#POData").html(data);
+                        onHideDetail();
+                        $("#btnSubmit").removeClass("hidden");
+                    }
+                }
+
+            });
+            }
+        }
+
+
+        function onChoosePO(PO)
+        {
+            $("#pop-PObyref").modal('hide');
+            $("#txtPO").val(PO);
+             onCheck();
+        }
+
+        function onDetail()
+        {
+            $("#PODetail").slideDown();
+            document.getElementById('linkDetail').className = "hidden";
+            document.getElementById('linkHideDetail').className = "";
+        }
+        function onHideDetail()
+        {
+            $("#PODetail").slideUp();
+//            document.getElementById('linkDetail').className = "";
+//            document.getElementById('linkHideDetail').className = "hidden";
+        }
+
+        function onSubmit()
+        {
+            var validation = ValidateItem();
+            if (validation.IsValid) {
+                OnAjaxBegin("Submitting Service Acceptance ...");
+                $.ajax({
+                    type:"POST",
+                    url: "@Html.Toyota().Page.GetActionUrl("Submit")",
+                    data: JSON.stringify({
+                        ProcessId: ViewData.Get("ProcessId"),
+                        SAList: validation.ItemList,
+                        PostingDateString: $("#txt-postingdate").valOrDefault(),
+                        ShortText: $("#txt-shorttext").valOrDefault()
+                    }),
+                    contentType: "@CommonFormat.JsonMimeType",
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError,
+                    success: function(data) {
+                        var resultData = data.Message;
+                        if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                            $.messagebox.show(
+                                "Create SA",
+                                "SA <b>" + resultData + "</b> has successfully created.",
+                                "INF",
+                                "SINGLE",
+                                "",
+                                ""
+                            );
+                            onCheck();
+                            $("[id^=chk-podata]:checked").each(function () { $(this).prop("checked", false); });
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    }
+                });
+            }
+            else {
+                if (validation.Message !== "")
+                    $.messagebox.show("@ActionResponseViewModel.Error", validation.Message, "@ActionResponseViewModel.Error");
+            }
+        }
+
+        function ValidateItem() {
+            var result = {
+                IsValid: false,
+                Message: "",
+                ItemList: []
+            };
+
+            var iCounter = 0;
+            if ($.ValidateMandatory(["#txt-shorttext"])) {
+                if (ValidateSelectedItem()) {
+                    $("[id^=txtsaqty-]").each(function (idx, el) {
+                        var $this = $(el);
+                        var
+                            poNo = $this.data("pono"),
+                            poItemNo = $this.data("poitemno"),
+                            poSubItemNo = $this.data("posubitemno"),
+                            remainQty = $this.data("remainqty"),
+                            checked = $this.data("checked"),
+                            $thisValue = $this.valOrDefault();
+
+                        checkedItem = $("#" + checked).is(':checked');
+
+                        if (Number($thisValue) > Number(remainQty))
+                            result.Message = "Item " + poItemNo + "'s Acceptance qty can't be greater than remaining qty.";
+                        else {
+                            if (checkedItem)
+                            {
+                                result.ItemList.push({
+                                    PONo: poNo,
+                                    POItemNo: poItemNo,
+                                    POSubItemNo: poSubItemNo,
+                                    Qty: $thisValue
+                                });
+
+                                iCounter = iCounter + 1;
+                            }
+                        }
+
+                        if (result.Message !== "")
+                            return false;
+                    });
+
+                    if (iCounter == 0) {
+                        $.messagebox.show(
+                                "Warning",
+                                "Nothing has been changed!.",
+                                "WRN",
+                                "SINGLE",
+                                "",
+                                ""
+                            );
+                    }
+                }
+                else {
+                    result.Message = "Please select one of available item to continue.";
+                }
+            }
+            else {
+                result.Message = "Please fill mandatory field in header data. ";
+                $("#txt-shorttext").focus();
+            }
+
+            result.IsValid = result.ItemList.length > 0 && result.Message === "";
+            return result;
+        }
+
+        function ValidateSelectedItem()
+        {
+            var selectedDataList = $("[id^=chk-podata-]:checked");
+            if (selectedDataList.length >= 1) {
+                return true;
+            }
+            return false;
+        }
+
+        function OnSubItemCollapsing(dataName, dataNo, embedded, expanderRow, onSubItemCollapsed) {
+            $("[id^=expchildrow-" + dataName + dataNo + "]").remove();
+            OnAjaxComplete();
+        }
+
+        function OnSubItemExpanding(dataName, dataNo, embedded, expanderRow, onSubItemCollapsed) {
+            OnAjaxBegin("Opening Sub Item ...");
+
+            var rowData = expanderRow.find("[id^=exp-]").data("embedded");
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("getSubItem")",
+                data: {
+                    poNo: rowData.PO_NO,
+                    poItemNo: rowData.PO_ITEM_NO,
+                    dataName: dataName + dataNo
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("[id^=expchildrow-" + dataName + dataNo + "]").remove();
+                        expanderRow.after(data);
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        }
+
+        function onSubItem(eventSource) {
+            var embedded = $(this).data("embedded");
+            eventSource.ToggleSubItem(OnSubItemExpanding, void(0), OnSubItemCollapsing, void(0), embedded);
+        }
+
+        //# sourceURL=_PartialScript.cshtml
+</script>

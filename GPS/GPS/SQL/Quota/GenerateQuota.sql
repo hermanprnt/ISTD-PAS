@@ -1,0 +1,1 @@
+﻿EXEC sp_Generate_Quota @NOW_DATE,@USER_ID

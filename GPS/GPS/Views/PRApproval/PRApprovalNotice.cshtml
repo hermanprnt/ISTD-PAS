@@ -1,0 +1,173 @@
+﻿@using GPS.Constants.PRPOApproval
+@{    
+    SelectList prApprovalNoticeUserList = new SelectList((IEnumerable<object>)ViewData["PRApprovalNoticeUser"], "NOTICE_TO_USER", "NOTICE_TO_ALIAS");
+}
+
+<style type="text/css">
+    #notice-header-toogle-button:hover,
+    #notice-list-add-button:hover,
+    .notice-list-remove-button:hover
+    {
+        cursor: pointer;
+    }
+</style>
+
+@Html.Hidden("notice-to-user-list")
+@Html.Hidden("notice-to-alias-list")
+@*<input type="text" id="notice-to-user-list" />*@
+@*<input type="text" id="notice-to-alias-list" />*@
+
+<div id="notice-header-container">
+    <div class="row-fluid">
+        <div class="col-sm-12">
+            <div class="form-group form-group-xs">
+                <div style="text-align:left;background-color: #555;color:white;font-size: 10pt;font-weight: bold;width: 100%;padding: 3px 3px 3px 7px;">
+                    Notice
+                    <span id="notice-header-toogle-button" style="font-size: 10pt;float:right;padding-right:7px;">Hide</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="notice-input-container">
+    <div class="row-fluid">
+        <div class="col-sm-12">
+            <div class="form-group form-group-xs">
+                <label for="cmb-notice-to" class="col-sm-2 control-label text-muted text-left">To</label>
+                <div class="col-sm-6" style="padding-right:0;">
+                    @Html.DropDownList("cmb-notice-to", prApprovalNoticeUserList, string.Empty, new { @class = "form-control" , @onchange = "javascript:noticeToChange()" })
+                    <div id="notice-list-container">
+                    </div>
+                </div>
+                @*<label id="notice-list-add-button" class="col-sm-1 control-label text-muted fa fa-plus-square" style="font-size:large;float:left;width: 27px;"></label>*@
+                <div class="col-sm-4" style="vertical-align:bottom;">
+                    <button id="btn-post-notice" type="button" class="btn btn-primary btn-xs btn-std">Post</button>
+                    <button id="btn-clear-notice" type="button" class="btn btn-default btn-xs btn-std">Clear</button>
+                </div>
+            </div>                                
+        </div>
+        @*<div class="col-sm-3">
+            <div class="form-group form-group-xs">
+                <div class="col-sm-12">
+                    <select name="cmb-notice-importance" id="cmb-notice-importance" class="form-control blank" style="width:85%;display:inline-block;">
+                        <option value="H">High</option>
+                        <option value="N" selected>Normal</option>
+                        <option value="L">Low</option>
+                    </select>
+                </div>
+            </div>
+        </div>*@
+    </div>
+    <div class="row-fluid">
+        <div class="col-sm-12">
+            <div class="form-group form-group-xs">
+                <label for="txt-notice-message" class="col-sm-2 control-label text-muted text-left">Message</label>
+                <div id="div-notice-text" class="col-sm-10">
+                    <textarea id="txt-notice-message" name="txt-notice" class="form-control" style="height:4em;"></textarea>                              
+                </div>
+            </div>                                
+        </div>
+    </div>
+</div>
+<div style="text-align:left;width:100%;height:20px;display:inline-block;background-color:white;border-top:0.1em solid #DDD;border-bottom:0.1em solid #DDD;">
+    <div class="text-center" style="font-weight:bold">Notice Thread</div>
+</div>
+<div id="notice-message-container" style="text-align:left;width:100%;height:117px;overflow:auto;display:inline-block;background-color:white;border-top:0.1em solid #DDD;border-bottom:0.1em solid #DDD;">
+    @Html.Partial(PRPOApprovalPage.PRApprovalNoticeMessage)
+</div>
+
+<script type="text/javascript">
+    var noticeToUserList = "";
+    var noticeToAliasList = "";
+    var noticeToUser = "";
+    var noticeToAlias = "";
+
+    $(document).ready(function () {
+        $("#notice-input-container").css("display", "linear");
+        $("#notice-message-container").css("display", "linear");
+        //setTimeout(function () {
+        //    $("#notice-header-toogle-button").click();
+        //    $("#attachment-header-toogle-button").click();
+        //}, 500);
+    });
+
+    $("#notice-header-toogle-button").click(function (e) {
+        $("#notice-input-container").toggle(200, "linear");
+        $("#notice-message-container").toggle(200, "linear");
+
+        var toogleText = $(this).text();
+        toogleText = toogleText === "Show" ? "Hide" : "Show";
+        $(this).text(toogleText);
+    });
+
+    function noticeToChange() {
+        noticeToUserList = $("#notice-to-user-list").val()
+        noticeToAliasList = $("#notice-to-alias-list").val()
+        noticeToUser = $("#cmb-notice-to").val();
+        noticeToAlias = $("#cmb-notice-to option:selected").text();
+        if (noticeToUser != '' && noticeToUser != undefined) {
+            var noticeToIndex = noticeToUserList.indexOf("[" + noticeToUser + "]");
+            if (noticeToIndex == -1) {
+                var html = '<div id="notice-list-container-' + noticeToUser + '" style="float:left;vertical-align:middle;padding:0.2em;line-height:1.5em;">' +
+                    '<label class="text-muted" style="margin:0;"><span>' + noticeToAlias + '</span></label>&nbsp;' +
+                    '<label class="text-muted" style="margin:0;"><span id="notice-list-remove-button-' + noticeToUser + '" class="notice-list-remove-button fa fa-minus-square" data-touser="' + noticeToUser + '" data-toalias="' + noticeToAlias + '" onclick="NoticeListRemoveButtonClick(this)"></span></label>' +
+                    '</div>'
+                $("#notice-list-container").append(html);
+                $("#notice-list-container").show();
+
+                noticeToUserList = noticeToUserList + "[" + noticeToUser + "],";
+                $("#notice-to-user-list").val(noticeToUserList);
+                noticeToAliasList = noticeToAliasList + "[" + noticeToAlias + "],";
+                $("#notice-to-alias-list").val(noticeToAliasList);
+
+                $("#cmb-notice-to").val($("#cmb-notice-to")[0].defaultValue);
+            }
+        }
+    };
+
+    function NoticeListRemoveButtonClick(e) {
+        noticeToUser = $(e).data("touser");
+        noticeToAlias = $(e).data("toalias");
+        $("#notice-list-container-" + noticeToUser).remove();
+        $("#notice-list-container-" + noticeToUser).hide();
+
+        noticeToUserList = $("#notice-to-user-list").val();
+        noticeToUserList = noticeToUserList.replace("[" + noticeToUser + "],", "");
+        $("#notice-to-user-list").val(noticeToUserList);
+        noticeToAliasList = $("#notice-to-alias-list").val();
+        noticeToAliasList = noticeToAliasList.replace("[" + noticeToAlias + "],", "");
+        $("#notice-to-alias-list").val(noticeToAliasList);
+    }
+
+    var resetNotice = function ResetNotice() {
+        $("#cmb-notice-to").val($("#cmb-notice-to")[0].defaultValue);
+        $("#cmb-notice-importance").val("N");
+        $("#txt-notice-message").val("");
+        $("#notice-to-user-list").val("");
+        $("#notice-to-alias-list").val("");
+        $("#notice-list-container").empty();
+        $("#btn-post-notice").text("Post");
+    }
+
+    $("#btn-post-notice").click(function (e) {
+        if (($("#notice-to-user-list").val() != '' && $("#notice-to-user-list").val() != null)
+            && ($("#txt-notice-message").val() != '' && $("#txt-notice-message").val() != null)) {
+            if ($(this).text() == "Post") {
+                PostPRApprovalNotice(function (data) {
+                    resetNotice();
+                    $("#notice-message-container").html(data);
+                });
+            }
+            else if ($(this).text() == "Reply") {
+                ReplyPRApprovalNotice(function (data) {
+                    resetNotice();
+                    $("#notice-message-container").html(data);
+                });
+            }
+        }
+    });
+
+    $("#btn-clear-notice").click(function (e) {
+        resetNotice();
+    });
+</script>

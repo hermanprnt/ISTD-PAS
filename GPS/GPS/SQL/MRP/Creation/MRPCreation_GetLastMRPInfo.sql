@@ -1,0 +1,1 @@
+﻿EXEC sp_MRPCreation_GetLastMRPInfo @ProcUsageGroup

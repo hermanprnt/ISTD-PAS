@@ -1,0 +1,281 @@
+﻿@using GPS.Controllers.Common
+<script type="text/javascript" id="Common">
+    $tdk.AjaxMethod = "POST";
+    $tdk.Alert = "#alert-search";
+    $tdk.AlertDetail = "#alert-detail";
+    $tdk.Success = "#success-search";
+    $tdk.Warning = "#warning-search";
+    $tdk.Division = "";
+    $tdk.isDetail = 0;
+    messagelife = 1;
+
+    function toggleSearch() {
+        $("._criteria").toggle(200, "linear");
+        if ($("#toogle-search").hasClass("fa-angle-double-up")) {
+            $("#toogle-search").removeClass("fa-angle-double-up");
+            $("#toogle-search").addClass("fa-angle-double-down");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            $("#toogle-search").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-search").removeClass("fa-angle-double-down");
+            $("#toogle-search").addClass("fa-angle-double-up");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            $("#toogle-search").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+
+    function toggleDetail() {
+        $("._detailpr").toggle(200, "linear");
+        if ($("#toogle-detail").hasClass("fa-angle-double-up")) {
+            $("#toogle-detail").removeClass("fa-angle-double-up");
+            $("#toogle-detail").addClass("fa-angle-double-down");
+            $("#toogle-detail").removeClass("btn-tiny-down");
+            $("#toogle-detail").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            $("#toogle-detail").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-detail").removeClass("fa-angle-double-down");
+            $("#toogle-detail").addClass("fa-angle-double-up");
+            $("#toogle-detail").removeClass("btn-tiny-down");
+            $("#toogle-detail").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            $("#toogle-_detail").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+
+    function toogle(_class, displaytext) {
+        var _criteria = $("." + _class);
+        var text = $("#lnsearch-toggle-" + _class).text();
+        _criteria.toggle(200, "linear");
+        $("#lnsearch-toggle-" + _class).text(text == "More " + displaytext ? "Less " + displaytext : "More " + displaytext);
+    }
+
+    function detailGrid() {
+        if ($tdk.isDetail > 0) {
+            $("#btnToggleDetail").html('Show Detail');
+            $("._toggle-detail").hide();
+            $tdk.isDetail = 0;
+            $("#dynamic-table").css("width", "100%");
+            $("#tblScroll").css("width", "100%");
+        }
+        else {
+            $("#btnToggleDetail").html('Hide Detail');
+            $("._toggle-detail").show();
+            $tdk.isDetail = 1;
+            $("#dynamic-table").css("width", "1388px");
+            $("#tblScroll").css("width", "1388px");
+        }
+    }
+
+    function onchangetype() {
+        $.progressbox.show("Get Status", "Get Status onprogress . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRPOTrackingController._onchangeType",
+            data: {
+                DOC_TYPE: $("#cmb-type").val()
+            },
+            success: function (data) {
+                $("#div-status").html(data);
+                $("#cmb-status").val('');
+            },
+            complete: function (data) {
+                $.progressbox.hide();
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript" id="Search">
+    function CollapseHeader(docno, type) {
+        if ($("#doc-" + docno + "-" + type).children('.fa').hasClass("fa-plus-square-o")) {
+            // expand grid
+            $("#doc-" + docno + "-" + type).children('.fa').removeClass("fa-plus-square-o");
+            $("#doc-" + docno + "-" + type).children('.fa').addClass("fa-minus-square-o");
+
+            $.progressbox.show("Get Data", "Get Data onprogress . . .");
+            if ($('#tScrollBody').find("[class^=lvl2grid-" + docno + "-" + type + "-]").length == 0) {
+                $.ajax({
+                    type: $tdk.AjaxMethod, url: "@PRPOTrackingController._getSecondRow",
+                    data: {
+                        DOC_NO: docno,
+                        DOC_TYPE: type
+                    },
+                    success: function (data) {
+                        $("#doc-" + docno + "-" + type).closest('tr').after(data);
+
+                        //Uncomment below code make item automatically collapse when 1st level row is collapse
+                        //$("[id^=item-" + docno + "-]").trigger("click");
+                    },
+                    complete: function (data) {
+                        $.progressbox.hide();
+                    }
+                });
+            }
+            else {
+                $("[class^=lvl2grid-" + docno + "-" + type + "-]").css("display", "");
+                $("#td-lvl2-" + docno + "-" + type).attr("rowspan", $("[class^=lvl2grid-" + docno + "-" + type +"-]").length);
+                $("[class^=lvl2grid-" + docno + "-" + type + "-]").children('td').children('div').children('.fa').addClass("fa-plus-square-o");
+
+                //Uncomment below code make item automatically collapse when 1st level row is collapse
+                //$("[id^=item-" + docno + "-]").trigger("click");
+
+                $.progressbox.hide();
+            }
+        } else {
+            // collapse grid
+            $("#doc-" + docno + "-" + type).children('.fa').removeClass("fa-minus-square-o");
+            $("#doc-" + docno + "-" + type).children('.fa').addClass("fa-plus-square-o");
+            $("[class^=lvl2grid-" + docno + "-" + type + "-]").css("display", "none");
+            $("[class^=lvl3grid-" + docno + "-]").remove();
+        }
+    }
+
+    function CollapseItem(docno, itemno, type) {
+        if ($("#item-" + docno + "-" + itemno + "-" + type).children('.fa').hasClass("fa-plus-square-o")) {
+            // expand grid
+            $("#item-" + docno + "-" + itemno + "-" + type).children('.fa').removeClass("fa-plus-square-o");
+            $("#item-" + docno + "-" + itemno + "-" + type).children('.fa').addClass("fa-minus-square-o");
+
+            $.progressbox.show("Get Data", "Get Data onprogress . . .");
+            if ($('#tScrollBody').find(".lvl3grid-" + docno + "-" + itemno + "-" + type).length == 0) {
+                $.ajax({
+                    type: $tdk.AjaxMethod, url: "@PRPOTrackingController._getThirdRow",
+                    data: {
+                        DOC_NO: docno,
+                        DOC_ITEM_NO: itemno,
+                        DOC_TYPE: type
+                    },
+                    success: function (data) {
+                        $("#item-" + docno + "-" + itemno + "-" + type).closest('tr').after(data);
+
+                        $("#td-lvl2-" + docno + "-" + type).attr('rowspan', ($("#td-lvl2-" + docno + "-" + type).prop("rowspan") + ($(".lvl3grid-" + docno + "-" + itemno + "-" + type + ":visible").length)));
+                        $.progressbox.hide();
+                    }
+                });
+            }
+            else {
+                $(".lvl3grid-" + docno + "-" + itemno + "-" + type).css("display", "");
+                $("#td-lvl2-" + docno + "-" + type).attr('rowspan', ($("#td-lvl2-" + docno + "-" + type).prop("rowspan") + ($(".lvl3grid-" + docno + "-" + itemno + "-" + type + ":visible").length)));
+                $.progressbox.hide();
+            }
+        } else {
+            // collapse grid
+            $("#item-" + docno + "-" + itemno + "-" + type).children('.fa').removeClass("fa-minus-square-o");
+            $("#item-" + docno + "-" + itemno + "-" + type).children('.fa').addClass("fa-plus-square-o");
+            $("#td-lvl2-" + docno + "-" + type).attr('rowspan', ($("#td-lvl2-" + docno + "-" + type).prop("rowspan") - ($(".lvl3grid-" + docno + "-" + itemno + "-" + type + ":visible").length)));
+            
+            $(".lvl3grid-" + docno + "-" + itemno + "-" + type).css("display", "none");
+        }
+    }
+
+    function ValidateDate() {
+        var datemsg = "";
+        var docdate = $("#txt-date").val().split('-') || "";
+        var datefrom = docdate != "" ? GetValidDate(docdate[0].trim()) : "";
+        var dateto = docdate != "" ? GetValidDate(docdate[1].trim()) : "";
+
+        if (datefrom != '') {
+            if (dateto == '') {
+                datemsg = MessageFormat("Doc Date to cannot be empty, if doc date from is not empty");
+            }
+        }
+        else if (dateto != '') {
+            if (datefrom == '') {
+                datemsg = MessageFormat("Doc Date from cannot be empty, if doc date to is not empty");
+            }
+        }
+        return datemsg;
+    }
+
+    function GetSearchParameters(page) {
+        var docdate = $("#txt-date").val().split('-') || "";
+
+        var datefrom = docdate != "" ? GetValidDate(docdate[0].trim()) : "";
+        var dateto = docdate != "" ? GetValidDate(docdate[1].trim()) : "";
+
+        return {
+            DOC_TYPE: $("#cmb-type").val(),
+            DOC_STATUS: $("#cmb-status").val(),
+            DOC_DATE_FROM: datefrom,
+            DOC_DATE_TO: dateto,
+            DOC_DESC: $("#txt-desc").val(),
+            DOC_NO: $("#txt-no").val(),
+            REGISTERED_BY: $("#txt-register").val(),
+            issearch: 'Y',
+            page: page,
+            pageSize: $('.page').val() || 10
+        };
+    }
+
+    function Search(page, isbutton) {
+        var param = GetSearchParameters(page);
+        var msg = ValidateDate();
+        if (msg != "") {
+            $.messagebox.show(
+                "Search",
+                msg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else {
+            if (isbutton === 1)
+                messagelife = 1;
+
+            $.progressbox.show("Search", "Loading Data...");
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@PRPOTrackingController._Search",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (resultMessage) {
+                    var maxperpage = $('.page').val() || 10;
+                    $('.TableList').html(resultMessage);
+                    //$("#btnToggleDetail").html('Show Detail');
+                    //$tdk.isDetail = 0;
+                    $('.page').val(maxperpage);
+                    $.progressbox.hide();
+                },
+                error: function (resultMessage) {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Error",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            });
+        }
+    }
+
+    function ClearCriteria() {
+        $("#cmb-type").val("PR");
+        $("#txt-desc").val('');
+        $("#txt-date").val('');
+        $("#txt-no").val('');
+        $("#txt-register").val('');
+
+        onchangetype();
+        Search(1, "Y");
+    }
+
+    function GetValidDate(date) {
+        if (date != "") {
+            date = date.split('.');
+            var date = date[1] + '-' + date[0] + '-' + date[2];
+        }
+        return date;
+    }
+</script>
