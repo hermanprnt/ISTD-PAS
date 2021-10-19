@@ -53,7 +53,14 @@ namespace PAS_Interface_Indirect_Material
             {
                 Console.WriteLine("Starting ...");
                 Console.WriteLine("Generate Process Id");
-                ProcessId = LibraryRepo.Instance.GetProcessID();
+                try
+                {
+                    ProcessId = LibraryRepo.Instance.GetProcessID();
+                }
+                catch (Exception w)
+                {
+                    Console.WriteLine(w.Message);
+                }
 
                 LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
@@ -125,7 +132,7 @@ namespace PAS_Interface_Indirect_Material
                     Msg.MsgText = string.Format(Msg.MsgText, string.Format("Create a file {0}", FileName));
                     LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
-                    string path = source.create(ConnString, "File/", FileName, false, true);
+                    string path = source.create(ConnString, "File/", FileName, true, true, false, true, "");
                     //FileName = Path.GetFileName(path.Split('|')[1]);
 
                     Console.WriteLine(string.Format("Sending a file {0} to SAP", FileName));
@@ -176,6 +183,7 @@ namespace PAS_Interface_Indirect_Material
                         Console.WriteLine(Msg.MsgText + "\r\n");
                         Console.WriteLine(string.Format("Deleting a file {0}", FileName));
                         File.Delete(Path.Combine(Dir + @"\File\", FileName));
+                        File.Delete(Path.Combine(Dir + @"\File\", FileName + ".CTF"));
                         Console.WriteLine(string.Format("Deleted a file {0}", FileName));
                     }
                     else
@@ -187,6 +195,7 @@ namespace PAS_Interface_Indirect_Material
                         CounterError++;
                         Console.WriteLine(string.Format("Deleting a file {0}", FileName));
                         File.Delete(Path.Combine(Dir + @"\File\", FileName));
+                        File.Delete(Path.Combine(Dir + @"\File\", FileName + ".CTF"));
                         Console.WriteLine(string.Format("Deleted a file {0}", FileName));
                     }
 
@@ -223,6 +232,7 @@ namespace PAS_Interface_Indirect_Material
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
                 Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString(e.Message) + "--" + Convert.ToString(e.InnerException));
                 LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);

@@ -18,6 +18,37 @@
   </Filename>
 
   <!--Header-->
+  <!--Header FGW-->
+  <Record id="Header-FGW">
+    <Field name="Headerdiscernmentcode" start="1" length="5"/>
+    <Field name="DivisionclassificationinGW" start="6" length="1"/>
+    <Field name="Blank" start="7" length="5"/>
+    <Field name="Logicalfilename" start="12" length="30"/>
+    <Field name="Filename" start="42" length="26"/>
+    <Field name="Totalnumberofdivision" start="68" length="2"/>
+    <Field name="Sequencenumber" start="70" length="2"/>
+    <Field name="Dataretentiondays" start="72" length="1"/>
+    <Field name="Compression" start="73" length="1"/>
+    <Field name="ReceiversFILEID" start="74" length="8"/>
+    <Field name="InitialFILEID" start="82" length="8"/>
+    <Field name="LastFILEID" start="90" length="8"/>
+    <Field name="UserID" start="98" length="10"/>
+    <Field name="Sendercompanycode" start="108" length="5"/>
+    <Field name="Senderlocationcode" start="113" length="5"/>
+    <Field name="ReceiverCompanycode" start="118" length="5"/>
+    <Field name="Receiverlocationcode" start="123" length="5"/>
+    <Field name="DataID" start="128" length="5"/>
+    <Field name="TotalRecordNumber" start="133" length="10"/>
+    <Field name="Reserve" start="143" length="58"/>
+  </Record>
+  <!--End Header FGW-->
+  
+  <!--Get Header FGW SQL-->
+  <SQL id="Header-FGW-Sql">
+    SP_06011_GET_HEADER_FGW
+  </SQL>
+  <!--End Header FGW SQL-->
+
   <!--Header File-->
   <Record id="Header-File">
     <Field name="BeginningofRecord" start="1" length="1" delimiter=""/>
