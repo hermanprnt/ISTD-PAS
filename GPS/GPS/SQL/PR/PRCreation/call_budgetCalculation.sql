@@ -5,4 +5,5 @@
 	 @PR_DESC,
 	 @USER_ID,
 	 @PROCESS_TYPE,
-	 @ROW_ROLLBACK
+	 @ROW_ROLLBACK,
+	 'SC'
