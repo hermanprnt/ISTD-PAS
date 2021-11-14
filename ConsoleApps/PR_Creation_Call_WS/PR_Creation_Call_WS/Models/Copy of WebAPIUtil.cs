@@ -8,7 +8,6 @@ using System.Web;
 using Newtonsoft.Json.Linq;
 using System.Web.Configuration;
 using PR_Creation_Call_WS.Models;
-using System.Xml;
 
 namespace PR_Creation_Call_WS.Models
 {
@@ -53,7 +52,7 @@ namespace PR_Creation_Call_WS.Models
             }
         }
 
-        internal static List<document> XMLRequest(string processId, string data, string method)
+        internal static List<ResponseH> Request(string processId, List<RequestH> data, string method)
         {
             string WSUri = WebConfigurationManager.AppSettings["WSUri"].ToString();
 
@@ -72,10 +71,8 @@ namespace PR_Creation_Call_WS.Models
             ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(WSUri);
 
-            System.Net.ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
             //set headers
-            request.ContentType = "text/xml; charset=utf-8";
+            request.ContentType = "application/json";
             request.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
             request.Method = method;
             //set token
@@ -87,64 +84,29 @@ namespace PR_Creation_Call_WS.Models
 
             try
             {
-                request.ContentLength = data.Length;
-
-                using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
+                if (data != null && data.Count > 0)
                 {
-                    writer.Write(data);
+                    //write data to be sent
+                    string dataJson = JsonConvert.SerializeObject(data);
+                    using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                    {
+                        streamWriter.Write(dataJson);
+                    }
                 }
 
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                //retrieve response
+                var response = request.GetResponse() as HttpWebResponse;
+
                 using (StreamReader reader = new StreamReader(response.GetResponseStream()))
                 {
                     content = reader.ReadToEnd();
                 }
-
                 response.Close();
 
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(content);
-
-                List<document> fullst = new List<document>();
-
-                #region TDEM
-                //var nsmgr = new XmlNamespaceManager(doc.NameTable);
-                //nsmgr.AddNamespace("ns0", "http://toyota.com/th/projectsystem/fund");
-
-                //XmlNodeList xnList = doc.SelectNodes("/ns0:MaintainFundCommitResp_MT", nsmgr);
-                #endregion
-
-                XmlNodeList xnList = doc.GetElementsByTagName("MaintainFundCommitResp_MT");//doc.SelectNodes("/MaintainFundCommitResp_MT");
-
-                foreach (XmlNode xn in xnList)
-                {
-                    XmlNode anode = xn.FirstChild; //xn.SelectSingleNode("RESPONSE");
-                    if (anode != null)
-                    {
-                        XmlNodeList CNodes = xn.FirstChild.ChildNodes; //xn.SelectNodes("RESPONSE/document");
-                        foreach (XmlNode node in CNodes)
-                        {
-                            document lst = new document();
-
-                            lst.doc_no = node["doc_no"].InnerText;
-                            lst.doc_line_item_no = node["doc_line_item_no"].InnerText;
-                            lst.fund_cmmt_doc = node["fund_cmmt_doc"].InnerText;
-                            lst.fund_cmmt_doc_line_item = node["fund_cmmt_doc_line_item"].InnerText;
-                            lst.msg_type = node["msg_type"].InnerText;
-                            lst.msg_id = node["msg_id"].InnerText;
-                            lst.msg_no = node["msg_no"].InnerText;
-                            lst.msg = node["msg"].InnerText;
-
-                            fullst.Add(lst);
-
-                        }
-                    }
-                }
-
-                ajax_array = fullst;
+                ajax_array = JsonConvert.DeserializeObject<List<ResponseH>>(content, settings);
                 //ajax_array.Message = null;
 
-                return !string.IsNullOrEmpty(content) ? ajax_array : new List<document>();
+                return !string.IsNullOrEmpty(content) ? ajax_array : new List<ResponseH>();
 
             }
             catch (WebException ex)
@@ -162,17 +124,87 @@ namespace PR_Creation_Call_WS.Models
                 }
 
                 //throw ex;
-                ajax_array = new List<document>();
+                ajax_array = new List<ResponseH>();
                 //ajax_array.Message = JsonConvert.DeserializeObject(Errresponse).ToString();
 
                 Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
                 Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString(Errresponse));
                 LibraryRepo.Instance.GenerateLog(processId, "2", "201002", Msg.MsgId, Msg.MsgText, Msg.MsgType, "Web Service Response", 0, "System");
 
-                return !string.IsNullOrEmpty(Errresponse) ? ajax_array : new List<document>();
+                return !string.IsNullOrEmpty(Errresponse) ? ajax_array : new List<ResponseH>();
             }
         }
 
+        //public static List<T> Request<T>(Dictionary<string, string> data, string uri, string method) where T : new()
+        //{
+        //    string WSUri = WebConfigurationManager.AppSettings["WSUri"].ToString();
+
+        //    var settings = new JsonSerializerSettings
+        //    {
+        //        NullValueHandling = NullValueHandling.Ignore,
+        //        MissingMemberHandling = MissingMemberHandling.Ignore
+        //    };
+
+        //    string content = string.Empty;
+        //    dynamic ajax_array = new Object();
+
+        //    //handle error
+        //    string Errresponse = string.Empty;
+
+        //    ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+        //    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(WSUri + uri);
+
+        //    //set headers
+        //    request.ContentType = "application/json";
+        //    request.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
+        //    request.Method = method;
+        //    //set token
+        //    //request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + TokenResponse.access_token);
+
+        //    request.Proxy = WebRequest.DefaultWebProxy;
+        //    request.Credentials = System.Net.CredentialCache.DefaultCredentials; ;
+        //    request.Proxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
+
+        //    try
+        //    {
+        //        if (data != null && data.Count > 0)
+        //        {
+        //            //write data to be sent
+        //            string dataJson = JsonConvert.SerializeObject(data);
+        //            using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+        //            {
+        //                streamWriter.Write(dataJson);
+        //            }
+        //        }
+
+        //        //retrieve response
+        //        var response = request.GetResponse() as HttpWebResponse;
+
+        //        using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+        //        {
+        //            content = reader.ReadToEnd();
+        //        }
+        //        response.Close();
+
+        //        ajax_array = JsonConvert.DeserializeObject<List<T>>(content, settings);
+        //        //ajax_array.Message = null;
+
+        //        return !string.IsNullOrEmpty(content) ? ajax_array : new List<T>();
+
+        //    }
+        //    catch (WebException ex)
+        //    {
+        //        using (var reader = new System.IO.StreamReader(ex.Response.GetResponseStream()))
+        //        {
+        //            Errresponse = reader.ReadToEnd();
+        //        }
+        //        //throw ex;
+        //        ajax_array = new List<T>();
+        //        //ajax_array.Message = JsonConvert.DeserializeObject(Errresponse).ToString();
+
+        //        return !string.IsNullOrEmpty(Errresponse) ? ajax_array : new List<T>();
+        //    }
+        //}
 
         public static T _download_serialized_json_data_token<T>(string url) where T : new()
         {

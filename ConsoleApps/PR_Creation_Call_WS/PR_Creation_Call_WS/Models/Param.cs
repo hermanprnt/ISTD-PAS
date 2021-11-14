@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace PR_Creation_Call_WS.Models
 {
@@ -14,60 +15,98 @@ namespace PR_Creation_Call_WS.Models
         public string MsgType { get; set; }
     }
 
-    class RequestH
+    public class MaintainFundCommitReq_MT
     {
-        public string DocumentNo { get; set; }
-        public IList<RequestD> Item { get; set; }
+        public PAS_Document REQUEST { get; set; }
+    }
+    public class PAS_Document
+    {
+        public PAS_Header document { get; set; }
+    }
+    public class PAS_Header
+    {
+        public string doc_type { get; set; }
+        public string action { get; set; }
+        public string system { get; set; }
+        public string test_run { get; set; }
+        public string doc_no { get; set; }
+        public string closed { get; set; }
+        public string doc_date { get; set; }
+        public string submit_date { get; set; }
+        public string requestor { get; set; }
+        public string company_code { get; set; }
+        public string currency { get; set; }
+        public string currency_rate { get; set; }
+        [XmlElement("item")]
+        public List<item> item { get; set; }
+    }
+    public class item
+    {
+        [XmlIgnore]
+        public string doc_type { get; set; }
+        [XmlIgnore]
+        public string action { get; set; }
+        [XmlIgnore]
+        public string system { get; set; }
+        [XmlIgnore]
+        public string test_run { get; set; }
+        [XmlIgnore]
+        public string doc_no { get; set; }
+        [XmlIgnore]
+        public string closed { get; set; }
+        [XmlIgnore]
+        public string doc_date { get; set; }
+        [XmlIgnore]
+        public string submit_date { get; set; }
+        [XmlIgnore]
+        public string requestor { get; set; }
+        [XmlIgnore]
+        public string company_code { get; set; }
+        [XmlIgnore]
+        public string currency { get; set; }
+        [XmlIgnore]
+        public string currency_rate { get; set; }
+
+        public string line_no { get; set; }
+        public string closed2 { get; set; }
+        public string ref_doc_no { get; set; }
+        public string ref_doc_line_item_no { get; set; }
+        public string item_code { get; set; }
+        public string item_description { get; set; }
+        public string part_category { get; set; }
+        public string inventory_type { get; set; }
+        public string material_type { get; set; }
+        public string supplier_code { get; set; }
+        public string asset { get; set; }
+        public string wbs_element { get; set; }
+        public string cost_center_changer { get; set; }
+        public string total_amount { get; set; }
+        public string quantity { get; set; }
+        public string uom { get; set; }
+
+        [XmlIgnore]
+        public string retXML { get; set; }
     }
 
-    class RequestD
+    public class document
     {
-        public string DocumentType { get; set; }
-        public string Action { get; set; }
-        public string System { get; set; }
-        public string TestRun { get; set; }
-        public string DocumentNo { get; set; }
-        public string Closed { get; set; }
-        public string DocumentDate { get; set; }
-        public string SubmitDate { get; set; }
-        public string Requestor { get; set; }
-        public string CompanyCode { get; set; }
-        public string Currency { get; set; }
-        public string CurrencyRate { get; set; }
-        public string LineNo { get; set; }
-        public string ReferenceDocumentNo { get; set; }
-        public string ReferenceDocumentLineItemNo { get; set; }
-        public string ItemCode { get; set; }
-        public string ItemDescription { get; set; }
-        public string PartCategory { get; set; }
-        public string InventoryType { get; set; }
-        public string MaterialType { get; set; }
-        public string SupplierCode { get; set; }
-        public string Asset { get; set; }
-        public string WBSElement { get; set; }
-        public string CostCenter { get; set; }
-        public string TotalAmount { get; set; }
-        public string Quantity { get; set; }
-        public string UOM { get; set; }
-
-        [JsonIgnore]
-        public string requestNoDet { get; set; }
+        public string doc_no { get; set; }
+        public string doc_line_item_no { get; set; }
+        public string fund_cmmt_doc { get; set; }
+        public string fund_cmmt_doc_line_item { get; set; }
+        public string msg_type { get; set; }
+        public string msg_id { get; set; }
+        public string msg_no { get; set; }
+        public string msg { get; set; }
     }
-
-    class ResponseH
+    public class MaintainFundCommitResp_MT
     {
-        public string DocNo { get; set; }
-        public IList<ResponseD> Item { get; set; }
+        public RESPONSE RESPONSE { get; set; }
     }
-
-    class ResponseD
+    [System.Xml.Serialization.XmlRoot("MaintainFundCommitResp_MT")]
+    public class RESPONSE
     {
-        public string DocNo { get; set; }
-        public string DocLineItemNo { get; set; }
-        public string FundCmntDoc { get; set; }
-        public string FundCmntDocLineItem { get; set; }
-        public string status { get; set; }
-        public string message { get; set; }
+        public List<document> document { get; set; }
     }
 
     class FCResponse

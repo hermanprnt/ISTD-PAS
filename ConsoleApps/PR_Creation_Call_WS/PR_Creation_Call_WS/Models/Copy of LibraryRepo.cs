@@ -93,7 +93,7 @@ namespace PR_Creation_Call_WS.Models
 
         #endregion
 
-        public List<item> GetParam(string ProcessId)
+        public List<RequestD> GetParam(string ProcessId)
         {
             string sql = "";
             sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetParam.sql"));
@@ -101,7 +101,7 @@ namespace PR_Creation_Call_WS.Models
             using (var db = new Database(ConnString))
             {
                 db.CommandTimeout = 0;
-                List<item> result = db.Fetch<item>(sql, new
+                List<RequestD> result = db.Fetch<RequestD>(sql, new
                 {
                     ProcessId = ProcessId
                 });
@@ -128,9 +128,7 @@ namespace PR_Creation_Call_WS.Models
                         sqlBulkCopy.ColumnMappings.Add("DOCUMENT_LINE_ITEM_NO", "DOCUMENT_LINE_ITEM_NO");
                         sqlBulkCopy.ColumnMappings.Add("FUND_DOCUMENT_DOC_NO", "FUND_DOCUMENT_DOC_NO");
                         sqlBulkCopy.ColumnMappings.Add("FUND_DOCUMENT_DOC_LINE_ITEM", "FUND_DOCUMENT_DOC_LINE_ITEM");
-                        sqlBulkCopy.ColumnMappings.Add("MESSAGE_TYPE", "MESSAGE_TYPE");
                         sqlBulkCopy.ColumnMappings.Add("MESSAGE_ID", "MESSAGE_ID");
-                        sqlBulkCopy.ColumnMappings.Add("MESSAGE_NO", "MESSAGE_NO");
                         sqlBulkCopy.ColumnMappings.Add("MESSAGE_MESSAGE", "MESSAGE_MESSAGE");
                         sqlBulkCopy.ColumnMappings.Add("PROCESSED_BY", "PROCESSED_BY");
                         sqlBulkCopy.ColumnMappings.Add("PROCESSED_DT", "PROCESSED_DT");
@@ -212,14 +210,9 @@ namespace PR_Creation_Call_WS.Models
             string USER_ID,
             string PROCESS_TYPE,
             string ROW_ROLLBACK,
-            string TriggerType,
-            string from)
+            string TriggerType)
         {
-            string sql = "";
-
-            if (from == "PR")
-            {
-                sql = @"EXEC [dbo].[sp_prcreation_budgetProcessing] 
+            string sql = @"EXEC [dbo].[sp_prcreation_budgetProcessing] 
 			                            @PROCESS_ID,
 			                            @DIVISION,
 			                            @PR_NO,
@@ -228,21 +221,6 @@ namespace PR_Creation_Call_WS.Models
 			                            @PROCESS_TYPE,
 			                            @ROW_ROLLBACK,
 			                            @TriggerType";
-            }
-            else
-            {
-                sql = @"EXEC [dbo].[sp_prcreation_budgetProcessingFromWO] 
-			                            @PROCESS_ID,
-			                            @DIVISION,
-			                            @PR_NO,
-			                            @PR_DESC,
-			                            @USER_ID,
-			                            @PROCESS_TYPE,
-			                            @ROW_ROLLBACK,
-			                            @TriggerType";
-            }
-
-            
             using (var db = new Database(ConnString))
             {
                 db.CommandTimeout = 0;
