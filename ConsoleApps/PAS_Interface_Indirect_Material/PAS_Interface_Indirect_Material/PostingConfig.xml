@@ -52,18 +52,13 @@
   <!--Header File-->
   <Record id="Header-File">
     <Field name="BeginningofRecord" start="1" length="1" delimiter=""/>
-    <Field name="HeaderSymbol" start="2" length="1" delimiter=""/>
-    <Field name="BeginningofFromSystem" start="3" length="1" delimiter=""/>
-    <Field name="FromSystem" start="4" length="3" delimiter=""/>
-    <Field name="BeginningofToSystem" start="7" length="1" delimiter=""/>
-    <Field name="ToSystemName" start="8" length="3" delimiter=""/>
-    <Field name="BeginningofFileName" start="11" length="1" delimiter=""/>
-    <Field name="FileName" start="12" length="24" delimiter=""/>
-    <Field name="BeginningofInterfaceName" start="36" length="1" delimiter=""/>
-    <Field name="InterfaceName" start="37" length="7" delimiter=""/>
-    <Field name="BeginningofRecordLength" start="44" length="1" delimiter=""/>
-    <Field name="RecordLength" start="45" length="5" delimiter=""/>
-    <Field name="EndingofRecord" start="50" length="1" delimiter=""/>
+    <Field name="RecordID" start="2" length="1" delimiter="#"/>
+    <Field name="FromSystem" start="3" length="3" delimiter="#"/>
+    <Field name="ToSystem" start="6" length="3" delimiter="#"/>
+    <Field name="FileName" start="9" length="26" delimiter="#"/>
+    <Field name="InterfaceName" start="35" length="8" delimiter="#"/>
+    <Field name="RecordLength" start="43" length="6" delimiter="#"/>
+    <!--<Field name="EndofRecord" start="48" length="1" delimiter=""/>-->
   </Record>
   <!--End Header File-->
 

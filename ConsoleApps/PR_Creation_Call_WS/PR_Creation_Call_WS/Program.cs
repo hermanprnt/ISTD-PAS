@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Configuration;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -21,7 +22,7 @@ namespace PR_Creation_Call_WS
 
         static void Main(string[] args)
         {
-            args = new String[] { "PR|202105280001|0|5000000155|teset|agan" };
+            //args = new String[] { "PR|202105280001|0|5000000155|teset|agan" };
 
             Console.WriteLine("Starting ...");
             Console.WriteLine("Get argument");
@@ -122,9 +123,15 @@ namespace PR_Creation_Call_WS
                 Type tp = typeof(MaintainFundCommitReq_MT);
                 XmlSerializer xml = new XmlSerializer(tp);
 
+                string WSPrefix = WebConfigurationManager.AppSettings["WSPrefix"].ToString();
+                string WSNamespace = WebConfigurationManager.AppSettings["WSNamespace"].ToString();
+
+                XmlSerializerNamespaces xmlNameSpace = new XmlSerializerNamespaces();
+                xmlNameSpace.Add(WSPrefix, WSNamespace);
+
                 try
                 {
-                    xml.Serialize(Stream, responses);
+                    xml.Serialize(Stream, responses, xmlNameSpace);
                 }
                 catch (Exception ex)
                 {
@@ -149,6 +156,7 @@ namespace PR_Creation_Call_WS
                 Stream.Position = 0;
                 StreamReader sr = new StreamReader(Stream);
                 string str = sr.ReadToEnd();
+                str = str.Replace("_x003A_", ":");
 
                 sr.Dispose();
                 Stream.Dispose();

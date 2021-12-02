@@ -15,6 +15,7 @@ namespace PR_Creation_Call_WS.Models
         public string MsgType { get; set; }
     }
 
+    [System.Xml.Serialization.XmlRoot("ns0:MaintainFundCommitReq_MT")]
     public class MaintainFundCommitReq_MT
     {
         public PAS_Document REQUEST { get; set; }
