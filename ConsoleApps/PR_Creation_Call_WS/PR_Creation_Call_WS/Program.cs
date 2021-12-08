@@ -64,12 +64,12 @@ namespace PR_Creation_Call_WS
                     LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
                     Console.WriteLine(Msg.MsgText);
 
-                    Console.WriteLine("Call Rollback Data");
-                    Msg = LibraryRepo.Instance.GetMessageById("INF00002");
-                    Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
-                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                    //Console.WriteLine("Call Rollback Data");
+                    //Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                    //Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
+                    //LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
-                    LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
+                    //LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
 
                     Environment.Exit(0);
                 }
@@ -142,12 +142,12 @@ namespace PR_Creation_Call_WS
 
                     Console.WriteLine("Error: " + ex.Message);
 
-                    Console.WriteLine("Call Rollback Data");
-                    Msg = LibraryRepo.Instance.GetMessageById("INF00002");
-                    Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
-                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                    //Console.WriteLine("Call Rollback Data");
+                    //Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                    //Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
+                    //LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
-                    LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
+                    //LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
 
                     Console.WriteLine("End Process ...");
                     Environment.Exit(0);
@@ -177,12 +177,12 @@ namespace PR_Creation_Call_WS
                     LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
                     Console.WriteLine(Msg.MsgText);
 
-                    Console.WriteLine("Call Rollback Data");
-                    Msg = LibraryRepo.Instance.GetMessageById("INF00002");
-                    Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
-                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                    //Console.WriteLine("Call Rollback Data");
+                    //Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                    //Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
+                    //LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
-                    LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
+                    //LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
 
                     Environment.Exit(0);
                 }
@@ -242,12 +242,12 @@ namespace PR_Creation_Call_WS
                     LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
                     Console.WriteLine(Msg.MsgText);
 
-                    Console.WriteLine("Call Rollback Data");
-                    Msg = LibraryRepo.Instance.GetMessageById("INF00002");
-                    Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
-                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                    //Console.WriteLine("Call Rollback Data");
+                    //Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                    //Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
+                    //LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
-                    LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
+                    //LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
 
                     Console.WriteLine("End Process ...");
                     Environment.Exit(0);
@@ -270,12 +270,12 @@ namespace PR_Creation_Call_WS
                             LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
                             Console.WriteLine(Msg.MsgText);
 
-                            Console.WriteLine("Call Rollback Data");
-                            Msg = LibraryRepo.Instance.GetMessageById("INF00002");
-                            Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
-                            LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                            //Console.WriteLine("Call Rollback Data");
+                            //Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                            //Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
+                            //LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
-                            LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
+                            //LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
 
                             Console.WriteLine("End Process ...");
                             Environment.Exit(0);
@@ -289,12 +289,12 @@ namespace PR_Creation_Call_WS
                             LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
                             Console.WriteLine(Msg.MsgText);
 
-                            Console.WriteLine("Call Rollback Data");
-                            Msg = LibraryRepo.Instance.GetMessageById("INF00002");
-                            Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
-                            LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                            //Console.WriteLine("Call Rollback Data");
+                            //Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                            //Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
+                            //LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
-                            LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
+                            //LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
 
                             Console.WriteLine("End Process ...");
                             Environment.Exit(0);
@@ -326,12 +326,12 @@ namespace PR_Creation_Call_WS
 
                 Console.WriteLine("Error: " + ex.Message);
 
-                Console.WriteLine("Call Rollback Data");
-                Msg = LibraryRepo.Instance.GetMessageById("INF00002");
-                Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
-                LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                //Console.WriteLine("Call Rollback Data");
+                //Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                //Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
+                //LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
-                LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
+                //LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
 
                 Console.WriteLine("End Process ...");
                 Environment.Exit(0);
