@@ -417,30 +417,40 @@
                 else
                 {
                     ViewData.Add("SelectedToCancel", firstEmbedded);
-                    if (firstEmbedded.StatusCode === "61" && firstEmbedded.ProcessId !== "") { // add process id checking
+                    //if (firstEmbedded.StatusCode === "61" && firstEmbedded.ProcessId !== "") { // add process id checking
+                    //    $.messagebox.show(
+                    //        "Cancel GR/SA",
+                    //        "Data still in progress posting to SAP. Please try again later.",
+                    //        "WRN",
+                    //        "SINGLE",
+                    //        "",
+                    //        ""
+                    //    );
+                    //}
+                    //else if (firstEmbedded.StatusCode === "62") {
+                    //    $.messagebox.show(
+                    //        "Cancel GR/SA",
+                    //        "Data in SAP still needs to be cancelled manually.",
+                    //        "WRN",
+                    //        "SINGLE",
+                    //        "$('#cancelpopup').modal()",
+                    //        ""
+                    //    );
+                    //}
+                    //else if (firstEmbedded.StatusCode === "69") {
+                    //    $.messagebox.show(
+                    //        "Cancel GR/SA",
+                    //        "Data already cancelled.",
+                    //        "WRN",
+                    //        "SINGLE",
+                    //        "",
+                    //        ""
+                    //    );
+                    //}
+                    if (firstEmbedded.StatusCode != "60" && firstEmbedded.StatusCode != "62" && firstEmbedded.StatusCode != "68") {
                         $.messagebox.show(
                             "Cancel GR/SA",
-                            "Data still in progress posting to SAP. Please try again later.",
-                            "WRN",
-                            "SINGLE",
-                            "",
-                            ""
-                        );
-                    }
-                    else if (firstEmbedded.StatusCode === "62") {
-                        $.messagebox.show(
-                            "Cancel GR/SA",
-                            "Data in SAP still needs to be cancelled manually.",
-                            "WRN",
-                            "SINGLE",
-                            "$('#cancelpopup').modal()",
-                            ""
-                        );
-                    }
-                    else if (firstEmbedded.StatusCode === "69") {
-                        $.messagebox.show(
-                            "Cancel GR/SA",
-                            "Data already cancelled.",
+                            "Status " + firstEmbedded.Status + " can not be cancelled",
                             "WRN",
                             "SINGLE",
                             "",
