@@ -84,6 +84,8 @@ namespace PR_Creation_Call_WS.Models
         public string total_amount { get; set; }
         public string quantity { get; set; }
         public string uom { get; set; }
+        public string journal_source { get; set; }
+        public string gl_account { get; set; }
 
         [XmlIgnore]
         public string retXML { get; set; }

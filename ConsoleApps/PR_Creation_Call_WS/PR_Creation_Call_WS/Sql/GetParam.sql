@@ -26,6 +26,8 @@
 	,TOTAL_AMOUNT total_amount
 	,QUANTITY quantity
 	,UOM uom
+	,JOURNAL_SOURCE journal_source
+	,GL_ACCOUNT gl_account
 FROM TB_H_FUND_COMMITMENT_REQUEST
 WHERE PROCESS_ID = @ProcessId
 
