@@ -110,14 +110,11 @@
     $(document).ready(function () {
         $("#vendor-data-container").css("display", "linear");
 
-        var curr_amount = '@prApprovalVendor.CURRENT_AMOUNT'; 
-        var last_amount = '@prApprovalVendor.LAST_AMOUNT'; 
-        var curr_limit_warning = '@prApprovalVendor.LIMIT_AMOUNT';
+        var curr_amount = @prApprovalVendor.CURRENT_AMOUNT; last_amount = @prApprovalVendor.LAST_AMOUNT; curr_limit_warning = @prApprovalVendor.LIMIT_AMOUNT;
         $("#curr_fiscal_amount").html(nFormatter(curr_amount, 3));
-        $("#curr_fiscal_year").html('@(prApprovalVendor.CURRENT_YEAR)');
+        $("#curr_fiscal_year").html('(@prApprovalVendor.CURRENT_YEAR)');
         $("#last_fiscal_amount").html(nFormatter(last_amount, 3));
-        $("#last_fiscal_year").html('@(prApprovalVendor.LAST_YEAR)');
-        
+        $("#last_fiscal_year").html('(@prApprovalVendor.LAST_YEAR)');
         if (curr_amount > last_amount) {
             $("#curr_fiscal_amount").css("color", "red");
             $('#curr_fiscal_amount').blink({
@@ -151,13 +148,10 @@
           { value: 1E3, symbol: "K" }
         ], rx = /\.0+$|(\.[0-9]*[1-9])0+$/, i;
         for (i = 0; i < si.length; i++) {
-            if (num >= si.length) {
-               return (parseInt(num / si[i].value)).toFixed(digits).replace(rx, "$1") + ' ' + si[i].symbol;
+            if (num >= si[i].value) {
+                return (num / si[i].value).toFixed(digits).replace(rx, "$1") + ' ' + si[i].symbol;
             }
         }
-
-        return parseInt(num).toFixed(digits).replace(rx, "$1");
+        return num.toFixed(digits).replace(rx, "$1");
     }
-
-    
 </script>

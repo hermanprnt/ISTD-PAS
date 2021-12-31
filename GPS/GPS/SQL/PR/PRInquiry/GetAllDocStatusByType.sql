@@ -4,5 +4,5 @@
 	WHERE DOC_TYPE = @DocType
 ) tb
 UNION ALL
-select '92','Open','PR'
+select '92','Ready to PO','PR'
 ORDER BY STATUS_CD

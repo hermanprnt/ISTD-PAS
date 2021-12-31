@@ -8,5 +8,3 @@ SET @@SQL_QUERY = '
 		EXEC ' + @@DB_CONNECTION + '.[BMS_DB].[dbo].[sp_BudgetControlGetSingleDataWBS] '''+@WBS_NO+'''
 	'
 EXEC(@@SQL_QUERY)
-
-

@@ -1,0 +1,243 @@
+﻿@using GPS.Constants.PRPOApproval
+@using GPS.Controllers.PR
+@{
+    string prApproval = (string)ViewData["PRApprovalType"];
+}
+
+<style type="text/css">
+    .title {
+        text-align: left;
+    }
+    /*.page-content .form-group {
+        margin-bottom: 0px;
+    }*/
+
+    .late-approve {
+        background-color: #ff0000;
+    }
+
+    .ontime-approve {
+        background-color: #00ff00;
+    }
+</style>
+
+<div class="modal-dialog modal-lg" style="overflow:auto;width:95%;max-height:95%">
+    <div class="modal-content">
+        <div id="alert-container-@PRPOApprovalPage.PRApprovalDetail" class="alert hidden"></div>
+        <div class="modal-header">
+            <h4 style="font-size:11px !important" class="modal-title popup-title"><b>PR Approval Detail</b></h4>
+        </div>
+        <div class="modal-body" id="search-container-@PRPOApprovalPage.PRApprovalDetail" style="padding-top: 7px;">
+            @Html.Partial(PRPOApprovalPage.PRApprovalDetailParam)
+        </div>
+        <div class="modal-body" style="margin-top:-20px; padding-left:15px;padding-bottom:0px;" id="tab-data">
+            <ul class="nav nav-tabs">
+                <li id="00" class="active"><a href="javascript:void(0);" onclick="javascript:onChangeTab('00')">PR Detail</a></li>
+                <li id="01"><a href="javascript:void(0);" onclick="javascript:onChangeTab('01')">Approval Division</a></li>
+                <li id="02"><a href="javascript:void(0);" onclick="javascript:onChangeTab('02')">Approval Coordinator</a></li>
+                <li id="03"><a href="javascript:void(0);" onclick="javascript:onChangeTab('03')">Approval Finance</a></li>
+            </ul>
+        </div>
+        <div class="modal-body" style="/*! margin-top:-30px; */margin-bottom: -10px;padding-top:0px;" id="tab-data">
+            <div class="row grid-detail" id="data-container-@PRPOApprovalPage.PRApprovalDetail">
+                @Html.Partial(PRPOApprovalPage.PRApprovalDetailGrid)
+            </div>
+            <div class="row grid-detail" style="margin-top:0px; display:none;" id="approvaldiv-grid-container">
+                @*@Html.Partial(PRPOApprovalPage.PRApprovalDivisionGrid)*@
+            </div>
+            <div class="row grid-detail" style="margin-top:0px;display:none" id="approvalcoord-grid-container">
+                @*@Html.Partial(PRPOApprovalPage.PRApprovalCoordinatorGrid)*@
+            </div>
+            <div class="row grid-detail" style="margin-top:0px;display:none" id="approvalfinance-grid-container">
+                @*@Html.Partial(PRPOApprovalPage.PRApprovalFinanceGrid)*@
+            </div>
+        </div>
+        <div class="modal-footer" style="clear:both;padding-bottom: 5px;padding-top: 5px;">
+            <div id="notice-container-@PRPOApprovalPage.PRApprovalDetail" class="form-horizontal row-fluid" style="background-color:#F9F9F9;float:left;width:50%;border:0.1em solid #DDD;">
+                @Html.Partial(PRPOApprovalPage.PRApprovalNotice)
+            </div>
+            <div style="float:left;width: calc(30% - 5px);padding-left: 5px;">
+                <div style="background-color: #F9F9F9;border:0.1em solid #DDD;">
+                    @Html.Partial(PRPOApprovalPage.PRApprovalAttachment)
+                </div>
+            </div>
+            <div style="float:right;width:calc(20%);">
+                <div style="background-color: #F9F9F9;border:0.1em solid #DDD;">
+                    @Html.Partial(PRPOApprovalPage.PRApprovalVendorAssignment)
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="padding-bottom: 5px;padding-top: 5px;">
+            <div class="text-right">
+                @*<button id="btn-close-detail" type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Close</button>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var currentTab = '00'; //id tab on detail, Initialize with tab PR Detail = 00
+
+    $("#btn-close-detail").click(function (e) {
+        updateDetailMainList(docNo);
+    });
+
+    $("#00").children().trigger("click");
+
+    function changeIcon(ITEM_NO, DOC_NO) {
+        if ($("#" + ITEM_NO).children('.fa').hasClass("fa-plus-square-o")) {
+            // expand grid
+            $("#" + ITEM_NO).children('.fa').removeClass("fa-plus-square-o");
+            $("#" + ITEM_NO).children('.fa').addClass("fa-minus-square-o");
+
+            $.progressbox.show("Get Sub Item", "Get Sub Item onprogress . . .");
+            if ($('#table-@PRPOApprovalPage.PRApprovalDetailGrid').find('.subitemgrid-' + ITEM_NO).length == 0) {
+                $.ajax({
+                    type: "POST",
+                    url: "@PRApprovalController._GetSubItem",
+                    data: {
+                        DOC_NO: DOC_NO,
+                        ITEM_NO: ITEM_NO
+                    },
+                    success: function (data) {
+                        $("#" + ITEM_NO).closest('tr').after(data);
+                        $.progressbox.hide();
+                    }
+                });
+            }
+            else {
+                $('.subitemgrid-' + ITEM_NO).css("display", "");
+                $.progressbox.hide();
+            }
+        } else {
+            // collapse grid
+            $("#" + ITEM_NO).children('.fa').removeClass("fa-minus-square-o");
+            $("#" + ITEM_NO).children('.fa').addClass("fa-plus-square-o");
+            $(".subitemgrid-" + ITEM_NO).css("display", "none");
+        }
+    }
+
+    function onChangeTab(type) {
+        if (currentTab != type) {
+            $(".nav.nav-tabs >li").removeClass("active");
+            $("#" + currentTab, $(".nav")).removeClass("active");
+            $("#" + type, $(".nav")).addClass("active");
+            //modified by rendika 05/07/2021
+            var id = "";
+            var code = ''
+            var maxRowperPage = $("#approvcoord-pagesize").val() == null ? "10" : $("#approvcoord-pagesize").val();
+            switch (type) {
+                case "00": {
+                    id = "#data-container-PRApprovalDetail";
+                    break;
+                }
+                case "01": {
+                    id = "#approvaldiv-grid-container";
+                    code = 'Division'
+                    break;
+                }
+                case "02": {
+                    id = "#approvalcoord-grid-container";
+                    code = 'Coordinator'
+                    break;
+                }
+                case "03": {
+                    id = "#approvalfinance-grid-container";
+                    code = 'Finance'
+                    break;
+                }
+                default: {
+                    id = "#detail-grid-container";
+                    break;
+                }
+            }
+            if (type == '00') {
+                $(".grid-detail:not(" + id + ")").css("display", "none");
+                $(id).css("display", "");
+
+            }
+            else {
+                var doc = $('#txt-docno-detail').val();
+                $.ajax({
+                    type: 'POST',
+                    url: "/PRApproval/GetPRApprovalDetailTab",
+                    data: {
+                        DOC_NO: doc,
+                        code: code
+                    },
+                    success: function (data) {
+                        $(".grid-detail:not(" + id + ")").css("display", "none");
+                        $(id).html(data);
+                        $(id).css("display", "");
+
+                        $("#approvdiv-pagesize").val(maxRowperPage);
+                        $.progressbox.hide();
+                        currentTab = type;
+                    },
+                    error: function (resultMessage) {
+                        console.log(resultMessage);
+                        $.progressbox.hide();
+                    }
+                })
+            }
+
+            //end modified
+
+        }
+    }
+
+    /////// Show Approval History
+    function SearchApprovalDivision(page, PR_NO) {
+        $.progressbox.show("Display Approval Division for PR No " + PR_NO, "Get Approval Division Data...");
+        var maxRowperPage = $("#approvdiv-pagesize").val() == null ? "10" : $("#approvdiv-pagesize").val();
+
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRApprovalController._GetApproval",
+            data: { type: "Division", PR_NO: PR_NO, pageSize: maxRowperPage, page: page },
+            success: function (data) {
+                $("#approvaldiv-grid-container").html(data);
+                $("#approvdiv-pagesize").val(maxRowperPage);
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                console.log(resultMessage);
+                $.progressbox.hide();
+            }
+        })
+    }
+
+    function SearchApprovalCoordinator(page, PR_NO) {
+        $.progressbox.show("Display Approval Coordinator for PR No " + PR_NO, "Get Approval Coordinator Data...");
+        var maxRowperPage = $("#approvcoord-pagesize").val() == null ? "10" : $("#approvcoord-pagesize").val();
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRApprovalController._GetApproval",
+            data: { type: "Coordinator", PR_NO: PR_NO, pageSize: maxRowperPage, page: page },
+            success: function (data) {
+                $("#approvalcoord-grid-container").html(data);
+                $("#approvcoord-pagesize").val(maxRowperPage);
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        })
+    }
+
+    function SearchApprovalFinance(page, PR_NO) {
+        $.progressbox.show("Display Approval Finance for PR No " + PR_NO, "Get Approval Finance Data...");
+        var maxRowperPage = $("#approvfinance-pagesize").val() == null ? "10" : $("#approvfinance-pagesize").val();
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRApprovalController._GetApproval",
+            data: { type: "Finance", PR_NO: PR_NO, pageSize: maxRowperPage, page: page },
+            success: function (data) {
+                $("#approvalfinance-grid-container").html(data);
+                $("#approvfinance-pagesize").val(maxRowperPage);
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        })
+    }
+    /////// End Show Approval History
+</script>

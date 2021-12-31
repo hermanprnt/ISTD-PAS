@@ -1,4 +1,4 @@
-﻿EXEC [dbo].[sp_prinquiry_cancelBudgetProcessing_20191122]
+﻿EXEC [dbo].[sp_prinquiry_cancelBudgetProcessingItem]
 	@PROCESS_ID,
 	@PR_NO,
 	@ITEM_NO,

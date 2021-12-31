@@ -1,0 +1,860 @@
+﻿@using GPS.Constants
+@using GPS.Constants.PO
+@using GPS.Constants.PRPOApproval
+@using GPS.Controllers.PO
+@using GPS.ViewModels
+@using GPS.Core.ViewModel
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Serialization
+
+@{
+    Layout = CommonPage.MainLayout;
+    bool logAsAccounting = (bool)ViewData["AccountingRolesFlag"];
+    HttpContext.Current.Session.Timeout = (int)TimeSpan.FromMinutes(60).TotalMinutes;
+    HttpContext.Current.Session.Add("btndetail_approve", Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PRApproval", "btndetail-approve"));
+    HttpContext.Current.Session.Add("btn_edit_detail", Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PRApproval", "btn-edit-detail"));
+
+    string ListDocNo = (string)ViewData["PRDocNoOnly"] != null ? (string)ViewData["PRDocNoOnly"] : null;
+    //add by rendika 08/03/2021
+    var maxmonth =  ViewData["commonMonth"];
+    var maxyears = ViewData["commonYears"];
+    //end add by rendika 08/03/2021
+}
+
+@section HeadScript {
+    <script type="text/javascript" src="@Url.Content("~/Content/js/custom-tdk.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+    <!-- Daterange picker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+}
+
+@section BodyScript{
+    <!-- Bootstrap Datepicker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+    <!-- Daterange picker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+}
+
+@Html.Hidden("header-selection-mode")
+@Html.Hidden("docno-count-value")
+@Html.Hidden("docno-list-value")
+@Html.Hidden("detail-selection-mode")
+@Html.Hidden("docitemno-count-value")
+@Html.Hidden("docitemno-list-value")
+@Html.Hidden("docitemno-main-list-value")
+
+@Html.Hidden("docno-list-value-exc")
+
+@Html.HiddenFor(model => logAsAccounting, new { id = "flag-accounting-value" })
+
+@*Testing Collecting Checkbox Selection*@
+@*<div>
+        <input type="text" id="header-selection-mode" />
+        <input type="text" id="docno-count-value" />
+        <input type="text" id="docno-list-value" style="width:50%;" />
+        <br />
+        <input type="text" id="detail-selection-mode" />
+        <input type="text" id="docitemno-count-value" />
+        <input type="text" id="docitemno-list-value" style="width:50%;" />
+        <br />
+        <input type="text" id="docitemno-main-list-value" style="width:100%;" />
+    </div>
+    <br />*@
+
+<div id="alert-container-@PRPOApprovalPage.PRApproval" class="alert hidden"></div>
+<div id="search-container-@PRPOApprovalPage.PRApproval">
+    @Html.Partial(PRPOApprovalPage.PRApprovalParam)
+</div>
+<div class="v-space"></div>
+<div id="data-container-@PRPOApprovalPage.PRApproval">
+    @{
+        if (logAsAccounting)
+        {
+            @Html.Partial(PRPOApprovalPage.PRApprovalGridAccounting);
+        }
+        else
+        {
+            @Html.Partial(PRPOApprovalPage.PRApprovalGrid);
+        }
+    }
+</div>
+<div id="popup-container" class="modal fade bs-example-modal-lg" data-backdrop="static" data-keyboard="false">
+</div>
+<div id="history-popup-container" class="modal fade bs-example-modal-lg" data-backdrop="static" data-keyboard="false">
+</div>
+<div id="dialog-container" class="modal fade bs-example-modal-lg" data-backdrop="static" data-keyboard="false">
+</div>
+
+<script type="text/javascript">
+    ///////// Shared variables.
+    $tdk.isDetail = 0;
+    var docNo;
+    var docDesc;
+    var divisionName;
+    var itemNo;
+    var itemNum;
+    var userType;
+
+    var headerSelectionMode;
+    var docNoCount;
+    var docNoList;
+    var detailSelectionMode;
+    var docItemNoCount;
+    var docItemNoList;
+    var docItemNoMainList;
+
+    var listDocNoOnly;
+    //test stage
+    $(document).ready(function () {
+        InitView();
+        ResetView();
+
+        listDocNoOnly = JSON.parse('@Html.Raw(JsonConvert.SerializeObject(ListDocNo))');
+
+        $('input[name=date-range-picker]').daterangepicker({
+            format: 'DD.MM.YYYY',
+            'applyClass': 'btn-sm btn-success',
+            'cancelClass': 'btn-sm btn-default',
+            locale: {
+                applyLabel: 'Apply',
+                cancelLabel: 'Cancel',
+            }
+        })
+		.prev().on(ace.click_event, function () {
+			$(this).next().focus();
+		});
+
+        SearchPRApproval(undefined, undefined, function (data) {
+            $("#data-container-@PRPOApprovalPage.PRApproval").html(data);
+        });
+    });
+
+    $(document).ajaxComplete(function (event, xhr, settings) {
+        ToogleView("EndAction");
+        ToogleDetailView("EndAction");
+        $.progressHide();
+    });
+
+    ///////// View Methods
+    function SortGrid(orderby, page) {
+        var pageTotal = $("#cmb-perpage-PRApproval").val();
+        var param = GetPRApprovalParameter(page, pageTotal, orderby);
+        $.progressbox.show("PR Approval", "Sort PR Approval Grid. . .")
+
+
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SortSearch")",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                if (!data.ResponseType) {
+                    $("#data-container-@PRPOApprovalPage.PRApproval").html(data);
+                    $("#btn-hideshow").html("Show Detail");
+                    setSortSymbol();
+                }
+                else
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+            },
+            error: function (result) {
+                $.messagebox.show("error access SortSearch");
+            },
+            complete:function()
+            {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function setSortSymbol() {
+        if (ViewData.Get("OrderBy") !== undefined && ViewData.Get("OrderBy") !== null) {
+            var orderby = ViewData.Get("OrderBy");
+
+            if (orderby.substring(orderby.indexOf('|') + 1, orderby.length) == 'DESC') {
+                removeClass = 'sorting_none';
+                addClass = 'sorting_desc';
+                dataSort = 'DESC';
+            } else if (orderby.substring(orderby.indexOf('|') + 1, orderby.length) == 'ASC') {
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'ASC';
+            }
+            else {
+                removeClass = 'sorting_asc sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+            }
+
+            $('*[data-field="' + orderby.substring(0, orderby.indexOf('|')) + '"]').removeClass(removeClass);
+            $('*[data-field="' + orderby.substring(0, orderby.indexOf('|')) + '"]').addClass(addClass);
+            $('*[data-field="' + orderby.substring(0, orderby.indexOf('|')) + '"]').data("sort", dataSort);
+        }
+    }
+
+    function InitView() {
+        ToDatePicker($("#txt-datefrom"), $("#txt-dateto"));
+
+    }
+    //add by rendika 08 / 03 / 2021
+    function dateFromTo() {
+        var dateObj = new Date();
+        var days = ("0" + (dateObj.getDate())).slice(-2);
+        var month = ("0" + (dateObj.getMonth() + 1) ).slice(-2);
+        var years = dateObj.getUTCFullYear();
+        var current = days + '.' + month + '.' + years;
+
+        var newDate = new Date(years + '/' + month + '/' + days);
+        newDate.setDate((-@maxmonth + dateObj.getDate()))
+
+        var daysn = ("0" + (newDate.getDate())).slice(-2);
+        var monthn = ("0" + (newDate.getMonth() + 1)).slice(-2);
+        var yearsn = newDate.getUTCFullYear();
+        var threemonth = daysn + '.' + monthn + '.' + yearsn;
+        return (threemonth + ' - ' + current);
+
+    }
+    //end add by rendika 08 / 03 / 2021
+
+    function ResetView() {
+        $("#txt-docno").val("");
+        $("#txt-desc").val("");
+        $("#txt-docdate").val(dateFromTo);//modified by rendika 08 / 03 / 2021
+        $("#cmb-coordinator").val($("#cmb-coordinator")[0].defaultValue);
+        $("#cmb-plant").val($("#cmb-plant")[0].defaultValue);
+        $("#cmb-sloc").val($("#cmb-sloc")[0].defaultValue);
+        $("#cmb-division").val($("#cmb-division")[0].defaultValue);
+        $("#cmb-usertype").val($("#cmb-usertype")[0].options[1].value);
+
+        resetHeaderSelection();
+        resetDetailSelection();
+    }
+
+    var resetHeaderSelection = function ResetHeaderSelection() {
+        $("#header-selection-mode").val("INC");
+        $("#docno-count-value").val("0");
+        $("#docno-list-value").val("");
+    }
+    var resetDetailSelection = function ResetDetailSelection() {
+        $("#detail-selection-mode").val("INC");
+        $("#docitemno-count-value").val("0");
+        $("#docitemno-list-value").val("");
+
+        $("#docitemno-main-list-value").val("");
+    }
+
+    // ToogleView : Do validation like progress modal.
+    function ToogleView(mode) {
+        switch (mode) {
+            case 'BeginAction': // Disable action control.
+                $("#btn-approve").prop("disabled", true);
+                $("#btn-reject").prop("disabled", true);
+                $("#btn-search").prop("disabled", true);
+                $("#btn-clearsearch").prop("disabled", true);
+                $("#btn-edit").prop("disabled", true);
+                break;
+            case 'EndAction': // Enable action control.
+                $("#btn-approve").prop("disabled", false);
+                $("#btn-reject").prop("disabled", false);
+                $("#btn-search").prop("disabled", false);
+                $("#btn-clearsearch").prop("disabled", false);
+                $("#btn-edit").prop("disabled", false);
+                break;
+        }
+    }
+    function ToogleDetailView(mode) {
+        switch (mode) {
+            case 'BeginAction': // Disable action control.
+                $("#btn-approve-detail").prop("disabled", true);
+                $("#btn-reject-detail").prop("disabled", true);
+                $("#btn-close-detail").prop("disabled", true);
+                $("#btn-post-notice").prop("disabled", true);
+                break;
+            case 'EndAction': // Enable action control.
+                $("#btn-approve-detail").prop("disabled", false);
+                $("#btn-reject-detail").prop("disabled", false);
+                $("#btn-close-detail").prop("disabled", false);
+                $("#btn-post-notice").prop("disabled", false);
+                break;
+        }
+    }
+    function showDetail() {
+        if ($tdk.isDetail > 0) {
+            $("#btn-hideshow").html('Show Detail');
+            $("._toggle-detail").hide();
+            $tdk.isDetail = 0;
+            $("#dynamic-table").css("width", "1680px");
+            $("#table-@PRPOApprovalPage.PRApprovalGrid").css("width", "1680px");
+        }
+        else {
+            $("#btn-hideshow").html('Hide Detail');
+            $("._toggle-detail").show();
+            $tdk.isDetail = 1;
+            $("#dynamic-table").css("width", "2200px");
+            $("#table-@PRPOApprovalPage.PRApprovalGrid").css("width", "2200px");
+        }
+    }
+    /////////// End View Methods
+
+    /////////// Data Methods
+    function populateComboBox(id) {
+        var source = $("#cmb-plant").val();
+
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@Html.Toyota().Page.GetActionUrl("GetSlocbyPlant")",
+            data: { param: source },
+            success: function (resultMessage) {
+                $("#sloc").html(resultMessage);
+            },
+            error: function (resultMessage) {
+                var e = resultMessage.responseText;
+                alert($(e).find("title").text());
+            }
+        });
+    }
+
+    function ApprovePRApprovalHeader(responseCallback) {
+        var param = GetPRApprovalApproveHeaderParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("ApprovePRApprovalHeader")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval Approve", "Approve Header PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+    function ApprovePRApprovalDetail(responseCallback) {
+        var param = GetPRApprovalApproveDetailParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("ApprovePRApprovalDetail")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval Approve", "Approve Detail PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+    function RejectPRApprovalHeader(responseCallback) {
+        var param = GetPRApprovalApproveHeaderParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("RejectPRApprovalHeader")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval Reject", "Reject Header PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+    function RejectPRApprovalDetail(responseCallback) {
+        var param = GetPRApprovalApproveDetailParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("RejectPRApprovalDetail")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval Reject", "Reject Detail PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+
+    function EditPRApproval(docNo, docType, responseCallback) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetPRNO", "PRCreation")',
+            data: { PR_NO: docNo },
+            success: function (data) {
+                window.open('@Url.Action("Index", "PRCreation")', '_blank');
+            },
+            error: function (data) { console.log(data.responseText); }
+        });
+    }
+
+    function EditPRApprovalDetail(docNo) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetPRNO", "PRCreation")',
+            data: { PR_NO: docNo },
+            success: function (data) {
+                window.open('@Url.Action("Index", "PRCreation")', '_blank');
+            },
+            error: function (data) { console.log(data.responseText); }
+        });
+        }
+
+    function ClearPRApproval(pageIndex, pageSize, responseCallback) {
+        ResetView();
+        var param = GetPRApprovalParameter(pageIndex, pageSize);
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("GetPRApprovalGrid")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval", "Reset Header PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+
+    function SearchPRApproval(pageIndex, pageSize, responseCallback) {
+        if (pageIndex == undefined)
+        {
+            ViewData.Clear();
+        }
+        var orderby = ViewData.Get("OrderBy");
+
+        var responseCallback_new = function (data) {
+            responseCallback(data);
+            setSortSymbol();
+        };
+
+        var param = GetPRApprovalParameter(pageIndex, pageSize, orderby);
+        if (param == false) {
+            return false
+        } else {
+
+            $.ajax({
+                type: "POST",
+                url: '@Html.Toyota().Page.GetActionUrl("GetPRApprovalGrid")',
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                //ajaxSend: ToogleView("BeginAction"),
+                ajaxSend: $.progressbox.show("PR Approval", "Search Header PR Approval Data. . ."),
+                success: responseCallback_new
+            });
+        }
+
+    }
+
+    function OpenPRApprovalDetail(pageIndex, pageSize, responseCallback) {
+        var param = GetPRApprovalDetailParameter(pageIndex, pageSize);
+        $.ajax({
+            type: "GET",
+            url: '@Html.Toyota().Page.GetActionUrl("GetPRApprovalDetail")',
+            data: param,
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval", "Search Detail PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+
+    function SearchPRApprovalDetail(pageIndex, pageSize, responseCallback) {
+        var param = GetPRApprovalDetailParameter(pageIndex, pageSize);
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("GetPRApprovalDetailGrid")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval", "Search Detail PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+
+    function OpenPRApprovalHistory(pageIndex, pageSize, responseCallback) {
+        var param = GetPRApprovalHistoryParameter(pageIndex, pageSize);
+        $.ajax({
+            type: "GET",
+            url: '@Html.Toyota().Page.GetActionUrl("GetPRApprovalHistory")',
+            data: param,
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval", "Search Workflow PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+
+    function SearchPRApprovalHistory(pageIndex, pageSize, responseCallback) {
+        var param = GetPRApprovalHistoryParameter(pageIndex, pageSize);
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("GetApprovalHistoryGrid")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval", "Search Workflow PR Approval Data. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+
+    function SearchPRApprovalNotice(docNo, responseCallback) {
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("GetPRApprovalNotice")',
+            data: JSON.stringify({ docNo: docNo }),
+            contentType: "application/json; charset=utf-8",
+            ajaxSend: ToogleView("BeginAction"),
+            success: responseCallback
+            //ajaxComplete: ToogleView("EndAction")
+        });
+    }
+
+    function PostPRApprovalNotice(responseCallback) {
+        var param = GetPRApprovalNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("PostPRApprovalNotice")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval", "Post PR Approval Notice. . ."),
+            success: function (data)
+            {
+                if (data.ResponseType == "@ActionResponseViewModel.Error")
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                else
+                    responseCallback(data);
+            }
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+
+    function ReplyPRApprovalNotice(responseCallback) {
+        var param = GetPRApprovalReplyNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("ReplyPRApprovalNotice")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval", "Reply PR Approval Notice. . ."),
+            success: function (data) {
+                if (data.ResponseType == "@ActionResponseViewModel.Error")
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                else
+                    responseCallback(data);
+            }
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+
+    function DeletePRApprovalNotice(responseCallback) {
+        var param = GetPRApprovalDeleteNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("DeletePRApprovalNotice")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("PR Approval", "Delete PR Approval Notice. . ."),
+            success: responseCallback
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+    /////////// End Data Methods
+
+    /////////// Helper Methods
+    function GetPRApprovalApproveHeaderParameter() {
+        var docdate = $("#txt-docdate").val().split('-') || "";
+        var datefrom = docdate != "" ? GetValidDate(docdate[0].trim()) : "";
+        var dateto = docdate != "" ? GetValidDate(docdate[1].trim()) : "";
+        var listDocNo = '';
+        var header = $("#header-selection-mode").val()
+
+        if (header.toUpperCase() == 'EXC') {
+            //listDocNo = listDocNoOnly;
+            listDocNo = $("#docno-list-value-exc").val();
+        } else {
+            listDocNo = $("#docno-list-value").val();
+        }
+
+        return {
+            DOC_NO: $("#txt-docno").val(),
+            DIVISION_ID: $("#cmb-division").val(),
+            DATE_FROM: GetValidDate(datefrom),
+            DATE_TO: GetValidDate(dateto),
+            USER_TYPE: $("#cmb-usertype").val(),
+
+            //headerMode: $("#header-selection-mode").val(),
+            headerMode: header,
+            //docNoList: $("#docno-list-value").val(),
+            docNoList: listDocNo,
+            docItemNoList: $("#docitemno-main-list-value").val()
+        };
+    }
+    function GetPRApprovalApproveDetailParameter() {
+        detailSelectionMode = $("#detail-selection-mode").val();
+
+        if (detailSelectionMode === "EXC") {
+            var docitemno = "";
+            if ($("#docitemno-list-value").val() == null || $("#docitemno-list-value").val() == "")
+                docitemno = docNo + "|" + docType + "|" + detailSelectionMode + "|" + $("#docitemno-list-value").val() + ";"
+            else
+                docitemno = $("#docitemno-list-value").val();
+
+            return {
+                docItemNoList: docitemno,
+                userType: $("#cmb-usertype").val()
+            };
+        }
+        else if (detailSelectionMode === "INC") {
+            return {
+                docItemNoList: $("#docitemno-list-value").val(),
+                userType: $("#cmb-usertype").val()
+            };
+        }
+    }
+
+    function GetPRApprovalParameter(pageIndex, pageSize, orderby) {
+        if (orderby === undefined) orderby = "DOC_NO";
+        pageIndex = pageIndex || 1;
+        pageSize = pageSize || 10;
+        var docdate = $("#txt-docdate").val().split('-') || "";
+        var datefrom = docdate != "" ? GetValidDate(docdate[0].trim()) : "";
+        var dateto = docdate != "" ? GetValidDate(docdate[1].trim()) : "";
+        //modified by rendika 08/03/2021
+        if ((datefrom == "" && dateto == "") || (datefrom == "" && dateto != "") || (datefrom != "" && dateto == "")) {
+            $.messagebox.show("@ActionResponseViewModel.Error", 'Doc Date may not be empty', 'E');
+            return false;
+        } else {
+            var maxyear = @maxyears;
+            var newDateto = new Date(dateto)
+            var newDatefrom = new Date(datefrom)
+            var newDate = new Date(newDateto - newDatefrom)
+            var dif = newDate / 1000 / 60 / 60 / 24;
+            if (dif > maxyear) {
+                $.messagebox.show("@ActionResponseViewModel.Error", 'Doc Date may not more than 1095 days', 'E');
+                return false;
+            } else {
+
+                ViewData.Add("OrderBy", orderby);
+                return {
+                    DOC_NO: $("#txt-docno").val(),
+                    DOC_DESC: $("#txt-desc").val(),
+                    DATE_FROM: datefrom,
+                    DATE_TO: dateto,
+                    PR_COORDINATOR: $("#cmb-coordinator").val(),
+                    PLANT_CD: $("#cmb-plant").val(),
+                    SLOC_CD: $("#cmb-sloc").val(),
+                    DIVISION_ID: $("#cmb-division").val(),
+                    USER_TYPE: $("#cmb-usertype").val(),
+                    ORDER_BY: orderby,
+
+                    pageIndex: pageIndex,
+                    pageSize: pageSize
+                    };
+            }
+        }
+        //end modified by rendika 08/03/2021
+
+
+    }
+
+    function GetCheckAll(orderby) {
+        if (orderby === undefined) orderby = "DOC_NO";
+        var docdate = $("#txt-docdate").val().split('-') || "";
+        var datefrom = docdate != "" ? GetValidDate(docdate[0].trim()) : "";
+        var dateto = docdate != "" ? GetValidDate(docdate[1].trim()) : "";
+
+        ViewData.Add("OrderBy", orderby);
+
+        return {
+            DOC_NO: $("#txt-docno").val(),
+            DOC_DESC: $("#txt-desc").val(),
+            DATE_FROM: datefrom,
+            DATE_TO: dateto,
+            PR_COORDINATOR: $("#cmb-coordinator").val(),
+            PLANT_CD: $("#cmb-plant").val(),
+            SLOC_CD: $("#cmb-sloc").val(),
+            DIVISION_ID: $("#cmb-division").val(),
+            USER_TYPE: $("#cmb-usertype").val(),
+            ORDER_BY: orderby
+        };
+    }
+
+
+    function GetPRApprovalDetailParameter(pageIndex, pageSize) {
+    //alert(docDt);
+        pageIndex = pageIndex || 1;
+        pageSize = pageSize || 10;
+        return {
+            DOC_NO: docNo,
+            DOC_TYPE: "PR",
+            DOC_DESC: docDesc,
+            DIVISION_NAME: divisionName,
+            DOC_DT: docDt,
+            USER_TYPE: $("#cmb-usertype").val(),
+
+            pageIndex: pageIndex,
+            pageSize: pageSize
+        };
+    }
+
+    function GetPRApprovalHistoryParameter(pageIndex, pageSize) {
+        pageIndex = pageIndex || 1;
+        pageSize = pageSize || 10;
+
+        return {
+            DOC_NO: docNo,
+            ITEM_NO: itemNo,
+            DOC_TYPE: docType,
+
+            pageIndex: pageIndex,
+            pageSize: pageSize
+        };
+    }
+
+    function GetPRApprovalNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            DOC_TYPE: docType,
+            NOTICE_TO_USER: $("#notice-to-user-list").val(),
+            NOTICE_TO_ALIAS: $("#notice-to-alias-list").val(),
+            NOTICE_IMPORTANCE: "N",//$("#cmb-notice-importance").val(),
+            NOTICE_MESSAGE: $("#txt-notice-message").val()
+        };
+    }
+
+    function GetPRApprovalReplyNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            DOC_TYPE: docType,
+            REPLY_FOR: seqNo,
+            NOTICE_TO_USER: $("#notice-to-user-list").val(),
+            NOTICE_TO_ALIAS: $("#notice-to-alias-list").val(),
+            NOTICE_IMPORTANCE: "N",//$("#cmb-notice-importance").val(),
+            NOTICE_MESSAGE: $("#txt-notice-message").val()
+        };
+    }
+
+    function GetPRApprovalDeleteNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            SEQ_NO: seqNo
+        };
+    }
+    /////////// End Helper Methods
+
+    /////////// Header And Detail Gridview Checkbox Methods
+    var updateHeaderCheck = function UpdateHeaderCheck(docNo, docType, isChecked) {
+        headerSelectionMode = $("#header-selection-mode").val();
+        docNoCount = parseInt($("#docno-count-value").val(), 10);
+        docNoList = $("#docno-list-value").val();
+
+        docNoCount = (docNoCount < 0) ? 0 : docNoCount;
+        if (isChecked) {
+            switch (headerSelectionMode.toUpperCase()) {
+                case "INC":
+                    if (docNoList.indexOf(docNo) == -1) {
+                        //docNoList = docNoList + docNo + "|" + docType + "|" + headerSelectionMode + "|;";
+                        docNoList = docNoList + docNo + ",";
+                        docNoCount = docNoCount + 1;
+                    }
+                    break;
+                case "EXC":
+                    if (docNoList.indexOf(docNo) != -1) {
+                        //docNoList = docNoList.replace(docNo + "|" + docType + "|" + headerSelectionMode + "|;", "");
+                        docNoList = docNoList.replace(docNo + ",", "");
+                        docNoCount = docNoCount + 1;
+                    }
+                    break;
+            }
+        }
+        else {
+            switch (headerSelectionMode.toUpperCase()) {
+                case "EXC":
+                    if (docNoList.indexOf(docNo) == -1) {
+                        //docNoList = docNoList + docNo + "|" + docType + "|" + headerSelectionMode + "|;";
+                        docNoList = docNoList + docNo + ",";
+                        docNoCount = docNoCount - 1;
+                    }
+                    break;
+                case "INC":
+                    if (docNoList.indexOf(docNo) != -1) {
+                        //docNoList = docNoList.replace(docNo + "|" + docType + "|" + headerSelectionMode + "|;", "");
+                        docNoList = docNoList.replace(docNo + ",", "");
+                        docNoCount = docNoCount - 1;
+                    }
+                    break;
+            }
+        }
+        $("#header-selection-mode").val(headerSelectionMode);
+        $("#docno-count-value").val(docNoCount);
+        $("#docno-list-value").val(docNoList);
+    }
+
+    var updateDetailMainList = function UpdateDetailMainList(docNo) {
+        docItemNoMainList = $("#docitemno-main-list-value").val();
+        detailSelectionMode = $("#detail-selection-mode").val();
+        docItemNoCount = parseInt($("#docitemno-count-value").val(), 10);
+        docItemNoList = $("#docitemno-list-value").val();
+        flagAccountingGrid = $("#flag-accounting-value").val();
+
+
+        var docItemNoIndex = docItemNoMainList.indexOf(docNo);
+        if (docItemNoIndex != -1) {
+            var delimitterIndex = docItemNoMainList.indexOf(";", docItemNoIndex);
+            var docItemNo = docItemNoMainList.substring(docItemNoIndex, delimitterIndex + 1);
+            if (flagAccountingGrid != "True") {
+                docItemNoMainList = docItemNoMainList.replace(docItemNo, docItemNoList);
+            } else {
+                var selectedDocNo = "";
+                var selectedDocitem = "";
+                var selectedDocType = "";
+                switch (detailSelectionMode.toUpperCase()) {
+                    case "EXC":
+                        selectedDocNo = docItemNo.split("|")[0];
+                        selectedDocType = docItemNo.split("|")[1];
+                        if (docItemNoList.indexOf(";") == -1) {
+                            selectedDocitem = selectedDocNo + "|" + selectedDocType + "|" + detailSelectionMode + "|;";
+                        } else {
+                            selectedDocitem = docItemNoList;
+                        }
+                        docItemNoMainList = docItemNoMainList.replace(docItemNo, selectedDocitem);
+                        break;
+                    case "INC":
+                        docItemNoMainList = docItemNoMainList.replace(docItemNo, docItemNoList);
+                        break;
+                }
+            }
+        }
+        else {
+            if (flagAccountingGrid == "True")
+            {
+                docItemNoMainList = docItemNoMainList + docNo +"|"+ "PR" +"|EXC|;";
+            }
+            var delimitterIndex = docItemNoMainList + docItemNoMainList.indexOf(";", docItemNoIndex);
+            var docItemNo = docItemNoMainList.substring(docItemNoIndex, delimitterIndex + 1);
+            docItemNoMainList = docItemNoMainList + docItemNoList;
+        }
+
+        detailSelectionMode = "INC";
+        docItemNoCount = 0;
+        docItemNoList = "";
+
+        $("#docitemno-main-list-value").val(docItemNoMainList);
+        $("#detail-selection-mode").val(detailSelectionMode);
+        $("#docitemno-count-value").val(docItemNoCount);
+        $("#docitemno-list-value").val(docItemNoList);
+    }
+
+    var removeDetailMainList = function RemoveDetailMainList(docNo) {
+        docItemNoMainList = $("#docitemno-main-list-value").val();
+
+        var docItemNoIndex = docItemNoMainList.indexOf(docNo);
+        if (docItemNoIndex != -1) {
+            var delimitterIndex = docItemNoMainList.indexOf(";", docItemNoIndex);
+            var docItemNo = docItemNoMainList.substring(docItemNoIndex, delimitterIndex + 1);
+            docItemNoMainList = docItemNoMainList.replace(docItemNo, "");
+        }
+
+        $("#docitemno-main-list-value").val(docItemNoMainList);
+    }
+    /////////// End Header And Detail Gridview Checkbox Methods
+
+
+</script>

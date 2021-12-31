@@ -18,9 +18,6 @@ DECLARE @@EXIST_ITEM INT,
 
 BEGIN TRANSACTION
 BEGIN TRY
-
-	SET @MAT_DESC = LTRIM(RTRIM((REPLACE(@MAT_DESC, SUBSTRING(@MAT_DESC, PATINDEX('%[^a-zA-Z0-9 '''''']%', @MAT_DESC), 1), ''))))
-
 	IF(@ASSET_CATEGORY <> 'X') --if not save for routine master, check wbs and asset category
 	BEGIN
 		IF(
@@ -209,8 +206,8 @@ BEGIN TRY
 			   ,@@IS_PARENT
 			   ,'' -- procurement purpose
 			   ,@MAT_NO
-			   ,@MAT_DESC
-			   --,LTRIM(RTRIM((REPLACE(@MAT_DESC, SUBSTRING(@MAT_DESC, PATINDEX('%[^a-zA-Z0-9 '''''']%', @MAT_DESC), 1), ''))))
+			   --,RTRIM(LTRIM(@MAT_DESC))
+			   ,LTRIM(RTRIM((REPLACE(@MAT_DESC, SUBSTRING(@MAT_DESC, PATINDEX('%[^a-zA-Z0-9 '''''']%', @MAT_DESC), 1), ''))))
 			   ,@COST_CENTER_CD
 			   ,@WBS_NO
 			   ,@WBS_NAME

@@ -16,6 +16,7 @@ DECLARE @@PO VARCHAR(20),
 		@@PO_NO VARCHAR(10),
 		@@WBS VARCHAR(30),
 		@@VALID_TO VARCHAR(10)=convert( varchar(10),getdate(),112),
+		@@RESULT VARCHAR(3),
 		@@REFF VARCHAR(20);
 
 SET @@PO=@PO;
@@ -42,29 +43,61 @@ SET @@B=(SELECT COUNT(1) FROM TB_R_PO_H WHERE PO_NO=@@PO OR REF_NO=@@REFF);
 				BEGIN
 					IF (SELECT DISTINCT 1 FROM TB_R_PO_ITEM WHERE PO_NO=@@PO AND ITEM_CLASS='S')=1
 					BEGIN
-						SELECT TOP 1 @@PO_NO = PO_NO, @@WBS = WBS_NO FROM TB_M_WBS_CARRYOVER WHERE PO_NO = @@PO -- PO_NO AND WBS
-						IF EXISTS (SELECT WBS_NO FROM TB_M_WBS_CARRYOVER WHERE PO_NO = @@PO_NO AND @@WBS = WBS_NO)
+						DECLARE l_cursor CURSOR LOCAL FAST_FORWARD
+						FOR 
+							SELECT 
+								[PO_NO],
+								[WBS_NO]
+							FROM 
+								TB_R_PO_SUBITEM
+							WHERE PO_NO = @@PO
+								
+  
+						OPEN l_cursor
+						FETCH NEXT FROM l_cursor INTO
+							@@PO_NO,
+							@@WBS
 						BEGIN
-							--SELECT @@WBS = WBS_NO FROM TB_M_WBS_CARRYOVER WHERE PO_NO=@@PO -- PO_NO AND WBS
-							IF EXISTS (SELECT PO_NO FROM TB_M_WBS_CARRYOVER WHERE PO_NO = @@PO_NO AND WBS_NO = @@WBS)
+						WHILE @@@@FETCH_STATUS = 0
+						  BEGIN
+							IF EXISTS (SELECT PO_NO, WBS_NO FROM TB_M_WBS_CARRYOVER WHERE WBS_NO = @@WBS AND PO_NO = @@PO_NO)
 							BEGIN
-								IF ( (SELECT VALID_TO FROM TB_M_WBS_CARRYOVER WHERE PO_NO = @@PO_NO AND WBS_NO = @@WBS) > @@VALID_TO )
+								IF ( @@VALID_TO > (SELECT VALID_TO FROM TB_M_WBS_CARRYOVER WHERE PO_NO = @@PO_NO AND WBS_NO = @@WBS) )
 								BEGIN
-									SELECT '7' -- GET DATA BUT PO ALREADY EXPIRED BY BAYU JONATAN
+									SET @@RESULT = '7' 
+									BREAK
 								END
 								ELSE
 								BEGIN
-									SELECT '4' -- SUCCESS
+									SET @@RESULT = '4'
+									BREAK
 								END
+							END
+							ELSE IF EXISTS (SELECT WBS_NO FROM TB_M_WBS_CARRYOVER WHERE WBS_NO = @@WBS)
+							BEGIN
+								SET @@RESULT = '7' 
+								BREAK
 							END
 							ELSE
 							BEGIN
-								SELECT '4' -- SUCCESS
+								SET @@RESULT = '4'
+								BREAK
 							END
+							END
+							end
+						  FETCH NEXT FROM l_cursor INTO
+							@@PO_NO,
+							@@WBS
+						CLOSE l_cursor
+						DEALLOCATE l_cursor
+
+						IF @@RESULT = 7
+						BEGIN
+							SELECT '7'
 						END
 						ELSE
 						BEGIN
-							SELECT '4' -- SUCCESS
+							SELECT '4'-- SUCCESS
 						END
 					END
 					ELSE

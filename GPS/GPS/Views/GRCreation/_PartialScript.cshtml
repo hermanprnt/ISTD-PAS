@@ -41,7 +41,9 @@
                 "#txt-shorttext"
             ]);
             $.progressbox.hide();
-            if ($('.note-expired').text().length > 1) {
+
+            if ($('.note-expired').text().length > 1)
+            {
                 $('#btnSubmit').prop('disabled', true);
             }
         }

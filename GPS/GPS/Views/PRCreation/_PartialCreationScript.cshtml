@@ -1734,6 +1734,7 @@
             $.progressbox.hide();
             
         }
+        onChangeAssetCat(); // pop up loading terus menerus pada saat edit -- -6/009/2019 - wot rudi
     }
 </script>
 
@@ -1850,6 +1851,7 @@
         if (itemno == "undefined" || itemno == "" || itemno == null)
             itemno = $(idItem.NO).html().length <= 0 ? "0" : $(idItem.NO).html()
 
+        $.Enable([idItem.ASSET_NO, idItem.SUBASSET_NO]);
         ClearEditorSubItem();
         $.ajax({
             type: $tdk.AjaxMethod,

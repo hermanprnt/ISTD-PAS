@@ -9,5 +9,3 @@ SET @@SQL_QUERY = '
 		EXEC ' + @@DB_CONNECTION + '.[BMS_DB].[dbo].[sp_BudgetControlCountDataDetail] '''+@WBS_NO+''', ' + @ACTION_TYPE + '
 	'
 EXEC(@@SQL_QUERY)
-
-

@@ -1,0 +1,92 @@
+﻿<div id="delete-confirm" class="modal fade"> 
+    <div class="modal-dialog modal-md" style="width: 400px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="close" style="opacity: 1 !important; margin-top: -7px;">
+                    <span aria-hidden="true"><img src="@Url.Content("~/Content/Bootstrap/img/question.png")" class="modal-icon" /></span>
+                    <span class="sr-only">Close</span>
+                </div>
+                <h4 class="modal-title" id="popup-title">Confirmation</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-body">
+                    <div class="row" style="padding-left: 10px;">
+                        Are you sure want to delete(s)?
+                    </div>
+                    <div class="row" style="text-align: right;padding-right: 10px; margin-top: 10px;">
+                        <button type="button" class="btn btn-primary btn-xs" onclick="onYesDelete()" data-dismiss="modal" style="width: 60px;">Yes</button>
+                        <button class="btn btn-danger btn-xs" data-dismiss="modal" style="width: 60px;">No</button>
+                    </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="selected-0-confirm" class="modal fade"> 
+    <div class="modal-dialog modal-md" style="width: 300px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="close" style="opacity: 1 !important; margin-top: -7px;">
+                    <span aria-hidden="true"><img src="@Url.Content("~/Content/Bootstrap/img/Warning.png")" class="modal-icon" /></span>
+                    <span class="sr-only">Close</span>
+                </div>
+                <h4 class="modal-title" id="popup-title">Warning</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row" style="padding-left: 10px;">
+                    Please select data.
+                </div>
+                <div class="row" style="text-align: right;padding-right: 10px; padding-top: 5px;">
+                    <button type="button" class="btn btn-primary btn-xs" data-dismiss="modal" style="width: 60px;">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="selected-more-confirm" class="modal fade"> 
+    <div class="modal-dialog modal-md" style="width: 300px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="close" style="opacity: 1 !important; margin-top: -7px;">
+                    <span aria-hidden="true"><img src="@Url.Content("~/Content/Bootstrap/img/Warning.png")" class="modal-icon" /></span>
+                    <span class="sr-only">Close</span>
+                </div>
+                <h4 class="modal-title" id="popup-title">Warning</h4>
+             </div>
+            <div class="modal-body">
+                <div class="row" style="padding-left: 10px;">
+                    Please select one data.
+                </div>
+                <div class="row" style="text-align: right;padding-right: 10px; padding-top: 5px;">
+                    <button type="button" class="btn btn-primary btn-xs" data-dismiss="modal" style="width: 60px;">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="selected-info" class="modal fade"> 
+    <div class="modal-dialog modal-md" style="width: 350px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="close" style="opacity: 1 !important; margin-top: -7px;">
+                    <span aria-hidden="true"><img src="@Url.Content("~/Content/Bootstrap/img/information.png")" class="modal-icon" /></span>
+                    <span class="sr-only">Close</span>
+                </div>
+                <h4 class="modal-title" id="popup-title">Information</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row" style="padding-left: 10px;">
+                    <div id="infoModal"></div>
+                </div>
+                <div class="row" style="text-align: right;padding-right: 10px; padding-top: 5px;">
+                    <button type="button" id="btnOKinfo" class="btn btn-primary btn-xs" data-dismiss="modal" style="width: 60px;">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -41,6 +41,9 @@ AND ((A.DIVISION_ID = ''' + ISNULL(@DIVISION_CD,'') + '''
 AND ((A.PROJECT_NO LIKE ''%' + ISNULL(@PROJECT_NO,'') + '%''
 	AND isnull(''' + ISNULL(@PROJECT_NO,'') + ''', '''') <> ''''
 	OR (isnull(''' + ISNULL(@PROJECT_NO,'') + ''', '''') = '''')))
+AND ((A.PR_STATUS = ''' + ISNULL(@PR_STATUS_FLAG,'') + '''
+	AND isnull(''' + ISNULL(@PR_STATUS_FLAG,'') + ''', '''') <> ''''
+	OR (isnull(''' + ISNULL(@PR_STATUS_FLAG,'') + ''', '''') = '''')))
 AND ((A.DOC_DT >= ''' + ISNULL(@DATEFROM,'') + '''
 	AND isnull(''' + ISNULL(@DATEFROM,'') + ''', '''') <> ''''
 	OR (isnull(''' + ISNULL(@DATEFROM,'') + ''', '''') = '''')))

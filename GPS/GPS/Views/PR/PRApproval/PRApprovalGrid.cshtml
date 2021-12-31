@@ -1,0 +1,470 @@
+﻿@using GPS.Constants
+@using GPS.Constants.PRPOApproval
+@using GPS.Models.Common
+@using GPS.Models.PRPOApproval
+@using GPS.ViewModels
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Serialization
+
+@{
+    List<PRApproval> prApprovalList = (List<PRApproval>)ViewData["PRApproval"];
+    PaginationViewModel paginationViewModel = (PaginationViewModel)ViewData["PRApprovalPage"];
+
+    string ListDocNo = (string)ViewData["PRDocNoOnly"] != null ? (string)ViewData["PRDocNoOnly"] : null;
+}
+
+<div style="border: 1pt solid #ccc;">
+    <div id="tScrollHead" style="width: 98.65%; overflow: hidden;">
+        <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1440px;">
+            <thead id="header-row">
+                <tr>
+                    <th width="30px"><input id="chk-all" type="checkbox" /></th>
+                    <th width="50px"><span style="font-weight:900;">!</span></th>
+                    <th width="100px" class="sorting" data-field="DOC_NO" data-sort="none">Doc. No</th>
+                    <th width="200px" class="sorting" data-field="DOC_DESC" data-sort="none">Description</th>
+                    <th width="70px" class="sorting" data-field="DOC_DT" data-sort="none">Doc. Date</th>
+                    <th width="60px" class="sorting" data-field="CURR" data-sort="none">Currency</th>
+                    <th width="90px" class="sorting" data-field="AMOUNT" data-sort="none">Amount</th>
+                    <th width="110px" class="sorting" data-field="STATUS_CD" data-sort="none">Status</th>
+                    <th width="100px" class="sorting" data-field="PR_COORDINATOR" data-sort="none">Coordinator</th>
+                    <th width="150px" class="sorting" data-field="DIVISION" data-sort="none">Division</th>
+                    <th class="_toggle-detail" width="60px">Plant</th>
+                    <th class="_toggle-detail" width="60px">Storage</th>
+                    <th class="_toggle-detail" width="100px">Created By</th>
+                    <th class="_toggle-detail" width="80px">Created Date</th>
+                    <th class="_toggle-detail" width="100px">Changed By</th>
+                    <th class="_toggle-detail" width="80px">Changed Date</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    <div id="tScrollBody" style="overflow: scroll; height: 270px;">
+        <table id="table-@PRPOApprovalPage.PRApprovalGrid" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1440px;">
+            <tbody>
+                @if (prApprovalList.Count > 0)
+                {
+                    foreach (PRApproval item in prApprovalList)
+                    {
+                        <tr>
+                            <td class="text-center" width="30px">
+                                <input id="chk-approval-@item.NUMBER" data-docno="@item.DOC_NO" data-doctype="@item.DOC_TYPE" type="checkbox" />
+                            </td>
+                            <td class="text-center" style="vertical-align:middle;" width="50px">
+                                @if (item.URGENT_DOC == "Y")
+                                {
+                                    <img src="@Url.Content("~/Content/img/alert_16.png")" />
+                                }
+                            </td>
+                            <td class="text-center" width="100px"><a id="lnk-docno-@item.NUMBER" href="#" data-itemnum="@item.NUMBER" data-docno="@item.DOC_NO" data-doctype="@item.DOC_TYPE" data-docdt="@item.DOC_DT" data-docdesc="@item.DOC_DESC" data-divisionname="@item.DIVISION_NAME">@item.DOC_NO</a></td>
+                            <td class="text-left" width="200px">@item.DOC_DESC</td>
+                            <td class="text-center" width="70px">@(item.DOC_DT != DateTime.MinValue ? item.DOC_DT.ToString(CommonFormat.Date) : "")</td>
+                            <td class="text-center" width="60px">@item.CURR</td>
+                            <td class="text-right" width="90px">@(String.Format("{0:n}", item.AMOUNT))</td>
+                            <td class="text-center" width="110px">@item.STATUS_DESC</td>
+                            <td width="100px">@item.PR_COORDINATOR</td>
+                            <td class="text-left" width="150px">@item.DIVISION_NAME</td>
+                            <td class="_toggle-detail text-center" width="60px">@item.PLANT_CD</td>
+                            <td class="_toggle-detail text-center" width="60px">@item.SLOC_CD</td>
+                            <td class="_toggle-detail text-left" width="100px">@item.CREATED_BY</td>
+                            <td class="_toggle-detail text-center" width="80px">@item.CREATED_DT</td>
+                            <td class="_toggle-detail text-left" width="100px">@item.CHANGED_BY</td>
+                            <td class="_toggle-detail text-center" width="80px">@item.CHANGED_DT</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="16" class="text-center">@CommonDisplayMessage.NoData</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div>
+        @Html.Partial(CommonPage.GridPagination, paginationViewModel)
+    </div>
+</div>
+
+<script type="text/javascript">
+    //var listDocNo;
+
+    $(document).ready(function () {
+        //listDocNo = JSON.parse('@Html.Raw(JsonConvert.SerializeObject(ListDocNo))');
+        //$("#docno-list-value-exc").val(listDocNo);
+        bindHeaderCheck();
+        removeDetailMainList("");
+    });
+
+    /////// Header Populate Data Methods
+    var bindHeaderCheck = function BindHeaderCheck() {
+
+        headerSelectionMode = $("#header-selection-mode").val();
+        docNoCount = parseInt($("#docno-count-value").val(), 10);
+        docNoList = $("#docno-list-value").val();
+        docNoListExc = $("#docno-list-value-exc").val();
+        docNoCountall = @(paginationViewModel.TotalDataCount);
+
+        if (docNoCount == Number("@paginationViewModel.TotalDataCount") && Number("@paginationViewModel.TotalDataCount") > 0) {
+            headerSelectionMode = "EXC";
+            docNoList = docNoListExc;
+            $("#chk-all").prop("checked", true);
+            //console.log('check point a', docNoList);
+        }
+        else if (docNoCount == 0) {
+            headerSelectionMode = "INC";
+            docNoList = "";
+            $("#chk-all").prop("checked", false);
+        }
+        else {
+            headerSelectionMode = "INC";
+            $("#chk-all").prop("checked", false);
+        }
+
+        $("#header-selection-mode").val(headerSelectionMode);
+        $("#docno-count-value").val(docNoCount)
+        $("#docno-list-value").val(docNoList);
+
+
+
+        switch (headerSelectionMode.toUpperCase())
+        {
+            case "INC":
+                $("[id^=chk-approval-]", "#table-@PRPOApprovalPage.PRApprovalGrid").each(function (idx) {
+                    if (docNoList.indexOf($(this).data("docno")) != -1)
+                        $(this).prop("checked", true);
+                    else
+                        $(this).prop("checked", false);
+                });
+                break;
+            case "EXC":
+                $("[id^=chk-approval-]", "#table-@PRPOApprovalPage.PRApprovalGrid").each(function (idx) {
+                    if (docNoList.indexOf($(this).data("docno")) != 1) {
+                        $(this).prop("checked", true );
+                    }
+                    else {
+                        $(this).prop("checked", false);
+                    }
+                });
+                break;
+        }
+    }
+    var bindCheckAll = function BindCheckAll() {
+        //console.log('bindCheckAll');
+        var orderby = ViewData.Get("OrderBy");
+        var param = GetCheckAll(orderby);
+
+        $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetCheckedAll", "PRApproval")',
+                data: JSON.stringify({ param }),
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (data) {
+                    //console.log('asdasd',data);
+                    //test = data;
+                    //docNoList = data.ListDocNo;
+                    //console.log('get from server', data.ListDocNo);
+                    $("#docno-list-value-exc").val(data.ListDocNo);
+                },
+                error: function (data) { console.log('error'); }
+            });
+
+    }
+
+
+    $("#chk-all").change(function (e) {
+        // Reset Header
+        var chkAll = this;
+        if (chkAll.checked) {
+            bindCheckAll();
+
+            headerSelectionMode = "EXC";
+            docNoCount = @(paginationViewModel.TotalDataCount);
+            //docNoList = test + ",";
+
+
+            //docNoList = listDocNo + ",";
+        }
+        else {
+            headerSelectionMode = "INC";
+            docNoCount = 0;
+            docNoList = "";
+        }
+
+        $("#header-selection-mode").val(headerSelectionMode);
+        $("#docno-count-value").val(docNoCount);
+        $("#docno-list-value").val(docNoList);
+
+        // Reset Detail
+        docItemNoMainList = "";
+        $("#docitemno-main-list-value").val(docItemNoMainList);
+        bindHeaderCheck();
+        removeDetailMainList($(this).data("docno"));
+    });
+
+    $("[id^=chk-approval-]", "#table-@PRPOApprovalPage.PRApprovalGrid").change(function (e) {
+        headerSelectionMode = $("#header-selection-mode").val();
+        docNoCount = parseInt($("#docno-count-value").val(), 10);
+        docNoList = $("#docno-list-value").val();
+
+        if (this.checked) {
+            switch (headerSelectionMode.toUpperCase()) {
+                case "INC":
+                    //docNoList = docNoList + $(this).data("docno") + "|" + $(this).data("doctype") + "|" + headerSelectionMode + "|;";
+                    docNoList = docNoList + $(this).data("docno") + ",";
+                    docNoCount = docNoCount + 1;
+                    break;
+                case "EXC":
+                    //docNoList = docNoList.replace($(this).data("docno") + "|" + $(this).data("doctype") + "|" + headerSelectionMode + "|;", "");
+                    docNoList = docNoList.replace($(this).data("docno") + ",", "");
+                    docNoCount = docNoCount + 1;
+                    break;
+            }
+        }
+        else {
+            switch (headerSelectionMode.toUpperCase()) {
+                case "EXC":
+                    //docNoList = docNoList + $(this).data("docno") + "|" + $(this).data("doctype") + "|" + headerSelectionMode + "|;";
+                    //docNoList = docNoList + $(this).data("docno") + ",";
+                    docNoList = docNoList.replace($(this).data("docno") + ",", "");
+                    docNoCount = docNoCount - 1;
+                    break;
+                case "INC":
+                    //docNoList = docNoList.replace($(this).data("docno") + "|" + $(this).data("doctype") + "|" + headerSelectionMode + "|;", "");
+                    docNoList = docNoList.replace($(this).data("docno") + ",", "");
+                    docNoCount = docNoCount - 1;
+                    break;
+            }
+        }
+        $("#header-selection-mode").val(headerSelectionMode);
+        $("#docno-count-value").val(docNoCount);
+        $("#docno-list-value").val(docNoList);
+
+        bindHeaderCheck();
+        removeDetailMainList($(this).data("docno"));
+    });
+    ///////// End Header Populate Data Methods
+
+    $("[id^=lnk-docno-]").click(function (e) {
+        e.preventDefault();
+        docNo = $(this).data("docno");
+
+        docDt = $(this).data("docdt");
+        userType = $("#cmb-usertype").val();
+        docDesc = $(this).data("docdesc");
+        divisionName = $(this).data("divisionname");
+
+        itemNum = $(this).data("itemnum");
+        if ($("#chk-approval-" + itemNum).prop("checked"))
+        {
+            detailSelectionMode = "EXC";
+            docItemNoCount = 0;
+            docItemNoList = "";
+        }
+        else
+        {
+            docItemNoMainList = $("#docitemno-main-list-value").val();
+
+            var docItemNoIndex = docItemNoMainList.indexOf(docNo);
+            if (docItemNoIndex != -1) {
+                var delimitterIndex = docItemNoMainList.indexOf(";", docItemNoIndex);
+                var docItemNo = docItemNoMainList.substring(docItemNoIndex, delimitterIndex);
+                detailSelectionMode = docItemNo.split("|")[2];
+                docItemNoList = docItemNo + ";";
+                if (docItemNo.indexOf(",") != -1)
+                {
+                    docItemNoCount = docItemNo.split("|")[3].split(",").length - 1;
+                }
+                else
+                {
+                    docItemNoCount = 0;
+                }
+            }
+            else
+            {
+                detailSelectionMode = "INC";
+                docItemNoCount = 0;
+                docItemNoList = "";
+            }
+        }
+
+        $("#detail-selection-mode").val(detailSelectionMode);
+        $("#docitemno-list-value").val(docItemNoList);
+        $("#docitemno-count-value").val(docItemNoCount);
+
+        OpenPRApprovalDetail(undefined, undefined, function (data) {
+            $("#popup-container").html(data);
+            $("#popup-container").modal();
+        });
+    });
+
+    $("#tScrollBody").scroll(function () {
+        $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+    });
+
+    /* =============================== Sort: begin =============================== */
+    var table = document.getElementById("header-row");
+
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+
+    function tableText(tableCell) {
+        var removeClass;
+        var addClass;
+        var dataSort;
+
+        if (tableCell.getAttribute("class") === null)
+        {
+            return;
+        }
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            if (tableCell.getAttribute("class").indexOf('sorting_asc') >= 0) {
+                removeClass = 'sorting_asc';
+                addClass = 'sorting_desc';
+                dataSort = 'DESC';
+            } else if (tableCell.getAttribute("class").indexOf('sorting_desc') >= 0) {
+                removeClass = 'sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+            } else {
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'ASC';
+            }
+        }
+
+        //reset all
+        var tableReset = document.getElementById("header-row");
+        if (tableReset != null) {
+            for (var i = 0; i < tableReset.rows.length; i++) {
+                for (var j = 0; j < tableReset.rows[i].cells.length; j++) {
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_asc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_asc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_desc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_desc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                }
+            }
+        }
+        // end
+
+        var orderby = tableCell.dataset.field + '|' + dataSort;
+        var page = $('.pagination > li.active > a').html();
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            tableCell.classList.remove(removeClass);
+            tableCell.classList.add(addClass);
+            tableCell.dataset.sort = dataSort;
+
+            //$.progressbox.show("PR Approval", "Sort PR Approval Grid. . .")
+            SortGrid(orderby, page);
+            //$.progressbox.hide();
+        }
+    }
+
+    /* =============================== Sort: end =============================== */
+
+
+    //var table = document.getElementById("dynamic-table");
+    //if (table != null) {
+    //    for (var i = 0; i < table.rows.length; i++) {
+    //        for (var j = 0; j < table.rows[i].cells.length; j++) {
+    //            table.rows[i].cells[j].onclick = function () {
+    //                //tableText(this);
+    //                sorting_execute = '1';
+    //            };
+    //        }
+    //    }
+    //}
+
+    @*function tableText(tableCell) {
+        var removeClass;
+        var addClass;
+        var dataSort;
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            if (tableCell.getAttribute("class").indexOf('sorting_asc') >= 0) {
+
+                removeClass = 'sorting_asc';
+                addClass = 'sorting_desc';
+                dataSort = 'desc';
+
+            } else if (tableCell.getAttribute("class").indexOf('sorting_desc') >= 0) {
+
+                removeClass = 'sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+
+            } else {
+
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'asc';
+
+            }
+        }
+
+        //reset all
+        var tableReset = document.getElementById("dynamic-table");
+        if (tableReset != null) {
+            for (var i = 0; i < tableReset.rows.length; i++) {
+                for (var j = 0; j < tableReset.rows[i].cells.length; j++) {
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_asc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_asc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_desc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_desc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                }
+            }
+        }
+        // end
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            tableCell.classList.remove(removeClass);
+            tableCell.classList.add(addClass);
+            tableCell.dataset.sort = dataSort;
+
+            $.ajax({
+                type: "GET",
+                url: '@Html.Toyota().Page.GetActionUrl("GetPRInquirySort")',
+                    data: {
+                    field: tableCell.dataset.field,
+                    sort: dataSort
+                },
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    $("#tblScroll")
+                            .find('tbody')
+                            .html(
+                                result
+                            );
+                }
+            });
+        }
+    }*@
+</script>

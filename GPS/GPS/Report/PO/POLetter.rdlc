@@ -156,10 +156,6 @@
           <DataField>NPWP</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="POStatus">
-          <DataField>POStatus</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
       </Fields>
       <Query>
         <DataSourceName>PODataSet</DataSourceName>
@@ -3056,7 +3052,7 @@
         <Top>4.23017cm</Top>
         <Left>0.45217cm</Left>
         <Height>3.96187cm</Height>
-        <Width>27.12649cm</Width>
+        <Width>27.12648cm</Width>
         <ZIndex>1</ZIndex>
         <Style>
           <Border>
@@ -4252,9 +4248,6 @@
                           <Left>0cm</Left>
                           <Height>1.2cm</Height>
                           <Width>3.5cm</Width>
-                          <Visibility>
-                            <Hidden>=iif(First(Fields!POStatus.Value, "PODataSet")=40, true, false)</Hidden>
-                          </Visibility>
                           <Style>
                             <Border>
                               <Style>None</Style>

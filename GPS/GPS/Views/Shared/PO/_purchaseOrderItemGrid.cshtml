@@ -11,48 +11,41 @@
 @model PRItemAdoptResultViewModel
 
 <style type="text/css">
-
-    .CategoryObject
-    {
+    .CategoryObject {
         width: 65px !important;
         text-align: right;
     }
 
-    .MaterialObject
-    {
+    .MaterialObject {
         width: 110px !important;
     }
 
-    .QtyObject
-    {
+    .QtyObject {
         width: 65px !important;
         text-align: right;
     }
 
-    .WBSObject
-    {
+    .WBSObject {
         width: 175px !important;
     }
 
-    .CostCenterObject
-    {
+    .CostCenterObject {
         width: 75px !important;
     }
 
-    .GLAccountObject
-    {
+    .GLAccountObject {
         width: 80px !important;
     }
 
-    .button-group-reject{
+    .button-group-reject {
         position: relative;
         top: -10px;
     }
 </style>
 
 @*<div class="button-group-reject @(Model.IsFromEcatalogue?"":"hidden")">
-    <button id="btn-reject-item" class="btn btn-warning btn-xs">Reject</button>
-</div>*@
+        <button id="btn-reject-item" class="btn btn-warning btn-xs">Reject</button>
+    </div>*@
 <div style="overflow: auto;">
     <table class="table table-striped table-bordered table-condensed">
         <thead>
@@ -79,41 +72,44 @@
             <tr id="rowedit" class="hidden">
                 <td></td>
                 <td class="itemedit-col-check hidden"></td>
-                <td class="not-in-pomanual"><input id="txt-itemedit-prno" type="text" class="form-control" disabled/></td>
-                <td class="not-in-pomanual"><input id="txt-itemedit-pritemno" type="text" class="form-control" disabled/></td>
+                <td class="not-in-pomanual"><input id="txt-itemedit-prno" type="text" class="form-control" disabled /></td>
+                <td class="not-in-pomanual"><input id="txt-itemedit-pritemno" type="text" class="form-control" disabled /></td>
                 <td>@Html.Lookup("itemedit-category", true, "CategoryObject")</td>
                 <td>@Html.Lookup("itemedit-matno", false, "MaterialObject")</td>
-                <td><input id="txt-itemedit-matdesc" type="text" class="form-control"/></td>
-                <td><input id="txt-itemedit-qty" type="text" class="form-control QtyObject"/></td>
+                <td><input id="txt-itemedit-matdesc" type="text" class="form-control" /></td>
+                <td><input id="txt-itemedit-qty" type="text" class="form-control QtyObject" /></td>
                 <td>@Html.DropDownList("cmb-itemedit-uom", POCreationController.UOMSelectList, new { @class = "form-control" })</td>
-                <td><input id="txt-itemedit-price" type="text" class="form-control"/></td>
-                <td><input id="txt-itemedit-amount" type="text" class="form-control" readonly/></td>
+                <td><input id="txt-itemedit-price" type="text" class="form-control" /></td>
+                <td><input id="txt-itemedit-amount" type="text" class="form-control" readonly /></td>
                 <td>@Html.Lookup("itemedit-wbsno", true, "WBSObject")</td>
-                @*<td>@Html.DropDownList("cmb-itemedit-costcenter", POCreationController.GetCostCenterSelectList(Model.CurrentUser.RegistrationNumber), new { @class = "form-control CostCenterObject" })</td>*@
-                <td>@Html.DropDownList("cmb-itemedit-costcenter", POCreationController.GetCostCenterSelectListAll(), new { @class = "form-control CostCenterObject" })</td> @*changed : 20190617 : isid.rgl*@
+		@*<td>@Html.DropDownList("cmb-itemedit-costcenter", POCreationController.GetCostCenterSelectList(Model.CurrentUser.RegistrationNumber), new { @class = "form-control CostCenterObject" })</td>*@
+                <td>@Html.DropDownList("cmb-itemedit-costcenter", POCreationController.GetCostCenterSelectListAll(), new { @class = "form-control CostCenterObject" })</td> @*20190624 : isid.rgl : bind cost center*@
                 <td>@Html.Lookup("itemedit-glaccount", false, "GLAccountObject")</td>
                 <td class="text-center editor-action">
-                    <button id="btn-itemedit-save" class="btn btn-xs btn-primary" ><i class="fa fa-save"></i></button>
+                    <button id="btn-itemedit-save" class="btn btn-xs btn-primary"><i class="fa fa-save"></i></button>
                     <button id="btn-itemedit-cancel" class="btn btn-xs btn-danger"><i class="fa fa-remove"></i></button>
                 </td>
             </tr>
             <tr id="subrowedit" class="form-group-xs hidden">
                 <td></td>
                 <td class="subitemedit-col-check hidden"></td>
-                <td class="not-in-pomanual"><input id="txt-subitemedit-prno" type="text" class="form-control" readonly/></td>
-                <td class="not-in-pomanual"><input id="txt-subitemedit-pritemno" type="text" class="form-control" readonly/></td>
-                <td><input id="txt-subitemedit-category" type="text" class="form-control" readonly/></td>
-                <td colspan="2"><input id="txt-subitemedit-matdesc" type="text" class="form-control"/></td>
-                <td><input id="txt-subitemedit-qty" class="form-control QtyObject" type="text"/></td>
+                <td class="not-in-pomanual"><input id="txt-subitemedit-prno" type="text" class="form-control" readonly /></td>
+                <td class="not-in-pomanual"><input id="txt-subitemedit-pritemno" type="text" class="form-control" readonly /></td>
+                <td><input id="txt-subitemedit-category" type="text" class="form-control" readonly /></td>
+                <td colspan="2"><input id="txt-subitemedit-matdesc" type="text" class="form-control" /></td>
+                <td><input id="txt-subitemedit-qty" class="form-control QtyObject" type="text" /></td>
                 <td>@Html.DropDownList("cmb-subitemedit-uom", POCreationController.UOMSelectList, new { @class = "form-control " })</td>
-                <td><input id="txt-subitemedit-price" type="text" class="form-control"/></td>
-                <td><input id="txt-subitemedit-amount" type="text" class="form-control" readonly/></td>
+                <td><input id="txt-subitemedit-price" type="text" class="form-control" /></td>
+                <td><input id="txt-subitemedit-amount" type="text" class="form-control" readonly /></td>
                 <td>@Html.Lookup("subitemedit-wbsno")</td>
-                <td>@Html.DropDownList("cmb-subitemedit-costcenter", POCreationController.GetCostCenterSelectList(Model.CurrentUser.RegistrationNumber), new { @class = "form-control CostCenterObject " })</td>
+                <td>
+                    @Html.DropDownList("cmb-subitemedit-costcenter", POCreationController.GetCostCenterSelectListAll(), new { @class = "form-control CostCenterObject " })
+                    <input id="txt-subitemedit-costcenter" type="text" class="form-control hidden" readonly />
+                </td>
                 <td>@Html.Lookup("subitemedit-glaccount")</td>
                 <td style="display:none"></td>
                 <td class="text-center editor-action">
-                    <button id="btn-subitemedit-save" class="btn btn-xs btn-primary" ><i class="fa fa-save"></i></button>
+                    <button id="btn-subitemedit-save" class="btn btn-xs btn-primary"><i class="fa fa-save"></i></button>
                     <button id="btn-subitemedit-cancel" class="btn btn-xs btn-danger"><i class="fa fa-remove"></i></button>
                 </td>
             </tr>
@@ -134,8 +130,8 @@
                             }
                         </td>
                         <td class="text-center itemedit-col-check hidden">
-                        @*<td class="text-center itemedit-col-check @(Model.IsFromEcatalogue?"":"hidden")">*@
-                            <input id="chk-@Model.GridPaging.DataName-@item.DataNo" type="checkbox" data-embedded="@item.AsEmbeddedData()"/>
+                            @*<td class="text-center itemedit-col-check @(Model.IsFromEcatalogue?"":"hidden")">*@
+                            <input id="chk-@Model.GridPaging.DataName-@item.DataNo" type="checkbox" data-embedded="@item.AsEmbeddedData()" />
                         </td>
                         <td class="text-center not-in-pomanual">@item.PRNo</td>
                         <td class="text-right not-in-pomanual">@(String.IsNullOrEmpty(item.POItemNo) ? String.Empty : int.Parse(item.POItemNo).ToString())</td>
@@ -151,12 +147,14 @@
                         <td class="text-center">@item.GLAccount</td>
                         <td id="txt-currcd-@item.DataNo" style="display:none">@item.Currency</td>
                         <td class="text-center itemedit-col-action hidden">
-                            @if(!item.IsLocked) {
+                            @if (!item.IsLocked)
+                            {
                                 <button id="btn-@Model.GridPaging.DataName-copy-@item.DataNo" class="btn btn-xs btn-primary hidden" data-pono="@item.PONo" data-poitemno="@item.POItemNo" data-seqitemno="@item.SeqItemNo" data-no="@item.DataNo" data-embedded="@item.AsEmbeddedData()"><i class="fa fa-copy"></i></button>
                                 <button id="btn-@Model.GridPaging.DataName-edit-@item.DataNo" class="btn btn-xs btn-primary" data-pono="@item.PONo" data-poitemno="@item.POItemNo" data-seqitemno="@item.SeqItemNo" data-no="@item.DataNo" data-embedded="@item.AsEmbeddedData()"><i class="fa fa-pencil"></i></button>
                                 <button id="btn-@Model.GridPaging.DataName-delete-@item.DataNo" class="btn btn-xs btn-danger" data-pono="@item.PONo" data-poitemno="@item.POItemNo" data-seqitemno="@item.SeqItemNo" data-no="@item.DataNo" data-embedded="@item.AsEmbeddedData()"><i class="fa fa-trash"></i></button>
                             }
-                            else {
+                            else
+                            {
                                 <a class="ref" href="#"><i class="fa fa-lock" data-toggle="tooltip" title="Data imported from SAP or already used by GR"></i></a>
                             }
                         </td>
@@ -252,7 +250,7 @@
         $(document).onOnce("change", "#cmb-@(Model.GridPaging.DataName)-additional", function (e) {
             OnAjaxBegin("PO Item Additional");
             var splittedValue = $("#cmb-@(Model.GridPaging.DataName)-additional").valOrDefault().split(";");
-            
+
             if (splittedValue.length === 1) {
                 splittedValue.push(0);
                 splittedValue.push(0);
@@ -304,7 +302,7 @@
         $("#btn-reject-item").click(function (e) {
             OnAjaxBegin("Reject Purchase Order");
             e.preventDefault();
-                
+
             var selectedDataList = $("[id^=chk-poitem-]:checked");
             if (selectedDataList.length === 0) {
                 $.displaymessagebox.show("@DisplayMessageId.SelectOneCriteria");
@@ -353,7 +351,7 @@
 
         });
 
-        
+
     });
 
     function doRejectSelectedItemPO(poNo, itemPoList) {
@@ -377,7 +375,7 @@
                                 ""
                             );
                     }, 300);
-                   
+
                 }
                 else {
                     var error = result.Message;
@@ -389,8 +387,7 @@
         });
     }
 
-    function FinishProcessReject()
-    {
+    function FinishProcessReject() {
         $('#pop-purchaseorder').modal('hide');
         $('#btn-search').click();
     }

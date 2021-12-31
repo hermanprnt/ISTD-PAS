@@ -1,4 +1,4 @@
-﻿EXEC [dbo].[sp_prinquiry_commitRemainBudget_20191125] 
+﻿EXEC [dbo].[sp_prinquiry_commitRemainBudget] 
 	@PROCESS_ID,
 	@PR_NO,
 	@ITEM_NO,

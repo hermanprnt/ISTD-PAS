@@ -106,7 +106,6 @@
 </div>
 
 <script type="text/javascript">
-
     $(document).ready(function (e) {
         docNo = '@DOC_NO';
         docType = '@DOC_TYPE';
@@ -263,6 +262,7 @@
                 break;
         }        
     }
+
     $("#chk-all-detail").change(function (e) {
         // Reset Detail List.
         var chkAll = this;
@@ -275,7 +275,7 @@
         if (chkAll.checked) {
             detailSelectionMode = "EXC";
             docItemNoList = "";
-            docItemNoCount = '@(paginationModel.TotalDataCount)';
+            docItemNoCount = @(paginationModel.TotalDataCount);
         }
         else {
             detailSelectionMode = "INC";
@@ -318,7 +318,7 @@
 
         
     });
-    
+
     $("[id^=chk-approval-detail-]", "#table-@PRPOApprovalPage.PRApprovalDetailGrid").change(function (e) {
         docItemNoList = $("#docitemno-list-value").val();
         docItemNoCount = parseInt($("#docitemno-count-value").val(), 10);
