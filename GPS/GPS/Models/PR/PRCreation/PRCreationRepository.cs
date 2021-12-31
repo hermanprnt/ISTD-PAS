@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using Toyota.Common.Database;
 using Toyota.Common.Web.Platform;
 
@@ -586,38 +588,87 @@ namespace GPS.Models.PR.PRCreation
 
         public Tuple<string, string, int> BudgetProcessing(PRCreation param, string username, string ProcessType, int TotalRollback)
         {
-            IDBContext db = DatabaseManager.Instance.GetContext();
+            #region FID.Ridwan:20211210 -> NewConnection handle timeout
             PRCreation resultTable = new PRCreation();
             string result = "";
             string status = "";
             int total_success = 0;
+            string constring = DatabaseManager.Instance.GetConnectionDescriptor("Dev").ConnectionString;
+            SqlConnection connect = new SqlConnection(constring);
+            SqlDataReader reader = null;
+
             try
             {
-                dynamic args = new
-                {
-                    USER_ID = username,
-                    PR_NO = param.PR_NO,
-                    PR_DESC = param.PR_DESC,
-                    PROCESS_ID = param.PROCESS_ID,
-                    DIVISION_ID = param.DIVISION_ID,
-                    PROCESS_TYPE = ProcessType,
-                    ROW_ROLLBACK = TotalRollback
 
-                };
-                resultTable = db.SingleOrDefault<PRCreation>(SqlFile.BudgetCalculation, args);
-                result = resultTable.MESSAGE;
-                status = resultTable.PROCESS_STATUS;
-                total_success = resultTable.NUMBER_OF_SUCCESS;
+                connect.Open();
+
+                SqlCommand sqlSelect = new SqlCommand("[dbo].[sp_prcreation_budgetProcessing]", connect);
+                sqlSelect.CommandType = CommandType.StoredProcedure;
+                sqlSelect.CommandTimeout = 180;
+
+                sqlSelect.Parameters.Add("@PROCESS_ID", SqlDbType.VarChar).Value = param.PROCESS_ID;
+                sqlSelect.Parameters.Add("@DIVISION", SqlDbType.VarChar).Value = param.DIVISION_ID;
+                sqlSelect.Parameters.Add("@PR_NO", SqlDbType.VarChar).Value = param.PR_NO;
+                sqlSelect.Parameters.Add("@PR_DESC", SqlDbType.VarChar).Value = param.PR_DESC;
+                sqlSelect.Parameters.Add("@USER_ID", SqlDbType.VarChar).Value = username;
+                sqlSelect.Parameters.Add("@PROCESS_TYPE", SqlDbType.VarChar).Value = ProcessType;
+                sqlSelect.Parameters.Add("@ROW_ROLLBACK", SqlDbType.Int).Value = TotalRollback;
+                sqlSelect.Parameters.Add("@TriggerType", SqlDbType.VarChar).Value = "SC";
+
+                reader = sqlSelect.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    result = (reader[0]).ToString();
+                    status = (reader[1]).ToString();
+                    total_success = Convert.ToInt32(reader[2]);
+                }
+
+                connect.Close();
             }
             catch (Exception e)
             {
                 result = e.Message;
                 status = "EXCEPTION";
+                connect.Close();
             }
-            finally
-            {
-                db.Close();
-            }
+            #endregion
+
+            #region remark
+            //IDBContext db = DatabaseManager.Instance.GetContext();
+            //PRCreation resultTable = new PRCreation();
+            //string result = "";
+            //string status = "";
+            //int total_success = 0;
+            //try
+            //{
+            //    dynamic args = new
+            //    {
+            //        USER_ID = username,
+            //        PR_NO = param.PR_NO,
+            //        PR_DESC = param.PR_DESC,
+            //        PROCESS_ID = param.PROCESS_ID,
+            //        DIVISION_ID = param.DIVISION_ID,
+            //        PROCESS_TYPE = ProcessType,
+            //        ROW_ROLLBACK = TotalRollback
+
+            //    };
+            //    resultTable = db.SingleOrDefault<PRCreation>(SqlFile.BudgetCalculation, args);
+            //    result = resultTable.MESSAGE;
+            //    status = resultTable.PROCESS_STATUS;
+            //    total_success = resultTable.NUMBER_OF_SUCCESS;
+            //}
+            //catch (Exception e)
+            //{
+            //    result = e.Message;
+            //    status = "EXCEPTION";
+            //}
+            //finally
+            //{
+            //    db.Close();
+            //}
+            #endregion
+            
             return new Tuple<string, string, int>(status, result, total_success);
         }
 

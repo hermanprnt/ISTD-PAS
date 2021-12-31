@@ -5,6 +5,8 @@ using Toyota.Common.Database;
 using Toyota.Common.Web.Platform;
 using GPS.Core;
 using GPS.Core.ViewModel;
+using System.Data.SqlClient;
+using System.Data;
 
 namespace GPS.Models.PR.PRInquiry
 {
@@ -458,37 +460,84 @@ namespace GPS.Models.PR.PRInquiry
 
         public Tuple<string, string, int> CancelBudget(string PROCESS_ID, string PR_NO, string userid, string processType, int row)
         {
-            IDBContext db = DatabaseManager.Instance.GetContext();
+            #region FID.Ridwan:20211210 -> NewConnection handle timeout
+            string result = "";
             string status = "";
-            string message = "";
             int total_success = 0;
+            string constring = DatabaseManager.Instance.GetConnectionDescriptor("Dev").ConnectionString;
+            SqlConnection connect = new SqlConnection(constring);
+            SqlDataReader reader = null;
 
             try
             {
-                dynamic args = new
+
+                connect.Open();
+
+                SqlCommand sqlSelect = new SqlCommand("[dbo].[sp_prinquiry_cancelBudgetProcessing]", connect);
+                sqlSelect.CommandType = CommandType.StoredProcedure;
+                sqlSelect.CommandTimeout = 180;
+
+                sqlSelect.Parameters.Add("@PROCESS_ID", SqlDbType.VarChar).Value = PROCESS_ID;
+                sqlSelect.Parameters.Add("@PR_NO", SqlDbType.VarChar).Value = PR_NO;
+                sqlSelect.Parameters.Add("@USER_ID", SqlDbType.VarChar).Value = userid;
+                sqlSelect.Parameters.Add("@PROCESS_TYPE", SqlDbType.VarChar).Value = processType;
+                sqlSelect.Parameters.Add("@ROW_ROLLBACK", SqlDbType.Int).Value = row;
+                sqlSelect.Parameters.Add("@TriggerType", SqlDbType.VarChar).Value = "SC";
+
+                reader = sqlSelect.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    PROCESS_ID = PROCESS_ID,
-                    PR_NO = PR_NO,
-                    USER_ID = userid,
-                    PROCESS_TYPE = processType,
-                    ROW_ROLLBACK = row
-                };
-                PRInquiry result = db.SingleOrDefault<PRInquiry>(SqlFile.CancelBudget, args);
-                status = result.PROCESS_STATUS;
-                message = result.MESSAGE;
-                total_success = result.NUMBER_OF_SUCCESS;
+                    result = (reader[0]).ToString();
+                    status = (reader[1]).ToString();
+                    total_success = Convert.ToInt32(reader[2]);
+                }
+
+                connect.Close();
             }
             catch (Exception e)
             {
-                status = "ERROR";
-                message = e.Message;
-            }
-            finally
-            {
-                db.Close();
+                result = e.Message;
+                status = "EXCEPTION";
+                connect.Close();
             }
 
-            return new Tuple<string, string, int>(status, message, total_success);
+
+            #endregion
+
+            #region remark
+            //IDBContext db = DatabaseManager.Instance.GetContext();
+            //string status = "";
+            //string message = "";
+            //int total_success = 0;
+
+            //try
+            //{
+            //    dynamic args = new
+            //    {
+            //        PROCESS_ID = PROCESS_ID,
+            //        PR_NO = PR_NO,
+            //        USER_ID = userid,
+            //        PROCESS_TYPE = processType,
+            //        ROW_ROLLBACK = row
+            //    };
+            //    PRInquiry result = db.SingleOrDefault<PRInquiry>(SqlFile.CancelBudget, args);
+            //    status = result.PROCESS_STATUS;
+            //    message = result.MESSAGE;
+            //    total_success = result.NUMBER_OF_SUCCESS;
+            //}
+            //catch (Exception e)
+            //{
+            //    status = "ERROR";
+            //    message = e.Message;
+            //}
+            //finally
+            //{
+            //    db.Close();
+            //}
+            #endregion
+
+            return new Tuple<string, string, int>(status, result, total_success);
         }
 
         public Tuple<string, string, int> CancelQuota(string PROCESS_ID, string PR_NO, string userid, string ProcessType)
