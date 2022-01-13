@@ -61,7 +61,11 @@ namespace PR_Creation_Call_WS
                 PAS_Document ReqDocumentCancel = new PAS_Document();
                 List<item> MainRequestCancel = LibraryRepo.Instance.GetParam(ProcessId, "C");
 
-                if (MainRequest.Count == 0 && MainRequestCancel.Count == 0)
+                List<MaintainFundCommitReq_MT> ReqHeaderUpdate = new List<MaintainFundCommitReq_MT>();
+                PAS_Document ReqDocumentUpdate = new PAS_Document();
+                List<item> MainRequestUpdate = LibraryRepo.Instance.GetParam(ProcessId, "U");
+
+                if (MainRequest.Count == 0 && MainRequestCancel.Count == 0 && MainRequestUpdate.Count == 0)
                 {
                     Msg = LibraryRepo.Instance.GetMessageById("ERR00007");
                     Msg.MsgText = string.Format(Msg.MsgText, "Request Table");
@@ -570,6 +574,254 @@ namespace PR_Creation_Call_WS
                     LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
                     LibraryRepo.Instance.UpdatePRData(ProcessId, Username, "I");
+                }
+                #endregion
+
+                #region Update
+                if (MainRequestUpdate.Count > 0)
+                {
+                    Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                    Msg.MsgText = string.Format(Msg.MsgText, "Update data to SAP");
+                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+
+                    var DistinctHUpdate = MainRequestUpdate.GroupBy(x => x.doc_no).Select(c => new PAS_Header
+                    {
+                        doc_type = c.First().doc_type,
+                        action = c.First().action,
+                        system = c.First().system,
+                        test_run = c.First().test_run,
+                        doc_no = c.First().doc_no,
+                        closed = c.First().closed,
+                        doc_date = c.First().doc_date,
+                        submit_date = c.First().submit_date,
+                        requestor = c.First().requestor,
+                        company_code = c.First().company_code,
+                        currency = c.First().currency,
+                        currency_rate = c.First().currency_rate
+                    }).ToList();
+
+                    foreach (var h in DistinctHUpdate)
+                    {
+                        MaintainFundCommitReq_MT tempMUpdate = new MaintainFundCommitReq_MT();
+                        PAS_Header tempHUpdate = new PAS_Header();
+
+                        tempHUpdate.doc_type = h.doc_type;
+                        tempHUpdate.action = h.action;
+                        tempHUpdate.system = h.system;
+                        tempHUpdate.test_run = h.test_run;
+                        tempHUpdate.doc_no = h.doc_no;
+                        tempHUpdate.closed = h.closed;
+                        tempHUpdate.doc_date = h.doc_date;
+                        tempHUpdate.submit_date = h.submit_date;
+                        tempHUpdate.requestor = h.requestor;
+                        tempHUpdate.company_code = h.company_code;
+                        tempHUpdate.currency = h.currency;
+                        tempHUpdate.currency_rate = h.currency_rate;
+
+                        tempHUpdate.item = MainRequestUpdate.Where(x => x.doc_no == h.doc_no).ToList();
+
+                        ReqDocumentUpdate.document = tempHUpdate;
+
+                        tempMUpdate.REQUEST = ReqDocumentUpdate;
+
+                        ReqHeaderUpdate.Add(tempMUpdate);
+                    }
+
+                    MaintainFundCommitReq_MT responsesUpdate = new MaintainFundCommitReq_MT();
+                    responsesUpdate.REQUEST = ReqHeaderUpdate[0].REQUEST;
+                    MemoryStream StreamUpdate = new MemoryStream();
+                    Type tpUpdate = typeof(MaintainFundCommitReq_MT);
+                    XmlSerializer xmlUpdate = new XmlSerializer(tpUpdate);
+
+                    string WSPrefixUpdate = WebConfigurationManager.AppSettings["WSPrefix"].ToString();
+                    string WSNamespaceUpdate = WebConfigurationManager.AppSettings["WSNamespace"].ToString();
+
+                    XmlSerializerNamespaces xmlNameSpaceUpdate = new XmlSerializerNamespaces();
+                    xmlNameSpaceUpdate.Add(WSPrefixUpdate, WSNamespaceUpdate);
+
+                    try
+                    {
+                        xmlUpdate.Serialize(StreamUpdate, responsesUpdate, xmlNameSpaceUpdate);
+                    }
+                    catch (Exception ex)
+                    {
+                        Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                        Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString(ex.Message) + "--" + Convert.ToString(ex.InnerException));
+                        LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                        Console.WriteLine(Msg.MsgText);
+
+                        Console.WriteLine("Error: " + ex.Message);
+
+                        //Console.WriteLine("Call Rollback Data");
+                        //Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                        //Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
+                        //LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+
+                        //LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
+
+                        Console.WriteLine("End Process ...");
+                        Environment.Exit(0);
+                    }
+
+                    StreamUpdate.Position = 0;
+                    StreamReader srUpdate = new StreamReader(StreamUpdate);
+                    string strUpdate = srUpdate.ReadToEnd();
+                    strUpdate = strUpdate.Replace("_x003A_", ":");
+
+                    srUpdate.Dispose();
+                    StreamUpdate.Dispose();
+
+                    //string str = MainRequest[0].retXML;
+
+                    Console.WriteLine("Call Web Service Fund Commitment");
+                    Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                    Msg.MsgText = string.Format(Msg.MsgText, "Call Web Service Fund Commitment");
+                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+
+                    var NewResponseUpdate = WebAPIUtil.XMLRequest(ProcessId, strUpdate, "POST");
+
+                    if (NewResponseUpdate.Count == 0)
+                    {
+                        Msg = LibraryRepo.Instance.GetMessageById("ERR00007");
+                        Msg.MsgText = string.Format(Msg.MsgText, "Response data");
+                        LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                        Console.WriteLine(Msg.MsgText);
+
+                        //Console.WriteLine("Call Rollback Data");
+                        //Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                        //Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
+                        //LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+
+                        //LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
+
+                        Environment.Exit(0);
+                    }
+
+                    Console.WriteLine("Retrieve Fund Commitment Response");
+                    Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                    Msg.MsgText = string.Format(Msg.MsgText, "Retrieve Fund Commitment Response");
+                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+
+                    #region Create Data Table
+                    System.Data.DataTable tableUpdate = new System.Data.DataTable();
+
+                    tableUpdate.Columns.Add("PROCESS_ID");
+                    tableUpdate.Columns.Add("ROW_NO");
+                    tableUpdate.Columns.Add("ACTION");
+                    tableUpdate.Columns.Add("DOCUMENT_NO");
+                    tableUpdate.Columns.Add("DOCUMENT_LINE_ITEM_NO");
+                    tableUpdate.Columns.Add("FUND_DOCUMENT_DOC_NO");
+                    tableUpdate.Columns.Add("FUND_DOCUMENT_DOC_LINE_ITEM");
+                    tableUpdate.Columns.Add("MESSAGE_TYPE");
+                    tableUpdate.Columns.Add("MESSAGE_ID");
+                    tableUpdate.Columns.Add("MESSAGE_NO");
+                    tableUpdate.Columns.Add("MESSAGE_MESSAGE");
+                    tableUpdate.Columns.Add("PROCESSED_BY");
+                    tableUpdate.Columns.Add("PROCESSED_DT");
+                    #endregion
+
+
+                    int zUpdate = 0;
+
+                    foreach (var d in NewResponseUpdate)
+                    {
+                        System.Data.DataRow rowUpdate = tableUpdate.NewRow();
+                        rowUpdate["PROCESS_ID"] = ProcessId;
+                        rowUpdate["ROW_NO"] = zUpdate + 1;
+                        rowUpdate["ACTION"] = "U";
+                        rowUpdate["DOCUMENT_NO"] = d.doc_no;
+                        rowUpdate["DOCUMENT_LINE_ITEM_NO"] = d.doc_line_item_no;
+                        rowUpdate["FUND_DOCUMENT_DOC_NO"] = d.fund_cmmt_doc;
+                        rowUpdate["FUND_DOCUMENT_DOC_LINE_ITEM"] = d.fund_cmmt_doc_line_item;
+                        rowUpdate["MESSAGE_TYPE"] = d.msg_type;
+                        rowUpdate["MESSAGE_ID"] = d.msg_id;
+                        rowUpdate["MESSAGE_NO"] = d.msg_no;
+                        rowUpdate["MESSAGE_MESSAGE"] = d.msg;
+                        rowUpdate["PROCESSED_BY"] = Username;
+                        rowUpdate["PROCESSED_DT"] = DateTime.Now;
+
+                        tableUpdate.Rows.Add(rowUpdate);
+
+                        zUpdate++;
+                    }
+
+                    string responseResUpdate = LibraryRepo.Instance.SaveToTemp(tableUpdate);
+
+                    if (responseResUpdate != "SUC")
+                    {
+                        Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                        Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString(responseResUpdate));
+                        LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                        Console.WriteLine(Msg.MsgText);
+
+                        //Console.WriteLine("Call Rollback Data");
+                        //Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                        //Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
+                        //LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+
+                        //LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
+
+                        Console.WriteLine("End Process ...");
+                        Environment.Exit(0);
+                    }
+
+                    List<FCResponse> getResponseUpdate = LibraryRepo.Instance.GetWSResponse(ProcessId, "U");
+
+                    //Validation
+                    foreach (var item in getResponseUpdate)
+                    {
+                        if (string.Equals(item.MESSAGE_TYPE, "S") || string.Equals(item.MESSAGE_TYPE, "Success")
+                               || string.Equals(item.MESSAGE_TYPE, "") || string.Equals(item.MESSAGE_TYPE, null))
+                        {
+                            //Mandatory
+                            if (string.IsNullOrEmpty(item.DOCUMENT_NO) || string.IsNullOrEmpty(item.DOCUMENT_LINE_ITEM_NO)
+                                || string.IsNullOrEmpty(item.FUND_DOCUMENT_DOC_NO) || string.IsNullOrEmpty(item.FUND_DOCUMENT_DOC_LINE_ITEM))
+                            {
+                                Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                                Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString("Invalid data found from response data"));
+                                LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                                Console.WriteLine(Msg.MsgText);
+
+                                //Console.WriteLine("Call Rollback Data");
+                                //Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                                //Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
+                                //LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+
+                                //LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
+
+                                Console.WriteLine("End Process ...");
+                                Environment.Exit(0);
+                            }
+
+                            //lenght
+                            if (item.DOCUMENT_NO.Length > 11 || item.DOCUMENT_LINE_ITEM_NO.Length > 5 || item.FUND_DOCUMENT_DOC_NO.Length > 10 || item.FUND_DOCUMENT_DOC_LINE_ITEM.Length > 3)
+                            {
+                                Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                                Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString("Invalid data found from response data"));
+                                LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                                Console.WriteLine(Msg.MsgText);
+
+                                //Console.WriteLine("Call Rollback Data");
+                                //Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                                //Msg.MsgText = string.Format(Msg.MsgText, "Call Rollback Data");
+                                //LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+
+                                //LibraryRepo.Instance.Rollback(ProcessId, Division, PRNo, PRDesc, Username, "ROLLBACK", "0", "WS", type);
+
+                                Console.WriteLine("End Process ...");
+                                Environment.Exit(0);
+                            }
+
+                        }
+                    }
+
+                    Console.WriteLine("Update PR Data");
+                    Msg = LibraryRepo.Instance.GetMessageById("INF00002");
+                    Msg.MsgText = string.Format(Msg.MsgText, "Update PR Data");
+                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+
+                    LibraryRepo.Instance.UpdatePRData(ProcessId, Username, "U");
+
                 }
                 #endregion
 

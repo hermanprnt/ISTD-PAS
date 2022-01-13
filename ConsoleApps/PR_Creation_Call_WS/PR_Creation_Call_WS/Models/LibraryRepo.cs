@@ -100,6 +100,10 @@ namespace PR_Creation_Call_WS.Models
             {
                 sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetParamCancel.sql"));
             }
+            else if (type == "U")
+            {
+                sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetParamUpdate.sql"));
+            }
             else
             {
                 sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetParam.sql"));
@@ -184,6 +188,10 @@ namespace PR_Creation_Call_WS.Models
             {
                 sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetResponseCancel.sql"));
             }
+            else if (type == "U")
+            {
+                sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetResponseUpdate.sql"));
+            }
             else
             {
                 sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetResponse.sql"));
@@ -207,6 +215,10 @@ namespace PR_Creation_Call_WS.Models
             if (type == "C")
             {
                 sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\UpdatePRDataCancel.sql"));
+            }
+            else if (type == "U")
+            {
+                sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\UpdatePRDataUpdate.sql"));
             }
             else
             {
