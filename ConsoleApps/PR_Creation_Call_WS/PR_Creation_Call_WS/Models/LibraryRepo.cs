@@ -93,28 +93,35 @@ namespace PR_Creation_Call_WS.Models
 
         #endregion
 
-        public List<item> GetParam(string ProcessId, string type)
+        public List<Lookby> GetLoopBy(string ProcessId)
         {
             string sql = "";
-            if (type == "C")
+            sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetLoopBy.sql"));
+
+            using (var db = new Database(ConnString))
             {
-                sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetParamCancel.sql"));
+                db.CommandTimeout = 0;
+                List<Lookby> result = db.Fetch<Lookby>(sql, new
+                {
+                    ProcessId = ProcessId
+                });
+                db.CloseSharedConnection();
+                return result;
             }
-            else if (type == "U")
-            {
-                sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetParamUpdate.sql"));
-            }
-            else
-            {
-                sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetParam.sql"));
-            }
+        }
+
+        public List<item> GetParam(Lookby param)
+        {
+            string sql = "";
+            sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetParam.sql"));
 
             using (var db = new Database(ConnString))
             {
                 db.CommandTimeout = 0;
                 List<item> result = db.Fetch<item>(sql, new
                 {
-                    ProcessId = ProcessId
+                    ProcessId = param.ProcessId,
+                    Action = param.Action
                 });
                 db.CloseSharedConnection();
                 return result;
@@ -181,56 +188,36 @@ namespace PR_Creation_Call_WS.Models
             return result;
         }
 
-        public List<FCResponse> GetWSResponse(string ProcessId, string type)
+        public List<FCResponse> GetWSResponse(Lookby param)
         {
             string sql = "";
-            if (type == "C")
-            {
-                sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetResponseCancel.sql"));
-            }
-            else if (type == "U")
-            {
-                sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetResponseUpdate.sql"));
-            }
-            else
-            {
-                sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetResponse.sql"));
-            }
+            sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetResponse.sql"));
 
             using (var db = new Database(ConnString))
             {
                 db.CommandTimeout = 0;
                 List<FCResponse> result = db.Fetch<FCResponse>(sql, new
                 {
-                    ProcessId = ProcessId
+                    ProcessId = param.ProcessId,
+                    Action = param.Action
                 });
                 db.CloseSharedConnection();
                 return result;
             }
         }
 
-        public void UpdatePRData(string ProcessID, string Username, string type)
+        public void UpdatePRData(Lookby param, string Username)
         {
             string sql = "";
-            if (type == "C")
-            {
-                sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\UpdatePRDataCancel.sql"));
-            }
-            else if (type == "U")
-            {
-                sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\UpdatePRDataUpdate.sql"));
-            }
-            else
-            {
-                sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\UpdatePRData.sql"));
-            }
+            sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\UpdatePRData.sql"));
 
             using (var db = new Database(ConnString))
             {
                 db.CommandTimeout = 0;
                 string res = db.ExecuteScalar<string>(sql, new
                 {
-                    ProcessID,
+                    param.ProcessId,
+                    param.Action,
                     Username
                 });
                 db.CloseSharedConnection();

@@ -127,4 +127,12 @@ namespace PR_Creation_Call_WS.Models
         public string PROCESSED_BY { get; set; }
         public string PROCESSED_DT { get; set; }
     }
+
+    public class Lookby
+    {
+        public string ProcessId { get; set; }
+        public string Action { get; set; }
+        public string Priority { get; set; }
+        public string Variable { get; set; }
+    }
 }
