@@ -33,6 +33,9 @@ namespace PAS_Interface_Indirect_Material
         static string Username;
         static string fn;
         static int seq;
+        static string fgwUsername;
+        static string fgwPassword;
+        static string fgwIPAddress;
 
         static MessageModel Msg = new MessageModel();
 
@@ -87,6 +90,9 @@ namespace PAS_Interface_Indirect_Material
                 ftpgcno = (Sys.Where(x => x.SYSTEM_CD == "FTP_GCNO").Count() > 0) ? Sys.Where(x => x.SYSTEM_CD == "FTP_GCNO").Select(x => x.SYSTEM_VALUE).Single() : "";
                 fn = (Sys.Where(x => x.SYSTEM_CD == "INTERFACE_FILENAME").Count() > 0) ? Sys.Where(x => x.SYSTEM_CD == "INTERFACE_FILENAME").Select(x => x.SYSTEM_VALUE).Single() : "";
                 seq = (Sys.Where(x => x.SYSTEM_CD == "SEQ_INTERFACE_FILE").Count() > 0) ? Convert.ToInt32(Sys.Where(x => x.SYSTEM_CD == "SEQ_INTERFACE_FILE").Select(x => x.SYSTEM_VALUE).Single()) : 1;
+                fgwIPAddress = (Sys.Where(x => x.SYSTEM_CD == "FGW_IP").Count() > 0) ? Sys.Where(x => x.SYSTEM_CD == "FGW_IP").Select(x => x.SYSTEM_VALUE).Single() : "";
+                fgwUsername = (Sys.Where(x => x.SYSTEM_CD == "FGW_USER").Count() > 0) ? Sys.Where(x => x.SYSTEM_CD == "FGW_USER").Select(x => x.SYSTEM_VALUE).Single() : "";
+                fgwPassword = (Sys.Where(x => x.SYSTEM_CD == "FGW_PASSWORD").Count() > 0) ? Sys.Where(x => x.SYSTEM_CD == "FGW_PASSWORD").Select(x => x.SYSTEM_VALUE).Single() : "";
 
                 if (string.IsNullOrEmpty(ftpUrl)) throw new Exception(string.Format("Data {0} not found", "URL FTP on System Master"));
                 if (string.IsNullOrEmpty(ftpIPAddress)) throw new Exception(string.Format("Data {0} not found", "FTP IP Address on System Master"));
@@ -152,8 +158,8 @@ namespace PAS_Interface_Indirect_Material
                     FileInfo info = new FileInfo(path.Split('|')[1]);
                     long size = info.Length;
 
-                    string CTFvalue = "\0" + ftpIPAddress + "\0" + "\0" + ftphosttype + "\0" + ftpsendtype + "\0" + ftptranstype + "\0" + ftpcompmode +
-                        "\0" + ftpUsername + "\0" + ftpPassword + "\0" + "\0" + "\0" + "\0" + "\0" + "\0" + "\0" + ftpregmode + "\0"
+                    string CTFvalue = "\0" + fgwIPAddress + "\0" + "\0" + ftphosttype + "\0" + ftpsendtype + "\0" + ftptranstype + "\0" + ftpcompmode +
+                        "\0" + fgwUsername + "\0" + fgwPassword + "\0" + "\0" + "\0" + "\0" + "\0" + "\0" + "\0" + ftpregmode + "\0"
                         + size.ToString() + "\0" + "\0" + ftpsync + "\0" + ftpgcno;
 
                     string pathCTF = source.createCTF("File/", FileName + ".CTF", CTFvalue);
