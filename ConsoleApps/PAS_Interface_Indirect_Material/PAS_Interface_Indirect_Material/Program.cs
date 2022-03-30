@@ -36,6 +36,10 @@ namespace PAS_Interface_Indirect_Material
         static string fgwUsername;
         static string fgwPassword;
         static string fgwIPAddress;
+        static string isHeaderFGW;
+        static string isHeaderFile;
+        static string isDetailFile;
+        static string isFooterFile;
 
         static MessageModel Msg = new MessageModel();
 
@@ -93,6 +97,10 @@ namespace PAS_Interface_Indirect_Material
                 fgwIPAddress = (Sys.Where(x => x.SYSTEM_CD == "FGW_IP").Count() > 0) ? Sys.Where(x => x.SYSTEM_CD == "FGW_IP").Select(x => x.SYSTEM_VALUE).Single() : "";
                 fgwUsername = (Sys.Where(x => x.SYSTEM_CD == "FGW_USER").Count() > 0) ? Sys.Where(x => x.SYSTEM_CD == "FGW_USER").Select(x => x.SYSTEM_VALUE).Single() : "";
                 fgwPassword = (Sys.Where(x => x.SYSTEM_CD == "FGW_PASSWORD").Count() > 0) ? Sys.Where(x => x.SYSTEM_CD == "FGW_PASSWORD").Select(x => x.SYSTEM_VALUE).Single() : "";
+                isHeaderFGW = (Sys.Where(x => x.SYSTEM_CD == "HEADER_FGW").Count() > 0) ? Sys.Where(x => x.SYSTEM_CD == "HEADER_FGW").Select(x => x.SYSTEM_VALUE).Single() : "";
+                isHeaderFile = (Sys.Where(x => x.SYSTEM_CD == "HEADER_FILE").Count() > 0) ? Sys.Where(x => x.SYSTEM_CD == "HEADER_FILE").Select(x => x.SYSTEM_VALUE).Single() : "";
+                isDetailFile = (Sys.Where(x => x.SYSTEM_CD == "DETAIL_FILE").Count() > 0) ? Sys.Where(x => x.SYSTEM_CD == "DETAIL_FILE").Select(x => x.SYSTEM_VALUE).Single() : "";
+                isFooterFile = (Sys.Where(x => x.SYSTEM_CD == "FOOTER_FILE").Count() > 0) ? Sys.Where(x => x.SYSTEM_CD == "FOOTER_FILE").Select(x => x.SYSTEM_VALUE).Single() : "";
 
                 if (string.IsNullOrEmpty(ftpUrl)) throw new Exception(string.Format("Data {0} not found", "URL FTP on System Master"));
                 if (string.IsNullOrEmpty(ftpIPAddress)) throw new Exception(string.Format("Data {0} not found", "FTP IP Address on System Master"));
@@ -138,7 +146,12 @@ namespace PAS_Interface_Indirect_Material
                     Msg.MsgText = string.Format(Msg.MsgText, string.Format("Create a file {0}", FileName));
                     LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
-                    string path = source.create(ConnString, "File/", FileName, true, true, false, true, "");
+                    string path = source.create(ConnString, "File/", FileName,
+                        (isHeaderFGW == "1" ? true : false),
+                        (isHeaderFile == "1" ? true : false),
+                        (isDetailFile == "1" ? true : false),
+                        (isFooterFile == "1" ? true : false), "");
+
                     //FileName = Path.GetFileName(path.Split('|')[1]);
 
                     Console.WriteLine(string.Format("Sending a file {0} to SAP", FileName));
