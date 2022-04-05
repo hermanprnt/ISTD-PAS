@@ -62,6 +62,27 @@ namespace FCManagementTools.Models
         }
         #endregion
 
+        #region get system master
+        public string GetSystemMasterById(string FuncId, string SystemCd)
+        {
+            string sql = @"SELECT SYSTEM_VALUE as SystemValue FROM TB_M_SYSTEM WHERE FUNCTION_ID = @FUNCTION_ID AND SYSTEM_CD = @SYSTEM_CD";
+
+            using (var db = new Database(ConnString))
+            {
+                db.CommandTimeout = 0;
+                string result = db.SingleOrDefault<string>(sql, new
+                {
+                    FUNCTION_ID = FuncId,
+                    SYSTEM_CD = SystemCd
+                });
+                db.CloseSharedConnection();
+                return result;
+            }
+
+
+        }
+        #endregion
+
         #region Generate Log
         public void GenerateLog(string PROCESS_ID,
             string MOD_ID,

@@ -39,21 +39,40 @@ namespace FCManagementTools.Controller
         }
 
         #region Exec Fund Commitment
-        public void ExecFundCommitment(string dirlog)
+        public void ExecFundCommitment(string dirlog, string docType)
         {
-            string AuthUser = WebConfigurationManager.AppSettings["AuthUser"];
-            string AuthPassword = WebConfigurationManager.AppSettings["AuthPassword"];
-            string isdummy = WebConfigurationManager.AppSettings["IsDummy"];
+            string AuthUser = "";//WebConfigurationManager.AppSettings["AuthUser"];
+            string AuthPassword = "";//WebConfigurationManager.AppSettings["AuthPassword"];
+            string isdummy = "";//WebConfigurationManager.AppSettings["IsDummy"];
             string WSUriDummy = WebConfigurationManager.AppSettings["WSUriDummy"];
             string WSUriProd = WebConfigurationManager.AppSettings["WSUriProd"];
-            string url = isdummy == "0" ? WSUriProd : WSUriDummy;
+            string url = "";//isdummy == "0" ? WSUriProd : WSUriDummy;
+
+            if (docType == "PR" || docType == "PO")
+            {
+                AuthUser = LibraryRepo.Instance.GetSystemMasterById("FC", "PAS_USER");
+                AuthPassword = LibraryRepo.Instance.GetSystemMasterById("FC", "PAS_PWD");
+                url = LibraryRepo.Instance.GetSystemMasterById("FC", "PAS_URL");
+            }
+            else if (docType == "TP")
+            {
+                AuthUser = LibraryRepo.Instance.GetSystemMasterById("FC", "TRV_USER");
+                AuthPassword = LibraryRepo.Instance.GetSystemMasterById("FC", "TRV_PWD");
+                url = LibraryRepo.Instance.GetSystemMasterById("FC", "TRV_URL");
+            }
+            else if (docType == "PV")
+            {
+                AuthUser = LibraryRepo.Instance.GetSystemMasterById("FC", "ELV_USER");
+                AuthPassword = LibraryRepo.Instance.GetSystemMasterById("FC", "ELV_PWD");
+                url = LibraryRepo.Instance.GetSystemMasterById("FC", "ELV_URL");
+            }
 
             Console.WriteLine("Get Data FC Management Tool..\n");
             LibraryRepo.GenerateLog("Get Data FC Management Tool..\n", dirlog);
             try
             {
                 /*1. Get data header from TB_S_FUND_COMMITMENT with top maximum count*/
-                List<DataHeader> Data = DataHeaderFC();
+                List<DataHeader> Data = DataHeaderFC(docType);
                 Console.WriteLine("Exec Management Tool per Doc No..\n");
                 LibraryRepo.GenerateLog("Exec Management Tool per Doc No..\n", dirlog);
                 if (Data.Count > 0)
@@ -132,7 +151,7 @@ namespace FCManagementTools.Controller
         #endregion
 
         #region Get Data Header
-        public List<DataHeader> DataHeaderFC()
+        public List<DataHeader> DataHeaderFC(string docType)
         {
             string sql = "";
             sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetHeaderFCRequest.sql"));
@@ -140,7 +159,9 @@ namespace FCManagementTools.Controller
             {
                 db.CommandTimeout = 0;
                 db.EnableAutoSelect = false;
-                List<DataHeader> result = db.Fetch<DataHeader>(sql, new { }).ToList();
+                List<DataHeader> result = db.Fetch<DataHeader>(sql, new {
+                    DOC_TYPE = docType
+                }).ToList();
                 db.CloseSharedConnection();
                 return result;
             }
@@ -160,7 +181,10 @@ namespace FCManagementTools.Controller
                 result = db.Fetch<DataRequest>(sql, new
                 {
                     HEADER_NO = item.HEADER_NO,
-                    PROCESS_ID = item.PROCESS_ID
+                    PROCESS_ID = item.PROCESS_ID,
+                    DOC_TYPE = item.DOCUMENT_TYPE,
+                    DOC_NO = item.DOCUMENT_NO,
+                    ACTION = item.ACTION
                 });
                 db.CloseSharedConnection();
             }
@@ -196,8 +220,8 @@ namespace FCManagementTools.Controller
             string XE_journal_source = WebConfigurationManager.AppSettings["journal_source"];
             string XE_gl_account = WebConfigurationManager.AppSettings["gl_account"];
 
-            string xmlns = WebConfigurationManager.AppSettings["WSNamespace"];
-            string prefix = WebConfigurationManager.AppSettings["WSPrefix"];
+            string xmlns = LibraryRepo.Instance.GetSystemMasterById("FC", "WS_NAME_SPACE");//WebConfigurationManager.AppSettings["WSNamespace"];
+            string prefix = LibraryRepo.Instance.GetSystemMasterById("FC", "WS_PREFIX"); //WebConfigurationManager.AppSettings["WSPrefix"];
             XNamespace aw = xmlns;
             XElement doc =
                 new XElement(aw + "MaintainFundCommitReq_MT", new XAttribute(XNamespace.Xmlns + prefix, xmlns),
@@ -233,7 +257,9 @@ namespace FCManagementTools.Controller
                             new XElement(XE_cost_center_charger, items.COST_CENTER_CD),
                             new XElement(XE_total_amount, items.TOTAL_AMOUNT),
                             new XElement(XE_quantity, items.QUANTITY),
-                            new XElement(XE_uom, items.UOM)
+                            new XElement(XE_uom, items.UOM),
+                            new XElement(XE_journal_source, items.JOURNAL_SOURCE),
+                            new XElement(XE_gl_account, items.GL_ACCOUNT)
                             )))));
 
 
@@ -288,14 +314,14 @@ namespace FCManagementTools.Controller
             string system = "";
             if (docType == "PR" || docType == "PO")
                 system = "FC";
-            else if (docType == "TV")
+            else if (docType == "TP")
                 system = "TRAVEL";
             else if (docType == "PV")
                 system = "ELVIS";
 
             string result = "";
             DataTable myDataTable = new DataTable();
-            myDataTable.Columns.Add(new DataColumn("PROCESS_ID", typeof(int)));
+            myDataTable.Columns.Add(new DataColumn("PROCESS_ID", typeof(long)));
             myDataTable.Columns.Add(new DataColumn("HEADER_NO", typeof(string)));
             myDataTable.Columns.Add(new DataColumn("DOCUMENT_NO", typeof(string)));
             myDataTable.Columns.Add(new DataColumn("ACTION", typeof(string)));
@@ -329,7 +355,10 @@ namespace FCManagementTools.Controller
                 row["DOC_TYPE"] = docType;
                 myDataTable.Rows.Add(row);
             }
+
             string Error = "";
+            #region old logic
+            /*
             using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FC"].ConnectionString))
             {
                 conn.Open();
@@ -380,7 +409,63 @@ namespace FCManagementTools.Controller
                     }
                     conn.Close();
                 }
+            }*/
+            #endregion
+
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["FC"].ConnectionString))
+            {
+                conn.Open();
+                try
+                {
+                    using (SqlCommand cmd = new SqlCommand("SP_MIGRATE_FUND_COMMITMENT"))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Connection = conn;
+                        cmd.Parameters.AddWithValue("@TABLES", myDataTable);
+                        cmd.Parameters.Add("@DOC_TYPE", SqlDbType.VarChar).Value = docType;
+                        SqlDataReader rdr = cmd.ExecuteReader();
+                        while (rdr.Read())
+                        {
+                            Error = rdr.GetString(0);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    conn.Close();
+                    result = result + " " + ex.Message;
+                }
+                conn.Close();
             }
+
+            if (docType == "TP" || docType == "PV")
+            {
+                using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings[system].ConnectionString))
+                {
+                    conn.Open();
+                    try
+                    {
+                        using (SqlCommand cmd = new SqlCommand("SP_MIGRATE_FUND_COMMITMENT"))
+                        {
+                            cmd.CommandType = CommandType.StoredProcedure;
+                            cmd.Connection = conn;
+                            cmd.Parameters.AddWithValue("@TABLES", myDataTable);
+                            SqlDataReader rdr = cmd.ExecuteReader();
+                            while (rdr.Read())
+                            {
+                                Error = rdr.GetString(0);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        conn.Close();
+                        result = result + " " + ex.Message;
+                    }
+                    conn.Close();
+                }
+            }
+            
             return result;
         }
         #endregion

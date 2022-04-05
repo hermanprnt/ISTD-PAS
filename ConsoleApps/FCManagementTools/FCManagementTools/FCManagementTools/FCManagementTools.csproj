@@ -99,7 +99,6 @@
     <Content Include="Sql\GetHeaderFCRequest.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Sql\Copy of GetParam.sql" />
     <Content Include="Sql\GetLoopBy.sql" />
     <Content Include="Sql\GetParam.sql" />
     <Content Include="Sql\GetParamCancel.sql" />
