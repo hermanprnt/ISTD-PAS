@@ -15,6 +15,7 @@ namespace PR_Creation_Call_WS.Models
     public class WebAPIUtil
     {
         static MessageModel Msg = new MessageModel();
+        static SystemMasterModel Sys = new SystemMasterModel();
 
         public WebAPIUtil()
         {
@@ -55,7 +56,13 @@ namespace PR_Creation_Call_WS.Models
 
         internal static List<document> XMLRequest(string processId, string data, string method)
         {
-            string WSUri = WebConfigurationManager.AppSettings["WSUri"].ToString();
+            //string WSUri = WebConfigurationManager.AppSettings["WSUri"].ToString();
+            string WSUri = LibraryRepo.Instance.GetSystemMasterById("FC", "URL_WS");
+            string WSUser = LibraryRepo.Instance.GetSystemMasterById("FC", "USER_WS");
+            string WSPwd = LibraryRepo.Instance.GetSystemMasterById("FC", "PASSWORD_WS");
+            string WSPrefix = LibraryRepo.Instance.GetSystemMasterById("FC", "WS_PREFIX");
+            string WSNamespace = LibraryRepo.Instance.GetSystemMasterById("FC", "WS_NAME_SPACE");
+
 
             var settings = new JsonSerializerSettings
             {
@@ -78,6 +85,10 @@ namespace PR_Creation_Call_WS.Models
             request.ContentType = "text/xml; charset=utf-8";
             request.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
             request.Method = method;
+
+            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(WSUser + ":" + WSPwd);
+            string val = System.Convert.ToBase64String(plainTextBytes);
+            request.Headers.Add(HttpRequestHeader.Authorization, "Basic " + val);
             //set token
             //request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + TokenResponse.access_token);
 
@@ -108,13 +119,13 @@ namespace PR_Creation_Call_WS.Models
                 List<document> fullst = new List<document>();
 
                 #region TDEM
-                //var nsmgr = new XmlNamespaceManager(doc.NameTable);
-                //nsmgr.AddNamespace("ns0", "http://toyota.com/th/projectsystem/fund");
+                var nsmgr = new XmlNamespaceManager(doc.NameTable);
+                nsmgr.AddNamespace(WSPrefix, WSNamespace);
 
-                //XmlNodeList xnList = doc.SelectNodes("/ns0:MaintainFundCommitResp_MT", nsmgr);
+                XmlNodeList xnList = doc.SelectNodes("/" + WSPrefix + ":MaintainFundCommitResp_MT", nsmgr);
                 #endregion
 
-                XmlNodeList xnList = doc.GetElementsByTagName("MaintainFundCommitResp_MT");//doc.SelectNodes("/MaintainFundCommitResp_MT");
+                //XmlNodeList xnList = doc.GetElementsByTagName("MaintainFundCommitResp_MT");//doc.SelectNodes("/MaintainFundCommitResp_MT");
 
                 foreach (XmlNode xn in xnList)
                 {

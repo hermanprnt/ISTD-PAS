@@ -15,6 +15,11 @@ namespace PR_Creation_Call_WS.Models
         public string MsgType { get; set; }
     }
 
+    class SystemMasterModel
+    {
+        public string SystemValue { get; set; }
+    }
+
     [System.Xml.Serialization.XmlRoot("ns0:MaintainFundCommitReq_MT")]
     public class MaintainFundCommitReq_MT
     {
@@ -80,7 +85,7 @@ namespace PR_Creation_Call_WS.Models
         public string supplier_code { get; set; }
         public string asset { get; set; }
         public string wbs_element { get; set; }
-        public string cost_center_changer { get; set; }
+        public string cost_center_charger { get; set; }
         public string total_amount { get; set; }
         public string quantity { get; set; }
         public string uom { get; set; }

@@ -22,7 +22,7 @@
 	,SUPPLIER_CD supplier_code
 	,ISNULL(ASSET_NO,'') asset
 	,WBS_ELEMENT wbs_element
-	,COST_CENTER_CD cost_center_changer
+	,COST_CENTER_CD cost_center_charger
 	,TOTAL_AMOUNT total_amount
 	,QUANTITY quantity
 	,UOM uom

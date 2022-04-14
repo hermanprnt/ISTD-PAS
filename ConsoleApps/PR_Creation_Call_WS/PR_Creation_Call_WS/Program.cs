@@ -34,6 +34,7 @@ namespace PR_Creation_Call_WS
             }
 
             String paramAll = args[0];
+            bool isErr = false;
 
             string type = paramAll.Split('|')[0];
             string ProcessId = paramAll.Split('|')[1];
@@ -129,8 +130,11 @@ namespace PR_Creation_Call_WS
                         Type tp = typeof(MaintainFundCommitReq_MT);
                         XmlSerializer xml = new XmlSerializer(tp);
 
-                        string WSPrefix = WebConfigurationManager.AppSettings["WSPrefix"].ToString();
-                        string WSNamespace = WebConfigurationManager.AppSettings["WSNamespace"].ToString();
+                        //string WSPrefix = WebConfigurationManager.AppSettings["WSPrefix"].ToString();
+                        //string WSNamespace = WebConfigurationManager.AppSettings["WSNamespace"].ToString();
+
+                        string WSPrefix = LibraryRepo.Instance.GetSystemMasterById("FC", "WS_PREFIX");
+                        string WSNamespace = LibraryRepo.Instance.GetSystemMasterById("FC", "WS_NAME_SPACE");
 
                         XmlSerializerNamespaces xmlNameSpace = new XmlSerializerNamespaces();
                         xmlNameSpace.Add(WSPrefix, WSNamespace);
@@ -249,6 +253,84 @@ namespace PR_Creation_Call_WS
                                    || string.Equals(item.MESSAGE_TYPE, "") || string.Equals(item.MESSAGE_TYPE, null))
                             {
                                 //Mandatory
+                                if (string.IsNullOrEmpty(item.DOCUMENT_NO))
+                                {
+                                    isErr = true;
+                                    Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                                    Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString("DOCUMENT_NO at line " + item.ROW_NO.ToString() + ", Should not be empty"));
+                                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                                }
+                                if (string.IsNullOrEmpty(item.DOCUMENT_LINE_ITEM_NO))
+                                {
+                                    isErr = true;
+                                    Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                                    Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString("DOCUMENT_LINE_ITEM_NO at line " + item.ROW_NO.ToString() + ", Should not be empty"));
+                                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                                }
+                                if (string.IsNullOrEmpty(item.FUND_DOCUMENT_DOC_NO))
+                                {
+                                    isErr = true;
+                                    Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                                    Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString("FUND_DOCUMENT_DOC_NO at line " + item.ROW_NO.ToString() + ", Should not be empty"));
+                                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                                }
+                                if (string.IsNullOrEmpty(item.FUND_DOCUMENT_DOC_LINE_ITEM))
+                                {
+                                    isErr = true;
+                                    Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                                    Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString("FUND_DOCUMENT_DOC_LINE_ITEM at line " + item.ROW_NO.ToString() + ", Should not be empty"));
+                                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                                }
+
+                                //lenght
+                                if (!string.IsNullOrEmpty(item.DOCUMENT_NO) && item.DOCUMENT_NO.Length > 11)
+                                {
+                                    isErr = true;
+
+                                    Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                                    Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString(" Invalid length of DOCUMENT_NO at line " + item.ROW_NO.ToString() + ". The length can not be more than 11"));
+                                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                                }
+                                if (!string.IsNullOrEmpty(item.DOCUMENT_LINE_ITEM_NO) && item.DOCUMENT_LINE_ITEM_NO.Length > 5)
+                                {
+                                    isErr = true;
+
+                                    Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                                    Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString(" Invalid length of DOCUMENT_LINE_ITEM_NO at line " + item.ROW_NO.ToString() + ". The length can not be more than 5"));
+                                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                                }
+                                if (!string.IsNullOrEmpty(item.FUND_DOCUMENT_DOC_NO) && item.FUND_DOCUMENT_DOC_NO.Length > 10)
+                                {
+                                    isErr = true;
+
+                                    Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                                    Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString(" Invalid length of FUND_DOCUMENT_DOC_NO at line " + item.ROW_NO.ToString() + ". The length can not be more than 10"));
+                                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                                }
+                                if (!string.IsNullOrEmpty(item.FUND_DOCUMENT_DOC_LINE_ITEM) && item.FUND_DOCUMENT_DOC_LINE_ITEM.Length > 3)
+                                {
+                                    isErr = true;
+
+                                    Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                                    Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString(" Invalid length of FUND_DOCUMENT_DOC_LINE_ITEM at line " + item.ROW_NO.ToString() + ". The length can not be more than 3"));
+                                    LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
+                                }
+                            }
+
+                            //return message
+                            if (item.MESSAGE_TYPE == "E")
+                            {
+                                isErr = true;
+                                Msg = LibraryRepo.Instance.GetMessageById("ERR00016");
+                                Msg.MsgText = string.Format(Msg.MsgText, Convert.ToString("Return message : " + item.MESSAGE_MESSAGE + " for DOCUMENT_NO: " + item.DOCUMENT_NO + " and DOCUMENT_LINE_ITEM_NO: " + item.DOCUMENT_LINE_ITEM_NO + " at line " + item.ROW_NO.ToString()));
+                                LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText.Replace("Undefined Error :", ""), Msg.MsgType, ProcessName, 0, Username);
+                            }
+
+                            #region Old Validation
+                            /*if (string.Equals(item.MESSAGE_TYPE, "S") || string.Equals(item.MESSAGE_TYPE, "Success")
+                                   || string.Equals(item.MESSAGE_TYPE, "") || string.Equals(item.MESSAGE_TYPE, null))
+                            {
+                                //Mandatory
                                 if (string.IsNullOrEmpty(item.DOCUMENT_NO) || string.IsNullOrEmpty(item.DOCUMENT_LINE_ITEM_NO)
                                     || string.IsNullOrEmpty(item.FUND_DOCUMENT_DOC_NO) || string.IsNullOrEmpty(item.FUND_DOCUMENT_DOC_LINE_ITEM))
                                 {
@@ -273,7 +355,10 @@ namespace PR_Creation_Call_WS
                                     Environment.Exit(0);
                                 }
 
-                            }
+                            }*/
+                            #endregion
+
+                            
                         }
 
                         Console.WriteLine("Update PR Data");
