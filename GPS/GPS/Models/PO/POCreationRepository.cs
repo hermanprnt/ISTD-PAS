@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using GPS.CommonFunc;
@@ -615,6 +617,99 @@ namespace GPS.Models.PO
 
         public POSaveResult SaveData(ExecProcedureModel execModel, PurchaseOrderSaveViewModel viewModel)
         {
+            #region NewConnection handle timeout(Riani:20220419)
+            string PONo = "";
+            string DocYear = "";
+            string Message = "";
+            string constring = DatabaseManager.Instance.GetConnectionDescriptor("Dev").ConnectionString;
+            SqlConnection connect = new SqlConnection(constring);
+            SqlDataReader reader = null;
+            POSaveResult result = new POSaveResult();
+            try
+            {
+
+                connect.Open();
+
+                SqlCommand sqlSelect = new SqlCommand("[dbo].[sp_POCreation_Save]", connect);
+                sqlSelect.CommandType = CommandType.StoredProcedure;
+                sqlSelect.CommandTimeout = 180;
+                string[] poNoteArray = viewModel.PONote.ToArray();
+                sqlSelect.Parameters.Add("@CurrentUser", SqlDbType.VarChar).Value = execModel.CurrentUser;
+                sqlSelect.Parameters.Add("@currentUserNoReg", SqlDbType.VarChar).Value = execModel.CurrentRegNo;
+                sqlSelect.Parameters.Add("@processId", SqlDbType.BigInt).Value = execModel.ProcessId;
+                sqlSelect.Parameters.Add("@moduleId", SqlDbType.VarChar).Value = execModel.ModuleId;
+                sqlSelect.Parameters.Add("@functionId", SqlDbType.VarChar).Value = execModel.FunctionId;
+                sqlSelect.Parameters.Add("@poNo", SqlDbType.VarChar).Value = viewModel.PONo == null ? "" : viewModel.PONo;
+                sqlSelect.Parameters.Add("@poDesc", SqlDbType.VarChar).Value = viewModel.PODesc;
+                sqlSelect.Parameters.Add("@poNote1", SqlDbType.VarChar).Value = poNoteArray[0];
+                sqlSelect.Parameters.Add("@poNote2", SqlDbType.VarChar).Value = poNoteArray[1];
+                sqlSelect.Parameters.Add("@poNote3", SqlDbType.VarChar).Value = poNoteArray[2];
+                sqlSelect.Parameters.Add("@poNote4", SqlDbType.VarChar).Value = poNoteArray[3];
+                sqlSelect.Parameters.Add("@poNote5", SqlDbType.VarChar).Value = poNoteArray[4];
+                sqlSelect.Parameters.Add("@poNote6", SqlDbType.VarChar).Value = poNoteArray[5];
+                sqlSelect.Parameters.Add("@poNote7", SqlDbType.VarChar).Value = poNoteArray[6];
+                sqlSelect.Parameters.Add("@poNote8", SqlDbType.VarChar).Value = poNoteArray[7];
+                sqlSelect.Parameters.Add("@poNote9", SqlDbType.VarChar).Value = poNoteArray[8];
+                sqlSelect.Parameters.Add("@poNote10", SqlDbType.VarChar).Value = poNoteArray[9];
+                sqlSelect.Parameters.Add("@vendor", SqlDbType.VarChar).Value = viewModel.Vendor == null ? "" : viewModel.Vendor;
+                sqlSelect.Parameters.Add("@vendorName", SqlDbType.VarChar).Value = viewModel.VendorName;
+                sqlSelect.Parameters.Add("@vendorAddress", SqlDbType.VarChar).Value = viewModel.VendorAddress==null?"":viewModel.VendorAddress;
+                sqlSelect.Parameters.Add("@vendorCountry", SqlDbType.VarChar).Value = viewModel.VendorCountry == null ? "" : viewModel.VendorCountry;
+                sqlSelect.Parameters.Add("@vendorCity", SqlDbType.VarChar).Value = viewModel.VendorCity == null ? "" : viewModel.VendorCity;
+                sqlSelect.Parameters.Add("@vendorPostalCode", SqlDbType.VarChar).Value = viewModel.VendorPostalCode == null ? "" : viewModel.VendorPostalCode;
+                sqlSelect.Parameters.Add("@vendorPhone", SqlDbType.VarChar).Value = viewModel.VendorPhone == null ? "" : viewModel.VendorPhone;
+                sqlSelect.Parameters.Add("@vendorFax", SqlDbType.VarChar).Value = viewModel.VendorFax == null ? "" : viewModel.VendorFax;
+                sqlSelect.Parameters.Add("@purchasingGroup", SqlDbType.VarChar).Value = viewModel.PurchasingGroup;
+                sqlSelect.Parameters.Add("@currency", SqlDbType.VarChar).Value = viewModel.Currency;
+                sqlSelect.Parameters.Add("@deliveryAddress", SqlDbType.VarChar).Value = viewModel.DeliveryAddress == null ? "" : viewModel.DeliveryAddress;
+                sqlSelect.Parameters.Add("@isSPKCreated", SqlDbType.Bit).Value = viewModel.SPKInfo.IsSPKCreated;
+                sqlSelect.Parameters.Add("@biddingDate", SqlDbType.DateTime).Value = viewModel.SPKInfo.BiddingDate;
+                sqlSelect.Parameters.Add("@spkOpening", SqlDbType.VarChar).Value = viewModel.SPKInfo.Opening == null ? "" : viewModel.SPKInfo.Opening;
+                sqlSelect.Parameters.Add("@spkWork", SqlDbType.VarChar).Value = viewModel.SPKInfo.Work;
+                sqlSelect.Parameters.Add("@spkAmount", SqlDbType.Decimal).Value = viewModel.SPKInfo.Amount;
+                sqlSelect.Parameters.Add("@spkLocation", SqlDbType.VarChar).Value = viewModel.SPKInfo.Location;
+                sqlSelect.Parameters.Add("@spkPeriodStart", SqlDbType.DateTime).Value = viewModel.SPKInfo.PeriodStart;
+                sqlSelect.Parameters.Add("@spkPeriodEnd", SqlDbType.DateTime).Value = viewModel.SPKInfo.PeriodEnd;
+                sqlSelect.Parameters.Add("@spkRetention", SqlDbType.Int).Value = viewModel.SPKInfo.Retention;
+                sqlSelect.Parameters.Add("@terminI", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminI;
+                sqlSelect.Parameters.Add("@terminIDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIDesc;
+                sqlSelect.Parameters.Add("@terminII", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminII;
+                sqlSelect.Parameters.Add("@terminIIDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIIDesc;
+                sqlSelect.Parameters.Add("@terminIII", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIII;
+                sqlSelect.Parameters.Add("@terminIIIDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIIIDesc;
+                sqlSelect.Parameters.Add("@terminIV", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIV;
+                sqlSelect.Parameters.Add("@terminIVDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIVDesc;
+                sqlSelect.Parameters.Add("@terminV", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminV;
+                sqlSelect.Parameters.Add("@terminVDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminVDesc;
+                sqlSelect.Parameters.Add("@saveAsDraft", SqlDbType.Bit).Value = viewModel.SaveAsDraft;
+                sqlSelect.Parameters.Add("@OtherMail", SqlDbType.VarChar).Value = viewModel.OtherMail == null ? "" : viewModel.OtherMail;
+                reader = sqlSelect.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    PONo = (reader[0]).ToString();
+                    DocYear = (reader[1]).ToString();
+                    Message = reader[2].ToString();
+                }
+
+                connect.Close();
+                result.Message = Message;
+                result.PONo = PONo;
+                result.DocYear = DocYear;
+                var resultViewModel = result.Message.AsActionResponseViewModel();
+                if (resultViewModel.ResponseType == ActionResponseViewModel.Error)
+                    throw new InvalidOperationException(resultViewModel.Message);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException(e.Message);
+                connect.Close();
+            }
+
+
+            #endregion
+            #region old
+            /*
             String query = @"EXEC sp_POCreation_Save
                 @CurrentUser, @CurrentRegNo, @ProcessId,
                 @ModuleId, @FunctionId, @PONo, @PODesc,
@@ -686,11 +781,14 @@ namespace GPS.Models.PO
 
             POSaveResult result = db.SingleOrDefault<POSaveResult>(query, param);
             db.Close();
-
+             
+            
+            
             var resultViewModel = result.Message.AsActionResponseViewModel();
             if (resultViewModel.ResponseType == ActionResponseViewModel.Error)
                 throw new InvalidOperationException(resultViewModel.Message);
-
+             */ 
+            #endregion
             return result;
         }
 

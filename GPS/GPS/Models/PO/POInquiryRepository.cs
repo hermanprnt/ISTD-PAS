@@ -92,6 +92,49 @@ namespace GPS.Models.PO
 
         public ActionResponseViewModel Cancel(ExecProcedureModel execParam, String poNo, String cancelReason)
         {
+            #region NewConnection handle timeout (FID.Riani:20220419)
+            string Results = "";
+            var resultViewModel = Results.AsActionResponseViewModel();
+            string constring = DatabaseManager.Instance.GetConnectionDescriptor("Dev").ConnectionString;
+            SqlConnection connect = new SqlConnection(constring);
+            SqlDataReader reader = null;
+            POSaveResult result = new POSaveResult();
+            try
+            {
+
+                connect.Open();
+
+                SqlCommand sqlSelect = new SqlCommand("[dbo].[sp_POInquiry_Cancel]", connect);
+                sqlSelect.CommandType = CommandType.StoredProcedure;
+                sqlSelect.CommandTimeout = 180;
+                sqlSelect.Parameters.Add("@currentUser", SqlDbType.BigInt).Value = execParam.CurrentUser;
+                sqlSelect.Parameters.Add("@processId", SqlDbType.BigInt).Value = execParam.ProcessId;
+                sqlSelect.Parameters.Add("@moduleId", SqlDbType.VarChar).Value = execParam.ModuleId;
+                sqlSelect.Parameters.Add("@functionId", SqlDbType.Int).Value = execParam.FunctionId;
+                sqlSelect.Parameters.Add("@poNo", SqlDbType.VarChar).Value = poNo;
+                sqlSelect.Parameters.Add("@cancelReason", SqlDbType.Int).Value = cancelReason;                
+                reader = sqlSelect.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Results = (reader[0]).ToString();                   
+                }
+
+                connect.Close();                
+                if (resultViewModel.ResponseType == ActionResponseViewModel.Error)
+                    throw new InvalidOperationException(resultViewModel.Message);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException(e.Message);
+                connect.Close();
+            }
+
+            
+            #endregion
+
+            #region old
+            /*
             String query = "EXEC sp_POInquiry_Cancel @CurrentUser, 0, @ModuleId, @FunctionId, @PONo, @cancelReason";
             String result = db.ExecuteScalar<String>(query, new { execParam.CurrentUser, execParam.ModuleId, execParam.FunctionId, PONo = poNo, cancelReason = cancelReason });
             db.Close();
@@ -99,8 +142,10 @@ namespace GPS.Models.PO
             var resultViewModel = result.AsActionResponseViewModel();
             if (resultViewModel.ResponseType == ActionResponseViewModel.Error)
                 throw new InvalidOperationException(resultViewModel.Message);
-
+            */
+            #endregion
             return resultViewModel;
+            
         }
 
         public ActionResponseViewModel RejectByVendor(String poNo, String currentUser)
