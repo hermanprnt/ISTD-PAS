@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using GPS.CommonFunc;
@@ -663,24 +664,74 @@ namespace GPS.Models.PO
                 sqlSelect.Parameters.Add("@currency", SqlDbType.VarChar).Value = viewModel.Currency;
                 sqlSelect.Parameters.Add("@deliveryAddress", SqlDbType.VarChar).Value = viewModel.DeliveryAddress == null ? "" : viewModel.DeliveryAddress;
                 sqlSelect.Parameters.Add("@isSPKCreated", SqlDbType.Bit).Value = viewModel.SPKInfo.IsSPKCreated;
-                sqlSelect.Parameters.Add("@biddingDate", SqlDbType.DateTime).Value = viewModel.SPKInfo.BiddingDate;
+                if(viewModel.SPKInfo.BiddingDate==null)
+                    sqlSelect.Parameters.Add("@biddingDate", SqlDbType.DateTime).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.BiddingDate != null)
+                    sqlSelect.Parameters.Add("@biddingDate", SqlDbType.DateTime).Value = viewModel.SPKInfo.BiddingDate;
                 sqlSelect.Parameters.Add("@spkOpening", SqlDbType.VarChar).Value = viewModel.SPKInfo.Opening == null ? "" : viewModel.SPKInfo.Opening;
-                sqlSelect.Parameters.Add("@spkWork", SqlDbType.VarChar).Value = viewModel.SPKInfo.Work;
+                sqlSelect.Parameters.Add("@spkWork", SqlDbType.VarChar).Value = viewModel.SPKInfo.Work == null ? "" : viewModel.SPKInfo.Work;
                 sqlSelect.Parameters.Add("@spkAmount", SqlDbType.Decimal).Value = viewModel.SPKInfo.Amount;
-                sqlSelect.Parameters.Add("@spkLocation", SqlDbType.VarChar).Value = viewModel.SPKInfo.Location;
-                sqlSelect.Parameters.Add("@spkPeriodStart", SqlDbType.DateTime).Value = viewModel.SPKInfo.PeriodStart;
-                sqlSelect.Parameters.Add("@spkPeriodEnd", SqlDbType.DateTime).Value = viewModel.SPKInfo.PeriodEnd;
+                sqlSelect.Parameters.Add("@spkLocation", SqlDbType.VarChar).Value = viewModel.SPKInfo.Location == null ? "" : viewModel.SPKInfo.Location;
+                if (viewModel.SPKInfo.PeriodStart == null)
+                    sqlSelect.Parameters.Add("@spkPeriodStart", SqlDbType.DateTime).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.PeriodStart != null)
+                    sqlSelect.Parameters.Add("@spkPeriodStart", SqlDbType.DateTime).Value = viewModel.SPKInfo.PeriodStart;
+                if (viewModel.SPKInfo.PeriodEnd == null)
+                    sqlSelect.Parameters.Add("@spkPeriodEnd", SqlDbType.DateTime).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.PeriodEnd != null)
+                    sqlSelect.Parameters.Add("@spkPeriodEnd", SqlDbType.DateTime).Value = viewModel.SPKInfo.PeriodEnd;
                 sqlSelect.Parameters.Add("@spkRetention", SqlDbType.Int).Value = viewModel.SPKInfo.Retention;
-                sqlSelect.Parameters.Add("@terminI", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminI;
-                sqlSelect.Parameters.Add("@terminIDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIDesc;
-                sqlSelect.Parameters.Add("@terminII", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminII;
-                sqlSelect.Parameters.Add("@terminIIDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIIDesc;
-                sqlSelect.Parameters.Add("@terminIII", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIII;
-                sqlSelect.Parameters.Add("@terminIIIDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIIIDesc;
-                sqlSelect.Parameters.Add("@terminIV", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIV;
-                sqlSelect.Parameters.Add("@terminIVDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIVDesc;
-                sqlSelect.Parameters.Add("@terminV", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminV;
-                sqlSelect.Parameters.Add("@terminVDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminVDesc;
+
+                if (viewModel.SPKInfo.TerminI == null)
+                    sqlSelect.Parameters.Add("@terminI", SqlDbType.VarChar).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.TerminI != null)
+                    sqlSelect.Parameters.Add("@terminI", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminI;
+
+                if (viewModel.SPKInfo.TerminIDesc == null)
+                    sqlSelect.Parameters.Add("@terminIDesc", SqlDbType.VarChar).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.TerminIDesc != null)
+                    sqlSelect.Parameters.Add("@terminIDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIDesc;
+
+                if (viewModel.SPKInfo.TerminII == null)
+                    sqlSelect.Parameters.Add("@terminII", SqlDbType.VarChar).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.TerminII != null)
+                    sqlSelect.Parameters.Add("@terminII", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminII;
+
+                if (viewModel.SPKInfo.TerminIIDesc == null)
+                    sqlSelect.Parameters.Add("@terminIIDesc", SqlDbType.VarChar).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.TerminIIDesc != null)
+                    sqlSelect.Parameters.Add("@terminIIDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIIDesc;
+
+                if (viewModel.SPKInfo.TerminIII == null)
+                    sqlSelect.Parameters.Add("@terminIII", SqlDbType.VarChar).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.TerminIII != null)
+                    sqlSelect.Parameters.Add("@terminIII", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIII;
+
+                if (viewModel.SPKInfo.TerminIIIDesc == null)
+                    sqlSelect.Parameters.Add("@terminIIIDesc", SqlDbType.VarChar).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.TerminIIIDesc != null)
+                    sqlSelect.Parameters.Add("@terminIIIDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIIIDesc;
+
+                if (viewModel.SPKInfo.TerminIV == null)
+                    sqlSelect.Parameters.Add("@terminIV", SqlDbType.VarChar).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.TerminIV != null)
+                    sqlSelect.Parameters.Add("@terminIV", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIV;
+
+                if (viewModel.SPKInfo.TerminIVDesc == null)
+                    sqlSelect.Parameters.Add("@terminIVDesc", SqlDbType.VarChar).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.TerminIVDesc != null)
+                    sqlSelect.Parameters.Add("@terminIVDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminIVDesc;
+
+                if (viewModel.SPKInfo.TerminV == null)
+                    sqlSelect.Parameters.Add("@terminV", SqlDbType.VarChar).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.TerminV != null)
+                    sqlSelect.Parameters.Add("@terminV", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminV;
+
+                if (viewModel.SPKInfo.TerminVDesc == null)
+                    sqlSelect.Parameters.Add("@terminVDesc", SqlDbType.VarChar).Value = DBNull.Value;
+                else if (viewModel.SPKInfo.TerminVDesc != null)
+                    sqlSelect.Parameters.Add("@terminVDesc", SqlDbType.VarChar).Value = viewModel.SPKInfo.TerminVDesc;
+
                 sqlSelect.Parameters.Add("@saveAsDraft", SqlDbType.Bit).Value = viewModel.SaveAsDraft;
                 sqlSelect.Parameters.Add("@OtherMail", SqlDbType.VarChar).Value = viewModel.OtherMail == null ? "" : viewModel.OtherMail;
                 reader = sqlSelect.ExecuteReader();
