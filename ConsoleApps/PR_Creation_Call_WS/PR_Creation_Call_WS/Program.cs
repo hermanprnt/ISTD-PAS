@@ -23,6 +23,7 @@ namespace PR_Creation_Call_WS
         static void Main(string[] args)
         {
             //args = new String[] { "PR|202105280001|0|5000000155|teset|agan" };
+            //args = new String[] { "PO|202204210009||||agan" };
 
             Console.WriteLine("Starting ...");
             Console.WriteLine("Get argument");
@@ -46,7 +47,7 @@ namespace PR_Creation_Call_WS
             try
             {
                 Msg = LibraryRepo.Instance.GetMessageById("INF00002");
-                Msg.MsgText = string.Format(Msg.MsgText, "PR Call WS Fund Commitment Console");
+                Msg.MsgText = string.Format(Msg.MsgText, type + " Call WS Fund Commitment Console");
                 LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
                 Console.WriteLine("Get Data");
@@ -54,7 +55,7 @@ namespace PR_Creation_Call_WS
                 Msg.MsgText = string.Format(Msg.MsgText, "Get Data for parameter");
                 LibraryRepo.Instance.GenerateLog(ProcessId, ModId, FuncId, Msg.MsgId, Msg.MsgText, Msg.MsgType, ProcessName, 0, Username);
 
-                List<Lookby> MainLoopby = LibraryRepo.Instance.GetLoopBy(ProcessId);
+                List<Lookby> MainLoopby = LibraryRepo.Instance.GetLoopBy(ProcessId, type);
 
                 List<MaintainFundCommitReq_MT> ReqHeader = new List<MaintainFundCommitReq_MT>();
                 PAS_Document ReqDocument = new PAS_Document();

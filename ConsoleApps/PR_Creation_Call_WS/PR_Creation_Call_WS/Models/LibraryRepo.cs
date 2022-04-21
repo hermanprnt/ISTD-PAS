@@ -114,7 +114,7 @@ namespace PR_Creation_Call_WS.Models
 
         #endregion
 
-        public List<Lookby> GetLoopBy(string ProcessId)
+        public List<Lookby> GetLoopBy(string ProcessId, string type)
         {
             string sql = "";
             sql = System.IO.File.ReadAllText(System.IO.Path.Combine(Dir + @"\Sql\GetLoopBy.sql"));
@@ -124,7 +124,8 @@ namespace PR_Creation_Call_WS.Models
                 db.CommandTimeout = 0;
                 List<Lookby> result = db.Fetch<Lookby>(sql, new
                 {
-                    ProcessId = ProcessId
+                    ProcessId = ProcessId,
+                    type = type
                 });
                 db.CloseSharedConnection();
                 return result;
