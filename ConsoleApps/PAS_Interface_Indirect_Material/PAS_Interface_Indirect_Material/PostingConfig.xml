@@ -112,7 +112,20 @@
     <Field name="BudgetNo" start="383" length="10"  delimiter="|"/>
     <Field name="ProjectCode" start="393" length="10"  delimiter="|"/>
     <Field name="AccountCode" start="403" length="10"  delimiter="|"/>
-    <Field name="PostingKey" start="413" length="2"  delimiter="|"/>
+    
+    <Field name="SignCode" start="413" length="1"  delimiter="|"/>
+    <Field name="StockMovementFlag" start="414" length="1"  delimiter="|"/>
+    <Field name="CancelFlag" start="415" length="1"  delimiter="|"/>
+    <Field name="InterfaceTypeFlag" start="416" length="1"  delimiter="|"/>
+    <Field name="GoodIssueType" start="417" length="50"  delimiter="|"/>
+    <Field name="WBS" start="467" length="24"  delimiter="|"/>
+    <Field name="EarmarkedFund" start="491" length="10"  delimiter="|"/>
+    <Field name="EarmarkedFundItem" start="501" length="3"  delimiter="|"/>
+    <Field name="PostingKey" start="504" length="2"  delimiter="|"/>
+    <Field name="Currency" start="506" length="6"  delimiter="|"/>
+    <!--<Field name="EndingofRecord" start="511" length="1"  delimiter="|"/>-->
+    
+    <!--<Field name="PostingKey" start="413" length="2"  delimiter="|"/>
     <Field name="Currency" start="415" length="5"  delimiter="|"/>
     <Field name="SignCode" start="420" length="1"  delimiter="|"/>
     <Field name="StockMovementFlag" start="421" length="1"  delimiter="|"/>
@@ -122,7 +135,7 @@
     <Field name="WBS" start="434" length="24"  delimiter="|"/>
     <Field name="EarmarkedFund" start="458" length="10"  delimiter="|"/>
     <Field name="EarmarkedFundItem" start="468" length="3"  delimiter="|"/>
-    <Field name="EndingofRecord" start="471" length="1"  delimiter="|"/>
+    <Field name="EndingofRecord" start="471" length="1"  delimiter="|"/>-->
   </Record>
   <!--End Header Data-->
 
