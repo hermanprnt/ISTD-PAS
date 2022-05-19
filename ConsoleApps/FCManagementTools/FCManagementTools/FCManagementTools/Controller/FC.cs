@@ -272,6 +272,7 @@ namespace FCManagementTools.Controller
         {
             string credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes(username + ":" + password));
 
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
             HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
             webRequest.Headers.Add("Authorization", string.Format("Basic {0}", credentials));
             webRequest.ContentType = "application/x-www-form-urlencoded";
@@ -284,6 +285,7 @@ namespace FCManagementTools.Controller
             byte[] requestBytes = System.Text.Encoding.ASCII.GetBytes(data);
             webRequest.Method = "POST";
             webRequest.ContentType = "text/xml;charset=utf-8";
+            webRequest.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
             webRequest.ContentLength = requestBytes.Length;
             Stream requestStream = webRequest.GetRequestStream();
             requestStream.Write(requestBytes, 0, requestBytes.Length);
