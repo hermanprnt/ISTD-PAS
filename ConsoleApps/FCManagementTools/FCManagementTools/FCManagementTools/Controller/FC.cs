@@ -95,6 +95,7 @@ namespace FCManagementTools.Controller
                             /*3. Bulk Insert and Update*/
                             LibraryRepo.GenerateLog("Bulk Insert and Update Header No: " + item.HEADER_NO + "..\n", Folder + FileName);
                             string ResultSave = SaveData(response.RESPONSE, item.DOCUMENT_TYPE, item.PROCESS_ID, item.HEADER_NO);
+                            LibraryRepo.GenerateLog("Bulk Insert and Update Result: " + ResultSave + "..\n", Folder + FileName);
                         }
                         catch (Exception ex)
                         {
@@ -297,7 +298,7 @@ namespace FCManagementTools.Controller
 
             sr.Close();
             res.Close();
-
+            /* edit riani 
             var serializer = new XmlSerializer(typeof(MaintainFundCommitResp_MT));
             MaintainFundCommitResp_MT result;
 
@@ -305,7 +306,49 @@ namespace FCManagementTools.Controller
             {
                 result = (MaintainFundCommitResp_MT)serializer.Deserialize(reader);
             }
+            */
+            string prefix = LibraryRepo.Instance.GetSystemMasterById("FC", "WS_PREFIX");
+            string xmlns = LibraryRepo.Instance.GetSystemMasterById("FC", "WS_NAME_SPACE");
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(s);
+            MaintainFundCommitResp_MT result = new MaintainFundCommitResp_MT();
+            result.RESPONSE = new RESPONSE();
+            result.RESPONSE.document = new List<document>();
+            List<document> fullst = new List<document>();
 
+            #region TDEM
+            var nsmgr = new XmlNamespaceManager(doc.NameTable);
+            nsmgr.AddNamespace(prefix, xmlns);
+
+            XmlNodeList xnList = doc.SelectNodes("/" + prefix + ":MaintainFundCommitResp_MT", nsmgr);
+            #endregion
+
+            //XmlNodeList xnList = doc.GetElementsByTagName("MaintainFundCommitResp_MT");//doc.SelectNodes("/MaintainFundCommitResp_MT");
+
+            foreach (XmlNode xn in xnList)
+            {
+                XmlNode anode = xn.FirstChild; //xn.SelectSingleNode("RESPONSE");
+                if (anode != null)
+                {
+                    XmlNodeList CNodes = xn.FirstChild.ChildNodes; //xn.SelectNodes("RESPONSE/document");
+                    foreach (XmlNode node in CNodes)
+                    {
+                        document lst = new document();
+
+                        lst.doc_no = node["doc_no"].InnerText;
+                        lst.doc_line_item_no = node["doc_line_item_no"].InnerText;
+                        lst.fund_cmmt_doc = node["fund_cmmt_doc"].InnerText;
+                        lst.fund_cmmt_doc_line_item = node["fund_cmmt_doc_line_item"].InnerText;
+                        lst.msg_type = node["msg_type"].InnerText;
+                        lst.msg_id = node["msg_id"].InnerText;
+                        lst.msg_no = node["msg_no"].InnerText;
+                        lst.msg = node["msg"].InnerText;
+
+                        fullst.Add(lst);
+                    }
+                }
+            }            
+            result.RESPONSE.document = fullst;
             return result;
         }
         #endregion
