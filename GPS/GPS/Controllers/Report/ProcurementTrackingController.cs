@@ -274,6 +274,9 @@ namespace GPS.Controllers.Report
                 Hrow.CreateCell(32).SetCellValue(bc_header.InvoiceCurrency);
                 Hrow.CreateCell(33).SetCellValue(bc_header.ClearingNo);
                 Hrow.CreateCell(34).SetCellValue(bc_header.ClearingDate.ToShortDateString() == "" ? "" : bc_header.ClearingDate.ToStandardFormat());
+                //FID.Ridwan:20220704
+                Hrow.CreateCell(35).SetCellValue(bc_header.SAPDocNo);
+                Hrow.CreateCell(36).SetCellValue(bc_header.SAPDocYear);
                 row++;
             }
 

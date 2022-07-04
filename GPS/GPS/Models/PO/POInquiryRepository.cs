@@ -92,15 +92,15 @@ namespace GPS.Models.PO
 
         public ActionResponseViewModel Cancel(ExecProcedureModel execParam, String poNo, String cancelReason)
         {
-            
             String query = "EXEC sp_POInquiry_Cancel @CurrentUser, 0, @ModuleId, @FunctionId, @PONo, @cancelReason";
             String result = db.ExecuteScalar<String>(query, new { execParam.CurrentUser, execParam.ModuleId, execParam.FunctionId, PONo = poNo, cancelReason = cancelReason });
             db.Close();
 
             var resultViewModel = result.AsActionResponseViewModel();
             if (resultViewModel.ResponseType == ActionResponseViewModel.Error)
-                throw new InvalidOperationException(resultViewModel.Message);                        
-            return resultViewModel;            
+                throw new InvalidOperationException(resultViewModel.Message);
+
+            return resultViewModel;
         }
 
         public ActionResponseViewModel RejectByVendor(String poNo, String currentUser)

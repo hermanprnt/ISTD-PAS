@@ -23,7 +23,7 @@ BEGIN TRY
 		IF(
 			(
 				-- - OLD CONDITION
-				SUBSTRING(@WBS_NO, 1, 1) = 'I' OR 
+				
 				SUBSTRING(@WBS_NO, 1, 1) = 'L' OR
 
 				-- - NEW CONDITION
@@ -43,7 +43,8 @@ BEGIN TRY
 				SUBSTRING(@WBS_NO, 1, 1) = 'E' OR 
 
 				-- - NEW CONDITION
-				SUBSTRING(@WBS_NO, 1, 1) = 'A' OR
+				SUBSTRING(@WBS_NO, 1, 1) = 'I' OR --change D3 ke I3
+ 				SUBSTRING(@WBS_NO, 1, 1) = 'A' OR
 				SUBSTRING(@WBS_NO, 1, 1) = 'F' OR
 				(SUBSTRING(@WBS_NO, 1, 1) = 'X' AND LEN(@WBS_NO) > 1)
 			) 

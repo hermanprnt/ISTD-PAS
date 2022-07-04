@@ -1,3 +1,18 @@
+  /* FID.Ridwan: 20220704*/
+ DECLARE @@PR_DATE_FROM_PAR DATE = CAST(@PR_DATE_FROM AS DATE)
+ , @@PR_DATE_TO_PAR DATE = CAST(@PR_DATE_TO AS DATE)
+ , @@PR_NO_PAR VARCHAR(100) = LTRIM(RTRIM(@PR_NO))
+ , @@VENDOR_PAR VARCHAR(100) = LTRIM(RTRIM(@VENDOR))
+ , @@CREATED_BY_PAR VARCHAR(100) = LTRIM(RTRIM(@CREATED_BY))
+ , @@PO_NO_PAR VARCHAR(100) = LTRIM(RTRIM(@PO_NO))
+ , @@GR_NO_PAR VARCHAR(100) = LTRIM(RTRIM(@GR_NO))
+ , @@INV_NO_PAR VARCHAR(100) = LTRIM(RTRIM(@INV_NO))
+ , @@PCS_GRP_PAR VARCHAR(100) = LTRIM(RTRIM(@PCS_GRP))
+ , @@DIVISION_ID_PAR VARCHAR(100) = LTRIM(RTRIM(@DIVISION_ID))
+ , @@WBS_NO_PAR VARCHAR(100) = LTRIM(RTRIM(@WBS_NO))
+ , @@CLEARING_NO_PAR VARCHAR(100) = LTRIM(RTRIM(@CLEARING_NO))
+ , @@CLEARING_DATE_PAR DATE = CAST(@CLEARING_DATE AS DATE)
+ , @@CLEARING_DATE_TO_PAR DATE = CAST(@CLEARING_DATE_TO AS DATE)
 
 select 
 			A.PR_NO	
@@ -34,8 +49,10 @@ select
 	,	h.INVOICE_DATE as InvoiceDate
 	,	h.TOTAL_AMOUNT as InvoiceAmount
 	,	h.CURRENCY as InvoiceCurrency
-	,	null as ClearingNo
-	,	null as ClearingDate	
+	,	h.LOG_DOC_NO as ClearingNo
+	,	h.CLEARING_DOC_DT as ClearingDate	
+	,	h.SAP_DOC_NO SAPDocNo
+	,	h.SAP_DOC_YEAR SAPDocYear	
 	from 
 	TB_R_PR_H A 
 	inner join TB_R_PR_ITEM B on A.PR_NO=B.PR_NO
@@ -46,17 +63,19 @@ select
 	left join TB_R_GR_IR g on d.PO_NO = g.PO_NO
 	left join TB_R_INVOICE_INFO h on h.GR_NUMBER = g.MAT_DOC_NO
 	where 1=1 
-	AND ISNULL(A.PR_NO, '') LIKE '%' + ISNULL(@PR_NO, '') + '%' 
-	AND ISNULL(D.VENDOR_CD, '') LIKE '%' + ISNULL(@VENDOR, '') + '%' 
-	AND ISNULL(A.CREATED_BY, '') LIKE '%' + ISNULL(@CREATED_BY, '') + '%' 
-	AND ISNULL(d.PO_NO, '') LIKE '%' + ISNULL(@PO_NO, '') + '%' 
-	AND ISNULL(g.MAT_DOC_NO, '') LIKE '%' + ISNULL(@GR_NO, '') + '%' 
-	AND a.DOC_DT BETWEEN convert(date,@PR_DATE_FROM) AND convert(date, @PR_DATE_TO)			
+	AND (ISNULL(@@PR_NO_PAR, '') = '' OR ISNULL(A.PR_NO, '') LIKE '%' + ISNULL(@@PR_NO_PAR, '') + '%')
+	AND (ISNULL(@@VENDOR_PAR, '') = '' OR ISNULL(D.VENDOR_CD, '') LIKE '%' + ISNULL(@@VENDOR_PAR, '') + '%')
+	AND (ISNULL(@@CREATED_BY_PAR, '') = '' OR ISNULL(A.CREATED_BY, '') LIKE '%' + ISNULL(@@CREATED_BY_PAR, '') + '%')
+	AND (ISNULL(@@PO_NO_PAR, '') = '' OR ISNULL(d.PO_NO, '') LIKE '%' + ISNULL(@@PO_NO_PAR, '') + '%')
+	AND (ISNULL(@@GR_NO_PAR, '') = '' OR ISNULL(g.MAT_DOC_NO, '') LIKE '%' + ISNULL(@@GR_NO_PAR, '') + '%')
+	AND a.DOC_DT BETWEEN @@PR_DATE_FROM_PAR AND @@PR_DATE_TO_PAR
 	--AND d.DOC_DT BETWEEN convert(date,@PO_DT) AND convert(date, @PO_DT_TO)
 	--AND h.INVOICE_DATE BETWEEN convert(date,@INV_DT) AND convert(date, @INV_DT_TO)	
 	--AND g.DOCUMENT_DT BETWEEN convert(date,@GR_DATE) AND convert(date, @GR_DATE_TO)	
-	AND ISNULL(g.MAT_DOC_NO, '') LIKE '%' + ISNULL(@GR_NO, '') + '%' 
-	AND ISNULL(h.INVOICE_NO, '') LIKE '%' + ISNULL(@INV_NO, '') + '%' 
-	AND ISNULL(d.PURCHASING_GRP_CD, '') LIKE '%' + ISNULL(@PCS_GRP, '') + '%' 
-	AND ISNULL(A.DIVISION_ID, '') = ''+ ISNULL(@DIVISION_ID, '') +'' 
-	AND ISNULL(b.WBS_NO, '') LIKE '%' + ISNULL(@WBS_NO, '') + '%' 
+	AND (ISNULL(@@GR_NO_PAR, '') = '' OR ISNULL(g.MAT_DOC_NO, '') LIKE '%' + ISNULL(@@GR_NO_PAR, '') + '%')
+	AND (ISNULL(@@INV_NO_PAR, '') = '' OR ISNULL(h.INVOICE_NO, '') LIKE '%' + ISNULL(@@INV_NO_PAR, '') + '%')
+	AND (ISNULL(@@PCS_GRP_PAR, '') = '' OR ISNULL(d.PURCHASING_GRP_CD, '') LIKE '%' + ISNULL(@@PCS_GRP_PAR, '') + '%')
+	AND (ISNULL(@@DIVISION_ID_PAR, '') = '' OR ISNULL(A.DIVISION_ID, '') = ''+ ISNULL(@@DIVISION_ID_PAR, '')+ '') 
+	AND (ISNULL(@@WBS_NO_PAR, '') = '' OR ISNULL(b.WBS_NO, '') LIKE '%' + ISNULL(@@WBS_NO_PAR, '') + '%')
+	AND (ISNULL(@@CLEARING_NO_PAR, '') = '' OR ISNULL(h.LOG_DOC_NO, '') LIKE '%' + ISNULL(@@CLEARING_NO_PAR, '') + '%')
+	AND (ISNULL(@CLEARING_DATE, '') = '' OR h.CLEARING_DOC_DT BETWEEN @@CLEARING_DATE_PAR AND @@CLEARING_DATE_TO_PAR) 

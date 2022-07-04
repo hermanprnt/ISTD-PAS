@@ -145,7 +145,7 @@
                     <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Clearing No.</label>
                     <div class="col-xs-8 col-sm-5 col-md-8">
                         <div class="input-group pos-rel" style="width: 100%;">
-                            @Html.TextBoxFor(m => m.CLEARING_NO, new { id = "clno", @style = "width:100%", @class = "input_keyup", @disabled = "disabled" })
+                            @Html.TextBoxFor(m => m.CLEARING_NO, new { id = "clno", @style = "width:100%", @class = "input_keyup" }) @*, @disabled = "disabled"*@
                         </div>
                     </div>
                 </div>
@@ -200,7 +200,7 @@
                         <div class="input-group">
                             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
 
-                            <input style="width:100%" " type="text" name="date-range-picker" id="cldt" data-date-format="MM/DD/YYYY" tabindex="6" autocomplete="off" class="form-control" readonly="readonly" />
+                            <input style="width:100%" " type="text" name="date-range-picker" id="cldt" data-date-format="MM/DD/YYYY" tabindex="6" autocomplete="off" class="form-control"  /> @*readonly="readonly"*@
                         </div>
 
                     </div>

@@ -88,6 +88,8 @@
                         <th style="min-width:100px">Invoice Curr</th>
                         <th style="min-width:100px">Clearing No</th>
                         <th style="min-width:100px">Clearing Date</th>
+                        <th style="min-width:100px">SAP Doc No (Invoice)</th>
+                        <th style="min-width:100px">SAP Doc Year (Invoice)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -132,6 +134,9 @@
                                     <td class="text-center">@item.InvoiceCurrency</td>
                                     <td class="text-center">@item.ClearingNo</td>
                                     <td class="text-center">@item.ClearingDate.ToStandardFormat()</td>
+                                    @*FID.Ridwan:20220704*@
+                                    <td class="text-center">@item.SAPDocNo</td>
+                                    <td class="text-center">@item.SAPDocYear</td>
 
                                 </tr>
                             }

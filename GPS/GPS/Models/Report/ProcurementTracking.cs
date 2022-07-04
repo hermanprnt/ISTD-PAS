@@ -39,6 +39,8 @@ namespace GPS.Models.Report
         public string InvoiceCurrency { get; set; }
         public string ClearingNo { get; set; }
         public DateTime ClearingDate { get; set; }
+        public string SAPDocNo { get; set; }
+        public string SAPDocYear { get; set; }
 
 
         
