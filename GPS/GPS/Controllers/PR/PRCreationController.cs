@@ -98,6 +98,12 @@ namespace GPS.Controllers.PR
             ViewData["CostCenter"] = PRCommonRepository.Instance.GetDataCostCenterByCoordinator(paramPrCoordinator, paramDivId, this.GetCurrentRegistrationNumber());
             return PartialView(PurchaseRequisitionPage._CascadeCostCenter);
         }
+        //FID.Ridwan: 20220705
+        public PartialViewResult SelectCostCentertoFamsDB(string assetNo, string subassetNo)
+        {
+            ViewData["CostCenter"] = PRCommonRepository.Instance.GetDataCostCenterFamsDB(assetNo, subassetNo);
+            return PartialView(PurchaseRequisitionPage._CascadeCostCenter);
+        }
         #endregion
 
         #region GRID LOOKUP

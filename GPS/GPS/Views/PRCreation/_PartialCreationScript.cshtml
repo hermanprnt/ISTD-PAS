@@ -7,6 +7,10 @@
     var WBS_Temp = '';
     var CostCenter_Temp = '';
     var Division_Temp = '';
+    //FID.Ridwan: 20220705
+    var wbsparam = '';
+    var assetnoparam = '';
+    var subassetnoparam = '';
 
     // Temporary variable for data manipulation to screen
     ViewData.Clear();
@@ -247,6 +251,10 @@
         var url = "";
         var param;
 
+        //FID.Ridwan: 20220705
+        var prefixWBS3dgt = wbsparam.substr(0, 3);
+        var prefixWBS4dgt = wbsparam.substr(0, 4);
+
         switch (id) {
             case "sloc":
                 {
@@ -272,6 +280,23 @@
 
                     param = { paramPrCoordinator: prCoor, paramDivId: divId };
                     url = "SelectCostCenterByCoordinator";
+
+                    //FID.Ridwan: 20220705
+                    if (
+                        prefixWBS4dgt == "R3.Y" ||
+                        prefixWBS3dgt == "C3."
+                    ) {
+                        param = { assetNo: assetnoparam, subassetNo: subassetnoparam };
+                        url = "SelectCostCentertoFamsDB";
+
+                        if (ViewData.Get("WBSType") == "subitem") {
+                            target = "#cascade-costcenter-subitem";
+                        }
+                        else {
+                            target = "#cascade-costcenter";
+                        }
+                    }
+                    
                     break;
                 }
         }
@@ -1381,6 +1406,7 @@
     }
 
     function CancelSaveItem() {
+        wbsparam = '';
         $.progressbox.show("Get Item", "Get Item Data onprogress . . .");
         $.ajax({
             type: $tdk.AjaxMethod,
@@ -1403,6 +1429,7 @@
 
                 ClearEditorItem();
                 $.progressbox.hide();
+
             },
             error: function (resultMessage) {
                 var e = resultMessage.responseText;
@@ -1433,6 +1460,20 @@
     function SaveItem(SaveOrSubmit, type) {
         //type = 0 (if trigger from submit/save button); type = 1 (if trigger from saveitem button)
 
+        //FID.Ridwan: 20220705
+        if ($(idItem.MAT_DESC).val() == '') {
+            var msg = "<p>" + AssignVariable("@PurchasingRequisitionMessages.mandatoryField", ["Item Description"]) + "</p>";
+            $.messagebox.show(
+                "Save Item",
+                msg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+                );
+            return;
+        }
+        
         var seqno = $(idItem.NO).html().length <= 0 ? "0" : $(idItem.NO).html();
         if (type != '1') $.disable_enable_button.disable();
         $.Disable([idBtn.SAVE_HEADER, idBtn.SUBMIT_HEADER, idBtn.CANCEL_HEADER, idBtn.SAVE_ITEM, idBtn.CANCEL_ITEM, idBtn.SAVE_SUBITEM, idBtn.CANCEL_SUBITEM]);
@@ -1853,6 +1894,7 @@
 
         $.Enable([idItem.ASSET_NO, idItem.SUBASSET_NO]);
         ClearEditorSubItem();
+        wbsparam = '';
         $.ajax({
             type: $tdk.AjaxMethod,
             url: "@PRCreationController._GetSubItemTemp",
@@ -2713,7 +2755,7 @@
                         $.Enable([idItem.COST_CENTER]);
                     }
                 }
-                // HANDLE JIKA SEBELUMNYA DISABLE
+                    // HANDLE JIKA SEBELUMNYA DISABLE
                 else {
                     $.Clear([idItem.COST_CENTER]);
                     $.Enable([idItem.COST_CENTER]);
@@ -2733,11 +2775,14 @@
             }
         }
 
-        @{ /* NEW WBS STRUCTURE */ }
+            @{ /* NEW WBS STRUCTURE */ }
         else
         {
             var prefixWBS = wbs.substr(0, 1);
             var isWBSContainsYear = wbs.substr(3, 1) == 'Y';
+            //FID.Ridwan: 20220705
+            var prefixWBS3dgt = wbs.substr(0, 3);
+            var prefixWBS4dgt = wbs.substr(0, 4);
 
             if (ViewData.Get("WBSType") == "subitem")
             {
@@ -2755,54 +2800,65 @@
                 $.Enable([idItem.QTY]);
             }
 
+            //FID.Ridwan: 20220705
             if (
-                prefixWBS == "R" ||
-                prefixWBS == "C"
+                //prefixWBS == "R" ||
+                //prefixWBS == "C"
+                prefixWBS4dgt == "R3.Y" ||
+                prefixWBS3dgt == "C3."
             ) {
-                if (ViewData.Get("WBSType") == "subitem")
-                {
+                if (ViewData.Get("WBSType") == "subitem") {
                     $.Clear([idSubItem.GL_ACCOUNT]);
 
                     DisableLookup([idDivLookup.DIV_GLSUBITEM], true);
                     DisableLookup([idDivLookup.DIV_ASSETNOITEM], false);
+                    $.Disable([idSubItem.COST_CENTER]);
+                    $("#cascade-costcenter-subitem #acost").prop('disabled', true);
 
                     $(idSubItem.GL_ACCOUNT).val('X');
 
                     $.Disable([idSubItem.GL_ACCOUNT]);
 
-                    populateComboBox('costcenter');
+                    //FID.Ridwan: 20220705
+                    //populateComboBox('costcenter');
 
-                    if (prefixWBS == 'R')
-                    {
+                    if (prefixWBS4dgt == "R3.Y") {//(prefixWBS == 'R') {
                         $.Disable([idSubItem.QTY]);
                         $(idSubItem.QTY).val(1);
                     }
                 }
-                else
-                {
+                else {
                     $.Clear([idItem.GL_ACCOUNT]);
 
                     DisableLookup([idDivLookup.DIV_GLITEM], true);
                     DisableLookup([idDivLookup.DIV_ASSETNOITEM], false);
+                    $.Disable([idItem.COST_CENTER]);
 
                     $(idItem.GL_ACCOUNT).val('X');
 
                     $.Disable([idItem.GL_ACCOUNT]);
 
-                    populateComboBox('costcenter');    
+                    //FID.Ridwan: 20220705
+                    //populateComboBox('costcenter');
 
-                    if (prefixWBS == 'R') {
+                    if (prefixWBS4dgt == "R3.Y") {//(prefixWBS == 'R') {
                         $.Disable([idItem.QTY]);
                         $(idItem.QTY).val(1);
                     }
                 }
             }
             else if (
-                prefixWBS == "X" ||
-                prefixWBS == "D" ||
-                prefixWBS == "A" ||
-                prefixWBS == "F"
+                //FID.Ridwan: 20220705
+                //prefixWBS == "X" ||
+                //prefixWBS == "D" ||
+                //prefixWBS == "A" ||
+                //prefixWBS == "F"
+                prefixWBS4dgt == "A3.Y" ||
+                prefixWBS4dgt == "F3.Y" ||
+                prefixWBS3dgt == "P3." ||
+                prefixWBS3dgt == "I3."
             ) {
+                wbsparam = '';
                 $.Clear([
                     idItem.ASSET_CATEGORY_CD,
                     idItem.ASSET_LOCATION,
@@ -2828,13 +2884,28 @@
 
                 DisableLookup([idDivLookup.DIV_ASSETNOITEM], true);
 
-                if (ViewData.Get("WBSType") == "subitem")
-                {
+                populateComboBox('costcenter');
+
+                if (ViewData.Get("WBSType") == "subitem") {
                     DisableLookup([idDivLookup.DIV_GLSUBITEM], false);
                 }
-                else
-                {
+                else {
                     DisableLookup([idDivLookup.DIV_GLITEM], false);
+                }
+            }
+            //FID.Ridwan: 20220705
+            else {
+                if (ViewData.Get("WBSType") == "subitem") {
+                    $.Disable([idSubItem.COST_CENTER]);
+                    DisableLookup([idDivLookup.DIV_GLSUBITEM], true);
+                    DisableLookup([idDivLookup.DIV_ASSETNOITEM], true);
+                    $.Disable([idSubItem.QTY]);
+                }
+                else {
+                    $.Disable([idItem.COST_CENTER]);
+                    DisableLookup([idDivLookup.DIV_GLITEM], true);
+                    DisableLookup([idDivLookup.DIV_ASSETNOITEM], true);
+                    $.Disable([idItem.QTY]);
                 }
             }
 
@@ -2869,6 +2940,18 @@
         $(idItem.ASSET_LOCATION).val(LOCATION_ID);
         $(idItem.ASSET_NO).val(ASSET_NO);
         $(idItem.SUBASSET_NO).val(SUB_ASSET_NO);
+
+        //FID.Ridwan: 20220705
+        assetnoparam = ASSET_NO;
+        subassetnoparam = SUB_ASSET_NO;
+        if (ViewData.Get("WBSType") == "subitem") {
+            wbsparam = $("#awbsnosubitem").val();
+        }
+        else {
+            wbsparam = $("#awbsno").val();
+        }
+
+        populateComboBox('costcenter');
 
         ClearLookupCriteria('AssetNo');
         $("#AssetNo-container").modal('hide');

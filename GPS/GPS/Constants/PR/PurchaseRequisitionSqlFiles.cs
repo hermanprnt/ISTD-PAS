@@ -20,6 +20,8 @@ namespace GPS.Constants.PR
         public const String DivisionList = _Root_Folder_Common + "call_getListDivision";
         public const String CostCenterList = _Root_Folder_Creation_DataList + "get_costcenterList";
         public const String CostCenterListByCoordinator = _Root_Folder_Creation_DataList + "get_costcenterListByCoordinator";
+        //FID.Ridwan: 20220705
+        public const String CostCenterListFamsDB = _Root_Folder_Creation_DataList + "get_costcenterListFamsDB";
         public const String PRStatusList = _Root_Folder_Inquiry + "get_prstatusList";
         public const String AssetCatList = _Root_Folder_Creation_DataList + "get_assetCatList";
         public const String AssetClassList = _Root_Folder_Creation_DataList + "get_assetClassList";

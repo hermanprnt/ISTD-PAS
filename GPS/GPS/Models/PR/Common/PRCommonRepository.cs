@@ -65,6 +65,16 @@ namespace GPS.Models.PR.Common
             return resultquery;
         }
 
+        //FID.Ridwan: 20220705
+        public IEnumerable<PRCommonList> GetDataCostCenterFamsDB(string assetNo, string subAssetNo)
+        {
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            dynamic args = new { ASSET_NO = assetNo, SUB_ASSET_NO = subAssetNo };
+            IEnumerable<PRCommonList> resultquery = db.Fetch<PRCommonList>(PurchaseRequisitionSqlFiles.CostCenterListFamsDB, args);
+            db.Close();
+            return resultquery;
+        }
+
         public IEnumerable<PRCommonList> GetDataPRStatusFlag(string type)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();
