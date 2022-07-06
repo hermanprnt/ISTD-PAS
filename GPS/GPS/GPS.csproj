@@ -681,6 +681,7 @@
     <Content Include="SQL\PR\PRCreation\copy_tempData.sql" />
     <Content Include="SQL\PR\PRCreation\CountData.sql" />
     <Content Include="SQL\PR\PRCreation\CountDataAssetNo.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_costcenterListFamsDB.sql" />
     <Content Include="SQL\PR\PRCreation\DataList\get_assetlocList.sql" />
     <Content Include="SQL\PR\PRCreation\DataList\get_costcenterListByCoordinator.sql" />
     <Content Include="SQL\PR\PRCreation\GetData.sql" />
