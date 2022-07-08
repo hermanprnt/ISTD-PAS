@@ -40,20 +40,20 @@ namespace GPS.Controllers.Report
         }
 
         #region SEARCH
-        private void Calldata(int Display, int page, string PR_NO, string PR_DT_FROM, string PR_DT_TO, string VENDOR, string CREATED_BY, string PO_NO, string PO_DT, string WBS_NO, string GR_NO, string GR_DATE, string DIVISION_ID, string INV_NO, string INV_DT, string PCS_GRP, string CLEARING_NO, string CLEARING_DATE)
+        private void Calldata(int Display, int page, string PR_NO, string PR_DT_FROM, string PR_DT_TO, string VENDOR, string CREATED_BY, string PO_NO, string PO_DT, string WBS_NO, string GR_NO, string GR_DATE, string DIVISION_ID, string INV_NO, string INV_DT, string PCS_GRP, string CLEARING_NO, string CLEARING_DATE, string STATUS_CD)
         {
-            Paging pg = new Paging(ProcurementTrackingRepository.Instance.CountData(PR_NO, PR_DT_FROM, PR_DT_TO, VENDOR, CREATED_BY, PO_NO, PO_DT, WBS_NO, GR_NO, GR_DATE, DIVISION_ID, INV_NO, INV_DT, PCS_GRP, CLEARING_NO, CLEARING_DATE), page, Display);
+            Paging pg = new Paging(ProcurementTrackingRepository.Instance.CountData(PR_NO, PR_DT_FROM, PR_DT_TO, VENDOR, CREATED_BY, PO_NO, PO_DT, WBS_NO, GR_NO, GR_DATE, DIVISION_ID, INV_NO, INV_DT, PCS_GRP, CLEARING_NO, CLEARING_DATE, STATUS_CD), page, Display);
             ViewData["Paging"] = pg;
 
-            List<ProcurementTracking> list = ProcurementTrackingRepository.Instance.GetData(PR_NO, PR_DT_FROM, PR_DT_TO, VENDOR, CREATED_BY, PO_NO, PO_DT, WBS_NO, GR_NO, GR_DATE, DIVISION_ID, INV_NO, INV_DT, PCS_GRP, CLEARING_NO, CLEARING_DATE, page, Display);
+            List<ProcurementTracking> list = ProcurementTrackingRepository.Instance.GetData(PR_NO, PR_DT_FROM, PR_DT_TO, VENDOR, CREATED_BY, PO_NO, PO_DT, WBS_NO, GR_NO, GR_DATE, DIVISION_ID, INV_NO, INV_DT, PCS_GRP, CLEARING_NO, CLEARING_DATE, STATUS_CD, page, Display);
             ViewData["ListProcurementTracking"] = list;
         }
 
-        public ActionResult onGetData(string clear, int Display, int Page, string PR_NO, string PR_DT_FROM, string PR_DT_TO, string VENDOR, string CREATED_BY, string PO_NO, string PO_DT, string WBS_NO, string GR_NO, string GR_DATE, string DIVISION_ID, string INV_NO, string INV_DT, string PCS_GRP, string CLEARING_NO, string CLEARING_DATE)
+        public ActionResult onGetData(string clear, int Display, int Page, string PR_NO, string PR_DT_FROM, string PR_DT_TO, string VENDOR, string CREATED_BY, string PO_NO, string PO_DT, string WBS_NO, string GR_NO, string GR_DATE, string DIVISION_ID, string INV_NO, string INV_DT, string PCS_GRP, string CLEARING_NO, string CLEARING_DATE, string STATUS_CD)
         {
             if (clear == "N")
             {
-                Calldata(Display, Page, PR_NO, PR_DT_FROM, PR_DT_TO, VENDOR, CREATED_BY, PO_NO, PO_DT, WBS_NO, GR_NO, GR_DATE, DIVISION_ID, INV_NO, INV_DT, PCS_GRP, CLEARING_NO, CLEARING_DATE);
+                Calldata(Display, Page, PR_NO, PR_DT_FROM, PR_DT_TO, VENDOR, CREATED_BY, PO_NO, PO_DT, WBS_NO, GR_NO, GR_DATE, DIVISION_ID, INV_NO, INV_DT, PCS_GRP, CLEARING_NO, CLEARING_DATE, STATUS_CD);
             }
             return PartialView("_ProcurementTrackingGrid");
         }
@@ -189,7 +189,7 @@ namespace GPS.Controllers.Report
         #endregion
 
         #region DOWNLOAD
-        public void DownloadHeader(string PR_NO, string PR_DT_FROM, string PR_DT_TO, string VENDOR, string CREATED_BY, string PO_NO, string PO_DT, string WBS_NO, string GR_NO, string GR_DATE, string DIVISION_ID, string INV_NO, string INV_DT, string PCS_GRP, string CLEARING_NO, string CLEARING_DATE)
+        public void DownloadHeader(string PR_NO, string PR_DT_FROM, string PR_DT_TO, string VENDOR, string CREATED_BY, string PO_NO, string PO_DT, string WBS_NO, string GR_NO, string GR_DATE, string DIVISION_ID, string INV_NO, string INV_DT, string PCS_GRP, string CLEARING_NO, string CLEARING_DATE, string STATUS_CD)
         {
             string filePath = HttpContext.Request.MapPath("~/Content/Download/ProcurementTrackingHeader.xls");
             FileStream ftmp = new FileStream(filePath, FileMode.Open, FileAccess.Read);
@@ -201,7 +201,7 @@ namespace GPS.Controllers.Report
 
             string username = this.GetCurrentUsername();
             List<ProcurementTracking> header = new List<ProcurementTracking>();
-            header = ProcurementTrackingRepository.Instance.getDownloadHeader(PR_NO, PR_DT_FROM, PR_DT_TO, VENDOR, CREATED_BY, PO_NO, PO_DT, WBS_NO, GR_NO, GR_DATE, DIVISION_ID, INV_NO, INV_DT, PCS_GRP, CLEARING_NO, CLEARING_DATE).ToList();
+            header = ProcurementTrackingRepository.Instance.getDownloadHeader(PR_NO, PR_DT_FROM, PR_DT_TO, VENDOR, CREATED_BY, PO_NO, PO_DT, WBS_NO, GR_NO, GR_DATE, DIVISION_ID, INV_NO, INV_DT, PCS_GRP, CLEARING_NO, CLEARING_DATE, STATUS_CD).ToList();
 
             ISheet sheet;
 
@@ -272,11 +272,11 @@ namespace GPS.Controllers.Report
                 Hrow.CreateCell(30).SetCellValue(bc_header.InvoiceDate.ToShortDateString()== "" ? "" : bc_header.InvoiceDate.ToStandardFormat());
                 Hrow.CreateCell(31).SetCellValue(bc_header.InvoiceAmount.ToStandardFormat() == "0" ? "" : bc_header.InvoiceAmount.ToStandardFormat());
                 Hrow.CreateCell(32).SetCellValue(bc_header.InvoiceCurrency);
-                Hrow.CreateCell(33).SetCellValue(bc_header.ClearingNo);
-                Hrow.CreateCell(34).SetCellValue(bc_header.ClearingDate.ToShortDateString() == "" ? "" : bc_header.ClearingDate.ToStandardFormat());
                 //FID.Ridwan:20220704
-                Hrow.CreateCell(35).SetCellValue(bc_header.SAPDocNo);
-                Hrow.CreateCell(36).SetCellValue(bc_header.SAPDocYear);
+                Hrow.CreateCell(33).SetCellValue(bc_header.SAPDocNo);
+                Hrow.CreateCell(34).SetCellValue(bc_header.SAPDocYear);
+                Hrow.CreateCell(35).SetCellValue(bc_header.ClearingNo);
+                Hrow.CreateCell(36).SetCellValue(bc_header.ClearingDate.ToShortDateString() == "" ? "" : bc_header.ClearingDate.ToStandardFormat());
                 row++;
             }
 
@@ -371,6 +371,17 @@ namespace GPS.Controllers.Report
         //    string filenametrimmed = "ProcurementTrackingDetail.xls";
         //    Response.AddHeader("content-disposition", String.Format("attachment;filename={0}", filenametrimmed));
         //}
+        #endregion
+
+        //FID.Ridwan: 20220708
+        #region SAPHANA
+        public static SelectList GetStatus()
+        {
+            return ProcurementTrackingRepository.Instance
+                .GetStatus()
+                .AsSelectList(sts => sts.Status_NAME,
+                    sts => sts.Status_ID);
+        }
         #endregion
     }
 }

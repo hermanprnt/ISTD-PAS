@@ -1564,6 +1564,7 @@
     <Content Include="SQL\ReceivingList\GetReceivingListDetail.sql" />
     <Content Include="SQL\ReceivingList\GetStatusGR.sql" />
     <Content Include="SQL\ReceivingList\GetSupplier.sql" />
+    <Content Include="SQL\Report\GetStatusCd.sql" />
     <Content Include="SQL\Report\countProcurementTracking.sql" />
     <Content Include="SQL\Report\downloadDataHeader.sql" />
     <Content Include="SQL\Report\GetAllDivision.sql" />

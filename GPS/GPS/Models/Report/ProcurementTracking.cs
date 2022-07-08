@@ -45,4 +45,12 @@ namespace GPS.Models.Report
 
         
     }
+
+    //FID.Ridwan:20220708
+    public class STATUS
+    {
+        public String Status_ID { get; set; }
+        public String Status_NAME { get; set; }
+    }
+
 }

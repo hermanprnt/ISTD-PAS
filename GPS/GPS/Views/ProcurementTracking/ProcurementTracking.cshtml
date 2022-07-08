@@ -155,7 +155,7 @@
             <div class="col-xs-12 col-sm-4 col-md-3">
 
                 <div class="form-group form-group-xs _criteria">
-                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">GR No.</label>
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">GR/SA No.</label>
                     <div class="col-xs-8 col-sm-5 col-md-8">
                         <div class="input-group pos-rel" style="width: 100%;">
                             @Html.TextBoxFor(m => m.GR_NO, new { id = "grno", @style = "width:100%", @class = "input_keyup" })
@@ -181,7 +181,7 @@
                         <div class="input-group pos-rel" style="width: calc(100% - 30px);">
                             @*@Html.DropDownListFor(m => m.DIVISION_ID, DivisionController.GetDivisionList(), new { id = "division", @class = "cursor-1", onchange = "javascript:populateComboBox('division')", @style = "width:100%;", @disabled = "disabled" })*@
                             @Html.DropDownListFor(m => m.DIVISION_ID,
-                                                        DivisionController.GetDivisionListCombo(),
+                                                        DivisionController.GetDivisionList(),
                                         new
                                         {
                                             id = "division",
@@ -236,6 +236,24 @@
                             <div class="input-group pos-rel" style="width: 100%;">
                                 @Html.TextBoxFor(m => m.WBS_NO, new { id = "pcsgrp", @style = "width:100%", @class = "input_keyup" })
                             </div>
+                        </div>
+                    </div>
+                    
+                    @*FID.Ridwan:20220708*@
+                    <div class="form-group form-group-xs _criteria">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Status</label>
+                        <div class="col-xs-8 col-sm-5 col-md-8">
+                            <div class="input-group pos-rel" style="width: calc(100% - 30px);">
+                            @Html.DropDownListFor(m => m.Status_ID,
+                                                        ProcurementTrackingController.GetStatus(),
+                                        new
+                                        {
+                                            id = "status",
+                                            @class = "cursor-1",
+                                            @style = "width:100%;"
+                                        }
+                                        )
+                        </div>
                         </div>
                     </div>
            </div>

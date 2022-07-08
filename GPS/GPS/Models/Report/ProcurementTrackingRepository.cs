@@ -23,7 +23,7 @@ namespace GPS.Models.Report
             }
         }
 
-        public int CountData(string PR_NO, string PR_DT_FROM, string PR_DT_TO, string VENDOR, string CREATED_BY, string PO_NO, string PO_DT, string WBS_NO, string GR_NO, string GR_DATE, string DIVISION_ID, string INV_NO, string INV_DT, string PCS_GRP, string CLEARING_NO, string CLEARING_DATE)
+        public int CountData(string PR_NO, string PR_DT_FROM, string PR_DT_TO, string VENDOR, string CREATED_BY, string PO_NO, string PO_DT, string WBS_NO, string GR_NO, string GR_DATE, string DIVISION_ID, string INV_NO, string INV_DT, string PCS_GRP, string CLEARING_NO, string CLEARING_DATE, string STATUS_CD)
         {
             string[] PRDate = PR_DT_FROM.Split('-');
             string[] PODate = PO_DT.Split('-');
@@ -55,13 +55,14 @@ namespace GPS.Models.Report
                 CLEARING_NO = CLEARING_NO,
                 CLEARING_DATE = ClDate[0],
                 CLEARING_DATE_TO = ClDate[1],
+                STATUS_CD = STATUS_CD,
             };
             int count = db.SingleOrDefault<int>("Report/countProcurementTracking",args);
             db.Close();
             return count;
         }
 
-        public List<ProcurementTracking> GetData(string PR_NO, string PR_DT_FROM, string PR_DT_TO, string VENDOR, string CREATED_BY, string PO_NO, string PO_DT, string WBS_NO, string GR_NO, string GR_DATE, string DIVISION_ID, string INV_NO, string INV_DT, string PCS_GRP, string CLEARING_NO, string CLEARING_DATE, int currentPage, int pageSize)
+        public List<ProcurementTracking> GetData(string PR_NO, string PR_DT_FROM, string PR_DT_TO, string VENDOR, string CREATED_BY, string PO_NO, string PO_DT, string WBS_NO, string GR_NO, string GR_DATE, string DIVISION_ID, string INV_NO, string INV_DT, string PCS_GRP, string CLEARING_NO, string CLEARING_DATE, string STATUS_CD, int currentPage, int pageSize)
         {
             string[] PRDate = PR_DT_FROM.Split('-');
             string[] PODate = PO_DT.Split('-');
@@ -91,6 +92,7 @@ namespace GPS.Models.Report
                 CLEARING_NO = CLEARING_NO,
                 CLEARING_DATE = ClDate[0],
                 CLEARING_DATE_TO = ClDate[1],
+                STATUS_CD = STATUS_CD,
                 currentPage = currentPage,
                 pageSize = pageSize
             };
@@ -99,7 +101,7 @@ namespace GPS.Models.Report
             return list;
         }
 
-        public IEnumerable<ProcurementTracking> getDownloadHeader(string PR_NO, string PR_DT_FROM, string PR_DT_TO, string VENDOR, string CREATED_BY, string PO_NO, string PO_DT, string WBS_NO, string GR_NO, string GR_DATE, string DIVISION_ID, string INV_NO, string INV_DT, string PCS_GRP, string CLEARING_NO, string CLEARING_DATE)
+        public IEnumerable<ProcurementTracking> getDownloadHeader(string PR_NO, string PR_DT_FROM, string PR_DT_TO, string VENDOR, string CREATED_BY, string PO_NO, string PO_DT, string WBS_NO, string GR_NO, string GR_DATE, string DIVISION_ID, string INV_NO, string INV_DT, string PCS_GRP, string CLEARING_NO, string CLEARING_DATE, string STATUS_CD)
         {
             string[] PRDate = PR_DT_FROM.Split('-');
             string[] PODate = PO_DT.Split('-');
@@ -129,6 +131,7 @@ namespace GPS.Models.Report
                 CLEARING_NO = CLEARING_NO,
                 CLEARING_DATE = ClDate[0],
                 CLEARING_DATE_TO = ClDate[1],
+                STATUS_CD = STATUS_CD,
             };
             IEnumerable<ProcurementTracking> result = db.Fetch<ProcurementTracking>("Report/downloadDataHeader", args);
             db.Close();
@@ -180,5 +183,23 @@ namespace GPS.Models.Report
             db.Close();
             return hasil == -1 ? 0 : hasil;
         }
+
+        //FID.Ridwan:20220708
+        #region SAP HANA
+        public IEnumerable<STATUS> GetStatus()
+        {
+            IDBContext db = DatabaseManager.Instance.GetContext();
+
+            dynamic args = new
+            {
+
+            };
+
+            IEnumerable<STATUS> result = db.Fetch<STATUS>("Report/GetStatusCd", args);
+            db.Close();
+            return result;
+        }
+
+        #endregion
     }
 }

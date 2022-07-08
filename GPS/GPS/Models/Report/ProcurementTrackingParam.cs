@@ -19,6 +19,8 @@
         public string GR_NO { get; set; }
         public string GR_DATE { get; set; }
         public string DIVISION_ID { get; set; }
+        //FID.Ridwan:20220708
+        public string Status_ID { get; set; }
 
 
         public string CLEARING_NO { get; set; }
