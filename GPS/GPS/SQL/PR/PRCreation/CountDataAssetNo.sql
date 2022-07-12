@@ -6,7 +6,7 @@ BEGIN
 					AND isnull(@DIVISION_PARAM, '') <> ''
 					OR (isnull(@DIVISION_PARAM, '') = '')))
 				/* FID.Ridwan: 20220712*/
-				AND (ISNULL(@wbsno, '') = '' OR WBS_NO LIKE '%' + ISNULL(@wbsno, '') + '%' )
+				AND (ISNULL(@wbsno, '') = '' OR WBS_NO = ISNULL(@wbsno, '') )
 END
 ELSE
 BEGIN
@@ -20,5 +20,5 @@ BEGIN
 					OR (isnull(@DIVISION_PARAM, '') = '')))
 					)
 				/* FID.Ridwan: 20220712*/
-				AND (ISNULL(@wbsno, '') = '' OR WBS_NO LIKE '%' + ISNULL(@wbsno, '') + '%' )
+				AND (ISNULL(@wbsno, '') = '' OR WBS_NO = ISNULL(@wbsno, '') )
 END
