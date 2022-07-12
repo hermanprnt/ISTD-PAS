@@ -1322,6 +1322,11 @@
                 /// Check if PR_RESERVATION, price should > 0
                 if (prtype == ViewData.Get("PRType")["Reservation"] && parseFloat($(idItem.PRICE).val()) <= 0)
                     isGreaterThanZero = isGreaterThanZero + "Price, ";
+
+                //FID.Ridwan : 20220712
+                if ($(idItem.WBS_NO).val().substr(0, 1) == "R" || $(idItem.WBS_NO).val().substr(0, 1) == "C") {
+                    if ($(idItem.ASSET_NO).val() == '') mandatoryDetailItem = mandatoryDetailItem + "Asset No, ";
+                }
             }
 
             if ($(idItem.MAT_NO).val() == '') {
@@ -1836,6 +1841,11 @@
         if ($(idSubItem.MAT_DESC).val() == '')
             mandatoryDetailItem = mandatoryDetailItem + "Descricption, ";
 
+        //FID.Ridwan : 20220712
+        if ($(idSubItem.WBS_NO).val().substr(0, 1) == "R" || $(idSubItem.WBS_NO).val().substr(0, 1) == "C") {
+            if ($(idItem.ASSET_NO).val() == '') mandatoryDetailItem = mandatoryDetailItem + "Asset No, ";
+        }
+
         if ($(idSubItem.QTY).val() == '') mandatoryDetailItem = mandatoryDetailItem + "Quantity, ";
         if ($(idSubItem.UOM).val() == '') mandatoryDetailItem = mandatoryDetailItem + "UOM, ";
         if ($(idSubItem.PRICE).val() == '') mandatoryDetailItem = mandatoryDetailItem + "Price, ";
@@ -2308,7 +2318,9 @@
             pageSize: LookupMaxRowPerPage,
             page: page,
             ASSETNO_PARAM: $('#AssetNosearchbox').val(),
-            DIVISION_PARAM: $('#division_id').val()
+            DIVISION_PARAM: $('#division_id').val(),
+            //FID.Ridwan: 20220712
+            WBS_PARAM: ($("#awbsno").val() == '' ? $("#awbsnosubitem").val() : $("#awbsno").val())
              
         }
     }

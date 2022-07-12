@@ -15,6 +15,8 @@ BEGIN
 			WHERE ((DIVISION_ID_HR LIKE '%' + ISNULL(@DIVISION_PARAM, '') + '%'
 					AND isnull(@DIVISION_PARAM, '') <> ''
 					OR (isnull(@DIVISION_PARAM, '') = '')))
+				/* FID.Ridwan: 20220712*/
+				AND (ISNULL(@wbsno, '') = '' OR WBS_NO LIKE '%' + ISNULL(@wbsno, '') + '%' )
 	) tbl WHERE tbl.Number >= @Start AND tbl.Number <= @Length
 
 END
@@ -37,6 +39,8 @@ BEGIN
 				AND ((DIVISION_ID_HR LIKE '%' + ISNULL(@DIVISION_PARAM, '') + '%'
 					AND isnull(@DIVISION_PARAM, '') <> ''
 					OR (isnull(@DIVISION_PARAM, '') = '')))
+				/* FID.Ridwan: 20220712*/
+				AND (ISNULL(@wbsno, '') = '' OR WBS_NO LIKE '%' + ISNULL(@wbsno, '') + '%' )
 			)
 	) tbl WHERE tbl.Number >= @Start AND tbl.Number <= @Length
 

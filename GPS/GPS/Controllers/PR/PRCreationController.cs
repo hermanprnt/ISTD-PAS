@@ -226,12 +226,13 @@ namespace GPS.Controllers.PR
             ViewData["Paging"] = CountIndex(VendorRepository.Instance.CountDataPr(param.VENDOR_PARAM, param.VALUATION_CLASS_PARAM, "", "", "", ""), pageSize, page);
             ViewData["FUNC"] = "getVendorGrid";
         }
+        //FID.Ridwan: 20220712 --> add wbs no param
         private void BindAssetNo(PRCreation param, int pageSize = 10, int page = 1)
         {
             if (String.IsNullOrEmpty(param.ASSETNO_PARAM)) param.ASSETNO_PARAM = "";
 
-            ViewData["AssetNo"] = PRCreationRepository.Instance.GetListDataAssetNo(param.ASSETNO_PARAM, param.DIVISION_PARAM, "", "", "", (((page - 1) * pageSize) + 1), (page * pageSize));
-            ViewData["Paging"] = CountIndex(PRCreationRepository.Instance.CountDataAssetNo(param.ASSETNO_PARAM, param.DIVISION_PARAM, "", "", ""), pageSize, page);
+            ViewData["AssetNo"] = PRCreationRepository.Instance.GetListDataAssetNo(param.ASSETNO_PARAM, param.DIVISION_PARAM, "", "", "",param.WBS_PARAM, (((page - 1) * pageSize) + 1), (page * pageSize));
+            ViewData["Paging"] = CountIndex(PRCreationRepository.Instance.CountDataAssetNo(param.ASSETNO_PARAM, param.DIVISION_PARAM, "", "", "", param.WBS_PARAM), pageSize, page);
             ViewData["FUNC"] = "getAssetNoGrid";
         }
 

@@ -227,7 +227,8 @@ namespace GPS.Models.PR.PRCreation
             db.Close();
             return result;
         }
-        public IEnumerable<PRCreation> GetListDataAssetNo(string Param, string DIVISION_PARAM, string VendorName, string PayMethod, string PayTerm, int start, int length)
+        //FID.Ridwan: 20220712 --> add wbs no param
+        public IEnumerable<PRCreation> GetListDataAssetNo(string Param, string DIVISION_PARAM, string VendorName, string PayMethod, string PayTerm, string wbsno, int start, int length)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();
             dynamic args = new
@@ -237,6 +238,7 @@ namespace GPS.Models.PR.PRCreation
                 PayMethod,
                 PayTerm,
                 Param,
+                wbsno,
                 Start = start,
                 Length = length
             };
@@ -246,7 +248,8 @@ namespace GPS.Models.PR.PRCreation
             db.Close();
             return result;
         }
-        public int CountDataAssetNo(string Param, string DIVISION_PARAM, string VendorName, string PayMethod, string PayTerm)
+        //FID.Ridwan: 20220712 --> add wbs no param
+        public int CountDataAssetNo(string Param, string DIVISION_PARAM, string VendorName, string PayMethod, string PayTerm, string wbsno)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();
             dynamic args = new
@@ -255,7 +258,8 @@ namespace GPS.Models.PR.PRCreation
                 VendorName,
                 PayMethod,
                 PayTerm,
-                Param
+                Param,
+                wbsno
             };
 
             int result = db.SingleOrDefault<int>("PR/PRCreation/CountDataAssetNo", args);
