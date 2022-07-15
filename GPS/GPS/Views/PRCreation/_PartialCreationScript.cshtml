@@ -437,30 +437,31 @@
                     }
                     break;
                 }
-            case ViewData.Get("AssetCategory")["MainAsset"]:
-                {
-                    //disableList.push(idItem.ASSET_NO);
-                    disableList.push(idItem.SUBASSET_NO);
-                    enableList.push(idItem.ASSET_CLASS, idItem.ASSET_NO);
-                    clearList.push(idItem.ASSET_CLASS, idItem.ASSET_LOCATION, idItem.ASSET_NO);
-                    lookupEnableList.push(idDivLookup.DIV_ASSETLOCITEM);
+            //FID.Ridwan: 20220714 --> remark as request ISTD
+            //case ViewData.Get("AssetCategory")["MainAsset"]:
+            //    {
+            //        //disableList.push(idItem.ASSET_NO);
+            //        disableList.push(idItem.SUBASSET_NO);
+            //        enableList.push(idItem.ASSET_CLASS, idItem.ASSET_NO);
+            //        clearList.push(idItem.ASSET_CLASS, idItem.ASSET_LOCATION, idItem.ASSET_NO);
+            //        lookupEnableList.push(idDivLookup.DIV_ASSETLOCITEM);
 
-                    $(idItem.SUBASSET_NO).val("00")
-                    ViewData.Add("Old_AssetCat", assetcat);
-                    break;
-                }
-            case ViewData.Get("AssetCategory")["SubAsset"]:
-                {
-                    //$(idItem.ASSET_NO).val($(idHeader.MAIN_ASSET_NO).val();
-                    enableList.push(idItem.ASSET_CLASS, idItem.SUBASSET_NO, idItem.ASSET_NO);
-                    clearList.push(idItem.ASSET_CLASS, idItem.ASSET_LOCATION);
-                    lookupEnableList.push(idDivLookup.DIV_ASSETLOCITEM);
-                    $(idItem.ASSET_NO).val("")
-                    $(idItem.SUBASSET_NO).val("")
+            //        $(idItem.SUBASSET_NO).val("00")
+            //        ViewData.Add("Old_AssetCat", assetcat);
+            //        break;
+            //    }
+            //case ViewData.Get("AssetCategory")["SubAsset"]:
+            //    {
+            //        //$(idItem.ASSET_NO).val($(idHeader.MAIN_ASSET_NO).val();
+            //        enableList.push(idItem.ASSET_CLASS, idItem.SUBASSET_NO, idItem.ASSET_NO);
+            //        clearList.push(idItem.ASSET_CLASS, idItem.ASSET_LOCATION);
+            //        lookupEnableList.push(idDivLookup.DIV_ASSETLOCITEM);
+            //        $(idItem.ASSET_NO).val("")
+            //        $(idItem.SUBASSET_NO).val("")
 
-                    ViewData.Add("Old_AssetCat", assetcat);
-                    break;
-                }
+            //        ViewData.Add("Old_AssetCat", assetcat);
+            //        break;
+            //    }
             case ViewData.Get("AssetCategory")["Maintenance"]:
                 {
                     if ($(idHeader.MAIN_ASSET_NO).val() == 0) {
@@ -1764,6 +1765,10 @@
                 $.Disable([idItem.GL_ACCOUNT]);
                 $(idItem.GL_ACCOUNT).val('X');
                 DisableLookup([idDivLookup.DIV_GLITEM], true);
+                assetnoparam = $(idItem.ASSET_NO).val();
+                subassetnoparam = $(idItem.SUBASSET_NO).val();
+                wbsparam = $(idItem.WBS_NO).val();
+                populateComboBox('costcenter');
             }
 
             if (prefixWBS == 'A' ||
@@ -2176,6 +2181,11 @@
             if (prefixWBS == 'R') {
                 $.Disable([idSubItem.QTY]);
             }
+            assetnoparam = $(idItem.ASSET_NO).val();
+            subassetnoparam = $(idItem.SUBASSET_NO).val();
+            wbsparam = $(idSubItem.WBS_NO).val();
+            ViewData.Add("WBSType", "subitem");
+            populateComboBox('costcenter');
         }
 
         if (prefixWBS == 'A' ||
