@@ -67,9 +67,11 @@
 	TB_R_PR_H A 
 	inner join TB_R_PR_ITEM B on A.PR_NO=B.PR_NO
 	left join TB_R_PR_SUBITEM C on A.PR_NO = c.PR_NO
+		AND B.PR_ITEM_NO = C.PR_ITEM_NO
 	left join TB_R_PO_H D on b.PO_NO=d.PO_NO
 	left join TB_R_PO_ITEM e on d.PO_NO=e.PO_NO
 	left join TB_R_PO_SUBITEM f on d.PO_NO=f.PO_NO
+		AND E.PO_ITEM_NO = F.PO_ITEM_NO
 	left join TB_R_GR_IR g on d.PO_NO = g.PO_NO
 	left join TB_R_INVOICE_INFO h on h.GR_NUMBER = g.MAT_DOC_NO
 	where 1=1 

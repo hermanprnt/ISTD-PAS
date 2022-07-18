@@ -297,6 +297,17 @@
             $(this).next().focus();
         });
 
+        var dateFrom = document.getElementsByName("daterangepicker_start");
+        for (i = 0; i < dateFrom.length; i++)
+        {
+            dateFrom[i].disabled = true;
+        }
+
+        var dateEnd = document.getElementsByName("daterangepicker_end");
+        for (i = 0; i < dateEnd.length; i++) {
+            dateEnd[i].disabled = true;
+        }
+
         var dt = new Date();
         dt.getDate();
         $("#prdtfrom").val(("0" + (curdate.getUTCMonth() + 1).toString()).slice(-2) + '/' + ("0" + curdate.getUTCDate()).slice(-2) + '/' + curdate.getUTCFullYear() + " - " + ("0" + (dt.getUTCMonth() + 1).toString()).slice(-2) + '/' + ("0" + dt.getUTCDate()).slice(-2) + '/' + dt.getUTCFullYear());
