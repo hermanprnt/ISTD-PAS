@@ -11,7 +11,7 @@
 	,CURRENCY currency
 	,CURRENCY_RATE currency_rate
 	,LINE_NO line_no
-	,'' closed2
+	,CLOSED_2 closed2
 	,REFERENCE_NO ref_doc_no
 	,REFERENCE_LINE_NO ref_doc_line_item_no
 	,ITEM_CD item_code
