@@ -22,6 +22,7 @@
                             <th width="3%;" rowspan="2">No</th>
                             <th rowspan="2" class="sorting" data-field="REFERENCE_DOC_NO" data-sort="none">Document No</th>
                             @*<th width="107px;" rowspan="2">Material No</th>*@
+                            <th width="8%;" rowspan="2">PO No</th>
                             <th class="text-center sorting" rowspan="2" data-field="ITEM_DESCRIPTION" data-sort="none" >Item Description</th>
                             <th  width="3%;" rowspan="2">Currency</th>
                             <th  width="8%;" rowspan="2">Amount</th>
@@ -50,6 +51,7 @@
                                         <td class="text-center" >@item.NUMBER</td>
                                         <td class="text-left">@item.REFERENCE_DOC_NO</td>
                                         @*<td style="width:107px;" class="text-center">@item.MATERIAL_NO</td>*@
+                                        <td class="text-left">@item.PO_NO</td>
                                         <td class="text-left">@item.ITEM_DESCRIPTION</td>
                                         <td class="text-center">@item.CURR_CD</td>
                                         <td class="text-right">@(String.Format("{0:n0}", item.ACTUAL_AMOUNT))</td>

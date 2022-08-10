@@ -42,7 +42,8 @@
         public string ACTION_TYPE { get; set; }
         public string SIGN { get; set; }
         public string IS_SYNCH { get; set; }
-        
+        public string PO_NO { get; set; }//add by fid.ahmad 03-08-2022
+
         //for grid
         public double COMMITMENT { get; set; }
         public double REMAINING_COMMITMENT { get; set; }

@@ -24,8 +24,8 @@ namespace GPS
 
             ApplicationSettings.Instance.Security.EnableAuthentication = true;
             ApplicationSettings.Instance.Security.IgnoreAuthorization = true;
-            ApplicationSettings.Instance.Security.EnableSingleSignOn = false;
-            BypassLogin(true);
+            //ApplicationSettings.Instance.Security.EnableSingleSignOn = false;
+            //BypassLogin(true);
         }
         private void BypassLogin(bool isBypass)
         {

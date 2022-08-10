@@ -590,14 +590,15 @@ namespace GPS.Controllers.PR
                 downloadEngine.WriteCellValue(Hrow, 14, styleNormal, item.VENDOR_CD);
                 downloadEngine.WriteCellValue(Hrow, 15, styleNormal, item.VENDOR_NAME);
                 downloadEngine.WriteCellValue(Hrow, 16, styleNormal, item.STATUS_DESC);
-                downloadEngine.WriteCellValue(Hrow, 17, styleNormal, item.CREATED_BY);
-                downloadEngine.WriteCellValue(Hrow, 18, styleNormal, item.CURRENT_APPROVER);
-                downloadEngine.WriteCellValue(Hrow, 19, styleNormal, item.PO_NO);
-                downloadEngine.WriteCellValue(Hrow, 20, styleNormal, item.PO_ITEM_NO);
-                downloadEngine.WriteCellValue(Hrow, 21, styleNormal, item.DIVISION_NAME);
-                downloadEngine.WriteCellValue(Hrow, 22, styleNormal, string.Format("{0:yyyy-MM-dd}", item.DOC_DT));
-                downloadEngine.WriteCellValue(Hrow, 23, styleNormal, item.PLANT_NAME);
-                downloadEngine.WriteCellValue(Hrow, 24, styleNormal, item.SLOC_NAME);
+                downloadEngine.WriteCellValue(Hrow, 17, styleNormal, item.COORDINATOR_DESC);//add by fid.ahmad 04-08-2022
+                downloadEngine.WriteCellValue(Hrow, 18, styleNormal, item.CREATED_BY);
+                downloadEngine.WriteCellValue(Hrow, 19, styleNormal, item.CURRENT_APPROVER);
+                downloadEngine.WriteCellValue(Hrow, 20, styleNormal, item.PO_NO);
+                downloadEngine.WriteCellValue(Hrow, 21, styleNormal, item.PO_ITEM_NO);
+                downloadEngine.WriteCellValue(Hrow, 22, styleNormal, item.DIVISION_NAME);
+                downloadEngine.WriteCellValue(Hrow, 23, styleNormal, string.Format("{0:yyyy-MM-dd}", item.DOC_DT));
+                downloadEngine.WriteCellValue(Hrow, 24, styleNormal, item.PLANT_NAME);
+                downloadEngine.WriteCellValue(Hrow, 25, styleNormal, item.SLOC_NAME);
                 row++;
             }
 

@@ -29,6 +29,7 @@ namespace GPS.Controllers.Master
         #region SEARCH
         private void Calldata(int Display, int Page, string division, string wbs_no, string year)
         {
+            
             Paging pg = new Paging(BudgetControlRepository.Instance.CountData(division, wbs_no, year), Page, Display);
             ViewData["Paging"] = pg;
             List<BudgetControl> list = BudgetControlRepository.Instance.GetData(pg.StartData, pg.EndData, division, wbs_no, year);
@@ -300,23 +301,24 @@ namespace GPS.Controllers.Master
             {
                 Hrow = sheet.CreateRow(row);
                 Hrow.CreateCell(0).SetCellValue(bc_detail.REFERENCE_DOC_NO);
-                Hrow.CreateCell(1).SetCellValue(bc_detail.ITEM_DESCRIPTION);
-                Hrow.CreateCell(2).SetCellValue(bc_detail.CURR_CD);
-                Hrow.CreateCell(3).SetCellValue(bc_detail.ACTUAL_AMOUNT);
-                Hrow.CreateCell(4).SetCellValue(Convert.ToDouble(bc_detail.EXC_RATE_ACTUAL));
+                Hrow.CreateCell(1).SetCellValue(bc_detail.PO_NO);
+                Hrow.CreateCell(2).SetCellValue(bc_detail.ITEM_DESCRIPTION);
+                Hrow.CreateCell(3).SetCellValue(bc_detail.CURR_CD);
+                Hrow.CreateCell(4).SetCellValue(bc_detail.ACTUAL_AMOUNT);
+                Hrow.CreateCell(5).SetCellValue(Convert.ToDouble(bc_detail.EXC_RATE_ACTUAL));
                 if (bc_detail.SIGN == "P")
                 {
-                    Hrow.CreateCell(5).SetCellValue(bc_detail.TOTAL_AMOUNT);
-                    Hrow.CreateCell(6).SetCellValue(0);
+                    Hrow.CreateCell(6).SetCellValue(bc_detail.TOTAL_AMOUNT);
+                    Hrow.CreateCell(7).SetCellValue(0);
                 }
                 else
                 {
-                    Hrow.CreateCell(5).SetCellValue(0);
-                    Hrow.CreateCell(6).SetCellValue(bc_detail.TOTAL_AMOUNT);
+                    Hrow.CreateCell(6).SetCellValue(0);
+                    Hrow.CreateCell(7).SetCellValue(bc_detail.TOTAL_AMOUNT);
                 }
-                Hrow.CreateCell(7).SetCellValue(bc_detail.ACTION_TYPE);
-                Hrow.CreateCell(8).SetCellValue(bc_detail.CHANGED_BY);
-                Hrow.CreateCell(9).SetCellValue(bc_detail.CHANGED_DT);
+                Hrow.CreateCell(8).SetCellValue(bc_detail.ACTION_TYPE);
+                Hrow.CreateCell(9).SetCellValue(bc_detail.CHANGED_BY);
+                Hrow.CreateCell(10).SetCellValue(bc_detail.CHANGED_DT);
                 row++;
             }
 
