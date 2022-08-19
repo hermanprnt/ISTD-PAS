@@ -1277,13 +1277,16 @@
                 }
 
                 /// WBS P/S and Asset = Non asset, Cost center should be empty.
-                if (($(idItem.WBS_NO).val().substr(0, 1) == "P" || $(idItem.WBS_NO).val().substr(0, 1) == "S")
+                //FID.Ridwan : 20220819 --> I and P mandatory
+                //if (($(idItem.WBS_NO).val().substr(0, 1) == "P" || $(idItem.WBS_NO).val().substr(0, 1) == "S")
+                if (($(idItem.WBS_NO).val().substr(0, 1) == "S")
                     && $(idItem.ASSET_CATEGORY).val() == ViewData.Get("AssetCategory")["NonAsset"])
                 {
                     $(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).val("X");
                 }
                     // penambahan vaidasi cost center tidak mandatory untuk aset -- 06-09-2019 wot.rudi
-                else if (($(idItem.WBS_NO).val().substr(0, 1) == "P" || $(idItem.WBS_NO).val().substr(0, 1) == "S")
+                //else if (($(idItem.WBS_NO).val().substr(0, 1) == "P" || $(idItem.WBS_NO).val().substr(0, 1) == "S")
+                else if (($(idItem.WBS_NO).val().substr(0, 1) == "S")
                     && $(idItem.ASSET_CATEGORY).val() != ViewData.Get("AssetCategory")["NonAsset"])
                 {
                     $(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).val("X");
@@ -1293,10 +1296,13 @@
                     if ($(idItem.COST_CENTER, $(idItem.COST_CENTER_DIV)).val() == '') mandatoryDetailItem = mandatoryDetailItem + "Cost Center, ";
                 }
 
+                //FID.Ridwan : 20220819 --> I and P mandatory
                 /// WBS I/L, GL account should be empty. WBS P/S and Asset != Non asset, GL account should be empty
-                if ($(idItem.WBS_NO).val().substr(0, 1) != "I" && $(idItem.WBS_NO).val().substr(0, 1) != "L") 
+                //if ($(idItem.WBS_NO).val().substr(0, 1) != "I" && $(idItem.WBS_NO).val().substr(0, 1) != "L") 
+                if ($(idItem.WBS_NO).val().substr(0, 1) != "L")
                 {
-                    if (($(idItem.WBS_NO).val().substr(0, 1) == "P" || $(idItem.WBS_NO).val().substr(0, 1) == "S") && $(idItem.ASSET_CATEGORY).val() != ViewData.Get("AssetCategory")["NonAsset"]) {
+                    //if (($(idItem.WBS_NO).val().substr(0, 1) == "P" || $(idItem.WBS_NO).val().substr(0, 1) == "S") && $(idItem.ASSET_CATEGORY).val() != ViewData.Get("AssetCategory")["NonAsset"]) {
+                    if (($(idItem.WBS_NO).val().substr(0, 1) == "S") && $(idItem.ASSET_CATEGORY).val() != ViewData.Get("AssetCategory")["NonAsset"]) {
                         //$(idItem.GL_ACCOUNT).val('X');
 
                         //perubahan GL account mandatory untuk wbs kecuali i --  06/09/2019 wot.rudi
