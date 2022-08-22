@@ -1,11 +1,12 @@
 ﻿DECLARE @@DB_CONNECTION VARCHAR(30),
         @@SQL_QUERY VARCHAR(MAX),
 		@@DIV_PARAMETER VARCHAR(10)
-
+		,@@DB_SCHEMA VARCHAR(30)
             
 SELECT @@DB_CONNECTION =  SYSTEM_VALUE FROM TB_M_SYSTEM WHERE SYSTEM_CD = 'BudgetControl'
+SELECT @@DB_SCHEMA =  SYSTEM_VALUE FROM TB_M_SYSTEM WHERE SYSTEM_CD = 'BudgetControlSchema'
 
 SET @@SQL_QUERY = '
-		EXEC ' + @@DB_CONNECTION + '.[BMS_DB].[dbo].[sp_BudgetControlGetDataDetail] '''+@WBS_NO+''', ' + @ACTION_TYPE + ', '+CAST(@Start AS VARCHAR)+', '+CAST(@End AS VARCHAR)+'
+		EXEC ' + @@DB_CONNECTION + '.' + @@DB_SCHEMA + '.[dbo].[sp_BudgetControlGetDataDetail] '''+@WBS_NO+''', ' + @ACTION_TYPE + ', '+CAST(@Start AS VARCHAR)+', '+CAST(@End AS VARCHAR)+'
 	'
 EXEC(@@SQL_QUERY)
