@@ -22,9 +22,84 @@
  , @@STATUS_CD_PAR VARCHAR(100) = LTRIM(RTRIM(@STATUS_CD))
 
 ;with tmp AS (
-	select 
-		ROW_NUMBER() OVER (ORDER BY A.PR_NO DESC) Data_No
-	
+	SELECT ROW_NUMBER() OVER (ORDER BY TB.PR_NO DESC) Data_No
+	,	TB.PR_NO	
+	,	TB.PR_ITEM_NO
+	,	TB.PR_SUBITEM_NO
+	,	TB.PR_DOC_DT
+	,	TB.PLANT_CD
+	,	TB.SLOC_CD
+	,	TB.MAT_NO
+	,	TB.MAT_DESC
+	,	TB.PR_QTY
+	,	TB.UNIT_OF_MEASURE_CD
+	,	TB.PR_ORI_AMOUNT
+	,	TB.ORI_CURR_CD
+	,	TB.BUDGET_REF
+	,	TB.CREATED_BY
+	,	TB.PO_NO
+	,	TB.PO_ITEM_NO
+	,	TB.PO_SUBITEM_NO	
+	,	TB.PURCHASING_GRP_CD
+	,	TB.PO_DOC_DT
+	,	TB.PO_CURR
+	,	TB.PO_QTY_ORI
+	, 	TB.UOM
+	,	TB.PO_ORI_AMOUNT
+	,	TB.VENDOR_CD
+	,	TB.VENDOR_NAME
+	,	TB.MAT_DOC_NO
+	,	TB.MAT_DOC_ITEM_NO
+	,	TB.GR_PO_SUBITEM_NO
+	, 	TB.DOCUMENT_DT
+	,	TB.GR_IR_AMOUNT
+	,	TB.InvoiceNo
+	,	TB.InvoiceDate
+	,	TB.InvoiceAmount
+	,	TB.InvoiceCurrency
+	,	TB.ClearingNo
+	,	TB.ClearingDate	
+	,	TB.SAPDocNo
+	,	TB.SAPDocYear
+	FROM (
+	select  DISTINCT A.PR_NO	
+	,	b.PR_ITEM_NO
+	,	c.PR_SUBITEM_NO
+	,	a.DOC_DT as PR_DOC_DT
+	,	a.PLANT_CD
+	,	a.SLOC_CD
+	,	b.MAT_NO
+	,	b.MAT_DESC
+	,	b.PR_QTY
+	,	b.UNIT_OF_MEASURE_CD
+	,	b.ORI_AMOUNT as PR_ORI_AMOUNT
+	,	b.ORI_CURR_CD
+	,	b.WBS_NO as BUDGET_REF
+	,	a.CREATED_BY
+	,	d.PO_NO
+	,	e.PO_ITEM_NO
+	,	f.PO_SUBITEM_NO	
+	,	d.PURCHASING_GRP_CD
+	,	d.DOC_DT as PO_DOC_DT
+	,	d.PO_CURR
+	,	e.PO_QTY_ORI
+	, 	e.UOM
+	,	e.ORI_AMOUNT as PO_ORI_AMOUNT
+	,	d.VENDOR_CD
+	,	d.VENDOR_NAME
+	,	g.MAT_DOC_NO
+	,	g.MAT_DOC_ITEM_NO
+	,	g.PO_SUBITEM_NO as GR_PO_SUBITEM_NO
+	, 	g.DOCUMENT_DT
+	,	g.GR_IR_AMOUNT
+	,	h.INVOICE_NO as InvoiceNo
+	,	h.INVOICE_DATE as InvoiceDate
+	,	h.TOTAL_AMOUNT as InvoiceAmount
+	,	h.CURRENCY as InvoiceCurrency
+	,	h.LOG_DOC_NO as ClearingNo
+	,	h.CLEARING_DOC_DT as ClearingDate	
+	,	h.SAP_DOC_NO SAPDocNo
+	,	h.SAP_DOC_YEAR SAPDocYear
 	from 
 	TB_R_PR_H A 
 	inner join TB_R_PR_ITEM B on A.PR_NO=B.PR_NO
@@ -32,10 +107,12 @@
 		AND B.PR_ITEM_NO = C.PR_ITEM_NO
 	left join TB_R_PO_H D on b.PO_NO=d.PO_NO
 	left join TB_R_PO_ITEM e on d.PO_NO=e.PO_NO
+		AND b.PR_ITEM_NO = e.PR_ITEM_NO
+		AND b.PR_NO = e.PR_NO
 	left join TB_R_PO_SUBITEM f on d.PO_NO=f.PO_NO
 		AND E.PO_ITEM_NO = F.PO_ITEM_NO
-	left join TB_R_GR_IR g on d.PO_NO = g.PO_NO
-	left join TB_R_INVOICE_INFO h on h.GR_NUMBER = g.MAT_DOC_NO
+	left join TB_R_GR_IR g on d.PO_NO = g.PO_NO AND E.PO_ITEM_NO = G.PO_ITEM
+	left join TB_R_INVOICE_INFO h on h.GR_NUMBER = g.MAT_DOC_NO AND H.GR_ITEM = G.MAT_DOC_ITEM_NO
 	where 1=1 
 	AND (ISNULL(@@PR_NO_PAR, '') = '' OR ISNULL(A.PR_NO, '') LIKE '%' + ISNULL(@@PR_NO_PAR, '') + '%')
 	AND (ISNULL(@@VENDOR_PAR, '') = '' OR ISNULL(D.VENDOR_CD, '') LIKE '%' + ISNULL(@@VENDOR_PAR, '') + '%')
@@ -63,4 +140,5 @@
 				EXISTS (SELECT 1 FROM TB_R_PO_ITEM POI WHERE D.PO_NO = POI.PO_NO AND POI.PO_QTY_ORI = POI.PO_QTY_REMAIN))
 			)
 		)
+	) TB
 ) SELECT count(*) FROM tmp 

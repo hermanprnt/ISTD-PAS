@@ -21,7 +21,7 @@
  , @@GR_DATE_TO_PAR DATE = CAST(@GR_DATE_TO AS DATE)
  , @@STATUS_CD_PAR VARCHAR(100) = LTRIM(RTRIM(@STATUS_CD))
 
-select 
+select DISTINCT
 			A.PR_NO	
 	,	b.PR_ITEM_NO
 	,	c.PR_SUBITEM_NO
@@ -67,10 +67,12 @@ select
 		AND B.PR_ITEM_NO = C.PR_ITEM_NO
 	left join TB_R_PO_H D on b.PO_NO=d.PO_NO
 	left join TB_R_PO_ITEM e on d.PO_NO=e.PO_NO
+		AND b.PR_ITEM_NO = e.PR_ITEM_NO
+		AND b.PR_NO = e.PR_NO
 	left join TB_R_PO_SUBITEM f on d.PO_NO=f.PO_NO
 		AND E.PO_ITEM_NO = F.PO_ITEM_NO
-	left join TB_R_GR_IR g on d.PO_NO = g.PO_NO
-	left join TB_R_INVOICE_INFO h on h.GR_NUMBER = g.MAT_DOC_NO
+	left join TB_R_GR_IR g on d.PO_NO = g.PO_NO AND E.PO_ITEM_NO = G.PO_ITEM
+	left join TB_R_INVOICE_INFO h on h.GR_NUMBER = g.MAT_DOC_NO AND H.GR_ITEM = G.MAT_DOC_ITEM_NO
 	where 1=1 
 	AND (ISNULL(@@PR_NO_PAR, '') = '' OR ISNULL(A.PR_NO, '') LIKE '%' + ISNULL(@@PR_NO_PAR, '') + '%')
 	AND (ISNULL(@@VENDOR_PAR, '') = '' OR ISNULL(D.VENDOR_CD, '') LIKE '%' + ISNULL(@@VENDOR_PAR, '') + '%')
