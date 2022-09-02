@@ -21,6 +21,68 @@
  , @@GR_DATE_TO_PAR DATE = CAST(@GR_DATE_TO AS DATE)
  , @@STATUS_CD_PAR VARCHAR(100) = LTRIM(RTRIM(@STATUS_CD))
  
+IF OBJECT_ID('tempdb..#temp_search_proc_tracking') IS NOT NULL
+BEGIN
+	DROP TABLE #temp_search_proc_tracking
+END
+
+ select  DISTINCT A.PR_NO	
+	,	b.PR_ITEM_NO
+	,	c.PR_SUBITEM_NO
+	,	a.DOC_DT as PR_DOC_DT
+	,	a.PLANT_CD
+	,	a.SLOC_CD
+	,	b.MAT_NO
+	,	b.MAT_DESC
+	,	b.PR_QTY
+	,	b.UNIT_OF_MEASURE_CD
+	,	b.ORI_AMOUNT as PR_ORI_AMOUNT
+	,	b.ORI_CURR_CD
+	,	b.WBS_NO as BUDGET_REF
+	,	a.CREATED_BY
+	,	d.PO_NO
+	,	e.PO_ITEM_NO
+	,	f.PO_SUBITEM_NO	
+	,	d.PURCHASING_GRP_CD
+	,	d.DOC_DT as PO_DOC_DT
+	,	d.PO_CURR
+	,	e.PO_QTY_ORI
+	, 	e.UOM
+	,	e.ORI_AMOUNT as PO_ORI_AMOUNT
+	,	d.VENDOR_CD
+	,	d.VENDOR_NAME
+	INTO #temp_search_proc_tracking
+	from 
+	TB_R_PR_H A 
+	inner join TB_R_PR_ITEM B on A.PR_NO=B.PR_NO
+	left join TB_R_PR_SUBITEM C on A.PR_NO = c.PR_NO
+		AND B.PR_ITEM_NO = C.PR_ITEM_NO
+	left join TB_R_PO_H D on b.PO_NO=d.PO_NO
+	left join TB_R_PO_ITEM e on d.PO_NO=e.PO_NO
+		AND b.PR_ITEM_NO = e.PR_ITEM_NO
+		AND b.PR_NO = e.PR_NO
+	left join TB_R_PO_SUBITEM f on d.PO_NO=f.PO_NO
+		AND E.PO_ITEM_NO = F.PO_ITEM_NO
+	where 1=1 
+	AND (ISNULL(@@PR_NO_PAR, '') = '' OR ISNULL(A.PR_NO, '') LIKE '%' + ISNULL(@@PR_NO_PAR, '') + '%')
+	AND (ISNULL(@@VENDOR_PAR, '') = '' OR ISNULL(D.VENDOR_CD, '') LIKE '%' + ISNULL(@@VENDOR_PAR, '') + '%')
+	AND (ISNULL(@@CREATED_BY_PAR, '') = '' OR ISNULL(A.CREATED_BY, '') LIKE '%' + ISNULL(@@CREATED_BY_PAR, '') + '%')
+	AND (ISNULL(@@PO_NO_PAR, '') = '' OR ISNULL(d.PO_NO, '') LIKE '%' + ISNULL(@@PO_NO_PAR, '') + '%')
+	AND a.DOC_DT BETWEEN @@PR_DATE_FROM_PAR AND @@PR_DATE_TO_PAR
+	AND (ISNULL(@@PO_DT_PAR, '') = '' OR d.DOC_DT BETWEEN @@PO_DT_PAR AND @@PO_DT_TO_PAR)
+	--AND (ISNULL(@@PCS_GRP_PAR, '') = '' OR ISNULL(d.PURCHASING_GRP_CD, '') LIKE '%' + ISNULL(@@PCS_GRP_PAR, '') + '%')
+	AND (ISNULL(@@PCS_GRP_PAR, '') = '' OR d.PURCHASING_GRP_CD IN (select splitdata From dbo.fnSplitString(@@PCS_GRP_PAR, ';')) )
+	AND (ISNULL(@@DIVISION_ID_PAR, '') = '' OR ISNULL(A.DIVISION_ID, '') = ''+ ISNULL(@@DIVISION_ID_PAR, '')+ '') 
+	AND (ISNULL(@@WBS_NO_PAR, '') = '' OR ISNULL(b.WBS_NO, '') LIKE '%' + ISNULL(@@WBS_NO_PAR, '') + '%')
+	AND (@@STATUS_CD_PAR IN ('', '2') OR (@@STATUS_CD_PAR = '1' AND D.PO_STATUS = '44'))
+	AND (@@STATUS_CD_PAR IN ('', '2') 
+		OR (@@STATUS_CD_PAR = '1' 
+			AND (EXISTS (SELECT 1 FROM TB_R_PO_SUBITEM POS WHERE D.PO_NO = POS.PO_NO AND POS.PO_QTY_ORI = POS.PO_QTY_REMAIN)
+					OR
+				EXISTS (SELECT 1 FROM TB_R_PO_ITEM POI WHERE D.PO_NO = POI.PO_NO AND POI.PO_QTY_ORI = POI.PO_QTY_REMAIN))
+			)
+		)
+
  DECLARE @@rowCount INT = (SELECT @currentPage * @pageSize)
 ;with tmp AS (
 	SELECT ROW_NUMBER() OVER (ORDER BY TB.PR_NO DESC) Data_No
@@ -64,30 +126,30 @@
 	,	TB.SAPDocYear
 	FROM (
 	select  DISTINCT A.PR_NO	
-	,	b.PR_ITEM_NO
-	,	c.PR_SUBITEM_NO
-	,	a.DOC_DT as PR_DOC_DT
+	,	a.PR_ITEM_NO
+	,	a.PR_SUBITEM_NO
+	,	a.PR_DOC_DT
 	,	a.PLANT_CD
 	,	a.SLOC_CD
-	,	b.MAT_NO
-	,	b.MAT_DESC
-	,	b.PR_QTY
-	,	b.UNIT_OF_MEASURE_CD
-	,	b.ORI_AMOUNT as PR_ORI_AMOUNT
-	,	b.ORI_CURR_CD
-	,	b.WBS_NO as BUDGET_REF
+	,	a.MAT_NO
+	,	a.MAT_DESC
+	,	a.PR_QTY
+	,	a.UNIT_OF_MEASURE_CD
+	,	a.PR_ORI_AMOUNT
+	,	a.ORI_CURR_CD
+	,	a.BUDGET_REF
 	,	a.CREATED_BY
-	,	d.PO_NO
-	,	e.PO_ITEM_NO
-	,	f.PO_SUBITEM_NO	
-	,	d.PURCHASING_GRP_CD
-	,	d.DOC_DT as PO_DOC_DT
-	,	d.PO_CURR
-	,	e.PO_QTY_ORI
-	, 	e.UOM
-	,	e.ORI_AMOUNT as PO_ORI_AMOUNT
-	,	d.VENDOR_CD
-	,	d.VENDOR_NAME
+	,	a.PO_NO
+	,	a.PO_ITEM_NO
+	,	a.PO_SUBITEM_NO	
+	,	a.PURCHASING_GRP_CD
+	,	a.PO_DOC_DT
+	,	a.PO_CURR
+	,	a.PO_QTY_ORI
+	, 	a.UOM
+	,	a.PO_ORI_AMOUNT
+	,	a.VENDOR_CD
+	,	a.VENDOR_NAME
 	,	g.MAT_DOC_NO
 	,	g.MAT_DOC_ITEM_NO
 	,	g.PO_SUBITEM_NO as GR_PO_SUBITEM_NO
@@ -102,46 +164,16 @@
 	,	h.SAP_DOC_NO SAPDocNo
 	,	h.SAP_DOC_YEAR SAPDocYear	
 	from 
-	TB_R_PR_H A 
-	inner join TB_R_PR_ITEM B on A.PR_NO=B.PR_NO
-	left join TB_R_PR_SUBITEM C on A.PR_NO = c.PR_NO
-		AND B.PR_ITEM_NO = C.PR_ITEM_NO
-	left join TB_R_PO_H D on b.PO_NO=d.PO_NO
-	left join TB_R_PO_ITEM e on d.PO_NO=e.PO_NO
-		AND b.PR_ITEM_NO = e.PR_ITEM_NO
-		AND b.PR_NO = e.PR_NO
-	left join TB_R_PO_SUBITEM f on d.PO_NO=f.PO_NO
-		AND E.PO_ITEM_NO = F.PO_ITEM_NO
-	left join TB_R_GR_IR g on d.PO_NO = g.PO_NO AND E.PO_ITEM_NO = G.PO_ITEM
+	#temp_search_proc_tracking a
+	left join TB_R_GR_IR g on a.PO_NO = g.PO_NO AND a.PO_ITEM_NO = G.PO_ITEM AND g.COMPONENT_PRICE_CD = 'PB00'
 	left join TB_R_INVOICE_INFO h on h.GR_NUMBER = g.MAT_DOC_NO AND H.GR_ITEM = G.MAT_DOC_ITEM_NO
 	where 1=1 
-	AND (ISNULL(@@PR_NO_PAR, '') = '' OR ISNULL(A.PR_NO, '') LIKE '%' + ISNULL(@@PR_NO_PAR, '') + '%')
-	AND (ISNULL(@@VENDOR_PAR, '') = '' OR ISNULL(D.VENDOR_CD, '') LIKE '%' + ISNULL(@@VENDOR_PAR, '') + '%')
-	AND (ISNULL(@@CREATED_BY_PAR, '') = '' OR ISNULL(A.CREATED_BY, '') LIKE '%' + ISNULL(@@CREATED_BY_PAR, '') + '%')
-	AND (ISNULL(@@PO_NO_PAR, '') = '' OR ISNULL(d.PO_NO, '') LIKE '%' + ISNULL(@@PO_NO_PAR, '') + '%')
 	AND (ISNULL(@@GR_NO_PAR, '') = '' OR ISNULL(g.MAT_DOC_NO, '') LIKE '%' + ISNULL(@@GR_NO_PAR, '') + '%')
-	AND a.DOC_DT BETWEEN @@PR_DATE_FROM_PAR AND @@PR_DATE_TO_PAR
-	AND (ISNULL(@@PO_DT_PAR, '') = '' OR d.DOC_DT BETWEEN @@PO_DT_PAR AND @@PO_DT_TO_PAR)
-	AND (ISNULL(@@INV_DT_PAR, '') = '' OR h.INVOICE_DATE BETWEEN @@INV_DT_PAR AND @@INV_DT_TO_PAR)
 	AND (ISNULL(@@GR_DATE_PAR, '') = '' OR g.DOCUMENT_DT BETWEEN @@GR_DATE_PAR AND @@GR_DATE_TO_PAR)
-	AND (ISNULL(@@GR_NO_PAR, '') = '' OR ISNULL(g.MAT_DOC_NO, '') LIKE '%' + ISNULL(@@GR_NO_PAR, '') + '%')
+	AND (ISNULL(@@INV_DT_PAR, '') = '' OR h.INVOICE_DATE BETWEEN @@INV_DT_PAR AND @@INV_DT_TO_PAR)
 	AND (ISNULL(@@INV_NO_PAR, '') = '' OR ISNULL(h.INVOICE_NO, '') LIKE '%' + ISNULL(@@INV_NO_PAR, '') + '%')
-	--AND (ISNULL(@@PCS_GRP_PAR, '') = '' OR ISNULL(d.PURCHASING_GRP_CD, '') LIKE '%' + ISNULL(@@PCS_GRP_PAR, '') + '%')
-	AND (ISNULL(@@PCS_GRP_PAR, '') = '' OR d.PURCHASING_GRP_CD IN (select splitdata From dbo.fnSplitString(@@PCS_GRP_PAR, ';')) )
-	AND (ISNULL(@@DIVISION_ID_PAR, '') = '' OR ISNULL(A.DIVISION_ID, '') = ''+ ISNULL(@@DIVISION_ID_PAR, '')+ '') 
-	AND (ISNULL(@@WBS_NO_PAR, '') = '' OR ISNULL(b.WBS_NO, '') LIKE '%' + ISNULL(@@WBS_NO_PAR, '') + '%')
 	AND (ISNULL(@@CLEARING_NO_PAR, '') = '' OR ISNULL(h.LOG_DOC_NO, '') LIKE '%' + ISNULL(@@CLEARING_NO_PAR, '') + '%')
 	AND (ISNULL(@@CLEARING_DATE_PAR, '') = '' OR h.CLEARING_DOC_DT BETWEEN @@CLEARING_DATE_PAR AND @@CLEARING_DATE_TO_PAR)
-	AND (@@STATUS_CD_PAR IN ('', '2') OR (@@STATUS_CD_PAR = '1' AND D.PO_STATUS = '44'))
 	AND (@@STATUS_CD_PAR IN ('', '1') OR (@@STATUS_CD_PAR = '2' AND h.INVOICE_ID IS NULL))
-	AND (@@STATUS_CD_PAR IN ('', '2') 
-		OR (@@STATUS_CD_PAR = '1' 
-			AND (EXISTS (SELECT 1 FROM TB_R_PO_SUBITEM POS WHERE D.PO_NO = POS.PO_NO AND POS.PO_QTY_ORI = POS.PO_QTY_REMAIN)
-					OR
-				EXISTS (SELECT 1 FROM TB_R_PO_ITEM POI WHERE D.PO_NO = POI.PO_NO AND POI.PO_QTY_ORI = POI.PO_QTY_REMAIN))
-			)
-		)
-	) TB
+) TB
 ) SELECT TOP (@@rowCount) * FROM tmp WHERE Data_No BETWEEN (@@rowCount - @pageSize + 1) AND @@rowCount
-
-
