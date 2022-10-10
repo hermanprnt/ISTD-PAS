@@ -177,6 +177,7 @@ END
 	from 
 	#temp_search_count_proc_tracking a
 	left join TB_R_GR_IR g on a.PO_NO = g.PO_NO AND a.PO_ITEM_NO = G.PO_ITEM AND g.COMPONENT_PRICE_CD = 'PB00'
+	AND G.STATUS_CD NOT IN ('65','69')
 	left join TB_R_INVOICE_INFO h on h.GR_NUMBER = g.MAT_DOC_NO AND H.GR_ITEM = G.MAT_DOC_ITEM_NO
 	where 1=1 
 	AND (ISNULL(@@GR_NO_PAR, '') = '' OR ISNULL(g.MAT_DOC_NO, '') LIKE '%' + ISNULL(@@GR_NO_PAR, '') + '%')

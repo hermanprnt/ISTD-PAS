@@ -74,14 +74,16 @@ END
 	AND (ISNULL(@@PCS_GRP_PAR, '') = '' OR d.PURCHASING_GRP_CD IN (select splitdata From dbo.fnSplitString(@@PCS_GRP_PAR, ';')) )
 	AND (ISNULL(@@DIVISION_ID_PAR, '') = '' OR ISNULL(A.DIVISION_ID, '') = ''+ ISNULL(@@DIVISION_ID_PAR, '')+ '') 
 	AND (ISNULL(@@WBS_NO_PAR, '') = '' OR ISNULL(b.WBS_NO, '') LIKE '%' + ISNULL(@@WBS_NO_PAR, '') + '%')
-	AND (@@STATUS_CD_PAR IN ('', '2') OR (@@STATUS_CD_PAR = '1' AND D.PO_STATUS = '44'))
-	AND (@@STATUS_CD_PAR IN ('', '2') 
-		OR (@@STATUS_CD_PAR = '1' 
-			AND (EXISTS (SELECT 1 FROM TB_R_PO_SUBITEM POS WHERE D.PO_NO = POS.PO_NO AND POS.PO_QTY_ORI = POS.PO_QTY_REMAIN)
-					OR
-				EXISTS (SELECT 1 FROM TB_R_PO_ITEM POI WHERE D.PO_NO = POI.PO_NO AND POI.PO_QTY_ORI = POI.PO_QTY_REMAIN))
-			)
-		)
+		AND (
+			-- 1st condition : blank
+			ISNULL(@@STATUS_CD_PAR,'') ='' OR   
+			-- 1 : Not Yet GR			
+			(ISNULL(@@STATUS_CD_PAR,'') ='1' AND D.PO_NO IS NOT NULL  ) OR
+			-- 2 : Not Yet Invoice
+			(ISNULL(@@STATUS_CD_PAR,'') ='2' AND D.PO_NO IS NOT NULL   ) OR
+			-- 3 : Not Yet PO
+			(ISNULL(@@STATUS_CD_PAR,'') ='3' AND D.PO_NO IS NULL )
+		)	
 
 
 select  DISTINCT A.PR_NO	
@@ -125,6 +127,7 @@ select  DISTINCT A.PR_NO
 	from 
 	#temp_search_download_proc_tracking a
 	left join TB_R_GR_IR g on a.PO_NO = g.PO_NO AND a.PO_ITEM_NO = G.PO_ITEM AND g.COMPONENT_PRICE_CD = 'PB00'
+	AND G.STATUS_CD NOT IN ('65','69')
 	left join TB_R_INVOICE_INFO h on h.GR_NUMBER = g.MAT_DOC_NO AND H.GR_ITEM = G.MAT_DOC_ITEM_NO
 	where 1=1 
 	AND (ISNULL(@@GR_NO_PAR, '') = '' OR ISNULL(g.MAT_DOC_NO, '') LIKE '%' + ISNULL(@@GR_NO_PAR, '') + '%')
@@ -133,4 +136,14 @@ select  DISTINCT A.PR_NO
 	AND (ISNULL(@@INV_NO_PAR, '') = '' OR ISNULL(h.INVOICE_NO, '') LIKE '%' + ISNULL(@@INV_NO_PAR, '') + '%')
 	AND (ISNULL(@@CLEARING_NO_PAR, '') = '' OR ISNULL(h.LOG_DOC_NO, '') LIKE '%' + ISNULL(@@CLEARING_NO_PAR, '') + '%')
 	AND (ISNULL(@@CLEARING_DATE_PAR, '') = '' OR h.CLEARING_DOC_DT BETWEEN @@CLEARING_DATE_PAR AND @@CLEARING_DATE_TO_PAR)
-	AND (@@STATUS_CD_PAR IN ('', '1') OR (@@STATUS_CD_PAR = '2' AND h.INVOICE_ID IS NULL))
+	AND (
+		-- 1st condition : blank		
+		(ISNULL(@@STATUS_CD_PAR,'') = '' ) OR
+		-- 1 : Not Yet GR			
+		(ISNULL(@@STATUS_CD_PAR,'') ='1' AND A.PO_NO IS NOT NULL AND G.MAT_DOC_NO IS NULL  ) OR
+		-- 2 : Not Yet Invoice
+		(ISNULL(@@STATUS_CD_PAR,'') ='2' AND A.PO_NO IS NOT NULL AND G.MAT_DOC_NO IS NOT NULL AND H.INVOICE_ID IS NULL ) OR
+		-- 3 : Not Yet PO
+		(ISNULL(@@STATUS_CD_PAR,'') ='3' AND A.PO_NO IS NULL )
+		
+		)
