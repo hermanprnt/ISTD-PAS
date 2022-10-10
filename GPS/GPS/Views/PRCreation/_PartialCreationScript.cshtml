@@ -2310,6 +2310,7 @@
         }
     }
 
+
     function getWBSParam(page) {
         return {
             pageSize: LookupMaxRowPerPage,
@@ -2337,7 +2338,7 @@
             DIVISION_PARAM: $('#division_id').val(),
             //FID.Ridwan: 20220712
             WBS_PARAM: ($("#awbsno").val() == '' ? $("#awbsnosubitem").val() : $("#awbsno").val())
-             
+
         }
     }
 
@@ -2475,7 +2476,7 @@
                 data: JSON.stringify(param),
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
-                    ViewData.Add("GLType", type); ;
+                    ViewData.Add("GLType", type);;
                     $("#gl-container").html(data);
                     $('#gl-container').on('shown.bs.modal', function () {
                         $("#glsearchbox").focus();
@@ -2491,7 +2492,7 @@
         }
     }
 
-    function getGLAccountGrid(page) {
+    @*function getGLAccountGrid(page) {
         var param = getGLAccountParam(page, WBS_Temp, CostCenter_Temp, Division_Temp);
         $.ajax({
             type: $tdk.AjaxMethod, url: "@PRCreationController._GetGLAccountGrid",
@@ -2504,7 +2505,8 @@
             },
             complete: function (data) { return false; }
         });
-    }
+    }*@
+
 
     function getWBS(page, type) {
         var param = getWBSParam(page);
@@ -2519,6 +2521,51 @@
                     $("#wbssearchbox").focus();
                 });
                 $("#wbs-container").modal();
+            },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function getGLAccountGrid(page) {
+        var param = getGLAccountParam(page, WBS_Temp, CostCenter_Temp, Division_Temp);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._GetGLAccountGrid",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                $("#gl-grid-container").html(data);
+                getCostCenterBaseOnGL();
+            },
+            error: function (data) {
+                var e = data.responseText;
+                //alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function getCostCenterBaseOnGL() {
+        //var param = getWBSParam(page);
+        var param = {
+            GL_ACCOUNT_PARAM: $('#agl').val(),
+            DIVISION_ID: $(idHeader.DIVISION_ID).val()
+        };
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRCreationController._SelectCostCenterByGlAccount",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                $("#cascade-costcenter").html(data);
+                //ViewData.Add("WBSType", type);
+                //$("#wbs-container").html(data);
+                //$('#wbs-container').on('shown.bs.modal', function () {
+                //    $("#wbssearchbox").focus();
+                //});
+                //$("#wbs-container").modal();
             },
             error: function (data) {
                 var e = data.responseText;
@@ -2691,8 +2738,7 @@
             }
         }
 
-        if (isErrorType)
-        {
+        if (isErrorType) {
             $(idItem.CURR).val('');
             $(idItem.PRICE).val('');
 
@@ -2737,8 +2783,7 @@
     function MoveWBSKey(wbs, wbsname) {
         var wbstrue = 1;
 
-        if (wbs.indexOf('-') > -1)
-        {
+        if (wbs.indexOf('-') > -1) {
             @{ /* OLD WBS STRUCTURE, OLD PRODUCTION LOGIC */ }
 
             DisableLookup([idDivLookup.DIV_ASSETNOITEM], false);
@@ -2768,10 +2813,8 @@
                     DisableLookup([idDivLookup.DIV_GLSUBITEM], false);
                 }
             }
-            else
-            {
-                if (wbs.substr(0, 1) == "P" || wbs.substr(0, 1) == "S")
-                {
+            else {
+                if (wbs.substr(0, 1) == "P" || wbs.substr(0, 1) == "S") {
                     if ($(idItem.ASSET_CATEGORY).val() == ViewData.Get("AssetCategory")["NonAsset"] && $(idItem.ITEM_CLASS).html() == "M") {
                         $.Clear([idItem.COST_CENTER]);
                         $.Disable([idItem.COST_CENTER]);
@@ -2804,16 +2847,14 @@
         }
 
             @{ /* NEW WBS STRUCTURE */ }
-        else
-        {
+        else {
             var prefixWBS = wbs.substr(0, 1);
             var isWBSContainsYear = wbs.substr(3, 1) == 'Y';
             //FID.Ridwan: 20220705
             var prefixWBS3dgt = wbs.substr(0, 3);
             var prefixWBS4dgt = wbs.substr(0, 4);
 
-            if (ViewData.Get("WBSType") == "subitem")
-            {
+            if (ViewData.Get("WBSType") == "subitem") {
                 $.Enable([idSubItem.COST_CENTER]);
 
                 $.Disable([idItem.COST_CENTER]);
@@ -2821,8 +2862,7 @@
 
                 $.Enable([idSubItem.QTY]);
             }
-            else
-            {
+            else {
                 $.Clear([idItem.COST_CENTER]);
                 $.Enable([idItem.COST_CENTER]);
                 $.Enable([idItem.QTY]);
@@ -2921,7 +2961,7 @@
                     DisableLookup([idDivLookup.DIV_GLITEM], false);
                 }
             }
-            //FID.Ridwan: 20220705
+                //FID.Ridwan: 20220705
             else {
                 if (ViewData.Get("WBSType") == "subitem") {
                     $.Disable([idSubItem.COST_CENTER]);
@@ -2937,13 +2977,11 @@
                 }
             }
 
-            if (ViewData.Get("WBSType") == "subitem")
-            {
+            if (ViewData.Get("WBSType") == "subitem") {
                 $(idSubItem.WBS_NO).val(wbs);
                 $(idSubItem.WBS_NAME).val(wbsname);
             }
-            else
-            {
+            else {
                 $(idItem.WBS_NO).val(wbs);
                 $(idItem.WBS_NAME).val(wbsname);
             }
@@ -2962,7 +3000,7 @@
         ClearLookupCriteria('vendor');
         $("#vendor-container").modal('hide');
     }
-    function MoveVendorKeyAssetNo(ASSET_CATEGORY,CLASS_ID,LOCATION_ID,ASSET_NO,SUB_ASSET_NO) {
+    function MoveVendorKeyAssetNo(ASSET_CATEGORY, CLASS_ID, LOCATION_ID, ASSET_NO, SUB_ASSET_NO) {
         $(idItem.ASSET_CATEGORY).val(ASSET_CATEGORY);
         $(idItem.ASSET_CLASS).val(CLASS_ID);
         $(idItem.ASSET_LOCATION).val(LOCATION_ID);

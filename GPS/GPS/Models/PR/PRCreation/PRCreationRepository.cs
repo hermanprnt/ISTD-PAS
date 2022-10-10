@@ -24,6 +24,7 @@ namespace GPS.Models.PR.PRCreation
             public const String WBSList = _Root_Folder_Creation_DataList + "get_wbsList";
             public const String WBSCount = _Root_Folder_Creation_DataList + "count_wbsList";
             public const String AssetLocList = _Root_Folder_Creation_DataList + "get_assetlocList";
+            public const String CostCenterList = _Root_Folder_Creation_DataList + "get_costcenterListByGlAccount";
             #endregion
 
             #region PRCREATION

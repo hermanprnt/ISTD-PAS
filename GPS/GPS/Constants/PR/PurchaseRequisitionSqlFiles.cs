@@ -18,6 +18,7 @@ namespace GPS.Constants.PR
         public const String GetPRType = _Root_Folder_Creation_DataList + "get_prtype";
         public const String VendorList = _Root_Folder_Common + "get_vendorList";
         public const String DivisionList = _Root_Folder_Common + "call_getListDivision";
+        public const String CostCenterListByGlAccount = _Root_Folder_Creation_DataList + "get_costcenterListByGlAccount";//add by fid.ahmad 07-10-2022
         public const String CostCenterList = _Root_Folder_Creation_DataList + "get_costcenterList";
         public const String CostCenterListByCoordinator = _Root_Folder_Creation_DataList + "get_costcenterListByCoordinator";
         //FID.Ridwan: 20220705

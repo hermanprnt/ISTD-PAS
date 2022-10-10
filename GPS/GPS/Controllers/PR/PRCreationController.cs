@@ -52,6 +52,7 @@ namespace GPS.Controllers.PR
         public const String _SaveSubItem = _PRCreationController + "SaveSubItem";
         public const String _DeleteSelectedSubItemTemp = _PRCreationController + "DeleteSelectedSubItemTemp";
         public const String _GetListItem = _PRCreationController + "GetListItemData";
+        public const String _SelectCostCenterByGlAccount = _PRCreationController + "SelectCostCenterByGlAccount";
 #endregion
 
         public PRCreationController()
@@ -164,6 +165,15 @@ namespace GPS.Controllers.PR
             ViewData["Paging"] = CountIndex(valuelist.Count(), pageSize,page);
             //ViewData["Paging"] = CountIndex(PRCreationRepository.Instance.CountGLAccount(param), pageSize, page);
             ViewData["FUNC"] = "getGLAccountGrid";
+        }
+
+        //add by fid.ahmad 07-10-2022
+        public PartialViewResult SelectCostCenterByGlAccount(PRCreation param, int pageSize = 10, int page = 1)
+        {
+            string div = param.DIVISION_ID;
+            string gl = param.GL_ACCOUNT_PARAM;
+            ViewData["CostCenter"] = PRCommonRepository.Instance.CostCenterListByGlAccount(div,gl);
+            return PartialView(PurchaseRequisitionPage._CascadeCostCenter);
         }
 
         public ActionResult getWBS(PRCreation param, int pageSize = 10, int page = 1)

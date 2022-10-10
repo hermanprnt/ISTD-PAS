@@ -1,1 +1,1 @@
-﻿EXEC sp_common_getListDivision2 @NO_REG
+﻿EXEC sp_common_getListDivision2 @NO_REG, @HAVE_ROLE

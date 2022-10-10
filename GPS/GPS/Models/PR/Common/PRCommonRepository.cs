@@ -47,6 +47,19 @@ namespace GPS.Models.PR.Common
             return result;
         }
 
+        //add by fid.ahmad 07-10-2022
+
+        public IEnumerable<PRCommonList> CostCenterListByGlAccount(string DIV, string GL)
+        {
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            dynamic args = new { DIVISION_ID = DIV, GL_ACCOUNT_PARAM=GL };
+            IEnumerable<PRCommonList> resultquery = db.Fetch<PRCommonList>(PurchaseRequisitionSqlFiles.CostCenterListByGlAccount, args);
+            db.Close();
+            return resultquery;
+        }
+
+
+
         public IEnumerable<PRCommonList> GetDataCostCenter(int pDIV)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();

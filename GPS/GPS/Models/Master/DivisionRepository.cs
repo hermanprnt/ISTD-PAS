@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Toyota.Common.Database;
 using Toyota.Common.Web.Platform;
+using GPS.Models.Common;
 
 namespace GPS.Models.Master
 {
@@ -31,7 +32,6 @@ namespace GPS.Models.Master
             emp.NO_REG = noReg.ToString();
 
             IDBContext db = DatabaseManager.Instance.GetContext();
-
             dynamic args = new
             {
                 NO_REG = noReg
@@ -40,6 +40,34 @@ namespace GPS.Models.Master
             Division result = db.SingleOrDefault<Division>("Master/GetAllDivision", args);
             db.Close();
             return result == null ? 0 : int.Parse(result.Division_ID);
+        }
+
+        //add by fid.ahmad 10-10-2022
+        public Int32 GetRoleForDivision(String noReg)
+        {
+            Int32 result = 0;
+            try
+            {
+                string SystemMaster = SystemRepository.Instance.GetSystemValue("MASTER_APP");
+                //String encrypt = System.Configuration.ConfigurationManager.AppSettings["Encryption"];
+                IDBContext dbsc = DatabaseManager.Instance.GetContext("SecurityCenter");
+                dynamic args = new
+                {
+                    Noreg = noReg,
+                    SystemMaster = SystemMaster
+                };
+
+                result = dbsc.SingleOrDefault<Int32>("Master/GetRoleForDivision", args);
+                dbsc.Close();
+            }
+            catch (Exception e)
+            {
+                string message = e.Message;
+                throw;
+            }
+           
+          
+            return result;
         }
         
         public IEnumerable<Division> GetDivisionData(String noReg = "")
@@ -60,15 +88,17 @@ namespace GPS.Models.Master
         public IEnumerable<Division> GetDivisionDataCombo(String noReg = "")
         {
             IDBContext db = DatabaseManager.Instance.GetContext();
-
+           
             if (emp.NO_REG != "")
             {
                 noReg = emp.NO_REG;
             }
-
+            Int32 haveRole = GetRoleForDivision(noReg);
+            
             dynamic args = new
             {
                 NO_REG = emp.NO_REG
+                ,HAVE_ROLE = haveRole
             };
 
             IEnumerable<Division> result = db.Fetch<Division>("Master/GetAllDivisionCombo", args);

@@ -642,8 +642,8 @@
                             <th class="text-center control-label required-left text-muted" style="width:90px" >Price</th>
                             <th class="text-center control-label required-left text-muted" style="width:90px" >Amount</th>
                             <th class="text-center control-label text-muted" style="width:165px" >WBS</th>
-                            <th class="text-center control-label text-muted" style="width:103px" >Cost Center</th>
                             <th class="text-center control-label text-muted" style="width:100px" >GL Account</th>
+                            <th class="text-center control-label text-muted" style="width:103px" >Cost Center</th>
                             <th class="text-center" style="width:100px">Action</th>
                         </tr>
                     </thead>
@@ -665,8 +665,8 @@
                             <td style="width:90px" ></td>
                             <td style="width:90px" ></td>
                             <td style="width:165px" ></td>
-                            <td style="width:103px" ></td>
                             <td style="width:100px" ></td>
+                            <td style="width:103px" ></td>
                             <td style="width:100px"></td>
                         </tr>
                         <tr id="addrow">
@@ -786,11 +786,6 @@
                                     </div>
                                 </div>
                             </td>
-                            <td id="row_col_10" style="width:103px">
-                                <div id="cascade-costcenter" class="cost">      
-                                    @Html.Partial(PurchaseRequisitionPage._CascadeCostCenter)
-                                </div>
-                            </td>
                             <td id="row_col_11" style="width:100px">
                                 <div class="input-group pos-rel" style="width: 100%;">
                                     <div id="lookupglitem" class="input-group input-group-xs lookup">
@@ -799,6 +794,11 @@
                                             <button id="glbutton" class="addinput custom-button-grid btn btn-warning btn-xs" type="button" onclick="javascript:getGLAccount(1, 'item')">&nbsp<i class="fa fa-search"></i>&nbsp</button>
                                         </span>
                                     </div>
+                                </div>
+                            </td>
+                            <td id="row_col_10" style="width:103px">
+                                <div id="cascade-costcenter" class="cost">
+                                    @Html.Partial(PurchaseRequisitionPage._CascadeCostCenter)
                                 </div>
                             </td>
                             <td class="text-center" style="width:100px">
