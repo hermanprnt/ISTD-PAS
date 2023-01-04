@@ -63,12 +63,13 @@
                 <span class="text twbs-@item.ITEM_NO">@if(item.WBS_NO != "X") { @item.WBS_NO }</span>
                 <span class="text twbsname-@item.ITEM_NO hidden">@item.WBS_NAME</span>
             </td>
-            <td style="width:103px" class="text-center custom-creation-datagrid col-@item.ITEM_NO">
-                <span class="text tcost-@item.ITEM_NO">@if(item.COST_CENTER != "X") { @item.COST_CENTER }</span>
-            </td>  
             <td style="width:100px" class="text-center custom-creation-datagrid col-@item.ITEM_NO">
                 <span class="text tgl-@item.ITEM_NO">@if(item.GL_ACCOUNT_CD != "X") { @item.GL_ACCOUNT_CD }</span>
             </td>
+            <td style="width:103px" class="text-center custom-creation-datagrid col-@item.ITEM_NO">
+                <span class="text tcost-@item.ITEM_NO">@if (item.COST_CENTER != "X")
+                { @item.COST_CENTER }</span>
+            </td>  
             <td style="display:none" class="text-center custom-creation-datagrid col-@item.ITEM_NO">
                 <span class="text-center tdeliverydate-@item.ITEM_NO hidden">@item.DELIVERY_DATE_ITEM</span>
             </td>

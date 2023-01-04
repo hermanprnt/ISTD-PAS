@@ -40,14 +40,16 @@
             <td class="text-center custom-creation-datagrid col-@item.ITEM_NO-@item.SUBITEM_NO" style="width:165px;">
                 <span class="text iwbsnosubitem-@item.ITEM_NO-@item.SUBITEM_NO">@item.SUBITEM_WBS_NO</span>
             </td>  
-            <td class="text-center custom-creation-datagrid col-@item.ITEM_NO-@item.SUBITEM_NO" style="width:103px;">
-                <span class="text icostcentersubitem-@item.ITEM_NO-@item.SUBITEM_NO">@item.SUBITEM_COST_CENTER</span>
-                <span class="text icostcentercdsubitem-@item.ITEM_NO-@item.SUBITEM_NO hidden">@item.SUBITEM_COST_CENTER</span>
-            </td>
             <td class="text-center custom-creation-datagrid col-@item.ITEM_NO-@item.SUBITEM_NO" style="width:100px;">
                 <span class="text iglasubitem-@item.ITEM_NO-@item.SUBITEM_NO">@item.SUBITEM_GL_ACCOUNT</span>
                 <span class="text iglacdsubitem-@item.ITEM_NO-@item.SUBITEM_NO hidden">@item.SUBITEM_GL_ACCOUNT</span>
             </td>  
+           
+            <td class="text-center custom-creation-datagrid col-@item.ITEM_NO-@item.SUBITEM_NO" style="width:103px;">
+                <span class="text icostcentersubitem-@item.ITEM_NO-@item.SUBITEM_NO">@item.SUBITEM_COST_CENTER</span>
+                <span class="text icostcentercdsubitem-@item.ITEM_NO-@item.SUBITEM_NO hidden">@item.SUBITEM_COST_CENTER</span>
+            </td>
+           
             <td class="text-center custom-creation-datagrid" style="width:100px;">
                 <div class="actiondetail-@item.ITEM_NO">
                     <i class="fa fa-copy btn btn-xs btn-primary" id="copylink" onclick="javascript:CopyItem('@item.ITEM_NO', '@item.SUBITEM_NO', 'subitem')"></i>

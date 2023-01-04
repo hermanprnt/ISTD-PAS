@@ -49,10 +49,10 @@ namespace GPS.Models.PR.Common
 
         //add by fid.ahmad 07-10-2022
 
-        public IEnumerable<PRCommonList> CostCenterListByGlAccount(string DIV, string GL)
+        public IEnumerable<PRCommonList> CostCenterListByGlAccount(int DIV, string GL, string prCoordinator, string regno)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();
-            dynamic args = new { DIVISION_ID = DIV, GL_ACCOUNT_PARAM=GL };
+            dynamic args = new { PR_COORDINATOR = prCoordinator, DIVISION_ID = DIV, REG_NO = regno, GL_ACCOUNT_PARAM=GL };
             IEnumerable<PRCommonList> resultquery = db.Fetch<PRCommonList>(PurchaseRequisitionSqlFiles.CostCenterListByGlAccount, args);
             db.Close();
             return resultquery;

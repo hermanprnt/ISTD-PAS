@@ -170,9 +170,11 @@ namespace GPS.Controllers.PR
         //add by fid.ahmad 07-10-2022
         public PartialViewResult SelectCostCenterByGlAccount(PRCreation param, int pageSize = 10, int page = 1)
         {
-            string div = param.DIVISION_ID;
+            int div = Convert.ToInt32(param.DIVISION_ID);
             string gl = param.GL_ACCOUNT_PARAM;
-            ViewData["CostCenter"] = PRCommonRepository.Instance.CostCenterListByGlAccount(div,gl);
+            string cordinator = param.PR_COORDINATOR;
+            string regno = this.GetCurrentRegistrationNumber();
+            ViewData["CostCenter"] = PRCommonRepository.Instance.CostCenterListByGlAccount(div,gl, cordinator, regno);
             return PartialView(PurchaseRequisitionPage._CascadeCostCenter);
         }
 

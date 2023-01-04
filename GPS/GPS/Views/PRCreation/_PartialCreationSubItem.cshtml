@@ -90,19 +90,21 @@
             <input type="text" class="form-control addinput" id="awbsnamesubitem" style="display:none" readonly="readonly">
         </div>
     </td>
-    <td class="text-center">
-        <div id="cascade-costcenter-subitem" class ="cost">
-            @Html.Partial(PurchaseRequisitionPage._CascadeCostCenter)
-        </div>
-    </td>
+   
     <td class="text-center">
         <div class="input-group pos-rel" style="width: 100%;">
             <div id="lookupglsubitem" class="input-group input-group-xs lookup">
-                <input type="text" class="form-control custom-text addinput" id="aglsubitem" readonly="readonly"/>
+                <input type="text" class="form-control custom-text addinput" id="aglsubitem" readonly="readonly" />
                 <span class="input-group-btn">
                     <button id="glbuttonsubitem" class="addinput custom-button-grid btn btn-warning btn-xs" type="button" onclick="javascript:getGLAccount(1, 'subitem')">&nbsp<i class="fa fa-search"></i>&nbsp</button>
                 </span>
             </div>
+        </div>
+    
+    </td>
+    <td class="text-center">
+        <div id="cascade-costcenter-subitem" class="cost">
+            @Html.Partial(PurchaseRequisitionPage._CascadeCostCenter)
         </div>
     </td>
     <td class="text-center">

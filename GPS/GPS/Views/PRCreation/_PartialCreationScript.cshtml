@@ -2549,10 +2549,20 @@
     }
 
     function getCostCenterBaseOnGL() {
+       
+        var GlAccount = '';
+        if (ViewData.Get("GLType") == "subitem")
+            GlAccount=$(idSubItem.GL_ACCOUNT).val()
+        else
+            GlAccount=$(idItem.GL_ACCOUNT).val();
+
+       
         //var param = getWBSParam(page);
+        //GL_ACCOUNT_PARAM: $('#agl').val(),
         var param = {
-            GL_ACCOUNT_PARAM: $('#agl').val(),
-            DIVISION_ID: $(idHeader.DIVISION_ID).val()
+            GL_ACCOUNT_PARAM: GlAccount,
+            DIVISION_ID: $(idHeader.DIVISION_ID).val(),
+            PR_COORDINATOR: $(idHeader.PR_COORDINATOR).val()
         };
         $.ajax({
             type: $tdk.AjaxMethod, url: "@PRCreationController._SelectCostCenterByGlAccount",
