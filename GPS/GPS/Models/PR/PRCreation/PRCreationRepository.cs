@@ -509,7 +509,8 @@ namespace GPS.Models.PR.PRCreation
                     DELIVERY_DATE = param.DELIVERY_DATE,
                     URGENT_DOC = param.URGENT_DOC,
                     PR_TYPE = param.PR_TYPE,
-                    PROCESS_ID = param.PROCESS_ID
+                    PROCESS_ID = param.PROCESS_ID,
+                    PR_NOTES = param.PR_NOTES // add by fid.ahmad 04-01-2023 PR Notes validation for blacklist char
                 };
                 resultTable = db.SingleOrDefault<PRCreation>(SqlFile.PRSavingValidation, args);
                 result = resultTable.MESSAGE;

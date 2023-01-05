@@ -877,9 +877,16 @@
                 contentType: "@CommonFormat.JsonMimeType",
                 success: function (data) {
                     if (data.ResponseType === "@ActionResponseViewModel.Error")
+                    {
+                        $("#pop-createspkconfirm").modal("hide");
+                        $("#pop-saveconfirm").modal("hide");
                         $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
                     else
+                    {
                         console.log("Silent save PO Header success.");
+                    }
+                       
                 },
                 error: OnAjaxError
             });
@@ -1502,6 +1509,8 @@
             window.close();
             window.location.href = "@POInquiryController.Action.Index";
         });
+
+        
 
         function ValidateAddItem() {
             var headerSelectorList = [
