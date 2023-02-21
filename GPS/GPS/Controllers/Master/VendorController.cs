@@ -28,6 +28,7 @@ namespace GPS.Controllers.Master
         protected override void Startup()
         {
             Settings.Title = "Supplier-Vendor Master Screen";
+            ViewData["REG_NO"] = this.GetCurrentRegistrationNumber();
         }
 
         #region COMMON LIST
@@ -168,8 +169,11 @@ namespace GPS.Controllers.Master
             else
             {
                 ViewData["VendorData"] = VendorRepository.Instance.GetSelectedData(VendorCode);
+                string PlantCd = VendorRepository.Instance.GetPlantData(VendorCode);
+                ViewData["DISABLED_FLAG"] = VendorRepository.Instance.CheckPlantCodeByRegNo(PlantCd, this.GetCurrentRegistrationNumber());
             }
-
+            ViewData["REG_NO"] = this.GetCurrentRegistrationNumber();
+           
             return PartialView("_AddEditPopUp");
         }
 

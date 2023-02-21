@@ -25,6 +25,7 @@ namespace GPS.Models.Master
         public DateTime CreatedDt { get; set; }
         public String ChangedBy { get; set; }
         public DateTime ChangedDt { get; set; }
+        public String SetDisablePlant { get; set; }
 
         //For Insert Upload
         public Int64 ProcessId { get; set; }

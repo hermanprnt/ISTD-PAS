@@ -4,6 +4,8 @@
 @{
     Vendor VendorData = ViewData["VendorData"] != null ? (Vendor)ViewData["VendorData"] : new Vendor();
     string edit = (string)ViewData["edit"];
+    string RegNo = ViewData["REG_NO"] == null ? "" : (string)ViewData["REG_NO"];
+    string DisabledPlant = ViewData["DISABLED_FLAG"] == null ? "FALSE" : (string)ViewData["DISABLED_FLAG"];
 }
 
 <script>
@@ -14,7 +16,7 @@
 
         $.Enable(["#txtVendorCdForm"]);
         $("#appended-mail").css("display", "none");
-        
+
         if ("@edit" === "1" || ("@edit" === "0" && "@VendorData.VendorCd" !== null)) {
             $("#txtVendorCdForm").val("@VendorData.VendorCd");
             $("#txtSAPCodeForm").val("@VendorData.SAPVendorID");
@@ -43,6 +45,13 @@
                 }
                 $("#appended-mail").css("display", "block");
             }
+
+            if ("@DisabledPlant" === "TRUE") {
+                $("#txtVendorPlantForm").prop('disabled', true);
+            }
+            else {
+                $("#txtVendorPlantForm").prop('disabled', false);
+            }
         }
     });
 </script>
@@ -70,7 +79,7 @@
                             <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Plant</label>
                             <div class="col-xs-8 col-sm-9 col-md-8">
                                 <div class="input-group pos-rel" style="width: 100%;">
-                                    @Html.DropDownListFor(m => m.VendorPlant, PlantController.PlantSelectList, new {id = "txtVendorPlantForm", @class = "cursor-1", @style = "width:100%", @tabindex="3" })
+                                    @Html.DropDownListFor(m => m.VendorPlant, PlantController.PlantSelectListByDivisionId(RegNo), new { id = "txtVendorPlantForm", @class = "cursor-1", @style = "width:100%", @tabindex = "3" })
                                 </div>
                             </div>
                         </div>
