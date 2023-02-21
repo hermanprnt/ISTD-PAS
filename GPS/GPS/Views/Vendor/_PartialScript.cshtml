@@ -1,7 +1,4 @@
-﻿@{
-    string DisabledPlant = ViewData["DISABLED_FLAG"] == null ? "FALSE" : (string)ViewData["DISABLED_FLAG"];
-}
-
+﻿
 <script type="text/javascript"> 
     $(document).ready(function () {
         onClear();      
@@ -255,15 +252,6 @@
         success: function (data) {
             $("#basicModal").html(data);
             $("#basicModal").modal();
-            if (@DisabledPlant =="TRUE") {
-                console.log('is disabled');
-                $("#txtVendorPlantForm").prop('disabled', true);
-            }
-            else {
-                console.log('is enabled');
-                $("#txtVendorPlantForm").prop('disabled', false);
-            }
-            
         }
         });
     }        
