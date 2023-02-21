@@ -208,11 +208,13 @@
                     poItemNo = $this.data("poitemno"),
                     poRemQty = $this.data("remqty"),
                     $thisValue = $this.valOrDefault();
-
+                let thisValueLet = $thisValue;
+                let poRemQtyLet = poRemQty;
                 if ($thisValue === "") {
                     errorMessage = "Item " + poItemNo + "'s Receiving qty can't be empty.";
                 }  else {
-                    if (parseInt($thisValue) > parseInt(poRemQty)) {
+                    //if (parseInt($thisValue) > parseInt(poRemQty)) {
+                    if (thisValueLet > poRemQtyLet) {
                         errorMessage = "Item " + poItemNo + "'s Receiving qty can't be greater than remaining qty.";
                     } else {
                         grList.push({

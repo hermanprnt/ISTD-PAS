@@ -24,11 +24,11 @@ namespace GPS.Models.MRP
         public string COMP_PRICE_RATE { get; set; }
         public string DELIVERY_PLAN_DT { get; set; }
         public string MAT_DESC { get; set; }
-        public int PO_QTY_ORI { get; set; }
-        public int PO_QTY_USED { get; set; }
+        public float PO_QTY_ORI { get; set; }
+        public float PO_QTY_USED { get; set; }
         public string PRICE_PER_UOM { get; set; }
         public string ORI_AMOUNT { get; set; }
-        public int PO_QTY_REMAIN { get; set; }
+        public float PO_QTY_REMAIN { get; set; }
         public string SLOC_NAME { get; set; }
         public string PLANT_NAME { get; set; }
         public string PO_SUBITEM_NO { get; set; }

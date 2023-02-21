@@ -152,11 +152,11 @@
                                         <td class="text-center">@item.DELIVERY_PLAN_DT</td>
                                         <td class="text-left">@item.PLANT_NAME</td>
                                         <td class="text-left">@item.SLOC_NAME</td>
-                                        <td class="text-right">@item.PO_QTY_REMAIN</td>
-                                        <td class="text-right">@item.PO_QTY_USED</td>
+                                        <td class="text-right">@item.PO_QTY_REMAIN.ToString("0.###")</td>
+                                        <td class="text-right">@item.PO_QTY_USED.ToString("0.###")</td>
                                         <td class="text-center">
                                             <input style="width:100px;text-align:right;" value="0" @disable
-                                                name="receive" type="number" data-pono="@item.PO_NO" data-poitemno="@item.PO_ITEM_NO" data-remqty="@item.PO_QTY_REMAIN"
+                                                name="receive" type="number" data-pono="@item.PO_NO" data-poitemno="@item.PO_ITEM_NO" data-remqty="@item.PO_QTY_REMAIN.ToString("0.###")"
                                                 id="txtgrqty-@item.PO_ITEM_NO" />
                                         </td>
                                         @*<td class="text-center"><button class="btn btn-primary btn-xs" title="Submit" onclick="onSubmit(@item.PO_ITEM_NO)"><span class='glyphicon glyphicon-ok'></span></button>
