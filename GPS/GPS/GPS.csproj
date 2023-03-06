@@ -597,6 +597,7 @@
     <Content Include="SQL\Master\Material\GetMaterialImageInfo.sql" />
     <Content Include="SQL\Master\Message\GetById.sql" />
     <Content Include="SQL\Master\Price\call_saveUpload.sql" />
+    <Content Include="SQL\Master\Vendor\GetDivisionCode.sql" />
     <Content Include="SQL\Master\Vendor\GetAllPlantByDivison.sql" />
     <Content Include="SQL\Master\Vendor\CheckPlantCodeByRegNo.sql" />
     <Content Include="SQL\Master\Vendor\GetVendorEcatalogueLookupSearchList.sql" />

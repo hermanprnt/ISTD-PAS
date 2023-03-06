@@ -5,6 +5,8 @@
     Vendor VendorData = ViewData["VendorData"] != null ? (Vendor)ViewData["VendorData"] : new Vendor();
     string edit = (string)ViewData["edit"];
     string RegNo = ViewData["REG_NO"] == null ? "" : (string)ViewData["REG_NO"];
+    string PlantBefore = ViewData["PLANT_BEFORE"] == null ? "" : (string)ViewData["PLANT_BEFORE"];
+    string DivCd = ViewData["DIV_CD"] == null ? "" : (string)ViewData["DIV_CD"];
     string DisabledPlant = ViewData["DISABLED_FLAG"] == null ? "FALSE" : (string)ViewData["DISABLED_FLAG"];
 }
 
@@ -57,202 +59,206 @@
 </script>
 
 <div class="modal-dialog" style="width: 700px">
-<form  method="post" action="javascript: onSaveData();" >
-    <div class="modal-content">
-        <div class="modal-header">
-            <div>Vendor Master</div>
-            <input type="hidden" id="txtEdit" value="@edit"/>
-        </div>
-        <div class="modal-body">
-            <div class="form-horizontal">
-                <div class="row">
-                    <div class="col-xs-12 col-sm-6 col-md-6">
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Code</label>
-                            <div class="col-xs-8 col-sm-9 col-md-8">
-                                <div class="input-group pos-rel" style="width: 80%;">
-                                    @Html.TextBoxFor(m => m.VendorCd, new {id = "txtVendorCdForm", @style = "width:100%", @class="mandatory", @tabindex="1"})
-					            </div>
-                            </div>
-                        </div>
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Plant</label>
-                            <div class="col-xs-8 col-sm-9 col-md-8">
-                                <div class="input-group pos-rel" style="width: 100%;">
-                                    @Html.DropDownListFor(m => m.VendorPlant, PlantController.PlantSelectListByDivisionId(RegNo), new { id = "txtVendorPlantForm", @class = "cursor-1", @style = "width:100%", @tabindex = "3" })
+    <form method="post" action="javascript: onSaveData(@DivCd,@PlantBefore);">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>Vendor Master</div>
+                <input type="hidden" id="txtEdit" value="@edit" />
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-6 col-md-6">
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Code</label>
+                                <div class="col-xs-8 col-sm-9 col-md-8">
+                                    <div class="input-group pos-rel" style="width: 80%;">
+                                        @Html.TextBoxFor(m => m.VendorCd, new { id = "txtVendorCdForm", @style = "width:100%", @class = "mandatory", @tabindex = "1" })
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6">
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">SAP Code</label>
-                            <div class="col-xs-8 col-sm-9 col-md-8">
-                                <div class="input-group pos-rel" style="width: 80%;">
-                                    @Html.TextBoxFor(m => m.SAPVendorID, new {id = "txtSAPCodeForm", @style = "width:100%", @tabindex="2"})
-					            </div>
-                            </div>
-                        </div>
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Purch. Group</label>
-                            <div class="col-xs-8 col-sm-9 col-md-8">
-                                <div class="input-group pos-rel" style="width: 100%;">
-                                    @Html.DropDownListFor(m => m.PurchGroup, PurchasingGroupController.PurchasingGroupSelectList, new {id = "txtPurchGroup", @style = "width:100%", @tabindex="4" })
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12">
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-2 col-sm-3 col-md-2 control-label text-muted">Name</label>
-                            <div class="col-xs-10 col-sm-9 col-md-10">
-                                <div class="input-group pos-rel" style="width: 100%;">
-                                    @Html.TextBoxFor(m => m.VendorName, new {id = "txtVendorNameForm", @style = "width:100%", @class="mandatory", @tabindex="5"})
-					            </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6">
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Payment Term</label>
-                            <div class="col-xs-8 col-sm-9 col-md-8">
-                                <div class="input-group pos-rel" style="width: 100%;">
-                                    @Html.DropDownListFor(m => m.PaymentTermCd, PaymentController.PaymentTermSelectList, new {id = "txtPayTermForm", @class = "cursor-1 mandatory", @style = "width:100%", @tabindex="6"})
-					            </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6">
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Payment Method</label>
-                            <div class="col-xs-8 col-sm-9 col-md-8">
-                                <div class="input-group pos-rel" style="width: 100%;">
-                                    @Html.DropDownListFor(m => m.PaymentMethodCd, PaymentController.PaymentMethodSelectList, new {id = "txtPayMethodForm", @class = "cursor-1 mandatory", @style = "width:100%", @tabindex="7"})
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12">
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-2 col-sm-3 col-md-2 control-label text-muted">Address</label>
-                            <div class="col-xs-10 col-sm-9 col-md-10">
-                                <div class="input-group pos-rel" style="width: 100%;">
-                                    @Html.TextBoxFor(m => m.Address, new {id = "txtVendorAddrForm", @style = "width:100%", @tabindex="8"})
-					            </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12">
-                        <div class="form-group form-group-xs _criteria">
-                            <div class="col-xs-12 col-sm-6 col-md-6" style="padding:0px">
-                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">City</label>
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Purch. Org</label>
                                 <div class="col-xs-8 col-sm-9 col-md-8">
                                     <div class="input-group pos-rel" style="width: 100%;">
-                                        @Html.TextBoxFor(m => m.City, new {id = "txtVendorCityForm", @style = "width:100%", @tabindex="9"})
+                                        @Html.DropDownListFor(m => m.VendorPlant, PlantController.PlantSelectListByDivisionId(RegNo, PlantBefore), new { id = "txtVendorPlantForm", @class = "cursor-1 mandatory", @style = "width:100%", @tabindex = "3" })
+
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6">
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Phone</label>
-                            <div class="col-xs-8 col-sm-9 col-md-8">
-                                <div class="input-group pos-rel" style="width: 100%;">
-                                    @Html.TextBoxFor(m => m.Phone, new {id = "txtVendorPhoneForm", @style = "width:100%", @tabindex="10"})
+                        <div class="col-xs-12 col-sm-6 col-md-6">
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">SAP Code</label>
+                                <div class="col-xs-8 col-sm-9 col-md-8">
+                                    <div class="input-group pos-rel" style="width: 80%;">
+                                        @Html.TextBoxFor(m => m.SAPVendorID, new { id = "txtSAPCodeForm", @style = "width:100%", @tabindex = "2" })
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6">
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Fax</label>
-                            <div class="col-xs-8 col-sm-9 col-md-8">
-                                <div class="input-group pos-rel" style="width: 100%;">
-                                    @Html.TextBoxFor(m => m.Fax, new {id = "txtVendorFaxForm", @style = "width:100%", @tabindex="11"})
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12">
-                        <div class="form-group form-group-xs _criteria">
-                            <div class="col-xs-12 col-sm-6 col-md-6" style="padding:0px">
-                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Attention</label>
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Purch. Group</label>
                                 <div class="col-xs-8 col-sm-9 col-md-8">
                                     <div class="input-group pos-rel" style="width: 100%;">
-                                        @Html.TextBoxFor(m => m.Attention, new {id = "txtVendorAttentionForm", @style = "width:100%", @tabindex="12"})
+                                        @Html.DropDownListFor(m => m.PurchGroup, PurchasingGroupController.PurchasingGroupSelectList, new { id = "txtPurchGroup", @style = "width:100%", @tabindex = "4" })
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6">
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Postal</label>
-                            <div class="col-xs-8 col-sm-9 col-md-8">
-                                <div class="input-group pos-rel" style="width: 100%;">
-                                    @Html.TextBoxFor(m => m.Postal, new {id = "txtVendorPostalForm", @style = "width:100%", @tabindex="13"})
+                        <div class="col-xs-12 col-sm-12 col-md-12">
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-2 col-sm-3 col-md-2 control-label text-muted">Name</label>
+                                <div class="col-xs-10 col-sm-9 col-md-10">
+                                    <div class="input-group pos-rel" style="width: 100%;">
+                                        @Html.TextBoxFor(m => m.VendorName, new { id = "txtVendorNameForm", @style = "width:100%", @class = "mandatory", @tabindex = "5" })
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6">
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Country</label>
-                            <div class="col-xs-8 col-sm-9 col-md-8">
-                                <div class="input-group pos-rel" style="width: 100%;">
-                                    @Html.DropDownListFor(m => m.Country, CountryController.CountrySelectList, new {id = "txtVendorCountryForm", @class = "cursor-1", @style = "width:100%", @tabindex="14"})
-					            </div>
+                        <div class="col-xs-12 col-sm-6 col-md-6">
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Payment Term</label>
+                                <div class="col-xs-8 col-sm-9 col-md-8">
+                                    <div class="input-group pos-rel" style="width: 100%;">
+                                        @Html.DropDownListFor(m => m.PaymentTermCd, PaymentController.PaymentTermSelectList, new { id = "txtPayTermForm", @class = "cursor-1 mandatory", @style = "width:100%", @tabindex = "6" })
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12">
-                        <div class="form-group form-group-xs _criteria">
-                            <label class="col-xs-2 col-sm-3 col-md-2 control-label text-muted">Email Address</label>
-                            <div class="col-xs-10 col-sm-9 col-md-10">
-                                <div class="input-group pos-rel col-xs-5 col-sm-4 col-md-5" >
-                                    <input type="text" id="hiddenmail" style="display:none">
-                                    @Html.TextBoxFor(m => m.Mail, new {id = "txtVendorMailForm", @style = "width:100%", @tabindex="15"})
-                                    <span class="input-group-btn">
-                                        <button id="btn-detail" class="btn btn-primary btn-xs" onclick="javascript:onaddedmail();return false;">Add</button>
-                                    </span>
+                        <div class="col-xs-12 col-sm-6 col-md-6">
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Payment Method</label>
+                                <div class="col-xs-8 col-sm-9 col-md-8">
+                                    <div class="input-group pos-rel" style="width: 100%;">
+                                        @Html.DropDownListFor(m => m.PaymentMethodCd, PaymentController.PaymentMethodSelectList, new { id = "txtPayMethodForm", @class = "cursor-1 mandatory", @style = "width:100%", @tabindex = "7" })
+                                    </div>
                                 </div>
-                                <div class="appended-mail" style="font-size:x-small;margin-top:5px;">
-                                    @if (VendorData.Mail != null && VendorData.Mail != "") {
-                                        int i = 0;
-                                        foreach (string mail in VendorData.Mail.Split(';'))
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-12">
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-2 col-sm-3 col-md-2 control-label text-muted">Address</label>
+                                <div class="col-xs-10 col-sm-9 col-md-10">
+                                    <div class="input-group pos-rel" style="width: 100%;">
+                                        @Html.TextBoxFor(m => m.Address, new { id = "txtVendorAddrForm", @style = "width:100%", @tabindex = "8" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-12">
+                            <div class="form-group form-group-xs _criteria">
+                                <div class="col-xs-12 col-sm-6 col-md-6" style="padding:0px">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">City</label>
+                                    <div class="col-xs-8 col-sm-9 col-md-8">
+                                        <div class="input-group pos-rel" style="width: 100%;">
+                                            @Html.TextBoxFor(m => m.City, new { id = "txtVendorCityForm", @style = "width:100%", @tabindex = "9" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-6">
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Phone</label>
+                                <div class="col-xs-8 col-sm-9 col-md-8">
+                                    <div class="input-group pos-rel" style="width: 100%;">
+                                        @Html.TextBoxFor(m => m.Phone, new { id = "txtVendorPhoneForm", @style = "width:100%", @tabindex = "10" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-6">
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Fax</label>
+                                <div class="col-xs-8 col-sm-9 col-md-8">
+                                    <div class="input-group pos-rel" style="width: 100%;">
+                                        @Html.TextBoxFor(m => m.Fax, new { id = "txtVendorFaxForm", @style = "width:100%", @tabindex = "11" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-12">
+                            <div class="form-group form-group-xs _criteria">
+                                <div class="col-xs-12 col-sm-6 col-md-6" style="padding:0px">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Attention</label>
+                                    <div class="col-xs-8 col-sm-9 col-md-8">
+                                        <div class="input-group pos-rel" style="width: 100%;">
+                                            @Html.TextBoxFor(m => m.Attention, new { id = "txtVendorAttentionForm", @style = "width:100%", @tabindex = "12" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-6">
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Postal</label>
+                                <div class="col-xs-8 col-sm-9 col-md-8">
+                                    <div class="input-group pos-rel" style="width: 100%;">
+                                        @Html.TextBoxFor(m => m.Postal, new { id = "txtVendorPostalForm", @style = "width:100%", @tabindex = "13" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-6">
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Country</label>
+                                <div class="col-xs-8 col-sm-9 col-md-8">
+                                    <div class="input-group pos-rel" style="width: 100%;">
+                                        @Html.DropDownListFor(m => m.Country, CountryController.CountrySelectList, new { id = "txtVendorCountryForm", @class = "cursor-1", @style = "width:100%", @tabindex = "14" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-12">
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-2 col-sm-3 col-md-2 control-label text-muted">Email Address</label>
+                                <div class="col-xs-10 col-sm-9 col-md-10">
+                                    <div class="input-group pos-rel col-xs-5 col-sm-4 col-md-5">
+                                        <input type="text" id="hiddenmail" style="display:none">
+                                        @Html.TextBoxFor(m => m.Mail, new { id = "txtVendorMailForm", @style = "width:100%", @tabindex = "15" })
+                                        <span class="input-group-btn">
+                                            <button id="btn-detail" class="btn btn-primary btn-xs" onclick="javascript:onaddedmail();return false;">Add</button>
+                                        </span>
+                                    </div>
+                                    <div class="appended-mail" style="font-size:x-small;margin-top:5px;">
+                                        @if (VendorData.Mail != null && VendorData.Mail != "")
                                         {
-                                            if (mail != "")
+                                            int i = 0;
+                                            foreach (string mail in VendorData.Mail.Split(';'))
                                             {
-                                                <p><span class="remove-list-mail-@i.ToString()" id="isrow-mail-@i.ToString()">
-                                                    <a href="#" onclick="deleteMail('@i.ToString()')"><img width="15" height="15" src="../Content/img/error.png" title="Delete Mail"></a>
-                                                    @mail</span>
-                                                </p>
+                                                if (mail != "")
+                                                {
+                                                    <p>
+                                                        <span class="remove-list-mail-@i.ToString()" id="isrow-mail-@i.ToString()">
+                                                            <a href="#" onclick="deleteMail('@i.ToString()')"><img width="15" height="15" src="../Content/img/error.png" title="Delete Mail"></a>
+                                                            @mail
+                                                        </span>
+                                                    </p>
+                                                }
+                                                i = i + 1;
                                             }
-                                            i = i + 1;
                                         }
-                                    }
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="row">
-                <div class="modal-footer">
-                    <div class="col-xs-6"> </div>
-                    <div class="col-xs-6 text-right">
-                        <div class="form-group-xs">
-                            <button type="submit" class="btn btn-primary btn-xs" tabindex="16">Save</button>  
-                            <button type="button" class="btn btn-danger btn-xs" id="btnCancel" data-dismiss="modal" tabindex="17">Close</button>                     
+
+                <div class="row">
+                    <div class="modal-footer">
+                        <div class="col-xs-6"> </div>
+                        <div class="col-xs-6 text-right">
+                            <div class="form-group-xs">
+                                <button type="submit" class="btn btn-primary btn-xs" tabindex="16">Save</button>
+                                <button type="button" class="btn btn-danger btn-xs" id="btnCancel" data-dismiss="modal" tabindex="17">Close</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
 </div>
 
 <script type="text/javascript">

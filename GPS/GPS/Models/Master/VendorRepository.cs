@@ -233,6 +233,28 @@ namespace GPS.Models.Master
             }
             return SetDisablePlant;
         }
+
+        public string GetDivisionCode(string RegNo)
+        {
+            string result = "";
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            dynamic args = new
+            {
+                RegNo
+            };
+
+            var data = db.Fetch<Vendor>("Master/Vendor/GetDivisionCode", args);
+            db.Close();
+
+            if (data.Count > 0)
+            {
+                foreach (var item in data)
+                {
+                    result = item.DivisionId;
+                }
+            }
+            return result;
+        }
         public List<Vendor> GetDownloadData(string VendorCd, string VendorName, string PayTerm, string PayMethod)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();

@@ -145,9 +145,32 @@
         $("#hiddenmail").val($("#hiddenmail").val().replace(mail + ";", ""));
     }
 
-    function onSaveData() {
+    function onSaveData(DivId,PlantBefore) {
         var isvalid = $.ValidateMandatory(["#txtVendorCdForm", "#txtPurchGroup", "#txtVendorNameForm", "#txtPayTermForm", "#txtPayMethodForm", "#txtVendorCountryForm"]);
-        if(isvalid) {
+        var PlanNotMandatory = "true";
+        if (DivId == "14" && PlantBefore == "0000") {
+            var PlantCd = $("#txtVendorPlantForm").val();
+            if (PlantCd != null) {
+                if (PlantCd.length < 1) {
+                    PlanNotMandatory = "false";
+                }
+            }
+            else {
+                PlanNotMandatory = "false";
+            }
+            
+        }
+        if (PlanNotMandatory == "false") {
+            $.messagebox.show(
+                    "Edit Vendor Validation",
+                    "Plant should not be empty",
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+        }
+        if (isvalid && PlanNotMandatory == "true") {
             $.ajax({
                 type: "post",
                 url: "@Html.Toyota().Page.GetActionUrl("SaveData")",

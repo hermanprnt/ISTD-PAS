@@ -26,7 +26,7 @@ namespace GPS.Models.Master
         public String ChangedBy { get; set; }
         public DateTime ChangedDt { get; set; }
         public String SetDisablePlant { get; set; }
-
+        public String DivisionId { get; set; }
         //For Insert Upload
         public Int64 ProcessId { get; set; }
         public String Row { get; set; }

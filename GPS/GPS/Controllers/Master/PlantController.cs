@@ -93,11 +93,11 @@ namespace GPS.Controllers.Master
 
         //add by fid.ahmad 20-02-2023
         #region COMMON LIST
-       
-        public static SelectList PlantSelectListByDivisionId(String RegNo)
+
+        public static SelectList PlantSelectListByDivisionId(String RegNo, String PlantBefore)
         {
             return PlantRepository.Instance
-                     .GetPlantListByDivisionId(RegNo)
+                     .GetPlantListByDivisionId(RegNo, PlantBefore)
                      .AsSelectList(plant => plant.PLANT_CD + " - " + plant.PLANT_NAME, plant => plant.PLANT_CD);
 
         }

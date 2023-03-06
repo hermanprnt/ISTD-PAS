@@ -107,7 +107,7 @@ namespace GPS.Models.Master
         #endregion
 
         #region Get Plant List By Division Id
-        public IEnumerable<Plant> GetPlantListByDivisionId(String RegNo)
+        public IEnumerable<Plant> GetPlantListByDivisionId(String RegNo, String PlantBefore)
         {
         
             string NoReg = RegNo;
@@ -115,7 +115,8 @@ namespace GPS.Models.Master
             IDBContext db = DatabaseManager.Instance.GetContext();
             dynamic args = new
             {
-                NOREG = NoReg
+                NOREG = NoReg,
+                PLANT_BEFORE = PlantBefore
             };
             IEnumerable<Plant> result = db.Fetch<Plant>("Master/Vendor/GetAllPlantByDivison",args);
             db.Close();
