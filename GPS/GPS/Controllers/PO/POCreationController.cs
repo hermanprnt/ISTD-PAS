@@ -790,6 +790,9 @@ namespace GPS.Controllers.PO
                 execModel.FunctionId = FunctionId.POCreation;
                 execModel.ProcessId = viewModel.ProcessId;
 
+                // add by fid.ahmad 27-02-2023 handle issue vendor code was not filtered by purchasing group 
+                POSaveResult resultChecking = creationRepo.PlantCodeChecking(execModel, viewModel);
+
                 POSaveResult result = creationRepo.SaveData(execModel, viewModel);
                 creationRepo.MoveTempAttachmentToRealPath(viewModel.ProcessId, result.PONo, result.DocYear);
                 Session.Add(PONoSaveSessionKey, result.PONo);
