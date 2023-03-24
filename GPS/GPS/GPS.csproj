@@ -464,7 +464,6 @@
     <Compile Include="Models\SA\SACreationRepository.cs" />
     <Compile Include="Report\PO\POLetterDataSet.cs">
       <DependentUpon>POLetterDataSet.xsd</DependentUpon>
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="ViewModels\SOP\SOPFileViewModel.cs" />
     <Content Include="bin\Content\sign\00212592.png" />
