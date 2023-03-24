@@ -1,0 +1,148 @@
+﻿@using GPS.Models.Master
+@using GPS.Controllers.Master
+@model GPS.Models.Master.Quota
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+<style>
+    .datepicker {
+        z-index: 9999999 !important;
+    }
+</style>
+
+@Html.Partial("_QuotaScript")
+
+<form role="form" class="form-horizontal" id="searchForm" method="post" action="javascript: onSearchData(1)">
+    <div class="row">
+         <div class="col-xs-12 col-sm-3 col-md-3">
+            <div class="form-group form-group-xs">
+              <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                    Division</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                   @Html.DropDownListFor(
+                                m => m.DIVISION_ID, 
+                                DivisionController.GetDivisionList(), 
+                                new {
+                                    id = "txtDivision", 
+                                    @class = "cursor-1 custom-combo",
+                                    @style = "width:100%"
+                                }) 
+                </div>
+            </div>   
+        </div>
+         <div class="col-xs-12 col-sm-3 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                    Type</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                     @Html.DropDownList("txtType", QuotaController.SelectType(), new { @class = "cursor-1 custom-combo"})
+                </div>
+            </div>
+        </div>
+         <div class="col-xs-12 col-sm-3 col-md-3">
+             <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                    Coordinator</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                   @Html.DropDownListFor(
+                            m => m.ORDER_COORD, 
+                            PRCheckerController.PRCheckerSelectList, 
+                            new { 
+                                id = "txtOrdCoord", 
+                                @class = "form-control", 
+                                @style = "width:100%;" 
+                            })
+                </div>
+            </div>
+        </div>  
+         <div class="col-xs-12 col-sm-3 col-md-3">
+             <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                    WBS No</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                   <input type="text" id="txtWBS" class="form-control"/>              
+                </div>
+            </div>
+        </div>  
+    </div>
+    <div class="row">
+        <div class="col-xs-6" style="margin-top: 5px;"></div>
+        <div class="col-xs-6 text-right">
+            <div class="form-group-xs">        
+                <button type="submit" id="btnSearch" class="btn btn-primary btn-xs btndisable">
+                    Search</button>        
+                <button type="button" id="btnClear" class="btn btn-default btn-xs btndisable" onclick="onClear()">
+                    Clear</button>
+            </div>
+        </div>       
+    </div>
+</form>
+<div class="text-center" style="margin-bottom: 3px;">
+    <hr id="hrsrc" style="margin: 0; padding: 0;" />
+</div>
+<div class="row" style="margin-top:5px">
+
+ <div class="col-xs-4 col-sm-4 col-md-4">
+        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("Quota", "btn-add"))
+        {           
+            <button type="button" onclick="onAddData()" id="btn-add" class="btn btn-primary btn-xs btndisable">
+                Add</button>
+        }
+    
+       @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("Quota", "btn-edit"))
+       {      
+            <button type="button" onclick="onEditData()" id="btn-edit" class="btn btn-primary btn-xs btndisable">
+                Edit</button>           
+       }
+   
+         @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("Quota", "btn-delete"))
+            { 
+            <button type="button" onclick="onDeleteData()" id="btn-delete" class="btn btn-danger btn-xs btndisable">
+                Delete</button>
+            }
+    </div>
+     
+</div>
+<div>
+    <div id="detailgrid">
+        @Html.Partial("_QuotaGrid")
+    </div>
+    <div class="modal fade" data-backdrop="static" data-keyboard="false" id="basicModal"
+        tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        @Html.Partial("_PopUpAddHeader")
+    </div>
+</div>
+
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="generatePopUp">
+    <div class="modal-dialog modal-md" style="width: 300px;">
+        <div class="modal-content">
+            <div class="modal-header">               
+                <h5 class="modal-title" id="popup-title">
+                    Generate</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row" style="padding-left: 10px;">
+                    <div class="form-group form-group-xs ">
+                        <label class="col-xs-2 col-sm-3 col-md-2 control-label text-muted">
+                            Year</label>
+                        <div class="input-group input-group-xs" style="padding-left: 11px;
+                            padding-right: 11px; height: 26px;">
+                            <div class="input-group" style="cursor: pointer;">
+                                <input class="form-control date-picker mandatory" onchange="YearsGenerate()" id="txtYear" name="txtYear" type="text" readonly="readonly"/>
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="text-align: right; padding-right: 10px; padding-top: 5px;">
+                    <button type="button" class="btn btn-primary btn-xs" style="width: 60px;" onclick="onGenerate();">
+                        OK</button> 
+                    <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal" style="width: 60px;">
+                        Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

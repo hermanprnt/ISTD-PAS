@@ -1,0 +1,46 @@
+﻿@using GPS.Models.Master
+@{
+    List<CostCenter> ListCostGroup = ViewData["CostCenterGroup"] != null ? (List<CostCenter>)ViewData["CostCenterGroup"] : new List<CostCenter>();
+}
+
+<form role="form" class="form-horizontal" id="searchForm" method="post" action="javascript: onGetData(1)">
+    <div class="row">
+        <div class="col-xs-12 col-sm-3 col-md-3">
+            <div class="form-group form-group-xs">
+                <div class="col-xs-4 col-sm-4 text-right">
+                    <label class="control-label text-muted">Cost Center</label>
+                </div>
+                <div class="col-xs-8 col-sm-8">
+                    <input type="text" id="txtCostCenter" class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4">
+            <div class="form-group form-group-xs"> 
+                <div class="col-xs-6 col-sm-6 text-right">
+                    <label class="control-label text-muted">Cost Center Group</label>
+                </div>
+                <div class="col-xs-6 col-sm-6">
+                    <select id="txtCostGrpCode" class="form-control">
+                        <option value=""></option>
+                        @foreach (CostCenter cgroup in ListCostGroup)
+                        {
+                            <option value="@cgroup.CostCenterGroupCd">@cgroup.CostCenterGroupCd</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xs-12 col-sm-5 col-md-5"> </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div class="col-sm-6">
+        </div>
+        <div class="col-xs-12 col-sm-6 text-right">
+            <button type="submit" class="btn btn-primary btn-xs btn-std btndisable" onclick="">Search</button>
+            <button type="button" class="btn btn-default btn-xs btn-std btndisable" onclick="onClear()">Clear</button>
+        </div>
+    </div>
+</form>

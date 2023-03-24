@@ -1,0 +1,281 @@
+﻿@using GPS.Controllers.Master
+@using GPS.Controllers.PR
+@using GPS.Constants.PR
+@model  GPS.Models.PR.PRInquiry.PRInquiry
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string PR_NO = TempData["PR_NO"] != null ?  TempData["PR_NO"].ToString() : "";
+    int DIVISION_ID = TempData["DIVISION_ID"] != null ? Convert.ToInt32(TempData["DIVISION_ID"]) : 0;
+}
+@section HeadScript{
+    <!-- Bootstrap Datepicker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/datepicker.css")" />
+    <!-- Daterange picker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+
+    <style>
+        .initial-hide,
+        .moreinquiry {
+            display:none;
+        }
+
+        .form-group {
+            margin-bottom:10px;
+        }
+
+        .cancel {
+            background-color:#ababab !important;
+            color: #fff !important;
+        }
+
+        .cancel a {
+            color: #fff !important;
+        }
+    </style>
+}
+
+@section BodyScript{
+    <!-- Bootstrap Datepicker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+    <!-- Daterange picker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+    <!-- Dropzone file js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/dropzone.js")"></script>
+
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/typeahead.jquery.js")"></script>
+
+    @Html.Partial("_PartialInquiryScript")
+    <script>
+        $(document).ready(function () {
+            $("#division").val("@DIVISION_ID.ToString()");
+            $("#prno").val("@PR_NO");
+            $("#iscreate").html("@PR_NO");
+
+            $tdk.Division = "@DIVISION_ID.ToString()";
+        
+            if ($("#iscreate").html() != '') {
+                $("#btnsearch").click();
+                $("#iscreate").html('');
+            }
+
+            var curdate = new Date();
+            curdate.getDate();
+            curdate.setMonth(curdate.getMonth()-1);
+
+            $('input[name=date-range-picker]').daterangepicker({
+                format: 'DD.MM.YYYY',
+                'applyClass': 'btn-sm btn-success',
+                'cancelClass': 'btn-sm btn-default',
+                startDate: curdate,
+                locale: {
+                    applyLabel: 'Apply',
+                    cancelLabel: 'Cancel',
+                }
+            })
+			.prev().on(ace.click_event, function () {
+			    $(this).next().focus();
+			});
+
+            populateComboBox('division');
+
+            var dt = new Date();
+            dt.getDate();
+            $("#docdate").val(("0" + curdate.getUTCDate()).slice(-2) + '.' + ("0" + (curdate.getUTCMonth() + 1).toString()).slice(-2) + '.' + curdate.getUTCFullYear() + " - " + ("0" + dt.getUTCDate()).slice(-2) + '.' + ("0" + (dt.getUTCMonth() + 1).toString()).slice(-2) + '.' + dt.getUTCFullYear());
+            SearchPRHeader(1, 1);
+        });
+    </script>
+    }
+<div class="alert alert-danger" role="alert" style="display:none" id="alert-search"></div>
+<div class="alert alert-warning" role="alert" style="display:none" id="warning-search"></div>
+<div class="form-horizontal" id="searchForm">
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">PR No.</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    <div class="input-group pos-rel" style="width: 100%;">
+                        @Html.TextBoxFor(m => m.PR_NO, new {id = "prno", @style = "width:100%"})
+					</div>
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">PR Status</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    @Html.DropDownListFor(m => m.STATUS_CD, DocStatusController.GetDocStatusSelectListPrInq("DOC"), new {id = "status", @class = "cursor-1", @style = "width:100%"})
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Plant</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                        @Html.DropDownListFor(m => m.PLANT_CD, PlantController.PlantSelectList, new {id = "plant", @class = "cursor-1", onchange = "javascript:populateComboBox('sloc')", @style = "width:100%" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">WBS</label>
+                <div class="col-xs-8 col-sm-9 col-md-8" id="cascade-wbs">
+                    @Html.TextBoxFor(m => m.WBS_NO, new {id = "awbsno", @style = "width:100%" })
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Description</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    <div class="input-group pos-rel" style="width: 100%;">
+                        @Html.TextBoxFor(m => m.PR_DESC, new {id = "prdesc", @style = "width:100%"})
+                    </div>
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Detail Status</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                        @Html.DropDownListFor(m => m.STATUS_CD, DocStatusController.GetDocStatusSelectList("PR"), new {id = "detstatusfrom", @class = "cursor-1", @style = "width:100%" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Storage</label>
+                <div class="col-xs-8 col-sm-9 col-md-8" id="cascade-sloc">
+                        @Html.Partial(PurchaseRequisitionPage._CascadeSloc)
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Created By</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    @Html.TextBoxFor(m => m.CREATED_BY, new {id = "createdby", @style = "width:100%"})
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Coordinator</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    @Html.DropDownListFor(m => m.PR_COORDINATOR, PRCheckerController.PRCheckerSelectList, new { id = "prchecker", @class = "cursor-1", @style = "width:100%;" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Type</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    @Html.DropDownListFor(m => m.PR_TYPE, PRInquiryController.SelectPRType(), new { id = "prtype", @class = "cursor-1", @style = "width:100%;" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Vendor</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    @Html.TextBoxFor(m => m.VENDOR_CD, new {id = "vendor", @style = "width:100%"})
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">PO No.</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    @Html.TextBoxFor(m => m.PO_NO, new { id = "po_No", @style = "width:100%" })
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Division</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                     @Html.DropDownListFor(m => m.DIVISION_ID, DivisionController.GetDivisionList(), new {id = "division", @class = "cursor-1", onchange = "javascript:populateComboBox('division')", @style="width:100%;" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Doc. Date</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    <div class="input-group">
+						<span class="input-group-addon" style="cursor: pointer;padding:4px 10px;">
+							<i class="fa fa-calendar bigger-110"></i>
+						</span>
+						<input style = "width:100%"" type="text" name="date-range-picker" id="docdate" data-date-format="dd.mm.yyyy"/>
+					</div>
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Project No</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    <div class="input-group pos-rel" style="width: 100%;">
+                        @Html.TextBoxFor(m => m.PROJECT_NO, new {id = "projectno", @style = "width:100%", maxlength="10" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Proc. Channel</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    <div class="input-group pos-rel" style="width: 100%;">
+                         @Html.DropDownList("cmb-procchannel", ProcurementChannelController.ProcurementChannelSelectList, new { tabindex = "9", @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6" style="margin-top: 5px;">
+            <label class="col-xs-4 col-sm-3 col-md-6 text-left _criteria hidden">
+                    <a id="lnsearch-toggle-moreinquiry" onclick="javascript:toogle('moreinquiry','Search Criteria')">More Search Criteria</a>
+            </label>
+        </div>
+        <div class="col-xs-6 text-right" style="margin-bottom: 3px;">
+            <div class="form-group-xs _criteria">
+                 <button type="button" class="btn btn-primary btn-xs" id="btnToggleDetail" onclick="javascript:detailGrid()">Show detail</button>
+                <button type="submit" id="btnsearch" name="btnsearch" class="btn btn-primary btn-search btn-xs" onclick="javascript:SearchPRHeader(1, 1)">Search</button>
+                <button id="btn-clearsearch" class="btn btn-default btn-xs" onclick="javascript: ClearCriteria()">Clear</button>
+                <span id="iscreate" class="hidden"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center" style="margin-bottom: 3px;">
+    <hr id="hrsrc" style="margin:0;padding:0;" />
+</div>
+
+<div class="row">
+    <div class="col-xs-12 col-sm-5 text-left">
+        <div class="btn-group">
+            <div class="form-group form-group-xs" style="margin-bottom: 3px;">
+               
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PRInquiry", "btn-add"))
+            {
+                <a href="#" type="button" class="btn btn-primary btn-xs" onclick="javascript:Add(0,'')">Add</a>
+            }
+               @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PRInquiry", "btn-edit"))
+            {
+                <a href="#" type="button" class="btn btn-primary btn-xs" onclick="javascript:Edit()">Edit</a>
+            }
+                 @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PRInquiry", "btn-cancel"))
+            {
+                 <a href="#" type="button" class="btn btn-danger btn-xs" onclick="javascript:Cancel()">Cancel</a>
+            }
+               
+            </div>
+        </div>
+    </div>
+       <div class="col-xs-12 col-sm-1 text-left">
+        <button data-rel="tooltip" title="Hide filter" onclick="javascript:toggleSearch()" type="button" class="ace-icon fa fa-angle-double-up btn btn-default btn-xs btn-tiny-down"
+            id="toogle-search" style="top: 6px;">
+        </button>
+        <input type="text" id="btnLostFocus" style="display: block; height: 1px; width: 1px;
+            border: none;" />
+    </div>
+    <div class="col-xs-12 col-sm-6 text-right">
+
+        <button id="btn-download" tabindex="12" class="btn btn-success btn-xs"  onclick="javascript:onDownload()">Download</button>
+
+    </div>
+</div>
+
+
+<div class="row TableList">
+    @Html.Partial(PurchaseRequisitionPage._InquiryGrid)
+</div>
+
+<div id="detail-popup-container" class="modal fade" style="padding-left: 0px !important; width:100%"; data-backdrop="static" data-keyboard="false"></div>
+<div id="history-popup-container" class="modal fade bs-example-modal-lg ncp-theme" data-backdrop="static" data-keyboard="false"></div>
+<div id="cancelreason-popup-container" class="modal fade bs-example-modal-lg ncp-theme" data-backdrop="static" data-keyboard="false">
+    @Html.Partial(PurchaseRequisitionPage._CancelReasonPopup)
+</div>
+<div id="cancel-popup-container" class="modal fade bs-example-modal-lg ncp-theme" data-backdrop="static" data-keyboard="false">
+    @Html.Partial(PurchaseRequisitionPage._CancelPopup)
+</div>

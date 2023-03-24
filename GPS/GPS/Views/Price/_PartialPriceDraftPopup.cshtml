@@ -1,0 +1,246 @@
+﻿@using GPS.CommonFunc.WebControl
+@using GPS.Controllers.Master
+@model GPS.Models.Master.MaterialPrice
+@{
+    List<SelectListItem> selectVendor = (List<SelectListItem>)ViewData["selectVendor"];
+    List<SelectListItem> selectCurr = (List<SelectListItem>)ViewData["selectCurr"];
+    List<SelectListItem> selectPriceStatus = (List<SelectListItem>)ViewData["selectPriceStatus"];
+}
+<style>
+    .table {
+        table-layout: fixed;
+    }
+
+    .table > tr > td {
+        vertical-align : middle;
+    }
+
+    .table > thead > tr > th {
+        vertical-align : middle;
+    }
+
+    .datepicker { 
+        z-index: 999999 !important; 
+    }
+</style>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#price-draft-validfrom").datepicker({
+            dateFormat: 'dd.mm.yyyy',
+            viewMode: 'days',
+            minViewMode: 'days',
+            minDate: 0,
+            showButtonPanel: true,
+            beforeShow: function (input) {
+                setTimeout(function () {
+                    var buttonPane = $(input)
+                        .datepicker("widget")
+                        .find(".ui-datepicker-buttonpane");
+                    $(".ui-datepicker-current").css("display", "none");
+                    $(".ui-datepicker-close").css("display", "none");
+                    $(".ui-datepicker-month").css("font-color", "black");
+                    $("<button>", {
+                        text: "Clear",
+                        click: function () {
+                            $.datepicker._clearDate(input);
+                        }
+                    }).appendTo(buttonPane).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
+                }, 1);
+            },
+            onChangeMonthYear: function (year, month, instance) {
+                setTimeout(function () {
+                    var buttonPane = $(instance)
+                        .datepicker("widget")
+                        .find(".ui-datepicker-buttonpane");
+                    $(".ui-datepicker-current").css("display", "none");
+                    $(".ui-datepicker-close").css("display", "none");
+                    $(".ui-datepicker-month").css("font-color", "black");
+                    $("<button>", {
+                        text: "Clear",
+                        click: function () {
+                            $.datepicker._clearDate(instance.input);
+                        }
+                    }).appendTo(buttonPane).addClass("ui-datepicker-clear ui-state-default ui-priority-primary ui-corner-all");
+                }, 1);
+            }
+        }).on('changeDate', function (ev) {
+            $(this).data('datepicker').hide();
+        });
+
+        $("#validfrom").keydown(function (e) {
+            // Allow: backspace, delete, tab, escape, enter and .
+            if (($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1) ||
+                // Allow: Ctrl+A
+                (e.keyCode == 65 && e.ctrlKey === true) ||
+                // Allow: home, end, left, right, down, up
+                (e.keyCode >= 35 && e.keyCode <= 40)) {
+                // let it happen, don't do anything
+                e.preventDefault();
+            }
+            // Ensure that it is a number and stop the keypress
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                e.preventDefault();
+            }
+
+            if ((e.shiftKey >= 48) || (e.shiftKey <= 57))
+            { e.preventDefault(); }
+        });
+    });
+</script>
+<div id="draft-popup-container" class="modal fade bs-example-modal-lg" width="100%" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" style="width: 700px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>New Draft Price</div>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="alert alert-danger" role="alert" style="display: none" id="price-draft-alert"></div>
+                    <div class="alert alert-success" role="alert" style="display: none" id="price-draft-success"></div>
+                    <div class="alert text-center price-draft-loading-save" style="display: none">Saving on Progress . . .</div>
+                    <div class="alert text-center price-draft-loading-save" id="price-draft-loading-image" style="display: none"></div>
+                    <div class="form-horizontal">
+                        <div class="row-fluid">
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Material No</label>
+                                    <div class="input-group pos-rel col-xs-8 col-sm-9 col-md-8">
+                                        <input type="text" id="price-draft-matno" class="form-control blank"/>
+                                        <span class="input-group-btn">
+                                            <button name="btnmatno" id="btn-matno" class="btn btn-warning btn-xs" onclick="javascript:getMaterial(1)">&nbsp<i class="fa fa-search"></i>&nbsp</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Part Color SFX</label>
+                                    <div class="col-xs-8 col-sm-9 col-md-8">
+                                        <select id="price-draft-sfx" class="form-control blank">
+                                            <option value="">None</option>
+                                            <option value="X">X</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row-fluid">
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Material Desc</label>
+                                    <div class="input-group pos-rel col-xs-8 col-sm-9 col-md-8">
+                                        <input type="text" id="price-draft-matdesc" class="form-control blank" readonly/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Packing Type</label>
+                                    <div class="col-xs-8 col-sm-9 col-md-8">
+                                        <select id="price-draft-packingtype" class="form-control blank">
+                                            <option value="">None</option>
+                                            <option value="0">0</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row-fluid">
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Vendor</label>
+                                    <div class="input-group pos-rel col-xs-8 col-sm-9 col-md-8">
+                                        @Html.Lookup("draftvendor")
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Currency</label>
+                                    <div class="col-xs-8 col-sm-9 col-md-8">
+                                        @Html.DropDownList("cmbdraft-currency", CurrencyController.CurrencySelectList, new {@class = "form-control"})
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row-fluid">
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Prod. Purpose</label>
+                                    <div class="input-group pos-rel col-xs-8 col-sm-9 col-md-8">
+                                        <select id="price-draft-prod" class="form-control blank">
+                                            <option value="">None</option>
+                                            <option value="D">D</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Amount</label>
+                                    <div class="col-xs-8 col-sm-9 col-md-8">
+                                        <input type="number" id="price-draft-amount" class="form-control blank" onkeydown=" javascript:Key(event) "/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row-fluid">
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Warp Buyer</label>
+                                    <div class="input-group pos-rel col-xs-8 col-sm-9 col-md-8">
+                                        <select id="price-draft-warpbuyer" class="form-control blank">
+                                            <option value="">None</option>
+                                            <option value="X">X</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Valid From</label>
+                                    <div class="col-xs-8 col-sm-9 col-md-8">
+                                        <input type="text" id="price-draft-validfrom" class="form-control blank" data-date-format="dd.mm.yyyy"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row-fluid">
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Source Type</label>
+                                    <div class="input-group pos-rel col-xs-8 col-sm-9 col-md-8">
+                                        <select id="price-draft-sourcetype" class="form-control blank">
+                                            <option value="">None</option>
+                                            <option value="1">1</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Price Status</label>
+                                    <div class="col-xs-8 col-sm-9 col-md-8">
+                                        @Html.DropDownList("cmbdraft-pricestatus", PriceController.PriceStatusSelectList, new { @class = "form-control" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="modal-footer">
+                        <div class="col-xs-6"> </div>
+                        <div class="col-xs-6 text-right">
+                            <div class="form-group-xs">
+                                <button type="submit" name="btnsave" class="btn btn-primary btn-xs btn-std" onclick=" javascript:savePriceDraft('Draft') ">Save</button>
+                                <button type="button" name="btnsaveclose" class="btn btn-primary btn-xs btn-std" onclick=" javascript:savePriceDraft('Draft', 'Y') ">Save and Close</button>
+                                <button type="button" name="btncancel" class="btn btn-danger btn-xs btn-std" data-dismiss="modal" onclick="">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

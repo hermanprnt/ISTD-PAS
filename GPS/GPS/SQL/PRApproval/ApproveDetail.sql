@@ -1,0 +1,1 @@
+﻿EXEC [sp_PRApproval_ApproveDetail] @DOC_ITEM_LIST, @REG_NO, null, 'ITEM', @USER_TYPE, @USER_ID, ''

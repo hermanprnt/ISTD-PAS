@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Root>
+  <!--Notes-->
+  <!--
+    Record -> tag untuk table name
+    Field -> tag untuk kolom tiap table 
+      Attribute -> name : kolom untuk mapping dari sql
+                   start : posisi awal karakter 
+                   length : jumlah karakter
+                   delimiter : (optional) jika pake tanda pemisah tiap kolom, contoh : delimiter="#"
+                   justification : (optional) untuk menentukan posisi data dimulai dari kiri apa kanan / jika tidak diisi default kiri, contoh : justification="Right"
+                   primarykey : wajib diisi bila table berupa header detail / optional jika hanya 1 rows
+  -->
+
+  <!--Filename-->
+  <Filename id="filename">
+    
+  </Filename>
+
+  <!--Header-->
+  <!--Header FGW-->
+  <Record id="Header-FGW">
+    <Field name="Headerdiscernmentcode" start="1" length="5"/>
+    <Field name="DivisionclassificationinGW" start="6" length="1"/>
+    <Field name="Blank" start="7" length="5"/>
+    <Field name="Logicalfilename" start="12" length="30"/>
+    <Field name="Filename" start="42" length="26"/>
+    <Field name="Totalnumberofdivision" start="68" length="2"/>
+    <Field name="Sequencenumber" start="70" length="2"/>
+    <Field name="Dataretentiondays" start="72" length="1"/>
+    <Field name="Compression" start="73" length="1"/>
+    <Field name="ReceiversFILEID" start="74" length="8"/>
+    <Field name="InitialFILEID" start="82" length="8"/>
+    <Field name="LastFILEID" start="90" length="8"/>
+    <Field name="UserID" start="98" length="10"/>
+    <Field name="Sendercompanycode" start="108" length="5"/>
+    <Field name="Senderlocationcode" start="113" length="5"/>
+    <Field name="ReceiverCompanycode" start="118" length="5"/>
+    <Field name="Receiverlocationcode" start="123" length="5"/>
+    <Field name="DataID" start="128" length="5"/>
+    <Field name="TotalRecordNumber" start="133" length="10"/>
+    <Field name="Reserve" start="143" length="58"/>
+  </Record>
+  <!--End Header FGW-->
+  
+  <!--Get Header FGW SQL-->
+  <SQL id="Header-FGW-Sql">
+    SP_06011_GET_HEADER_FGW
+  </SQL>
+  <!--End Header FGW SQL-->
+
+  <!--Header File-->
+  <Record id="Header-File">
+    <Field name="BeginningofRecord" start="1" length="1" delimiter=""/>
+    <Field name="RecordID" start="2" length="1" delimiter="#"/>
+    <Field name="FromSystem" start="3" length="3" delimiter="#"/>
+    <Field name="ToSystem" start="6" length="3" delimiter="#"/>
+    <Field name="FileName" start="9" length="26" delimiter="#"/>
+    <Field name="InterfaceName" start="35" length="8" delimiter="#"/>
+    <Field name="RecordLength" start="43" length="6" delimiter="#"/>
+    <!--<Field name="EndofRecord" start="48" length="1" delimiter=""/>-->
+  </Record>
+  <!--End Header File-->
+
+  <!--Get header sql-->
+  <SQL id="Header-Sql">
+    SP_06011_GET_HEADER_FILE
+  </SQL>
+  <!--End Get header sql-->
+  <!--End Header-->
+
+  <!--Body-->
+  <!--Header Data-->
+  <Record id="Header-Data">
+    <Field name="RecordID" start="1" length="7"  delimiter="|"/>
+    <Field name="CountryCode" start="8" length="3"  delimiter="|"/>
+    <Field name="CompanyCode" start="11" length="8"  delimiter="|"/>
+    <Field name="CompanyBranchCode" start="19" length="5"  delimiter="|"/>
+    <Field name="LegacySystem" start="24" length="10"  delimiter="|"/>
+    <Field name="PartCategory" start="34" length="2"  delimiter="|"/>
+    <Field name="InventoryType" start="36" length="1"  delimiter="|"/>
+    <Field name="TransactionType" start="37" length="2"  delimiter="|"/>
+    <Field name="AutoGIFlag" start="39" length="1"  delimiter="|"/>
+    <Field name="AdjustmentType" start="40" length="1"  delimiter="|"/>
+    <Field name="ExpenseFlag" start="41" length="1"  delimiter="|"/>
+    <Field name="ReferenceDocumentNo" start="42" length="25"  delimiter="|"/>
+    <Field name="ReferenceDocumentDate" start="67" length="8"  delimiter="|"/>
+    <Field name="ModuleNo" start="75" length="8"  delimiter="|"/>
+    <Field name="OracleSupplierCode" start="83" length="10"  delimiter="|"/>
+    <Field name="SupplierCode" start="93" length="10"  delimiter="|"/>
+    <Field name="PartReceiveDate" start="103" length="8"  delimiter="|"/>
+    <Field name="ReceivingSupplyNo" start="111" length="20"  delimiter="|"/>
+    <Field name="ReceivingSupplyDate" start="131" length="8"  delimiter="|"/>
+    <Field name="ReceiveSupplyPlantCode" start="139" length="5"  delimiter="|"/>
+    <Field name="ReceiveSupplyDockCode" start="144" length="5"  delimiter="|"/>
+    <Field name="ReceiveSupplyLocation" start="149" length="30"  delimiter="|"/>
+    <Field name="PDSPONoOrderNo" start="179" length="20"  delimiter="|"/>
+    <Field name="FixedAssetNo" start="199" length="20"  delimiter="|"/>
+    <Field name="ItemCode" start="219" length="20"  delimiter="|"/>
+    <Field name="ItemQuantity" start="239" length="10"  delimiter="|"/>
+    <Field name="UOM" start="249" length="10"  delimiter="|"/>
+    <Field name="StandardUnitCost" start="259" length="14"  delimiter="|"/>
+    <Field name="StandardCostAmount" start="273" length="14"  delimiter="|"/>
+    <Field name="StandardTotalAmount" start="287" length="14"  delimiter="|"/>
+    <Field name="ActualUnitCost" start="301" length="18"  delimiter="|"/>
+    <Field name="ActualCostAmount" start="319" length="18"  delimiter="|"/>
+    <Field name="ActualTotalAmount" start="337" length="18"  delimiter="|"/>
+    <Field name="VarianceAmount" start="355" length="14"  delimiter="|"/>
+    <Field name="OrderType" start="369" length="2"  delimiter="|"/>
+    <Field name="ReasonCode" start="371" length="2"  delimiter="|"/>
+    <Field name="CostCenter" start="373" length="10"  delimiter="|"/>
+    <Field name="BudgetNo" start="383" length="10"  delimiter="|"/>
+    <Field name="ProjectCode" start="393" length="10"  delimiter="|"/>
+    <Field name="AccountCode" start="403" length="10"  delimiter="|"/>
+    
+    <Field name="SignCode" start="413" length="1"  delimiter="|"/>
+    <Field name="StockMovementFlag" start="414" length="1"  delimiter="|"/>
+    <Field name="CancelFlag" start="415" length="1"  delimiter="|"/>
+    <Field name="InterfaceTypeFlag" start="416" length="1"  delimiter="|"/>
+    <Field name="GoodIssueType" start="417" length="50"  delimiter="|"/>
+    <Field name="WBS" start="467" length="24"  delimiter="|"/>
+    <Field name="EarmarkedFund" start="491" length="10"  delimiter="|"/>
+    <Field name="EarmarkedFundItem" start="501" length="3"  delimiter="|"/>
+    <Field name="PostingKey" start="504" length="2"  delimiter="|"/>
+    <Field name="Currency" start="506" length="6"  delimiter="|"/>
+    <!--<Field name="EndingofRecord" start="511" length="1"  delimiter="|"/>-->
+    
+    <!--<Field name="PostingKey" start="413" length="2"  delimiter="|"/>
+    <Field name="Currency" start="415" length="5"  delimiter="|"/>
+    <Field name="SignCode" start="420" length="1"  delimiter="|"/>
+    <Field name="StockMovementFlag" start="421" length="1"  delimiter="|"/>
+    <Field name="CancelFlag" start="422" length="1"  delimiter="|"/>
+    <Field name="InterfaceTypeFlag" start="423" length="1"  delimiter="|"/>
+    <Field name="GoodIssueType" start="424" length="10"  delimiter="|"/>
+    <Field name="WBS" start="434" length="24"  delimiter="|"/>
+    <Field name="EarmarkedFund" start="458" length="10"  delimiter="|"/>
+    <Field name="EarmarkedFundItem" start="468" length="3"  delimiter="|"/>
+    <Field name="EndingofRecord" start="471" length="1"  delimiter="|"/>-->
+  </Record>
+  <!--End Header Data-->
+
+  <!--Get header data sql-->
+  <SQL id="Header-Data-Sql">
+    SP_06011_GET_DOCUMENT_SEGMENT
+  </SQL>
+  <!--End Get header data sql-->
+
+  <!--Detail Data-->
+  
+  <!--End Detail Data-->
+
+  <!--Get Detail data sql-->
+  
+  <!--End Get Detail data sql-->
+
+  <!--WH Data-->
+  
+  <!--End WH Data-->
+
+  <!--Get WH data sql-->
+  
+  <!--End Get WH data sql-->
+  <!--End Body-->
+
+  <!--Footer-->
+  <Record id="Footer-File">
+    <Field BeginRecord="#" RecordId="T" BeginRecordCount="#" BeginRecord2="#"/>
+  </Record>
+  <!--End Footer-->
+
+</Root>
+
+
+

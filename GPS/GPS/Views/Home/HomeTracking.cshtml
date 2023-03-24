@@ -1,0 +1,41 @@
+﻿@using GPS.Constants
+@using GPS.Models.PR.Common
+@using CommonFormat = GPS.Constants.CommonFormat
+@{
+    List<PRCommonList> pr = ViewData["HomeTracking"] != null ? (List<PRCommonList>)ViewData["HomeTracking"] : new List<PRCommonList>();
+}
+
+<div style="width:100%;overflow:auto;">
+    <table id="table-HomeTracking" class="table table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th style="width:7em;">Document No</th>
+                <th style="width:5em;">Item No</th>
+                <th style="width:15em;">Item Description</th>
+                <th style="width:5em;">Purchasing Group</th>
+                <th style="width:8em;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (pr.Count > 0)
+        {
+            foreach (PRCommonList item in pr)
+            {
+                <tr class="pt">
+                    <td class="text-center">@item.PR_NO</td>
+                    <td class="text-center">@int.Parse(item.ITEM_NO)</td>
+                    <td class="text-center">@item.ITEM_DESCRIPTION</td>
+                    <td class="text-center">@item.PURCHASING_GROUP_CD</td>
+                    <td class="text-center">@item.STATUS_DESC</td>
+                </tr>
+            } 
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center">@CommonDisplayMessage.NoData</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

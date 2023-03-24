@@ -1,0 +1,66 @@
+﻿<style>
+    .table {
+        table-layout: fixed;
+    }
+
+    .table > tr > td {
+        vertical-align : middle;    
+    }
+
+    .table > thead > tr > th {
+        vertical-align : middle;    
+    }
+</style>
+<div class="modal-dialog modal-lg" style="width:500px">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>Material Number Lookup</div>
+        </div>
+        <div class="modal-body">
+            <div class="form-horizontal">
+            <div class="row-fluid">
+                <div class="col-xs-12 col-sm-12 col-md-12">
+                    <div class="form-group form-group-xs">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Material No.</label>
+                        <div class="col-xs-8 col-sm-9 col-md-8">
+                            <input type="text" id="matnolook" class="form-control blank"/>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-xs">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Material Desc.</label>
+                        <div class="col-xs-8 col-sm-9 col-md-8">
+                            <input type="text" id="matdesclook" class="form-control blank"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-6">
+                     <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted"></label>
+                        <div class="col-xs-8 col-sm-9 col-md-8">
+                            <input type="text" id="" class="form-control blank" style="visibility:hidden"/>
+                        </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-6 text-right">
+                    <div>
+                        <button type="submit" id="btnsearch-mat" name="btnsearch-mat" class="addinput custom-button-grid btn btn-primary btn-xs" onclick="javascript:getMaterialGrid(1)">Search</button>
+                        <input type="reset" class="addinput custom-button-grid btn btn-default btn-xs" value="Clear" onclick="javascript:clearfield()"/>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <div class="row" style="margin-top:10px">
+                <div class="full-border">
+                    <div id="material-grid-container" class="col-xs-12 col-md-12 form-main-group-box-search">
+                        @Html.Partial("_PartialPriceLookupMaterialGrid")
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col-xs-12 text-right">
+                <button type="button" class="btn btn-danger btn-standard btn-xs" data-dismiss="modal" onclick="javascript:clearValueLookup()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

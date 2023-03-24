@@ -1,0 +1,15 @@
+CREATE PROCEDURE [dbo].[sp_POCommon_GetComponentPriceList]
+    @valuationClass VARCHAR(4)
+AS
+BEGIN
+    WITH tmp AS (
+        SELECT cmpp.COMP_PRICE_CD
+        FROM TB_M_VALUATION_CLASS valc
+        JOIN TB_M_CALCULATION_MAPPING calcm ON valc.CALCULATION_SCHEME_CD = calcm.CALCULATION_SCHEME_CD
+        JOIN TB_M_COMP_PRICE cmpp ON calcm.COMP_PRICE_CD = cmpp.COMP_PRICE_CD
+        WHERE valc.VALUATION_CLASS = @valuationClass
+    )
+    SELECT cmp.COMP_PRICE_CD CompPriceCode, cmp.COMP_PRICE_DESC CompPriceDesc, ISNULL(cmpr.COMP_PRICE_RATE, 0) CompPriceRate
+    FROM TB_M_COMP_PRICE cmp LEFT JOIN TB_M_COMP_PRICE_RATE cmpr ON cmp.COMP_PRICE_CD = cmpr.COMP_PRICE_CD
+    WHERE cmp.COMP_PRICE_CD NOT IN (SELECT COMP_PRICE_CD FROM tmp) AND cmp.CONDITION_FLAG = 'Y'
+END

@@ -1,0 +1,45 @@
+﻿@using GPS.Models.Master
+@{
+    List<CostCenterGroup> ListCostGroup = ViewData["CostCenterGroup"] != null ? (List<CostCenterGroup>)ViewData["CostCenterGroup"] : new List<CostCenterGroup>();
+}
+
+<form role="form" class="form-horizontal" id="searchForm" method="post" action="javascript: onGetData(1)">
+<div class="row">    
+   <div class="col-xs-12 col-sm-3 col-md-3">
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-12 col-sm-6 col-md-6 control-label text-muted">
+                Cost Center Group</label>
+            <div class="col-xs-12 col-sm-6 col-md-6">
+                <select id="txtCostGrpCode" class="form-control">
+                    <option value=""></option>
+                    @foreach(CostCenterGroup code in ListCostGroup)
+                    {
+                        <option value="@code.CostCenterGroupCd">@code.CostCenterGroupCd</option>
+                    } 
+                </select>
+            </div>
+        </div>
+    </div>
+   <div class="col-xs-12 col-sm-3 col-md-3">
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-12 col-sm-6 col-md-5 control-label text-muted">
+                Division</label>
+            <div class="col-xs-12 col-sm-6 col-md-7">
+                <input type="text" id="txtDivCd" class="form-control" />
+            </div>
+        </div>
+    </div>
+     <div class="col-xs-12 col-sm-6 col-md-6"></div>
+</div>
+<div class="row">
+    <div class="col-xs-6" style="margin-top: 5px;"></div>
+    <div class="col-xs-6 text-right">
+        <div class="form-group-xs">        
+            <button type="submit" class="btn btn-primary btn-xs btndisable" onclick="">
+                Search</button>        
+            <button type="button" class="btn btn-default btn-xs btndisable" onclick="onClear()">
+                Clear</button>
+        </div>
+    </div>
+</div>
+</form>

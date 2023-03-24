@@ -1,0 +1,151 @@
+﻿@using GPS.Models.Master
+@using GPS.Constants.Master
+@{
+    Tuple<Routine, string> Routine_Header = ViewData["ROUTINE_Header"] != null ? 
+                                    (Tuple<Routine, string>)ViewData["ROUTINE_Header"]
+                                    : new Tuple<Routine, string>(new Routine(), "0");
+
+    string errormessage = ViewData["Message"] != null ? ViewData["Message"].ToString() : "";
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var errormessage = "@errormessage";
+        if (errormessage !== "")
+        {
+            $("#alert-detail").css("display", "inherit");
+            $("#alert-detail").html(errormessage);
+        }
+    })
+</script>
+
+<style>
+    ._detailpr {
+        display: none;
+    }
+
+    textarea[readonly] {
+        color: #939192;
+        background: #f5f5f5 !important;
+    }
+
+    .moredetail{
+        display:none;
+    }
+
+    .inactive{
+        color: lightgrey;
+    }
+
+    .active{
+        color: green;
+    }
+</style>
+<div class="modal-dialog modal-md" style="width:98%">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title dettitle popup-title" id="popup-title"></h4>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-danger" role="alert" style="display:none" id="alert-detail"></div>
+            <input type="text" id="prno" readonly="readonly" style="display:none;" value="">
+            <div class="form-horizontal">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-3">
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Description</label>
+                            <div class="col-xs-8 col-sm-9 col-md-8">
+                                <input type="text" id="det11" style="width: 100%;" class="blank" readonly = "readonly" value="@Routine_Header.Item1.PR_DESC"/>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Plant</label>
+                            <div class="col-xs-8 col-sm-9 col-md-8">
+                                <input type="text" id="det1" style="width: 100%;" readonly = "readonly" value="@Routine_Header.Item1.PLANT_CD"/>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Active / Inactive</label>
+                            <div class="col-xs-8 col-sm-9 col-md-8">
+                                @if(Routine_Header.Item1.ACTIVE_FLAG == "I") {
+                                    <i id="astatus" class="fa fa-circle inactive"></i>
+                                }
+                                else {
+                                    <i id="astatus" class="fa fa-circle active"></i>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-3">
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Coordinator</label>
+                            <div class="col-xs-8 col-sm-9 col-md-8">
+                                 <input type="text" id="det13" style="width: 100%;" readonly = "readonly" value="@Routine_Header.Item1.PR_COORDINATOR"/>
+                            </div>   
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Storage</label>
+                            <div class="col-xs-8 col-sm-9 col-md-8">
+                                <input type="text" id="det2" style="width: 100%;" readonly = "readonly" value="@Routine_Header.Item1.SLOC_CD"/>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Valid Date</label>
+                            <div class="col-xs-8 col-sm-9 col-md-8">
+                                <input type="text" id="det7" style="width: 100%;" readonly = "readonly" value="@Routine_Header.Item1.VALID_FROM - @Routine_Header.Item1.VALID_TO"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-3">
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Division</label>
+                            <div class="col-xs-8 col-sm-9 col-md-8">
+                                <input type="text" id="det4" style="width: 100%;" readonly = "readonly" value="@Routine_Header.Item1.DIVISION_NAME"/>
+                            </div> 
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Schedule Type</label>
+                            <div class="col-xs-8 col-sm-9 col-md-8">
+                                <input type="text" id="det3" style="width: 100%;" readonly = "readonly" value="@Routine_Header.Item1.SCH_TYPE_DESC"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-3">
+                        <div class="form-group form-group-xs ">
+                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">PIC</label>
+                            <div class="col-xs-8 col-sm-9 col-md-8">
+                                <input type="text" id="det4" style="width: 100%;" readonly = "readonly" value="@Routine_Header.Item1.DIVISION_PIC"/>
+                            </div> 
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Schedule</label>
+                            <div class="col-xs-8 col-sm-9 col-md-8">
+                                <input type="text" id="det3" style="width: 100%;" readonly = "readonly" value="@Routine_Header.Item1.SCH_VALUE"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6">
+                    </div>
+                    <div class="col-xs-12 col-sm-1 text-left">
+                        <button data-rel="tooltip" title="Hide filter" onclick="javascript:toggleDetail()" type="button" class="ace-icon fa fa-angle-double-down btn btn-default btn-xs btn-tiny-down"
+                            id="toogle-detail" style="top: 6px;">
+                        </button>
+                        <input type="text" id="btnLostFocus" style="display: block; height: 1px; width: 1px;
+                            border: none;" />
+                    </div>
+                    <div class="col-xs-12 col-sm-5 text-right">
+                        
+                    </div>
+                </div>
+                <div class="row grid-detail" style="margin-top:10px" id="detail-grid-container">
+                    @Html.Partial(RoutinePage._InquiryDetailGrid)
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+             <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>

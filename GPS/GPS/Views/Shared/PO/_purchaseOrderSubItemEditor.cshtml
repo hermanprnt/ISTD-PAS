@@ -1,0 +1,149 @@
+﻿@using System.Linq
+@using GPS.CommonFunc
+@using GPS.CommonFunc.WebControl
+@using GPS.Constants
+@using GPS.Controllers.Master
+@using GPS.Controllers.PO
+@using GPS.Models.PO
+@using GPS.ViewModels
+@model GenericViewModel<PRPOSubItem>
+
+<tr id="subrowadd" class="form-group-xs subitemadd-row-action hidden">
+    <td></td>
+    <td class="subitemadd-col-check hidden"></td>
+    <td><input id="txt-subitemadd-prno" type="text" disabled/></td>
+    <td><input id="txt-subitemadd-pritemno" type="text" disabled/></td>
+    <td><input id="txt-subitemadd-category" type="text" disabled/></td>
+    <td colspan="2"><input id="txt-subitemadd-matdesc" type="text" disabled/></td>
+    <td><input id="txt-subitemadd-qty" type="number" min="0" step="0.01"/></td>
+    <td>@Html.DropDownList("cmb-subitemadd-uom", POCreationController.UOMSelectList, new { @class = "form-control" })</td>
+    <td><input id="txt-subitemadd-price" type="number" min="0" step="0.01"/></td>
+    <td><input id="txt-subitemadd-amount" type="text" disabled/></td>
+    <td>@Html.Lookup("subitemadd-wbsno")</td>
+    @*<td>@Html.DropDownList("cmb-subitemadd-costcenter", POCreationController.GetCostCenterSelectList(Model.CurrentUser.RegistrationNumber), new { @class = "form-control" })</td>*@
+    <td>@Html.DropDownList("cmb-subitemadd-costcenter", POCreationController.GetCostCenterSelectListAll(), new { @class = "form-control" })</td>        @*changed : 20190617 : isid.rgl*@
+    <td>@Html.Lookup("subitemadd-glaccount")</td>
+    <td class="text-center subitemadd-col-action">
+        <button id="btn-subitemadd-save" class="btn btn-xs btn-primary" ><i class="fa fa-save"></i></button>
+        <button id="btn-subitemadd-cancel" class="btn btn-xs btn-danger"><i class="fa fa-remove"></i></button>
+    </td>
+</tr>
+@if (Model.DataList.Any())
+{
+    foreach (PRPOSubItem item in Model.DataList)
+    {
+        <tr id="expchildrow-@(Model.GridPaging.DataName + "-" + item.DataNo)" data-no="@item.DataNo">
+            <td colspan="2"></td>
+            <td class="text-center">@item.PRSubItemNo</td>
+            <td>@item.ValuationClass</td>
+            <td colspan="2">@item.MatDesc</td>
+            <td class="text-right">@item.Qty.ToStandardFormat()</td>
+            <td class="text-center">@item.UOM</td>
+            <td class="text-right">@item.PricePerUOM.ToStandardFormat()</td>
+            <td class="text-right">@item.PriceAmount.ToStandardFormat()</td>
+            <td>@item.WBSNo</td>
+            <td>@item.CostCenter</td>
+            <td>@item.GLAccount</td>
+            <td class="text-center subitemedit-col-action hidden">
+                <button id="btn-subitemedit-save" class="btn btn-xs btn-primary" ><i class="fa fa-save"></i></button>
+                <button id="btn-subitemedit-cancel" class="btn btn-xs btn-danger"><i class="fa fa-remove"></i></button>
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="12" class="text-center">@CommonDisplayMessage.NoData</td>
+    </tr>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+        /* ============================== Init: begin ============================== */
+        
+        var hiddenActionRow = $(".subitemadd-row-action.hidden");
+        if (hiddenActionRow.parents("[id*=poitem]").length > 0)
+            hiddenActionRow.removeClass("hidden");
+            
+        $("#lookup-subitemadd-category").lookup({
+            IsSingleSelection: true,
+            LookupOpenUrl: "@POCreationController.Action.OpenValuationClassLookup",
+            LookupSearchUrl: "@POCreationController.Action.SearchValuationClassLookup",
+            AdditionalParam: [{
+                Name: "PurchasingGroup",
+                Type: "I",
+                Value: "#cmbedit-purchasinggroup"
+            }],
+            DataName: "valuationclass",
+            SelectedFormatter: function (selected) { return selected.ValuationClass; },
+            OnRowSelected: function (selected) {
+                if (selected.ItemClass === "S") {
+                    $("#lookup-subitemadd-matno").lookupdisabled(true);
+                    $("#txt-subitemadd-matdesc").prop("disabled", false);
+                    
+                    var txtQty = $("#txt-subitemadd-qty");
+                    var txtUOM = $("#cmb-subitemadd-uom");
+                    var txtPrice = $("#txt-subitemadd-price");
+                    txtQty.val("1");
+                    txtUOM.val("AU");
+                    txtPrice.val("0");
+                    $("#txt-subitemadd-amount").val("0");
+                    
+                    $.Disable([txtQty, txtPrice, txtUOM, "#cmb-subitemadd-costcenter"], true);
+                    $("#lookup-subitemadd-wbsno").lookupdisabled(true);
+                    $("#lookup-subitemadd-glaccount").lookupdisabled(true);
+                }
+                
+                $("#popuplookup-subitemadd-category").modal("hide");
+            }
+        });
+
+        $("#lookup-subitemadd-matno").lookup({
+            IsSingleSelection: true,
+            LookupOpenUrl: "@POCreationController.Action.OpenMaterialLookup",
+            LookupSearchUrl: "@POCreationController.Action.SearchMaterialLookup",
+            AdditionalParam: [{
+                Name: "ValuationClass",
+                Type: "C",
+                Value: function () {
+                    return $("#lookup-subitemadd-category").LookupVal();
+                }
+            }],
+            DataName: "material",
+            SelectedFormatter: function (selected) { return selected.MaterialNo; },
+            OnRowSelected: function (selected) {
+                $("#txt-subitemadd-matdesc").val(selected.MaterialDesc);
+                var txtQty = $("#txt-subitemadd-qty");
+                var txtUOM = $("#cmb-subitemadd-uom");
+                var txtPrice = $("#txt-subitemadd-price");
+                txtQty.val("1");
+                txtUOM.val(selected.UOM);
+                txtPrice.val("0");
+                $("#txt-subitemadd-amount").val("0");
+                
+                $("#popuplookup-subitemadd-matno").modal("hide");
+            }
+        });
+
+        $("#lookup-subitemadd-wbsno").lookup({
+            IsSingleSelection: true,
+            LookupOpenUrl: "@POCreationController.Action.OpenWBSLookup",
+            LookupSearchUrl: "@POCreationController.Action.SearchWBSLookup",
+            DataName: "wbsno",
+            SelectedFormatter: function (selected) { return selected.Value; }
+        });
+
+        $("#lookup-subitemadd-glaccount").lookup({
+            IsSingleSelection: true,
+            LookupOpenUrl: "@POCreationController.Action.OpenGLAccountLookup",
+            LookupSearchUrl: "@POCreationController.Action.SearchGLAccountLookup",
+            DataName: "glaccount",
+            SelectedFormatter: function (selected) { return selected.Value; }
+        });
+        
+        /* =============================== Init: end =============================== */
+        
+    });
+</script>

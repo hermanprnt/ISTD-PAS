@@ -1,0 +1,14 @@
+﻿EXEC [sp_PRApproval_ApproveHeader_2] 
+	@DOC_NO, 
+	@DOC_TYPE, 
+	@VENDOR_CD, 
+	@DIVISION_ID, 
+	@DATE_FROM, 
+	@DATE_TO, 
+	@HEADER_MODE, 
+	@DOC_LIST, 
+	@DOC_ITEM_LIST, 
+	@REG_NO,
+	@USER_ID, 
+	@USER_TYPE, 
+	@TYPEAPPROVE

@@ -1,0 +1,146 @@
+﻿@using GPS.Models.Master
+
+<div class="modal fade" data-keyboard="false" data-backdrop="static" id="PupUpAdditional"
+    tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+    
+<div class="modal-dialog"  style="width: 1200px">
+<form  method="post" action="javascript: onSubmitAdditional();" >
+    <div class="modal-content">
+        <div class="modal-header">           
+            <div class="modal-title" id="myModalLabel">
+                <h4 class="modal-title dettitle">Quota Transfer</h4>
+            </div>
+            <input type="hidden" id="txtAddHide"/>
+        </div>
+        <div class="modal-body">
+             <div class="row">
+                <div class="form-horizontal">
+                    <div class="col-xs-12">                         
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                            <div class="form-group form-group-xs">                            
+                                <label class="col-sm-3 col-md-4 control-label text-muted"> 
+                                    Division</label>                                   
+                                <div class="col-sm-8 col-md-8">  
+                                      <input type="text" id="txtDivAdd" class="form-control" readonly /> 
+                                      <input type="hidden" id="txtDivAddHide"/>                                                  
+                                </div>                                    
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                              <div class="form-group form-group-xs">
+                                <label class="col-sm-4 col-md-4 control-label text-muted">
+                                    Coordinator</label>
+                                <div class="col-sm-5 col-md-8">
+                                      <input type="text" id="txtCoordAdd" class="form-control" readonly/>                                                                       
+                                </div>
+                            </div>                           
+                        </div>  
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                            <div class="form-group form-group-xs">
+                                <label class="col-sm-4 col-md-4 control-label text-muted">
+                                    WBS No</label>
+                                <div class="col-sm-5 col-md-8">
+                                    <input type="text" id="txtWBSAdd" class="form-control" readonly/>                                                                   
+                                </div>
+                            </div>                           
+                        </div>                                                                                     
+                    </div>
+                </div>
+            </div>                       
+            <div class="row">
+                <div class="form-horizontal">
+                    <div class="col-xs-12">  
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                            <div class="form-group form-group-xs">                            
+                                <label class="col-sm-3 col-md-4 control-label text-muted"> 
+                                    Periode</label>                                   
+                                <div class="col-sm-8 col-md-8">  
+                                      <input type="text" id="txtPeriodAdd" class="form-control" readonly /> 
+                                      <input type="hidden" id="txtPeriodAddHide"/>                                                 
+                                </div>                                    
+                            </div>
+                        </div>                        
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                            <div class="form-group form-group-xs">
+                                <label class="col-sm-4 col-md-4 control-label text-muted">
+                                    Amount Transfer</label>
+                                <div class="col-sm-5 col-md-8">
+                                      <input type="text" id="txtAmountTransfer" style="text-align:right" class="form-control"
+                                        onkeypress="javascript:hapus(this,this.value);"
+                                        onblur="if (this.value){this.onchange();} javascript:muncul(this,this.value);"
+                                        onkeyup="javascript:detectComma(this.value,this);"/>                                                                     
+                                </div>
+                            </div> 
+                        </div>    
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                            <div class="form-group form-group-xs">
+                                <label class="col-sm-4 col-md-4 control-label text-muted">
+                                    Source Periode</label>
+                                <div class="col-sm-5 col-md-8">                                    
+                                        <select id="txtSourceAdd" class="form-control">                                    
+                                    </select>                                                                                                    
+                                </div>
+                            </div>
+                        </div>                                                                                                                              
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-horizontal">
+                     <div class="col-xs-12"> 
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                             <div class="form-group form-group-xs">
+                                <label class="col-sm-4 col-md-4 control-label text-muted">
+                                    Order Type</label>
+                                <div class="col-sm-5 col-md-8">
+                                     <input type="text" id="txtTypeAdd" class="form-control" readonly/>  
+                                     <input type="hidden" id="txtTypeAddHide"/>                                                                   
+                                </div>
+                            </div>                          
+                        </div> 
+                        <div class="col-xs-12 col-sm-12 col-md-4"></div>
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                             <div class="form-group form-group-xs">
+                                <label class="col-sm-4 col-md-4 control-label text-muted">
+                                    Source Order Type</label>
+                                <div class="col-sm-5 col-md-8">                                      
+                                     <select id="txtSourceOrderType" class="form-control">
+                                                                        
+                                    </select>                                                                                                           
+                                </div>
+                            </div>
+                        </div>  
+                     </div>   
+                </div>
+            </div>             
+             <div class="row">
+                <div class="form-horizontal">
+                     <div class="col-xs-12">                       
+                         <div class="col-xs-12 col-sm-12 col-md-4">
+                            
+                        </div>  
+                     </div>   
+                </div>
+            </div>
+            <div class="row">
+                <div class="modal-footer">
+                    <div class="col-xs-6">
+                    </div>
+                <div class="col-xs-6 text-right">
+                    <div class="form-group-xs">
+                        @* <button type="button" class="btn btn-primary btn-xs" onclick="ConfirmAdditional()">
+                            Confirm</button>*@
+                        <button type="submit" class="btn btn-primary btn-xs">
+                            Submit</button>
+                         <button type="button" class="btn btn-danger btn-xs" onclick="CancelAdditional()">
+                            Cancel</button>                           
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+
+</div>

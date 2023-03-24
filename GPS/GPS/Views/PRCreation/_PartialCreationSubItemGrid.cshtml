@@ -1,0 +1,64 @@
+﻿@using GPS.Constants
+@using GPS.Models.PR.PRCreation
+@model  GPS.Models.PR.PRCreation.PRCreation
+@{
+    List<PRCreation> data = ViewData["SUB_ITEM_PR"] != null ?
+                            (List<PRCreation>)ViewData["SUB_ITEM_PR"] :
+                            new List<PRCreation>(new List<PRCreation>());     
+    PRCreation temp = data.FirstOrDefault(x => x.ITEM_NO != "0");
+    string ITEM_NO = temp == null ? "0" : (String.IsNullOrEmpty(temp.ITEM_NO) ? "0" : temp.ITEM_NO); 
+}
+<table id="tbsubitem-@ITEM_NO" style="width:1118px; max-width:1118px !important" class="table-striped table-bordered table-condensed appended-table">
+@if (data.Count > 0)
+{
+    int i = 0;
+    
+    foreach (var item in data)
+    {
+        string a = String.Format("{0:0.####}", item.PRICE_PER_UOM);
+        <tr class="removed isrowsubitem" id="rowsubitem-@item.ITEM_NO-@item.SUBITEM_NO">
+            <td class="text-center custom-creation-datagrid" id="ino-@item.ITEM_NO-@item.SUBITEM_NO" style="display:none">@item.SUBITEM_NO</td>
+            <td class="text-left custom-creation-datagrid col-@item.ITEM_NO-@item.SUBITEM_NO" style="width:279px;">
+                <span class="text-left idescsubitem-@item.ITEM_NO-@item.SUBITEM_NO">@item.SUBITEM_MAT_DESC</span>
+            </td>
+            <td class="text-right custom-creation-datagrid col-@item.ITEM_NO-@item.SUBITEM_NO" style="width:50px;">
+                <span class="text-right iqtysubitem-@item.ITEM_NO-@item.SUBITEM_NO">@item.SUBITEM_QTY</span>
+            </td>  
+            <td class="text-center custom-creation-datagrid col-@item.ITEM_NO-@item.SUBITEM_NO" style="width:70px;">
+                <span class="text-center iuomsubitem-@item.ITEM_NO-@item.SUBITEM_NO">@item.SUBITEM_UOM</span>
+                <span class="text-center hcalvaluesubitem-@item.ITEM_NO-@item.SUBITEM_NO hidden">@item.CALC_VALUE</span>
+            </td>   
+            <td style="width:70px;"></td>         
+            <td class="text-right custom-creation-datagrid col-@item.ITEM_NO-@item.SUBITEM_NO" style="width:90px;">
+                <span class="text-right ipricesubitem-@item.ITEM_NO-@item.SUBITEM_NO hidden">@item.PRICE_PER_UOM</span>
+                <span class="text-right hpricesubitem-@item.ITEM_NO-@item.SUBITEM_NO">@(String.Format("{0:#,0.00##}", item.PRICE_PER_UOM))</span>
+            </td>
+            <td class="text-right custom-creation-datagrid col-@item.ITEM_NO-@item.SUBITEM_NO" style="width:90px;">
+                <span class="text-right iamountsubitem-@item.ITEM_NO-@item.SUBITEM_NO hidden">@item.SUBITEM_AMOUNT</span>
+                <span class="text-right hamountsubitem-@item.ITEM_NO-@item.SUBITEM_NO">@(String.Format("{0:#,0.00##}", item.SUBITEM_AMOUNT))</span>
+            </td>
+            <td class="text-center custom-creation-datagrid col-@item.ITEM_NO-@item.SUBITEM_NO" style="width:165px;">
+                <span class="text iwbsnosubitem-@item.ITEM_NO-@item.SUBITEM_NO">@item.SUBITEM_WBS_NO</span>
+            </td>  
+            <td class="text-center custom-creation-datagrid col-@item.ITEM_NO-@item.SUBITEM_NO" style="width:100px;">
+                <span class="text iglasubitem-@item.ITEM_NO-@item.SUBITEM_NO">@item.SUBITEM_GL_ACCOUNT</span>
+                <span class="text iglacdsubitem-@item.ITEM_NO-@item.SUBITEM_NO hidden">@item.SUBITEM_GL_ACCOUNT</span>
+            </td>  
+           
+            <td class="text-center custom-creation-datagrid col-@item.ITEM_NO-@item.SUBITEM_NO" style="width:103px;">
+                <span class="text icostcentersubitem-@item.ITEM_NO-@item.SUBITEM_NO">@item.SUBITEM_COST_CENTER</span>
+                <span class="text icostcentercdsubitem-@item.ITEM_NO-@item.SUBITEM_NO hidden">@item.SUBITEM_COST_CENTER</span>
+            </td>
+           
+            <td class="text-center custom-creation-datagrid" style="width:100px;">
+                <div class="actiondetail-@item.ITEM_NO">
+                    <i class="fa fa-copy btn btn-xs btn-primary" id="copylink" onclick="javascript:CopyItem('@item.ITEM_NO', '@item.SUBITEM_NO', 'subitem')"></i>
+                    <i class="fa fa-pencil btn btn-xs btn-primary" id="editlink" onclick="javascript:EditSubItem('@item.ITEM_NO', '@item.SUBITEM_NO')"></i>
+                    <i class="fa fa-trash btn btn-xs btn-danger" id="dellink" onclick="javascript:DeleteSubItem('@item.ITEM_NO', '@item.SUBITEM_NO')"></i>
+                </div>
+            </td>
+        </tr>
+        i++;
+    }
+}
+</table>

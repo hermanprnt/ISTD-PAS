@@ -1,0 +1,157 @@
+﻿@using GPS.Models.PRPOApproval
+@{
+    CommonApprovalVendorAssignment prApprovalVendor = (CommonApprovalVendorAssignment)ViewData["PRApprovalVendor"];
+}
+<style type="text/css">
+    #vendor-header-toogle-button:hover 
+    {
+        cursor: pointer;
+    }
+    .vendor-text
+    {
+        font-size:16px;
+        font-weight:bold;
+    }
+    .vendor-year
+    {
+        font-size:14px;
+        font-weight:bold;
+    }
+    .vendor-amount
+    {
+        font-size:24px;
+        color:#008000;
+        font-weight:bold;
+    }
+</style>
+
+<div id="vendor-header-container">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group form-group-xs">
+                <div style="text-align:left;background-color: #555;color:white;font-size: 10pt;font-weight: bold;width: 100%;padding: 3px 3px 3px 7px;">
+                    Vendor Assignment
+                    <span id="vendor-header-toogle-button" style="font-size: 10pt;float:right;padding-right:7px;">Hide</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="vendor-data-container" style="height:220px;">
+    <div class="row" style="padding-bottom:1em;">
+        @if (prApprovalVendor.VENDOR_CD == "-")
+        {
+            <div class="col-sm-12" style="text-align:center;line-height:8;">
+                <span style="font-weight:bold; color:#428bca;font-size:24px;">@prApprovalVendor.VENDOR_NAME</span>
+            </div>
+        }
+        else
+        {
+            <div class="col-sm-12" style="text-align:center">
+                <div class="form-group form-group-xs">
+                    <div class="col-sm-4" style="text-align:left;">
+                         <span style="font-weight:bold; color:#428bca;">@prApprovalVendor.VENDOR_CD</span>
+                    </div>
+                    <div class="col-sm-8" style="text-align:right;">
+                        <span style="font-weight:bold; color:#428bca;">@prApprovalVendor.VENDOR_NAME</span>
+                    </div>
+                    <div class="col-sm-12">
+                        <hr style="margin:0;"/>
+                    </div>
+                    <div class="col-sm-12">
+                        <span class="vendor-text">Current Fiscal Year</span>
+                    </div>
+                    <div class="col-sm-12">
+                        <span class="vendor-year"  id="curr_fiscal_year"></span>
+                    </div>
+                    <div class="col-sm-12">
+                        <span class="vendor-amount" id="curr_fiscal_amount"></span>
+                    </div>
+                    <div class="col-sm-12">
+                        <hr style="margin:10px;"/>
+                    </div>
+                    <div class="col-sm-12">
+                        <span class="vendor-text">Last Fiscal Year</span>
+                    </div>
+                    <div class="col-sm-12">
+                        <span class="vendor-year" id="last_fiscal_year"></span>
+                    </div>
+                    <div class="col-sm-12">
+                        <span class="vendor-amount blink" id="last_fiscal_amount"></span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    (function ($) {
+        $.fn.blink = function (options) {
+            var defaults = {
+                delay: 500
+            };
+            var options = $.extend(defaults, options);
+
+            return this.each(function () {
+                var obj = $(this);
+                setInterval(function () {
+                    if ($(obj).css("visibility") == "visible") {
+                        $(obj).css('visibility', 'hidden');
+                    }
+                    else {
+                        $(obj).css('visibility', 'visible');
+                    }
+                }, options.delay);
+            });
+        }
+    }(jQuery))
+
+    $(document).ready(function () {
+        $("#vendor-data-container").css("display", "linear");
+
+        var curr_amount = @prApprovalVendor.CURRENT_AMOUNT; last_amount = @prApprovalVendor.LAST_AMOUNT; curr_limit_warning = @prApprovalVendor.LIMIT_AMOUNT;
+        $("#curr_fiscal_amount").html(nFormatter(curr_amount, 3));
+        $("#curr_fiscal_year").html('(@prApprovalVendor.CURRENT_YEAR)');
+        $("#last_fiscal_amount").html(nFormatter(last_amount, 3));
+        $("#last_fiscal_year").html('(@prApprovalVendor.LAST_YEAR)');
+        if (curr_amount > last_amount) {
+            $("#curr_fiscal_amount").css("color", "red");
+            $('#curr_fiscal_amount').blink({
+                delay: 200
+            });
+        }
+        else if (curr_amount + curr_limit_warning >= last_amount) {
+            $("#curr_fiscal_amount").css("color", "orange");
+            $('#curr_fiscal_amount').blink({
+                delay: 500
+            });
+        }
+
+    });
+
+    $("#vendor-header-toogle-button").click(function (e) {
+        $("#vendor-data-container").toggle(200, "linear");
+
+        var toogleText = $(this).text();
+        toogleText = toogleText === "Show" ? "Hide" : "Show";
+        $(this).text(toogleText);
+    });
+
+    function nFormatter(num, digits) {
+        var si = [
+          { value: 1E18, symbol: "Quin" },
+          { value: 1E15, symbol: "Quad" },
+          { value: 1E12, symbol: "T" },
+          { value: 1E9, symbol: "Bio" },
+          { value: 1E6, symbol: "Mio" },
+          { value: 1E3, symbol: "K" }
+        ], rx = /\.0+$|(\.[0-9]*[1-9])0+$/, i;
+        for (i = 0; i < si.length; i++) {
+            if (num >= si[i].value) {
+                return (num / si[i].value).toFixed(digits).replace(rx, "$1") + ' ' + si[i].symbol;
+            }
+        }
+        return num.toFixed(digits).replace(rx, "$1");
+    }
+</script>

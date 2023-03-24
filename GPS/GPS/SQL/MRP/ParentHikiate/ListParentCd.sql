@@ -1,0 +1,1 @@
+﻿SELECT distinct PARENT_CD FROM TB_M_PARENT

@@ -1,0 +1,168 @@
+﻿@using GPS.Models.Master
+@using GPS.Constants
+@using GPS.Controllers.Master
+@using GPS.Controllers.PR
+@model GPS.Models.Master.ValuationClass
+@{
+    Tuple<ValuationClass, int, string> VCData = ViewData["AddEditData"] != null ?
+                                        (Tuple<ValuationClass, int, string>)ViewData["AddEditData"] :
+                                        new Tuple<ValuationClass, int, string>(new ValuationClass(), 0, "");
+
+    int isedit = VCData.Item2;
+    string title = " Data Valuation Class";
+    string disabled = "";
+    string hiddenLabel = "";
+    string selected = "selected";
+    string mandatory = "mandatory";
+    if (isedit == 0)
+    {
+        title = "Add" + title;
+        hiddenLabel = "hidden";
+        disabled = "";
+    }
+    else
+    {
+        title = "Edit" + title;
+        hiddenLabel = "";
+        //disabled = "disabled";
+        disabled = "hidden";
+
+    }
+
+    string errormessage = ViewData["Message"] != null ? ViewData["Message"].ToString() : "";
+
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+        var errormessage = "@errormessage";
+        if (errormessage !== "") {
+            $("#alert-detail").css("display", "inherit");
+            $("#alert-detail").html(errormessage);
+        }
+        $("#valprtype").val("<%= VCData.Item1.PROCUREMENT_TYPE %>");
+
+    })
+
+    function disableValField(flag) {
+        if (flag == 1) {
+            //document.getElementById("valclass").disabled = true;
+            $("#valclass").attr("disabled");
+        } else {
+            document.getElementById("valclass").disabled = false;
+        }
+    }
+</script>
+
+<style>
+    .moredetail {
+        display: none;
+    }
+</style>
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>@title</div>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-danger" role="alert" style="display:none" id="alert-detail"></div>
+            <div class="form-horizontal">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6">
+                        <div class="form-group form-group-xs _detailpr">
+                            <label class="col-xs-4 col-sm-3 control-label text-muted">Val. Class</label>
+                            <div class="col-xs-8 col-sm-9">
+                                <input type="text" id="valclass" class="form-control @if (isedit == 0) { @mandatory } " value="@VCData.Item1.VALUATION_CLASS" />
+                                @*<input type="text" id="valclass" class="form-control @if (isedit == 0) { @mandatory } @hiddenLabel" disabled value="@VCData.Item1.VALUATION_CLASS" />*@
+
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs _detailpr">
+                            <label class="col-xs-4 col-sm-3 control-label text-muted">Description</label>
+                            <div class="col-xs-8 col-sm-9">
+                                <input type="text" id="valdesc" class="form-control @mandatory" value="@VCData.Item1.VALUATION_CLASS_DESC" />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs _detailpr">
+                            <label class="col-xs-4 col-sm-3 control-label text-muted">Area</label>
+                            <div class="col-xs-8 col-sm-9">
+                                <input type="text" id="valarea" class="form-control" value="@VCData.Item1.AREA_DESC" />
+                            </div>
+                        </div>
+
+
+                        @*Start add by khanif hanafi 17-07-2019*@
+                        <div class="form-group form-group-xs _detailpr">
+                            <label class="col-xs-4 col-sm-3 control-label text-muted">Item Class</label>
+                            <div class="col-xs-8 col-sm-9">
+                                @Html.DropDownListFor(m => m.ITEM_CLASS, ValuationClassController.SelectItemClass(), new { id = "valitemclass", @class = "form-control " + @mandatory })
+                            </div>
+                        </div>
+                        @*End add by khanif hanafi 17-07-2019*@
+
+
+                        <div class="form-group form-group-xs _detailpr">
+                            <label class="col-xs-4 col-sm-3 control-label text-muted" style="padding-top:0px">Proc. Type</label>
+                            <div class="col-xs-8 col-sm-9">
+                                @Html.DropDownListFor(m => m.PROCUREMENT_TYPE, PRInquiryController.SelectPRType(), new { id = "valprtype", @class = "form-control " + @mandatory })
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs _detailpr">
+                            <label class="col-xs-4 col-sm-3 control-label text-muted" style="padding-top:0px">Mat. Group</label>
+                            <div class="col-xs-8 col-sm-9">
+                                @Html.DropDownListFor(m => m.MATL_GROUP, ValuationClassController.SelectMatGroup(), new { id = "matgroup", @class = "form-control " + @mandatory })
+                                @*<input type="text" id="matgroup" class="form-control" value="@VCData.Item1.MATL_GROUP"/>*@
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6">
+
+                        <div class="form-group form-group-xs _detailpr">
+                            <label class="col-xs-4 col-sm-3 control-label text-muted">Purch. Group</label>
+                            <div class="col-xs-8 col-sm-9">
+                                @Html.DropDownListFor(m => m.PURCHASING_GROUP_CD, ValuationClassController.SelectPurchasing(), new { id = "valpurcgrp", @class = "form-control " + @mandatory })
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs _detailpr">
+                            <label class="col-xs-4 col-sm-3 control-label text-muted">FD Check</label>
+                            <div class="col-xs-8 col-sm-9">
+                                @Html.DropDownListFor(m => m.FD_GROUP_CD, ValuationClassController.SelectFD(), new { id = "valfd", @class = "form-control " })
+                            </div>
+                        </div>
+
+
+                        @*Start add by khanif hanafi 17-07-2019*@
+                        <div class="form-group form-group-xs _detailpr">
+                            <label class="col-xs-4 col-sm-3 control-label text-muted">PR Coordinator</label>
+                            <div class="col-xs-8 col-sm-9">
+                                @Html.DropDownListFor(m => m.PR_COORDINATOR_CD, ValuationClassController.SelectPRCoordinator(), new { id = "valPRCoordinator", @class = "form-control " + @mandatory })
+                            </div>
+                        </div>
+                        @*End add by khanif hanafi 17-07-2019*@
+
+
+                        <div class="form-group form-group-xs _detailpr">
+                            <label class="col-xs-4 col-sm-3 control-label text-muted">Calc. Scheme</label>
+                            <div class="col-xs-8 col-sm-9">
+                                @Html.DropDownListFor(m => m.CALCULATION_SCHEME_CD, ValuationClassController.SelectCalculation_Scheme(), new { id = "valcalculation", @class = "form-control " + @mandatory })
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs _detailpr">
+                            <label class="col-xs-4 col-sm-3 control-label text-muted">Status</label>
+                            <div class="col-xs-8 col-sm-9">
+                                @Html.DropDownListFor(m => m.STATUS, SystemController.GetSystemValue(FunctionId.ComponentPrice), new { id = "valstatus", @class = "form-control " + @mandatory })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-xs btn-primary btnsavehead btn-std" onclick="javascript:SaveData(@isedit)">Save</button>
+            <button type="button" class="btn btn-xs btn-danger btncancelhead btn-std" data-dismiss="modal">Cancel</button>
+        </div>
+    </div>
+</div>
+

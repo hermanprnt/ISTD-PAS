@@ -1,0 +1,18 @@
+USE [PAS_DB_QA]
+GO
+/****** Object:  StoredProcedure [dbo].[sp_PRStatusMonitoring_CountList]    Script Date: 12/27/2017 9:28:46 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[sp_PRStatusMonitoring_GetSummaryData]
+    @DIVISION_ID int
+AS 
+BEGIN
+	SELECT prh.DIVISION_ID,COUNT(0) AS TOTAL_PR, SUM(pri.OPEN_QTY * pri.PRICE_PER_UOM * pri.EXCHANGE_RATE) AS TOTAL_AMOUNT_PR
+	FROM
+	TB_R_PR_ITEM pri
+	INNER JOIN TB_R_PR_H prh on prh.PR_NO = pri.PR_NO
+	WHERE pri.PR_STATUS NOT IN ('14', '98', '99') AND prh.DIVISION_ID = @DIVISION_ID
+	GROUP BY prh.DIVISION_ID
+END

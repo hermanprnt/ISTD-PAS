@@ -1,0 +1,1 @@
+EXEC sp_prinquiry_validationeditPR @PR_NO, @USER_ID, @NOREG

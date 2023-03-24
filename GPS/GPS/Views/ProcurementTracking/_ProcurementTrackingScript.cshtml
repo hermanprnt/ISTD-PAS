@@ -1,0 +1,137 @@
+﻿@model GPS.Models.Report.ProcurementTracking
+@using GPS.Controllers.Report
+@using GPS.Models.Report
+<script ="text/javascript">
+    function onGetData(page, clear)
+    {
+        $.progressbox.show($tdk.PageTitle, "Search");
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("onGetData")",
+            data: {
+            clear : clear,
+            Display: $("#cbodisplay").val(),
+            Page:page,
+                PR_NO: $("#prno").val(),
+                PR_DT_FROM: $("#prdtfrom").val(),
+                PR_DT_TO: $("#prdtto").val(),
+                VENDOR: $("#vendor").val(),
+                CREATED_BY: $("#createdby").val(),
+                PO_NO: $("#pono").val(),
+                PO_DT: $("#podt").val(),
+                WBS_NO: $("#wbs_no").val(),            
+                GR_NO: $("#grno").val(),
+                GR_DATE: $("#grdt").val(),
+                DIVISION_ID: $("#division").val(),
+                INV_NO: $("#invno").val(),
+                INV_DT: $("#invdt").val(),
+                PCS_GRP: $("#pcsgrp").val(),
+                CLEARING_NO: $("#clno").val(),
+                CLEARING_DATE: $("#cldt").val(),
+                @*FID.Ridwan:20220708*@
+                STATUS_CD: $("#status").val()
+            },
+        success: function (data) {
+            $("#divtable").html(data);
+            CurrentPage = page;
+            $.progressbox.hide();
+        },
+        error:function (xhr, ajaxOptions, thrownError,data){
+            alert(xhr.status);
+        }
+    });
+    }
+
+    function Download()
+    {
+        //$.progressbox.show($tdk.PageTitle, "Downloading");
+        $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadHeader")", 
+             {
+            data: {
+                PR_NO: $("#prno").val(),
+                PR_DT_FROM: $("#prdtfrom").val(),
+                PR_DT_TO: $("#prdtto").val(),
+                VENDOR: $("#vendor").val(),
+                CREATED_BY: $("#createdby").val(),
+                PO_NO: $("#pono").val(),
+                PO_DT: $("#podt").val(),
+                WBS_NO: $("#wbs_no").val(),
+                GR_NO: $("#grno").val(),
+                GR_DATE: $("#grdt").val(),
+                DIVISION_ID: $("#division").val(),
+                INV_NO: $("#invno").val(),
+                INV_DT: $("#invdt").val(),
+                PCS_GRP: $("#pcsgrp").val(),
+                CLEARING_NO: $("#clno").val(),
+                CLEARING_DATE: $("#cldt").val(),
+                @*FID.Ridwan:20220708*@
+                STATUS_CD: $("#status").val()
+            },
+        success: function () {
+           
+            $.progressbox.hide();
+        },
+        error:function (xhr, ajaxOptions, thrownError,data){
+            alert(xhr.status);
+        }
+    });
+    }
+
+    //function Search(page)
+    //{
+    //    var param = GetSearchPRParameters(page);
+    //    $.progressbox.show("Search ", "Loading Data...");
+    //    $.ajax({
+    //        type: $tdk.AjaxMethod, url: "/ProcurementTracking/onGetData",
+    //        data: JSON.stringify(param),
+    //        contentType: "application/json; charset=utf-8",
+    //        success: function (resultMessage) {
+    //            var maxperpage = $('.page').val() || 10;
+    //            $(".TableList").html(resultMessage);
+    //            $('.page').val(maxperpage);
+    //            $.progressbox.hide();
+    //            autosizeGrid();
+    //        },
+    //        error: function (resultMessage) {
+    //            console.log(resultMessage);
+    //            $.progressbox.hide();
+    //            $.messagebox.show(
+    //                "Error",
+    //                resultMessage,
+    //                "ERR",
+    //                "SINGLE",
+    //                "",
+    //                ""
+    //            )
+    //        }
+    //    });
+    //}
+
+    function GetSearchPRParameters(page) {
+        return {
+            PR_NO: $("#prno").val(),
+            //PR_DT_FROM: $("#prdtfrom").val(),
+            //PR_DT_TO: $("#prdtto").val(),
+            //VENDOR: $("#vendor").val(),
+            //CREATED_BY: $("createdby").val(),
+            //PO_NO: $("#pono").val(),
+            //PO_DT: $("#podt").val(),
+            //WBS_NO: $("#wbs_no").val(),            
+            //GR_NO: $("#grno").val(),
+            //GR_DATE: $("#grdt").val(),
+            //DIVISION_ID: $("#division").val(),
+            //CLEARING_NO: $("#clno").val(),
+            //CLEARING_DATE: $("#cldt").val(),
+            //page: page,
+            //pageSize: $('.page').val() || 10
+        };
+    }
+    function autosizeGrid() {
+        $("#tScrollBody").height($(document).height() - 270);
+    }
+
+    function ClearSearch(data) {
+        window.location.reload();
+    }
+
+</script>

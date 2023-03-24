@@ -1,0 +1,70 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Models.Master
+@model IList<PurchasingGroupUser>
+
+<div class="col-xs-12">
+    <div id="main-container" class="afixed-main-container">
+        <div id="usermap-fixed-table-container" class="table-responsive afixed-table-container">
+            <div id="usermap-fixed-table-viewport" class="afixed-table-viewport"></div>
+            <table id="usermap-fixed-table" class="table table-striped table-bordered table-condensed table-hover afixed-table">
+                <colgroup>
+                    <col style="width:30px;"/>
+                    <col style="width:55px;"/>
+                    <col style="width:75px;"/>
+                    <col style="width:40px;"/>
+                    <col style="width:75px;"/>
+                    <col style="width:40px;" />
+                    <col style="width:75px;" />
+                    <col style="width:40px;" />
+                    <col style="width:75px;" />
+                </colgroup>
+                <thead>
+                    <tr class="afixed-header" id="usermap-level1header">
+                        <th rowspan="2"></th>
+                        <th rowspan="2">Reg. No</th>
+                        <th rowspan="2">Name</th>
+                        <th colspan="2">Section</th>
+                        <th colspan="2">Dept.</th>
+                        <th colspan="2">Division</th>
+                    </tr>
+                    <tr class="afixed-header" id="usermap-level2header">
+                        <th>Id</th>
+                        <th>Description</th>
+                        <th>Id</th>
+                        <th>Description</th>
+                        <th>Id</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (PurchasingGroupUser item in Model)
+                        {
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" id="chk-usermap-@item.DataNo" data-embedded="@item.AsEmbeddedData()"/>
+                                </td>
+                                <td class="text-center">@item.RegNo</td>
+                                <td>@item.Name</td>
+                                <td class="text-center">@item.SectionId</td>
+                                <td>@item.SectionTitle</td>
+                                <td class="text-center">@item.DeptId</td>
+                                <td>@item.DeptTitle</td>
+                                <td class="text-center">@item.DivisionId</td>
+                                <td>@item.DivisionTitle</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="afixed-column text-center">@CommonDisplayMessage.NoData</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

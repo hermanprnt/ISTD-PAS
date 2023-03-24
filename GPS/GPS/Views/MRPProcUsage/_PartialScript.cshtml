@@ -1,0 +1,389 @@
+﻿@using Toyota.Common.Credential
+@{
+   User user = Html.Toyota().Page.User;
+}
+<script type="text/javascript"> 
+$(document).ready(function () {   
+    onClear();     
+        
+    $('.date-picker').datepicker({
+        autoclose: true,
+        todayHighlight: true
+    })
+    //show datepicker when clicking on the icon
+	.next().on(ace.click_event, function () {
+		$(this).prev().focus();
+	});            
+}); 
+
+$.fn.addOption = function (optText, optValue) {
+    var option = new Option(optText, optValue);
+    return this.append(option);
+};
+
+function onGetData(page) {    
+    $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val() ,
+                Page:page,    
+                USER_NAME :  '@user.Name',            
+                ProcUsage : $("#txtProcUsage").val(),
+                Desc : $("#txtDesc").val()			             
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+            }        
+        });
+}
+
+/*Checkbox all*/   
+function onCekAll() { 
+    if ($("#checkall").is(":checked")) {
+            $(".grid-checkbox-body").prop('checked', true);
+        } else {
+            $(".grid-checkbox-body").prop('checked', false);
+        }
+}
+
+function GetSelectedGrid() {
+    var ids = [];
+    $("input[id^=cb-]").each(function (i, a) {
+        if (a.id != null && a.id.length > 0 && a.checked) {
+            ids.push($('#' + a.id).data('pc_cd'));
+        }
+    }
+    );
+    var h = ids.length;
+    var w = ids.join();
+    return [h, w];
+}
+
+function onClear() {    
+    $("#txtProcUsage").val('');
+    $("#txtDesc").val('');	
+    $(".btnDownload").attr('disabled',true);
+      
+    $("input[id^=cb-]").each(function(i,a){
+        a.checked = false;          
+    }); 
+          
+    ClearGrid(1);    
+}
+
+function ClearGrid(page) { 
+    $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val() ,
+                Page:page,   
+                USER_NAME :  '@user.Name',            
+                ProcUsage : '$',
+                Desc : '$'			             
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+            }        
+        });
+}
+
+function ProcUsagePU() { 
+    $("#txtProcUsagePU").css("background-color", "#FFFFFF");
+}
+
+function onSaveData() { 
+    if ($("#txtProcUsagePU").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");                      
+        return;
+    }    
+
+    $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
+            data: {
+                flag : $("#txtEdit").val(),   
+                USER_NAME :  '@user.Name',  
+                PROC_USAGE_CD_HIDE : $("#txtProcUsageHide").val(),           
+                PROC_USAGE_CD : $("#txtProcUsagePU").val(),
+                DESCRIPTION : $("#txtDescPU").val()			                                 
+            },                
+            success: function (data) { 
+                var result = data.message.split('|');
+                if(result[0] == 'True') {
+                     //$("#info-save").modal();
+                     //$("#infoSave").html(data.message);
+                     $.messagebox.show(
+                        "Info",
+                        result[1],
+                        "SUC",
+                        "SINGLE",
+                        "OkInfoSave()",
+                        ""
+                    ) 
+                     onGetData(1);
+                }              
+                else {
+                    //$("#confirm-save").modal();
+                    //$("#ConfirmModal").html(data.message); 
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )                  
+                }                            
+            }
+        });    
+}
+
+function OkWarningSave() {
+    $("#confirm-save").modal('hide');
+}
+
+function OkInfoSave() {
+    //$("#info-save").modal('hide');
+    $("#basicModal").modal('hide');
+}
+
+function onAddData() { 
+    $.ajax({
+        type: "post",
+        url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+        data: {
+            flag: '0'                                
+        },                
+        success: function (data) {  
+             $("#basicModal").html(data);
+             $("#myModalLabel").html('<h4>Procurement Usage (Add)</h4>');    
+             $("#basicModal").modal();                            
+        }
+    });   
+}
+
+function onEditData() {      
+    if ($(".grid-checkbox-body:checked").length == 0){
+        //$("#selected-0-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select at Least One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else if ($(".grid-checkbox-body:checked").length > 1){
+        //$("#selected-more-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select only One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else {
+        var value = GetSelectedGrid();
+        var key = value[Object.getOwnPropertyNames(value)[1]];       
+        var col;
+               
+        var PROCUSAGE = "";
+                     
+        col = key.split(';');           
+        PROCUSAGE = col[0];                 
+            
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+            data: {
+                flag: '1'                                 
+            },                
+            success: function (data) {                    
+                    $("#basicModal").html(data);   
+                    $("#myModalLabel").html('<h4>Gentani Header (Edit)</h4>');
+                    $("#basicModal").modal(); 
+                    
+                    $.ajax({
+                        type: "post",
+                        url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+                        data: {
+                            ProcUsage : PROCUSAGE                                         
+                        },                
+                        success: function (data) {                      
+                            $("#txtProcUsagePU").val(data.PROC_USAGE_CD);
+                            $("#txtProcUsageHide").val(data.PROC_USAGE_CD);
+                            $("#txtDescPU").val(data.DESCRIPTION);	                                                                             
+                        }
+                    });   
+                    //                          
+            }
+        });  
+    }        
+}
+
+function onCopyData() {      
+    if ($(".grid-checkbox-body:checked").length == 0){
+        //$("#selected-0-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select at Least One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else if ($(".grid-checkbox-body:checked").length > 1){
+        //$("#selected-more-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select only One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else {
+        var value = GetSelectedGrid();
+        var key = value[Object.getOwnPropertyNames(value)[1]];       
+        var col;
+                
+        var PROCUSAGE = "";
+                     
+        col = key.split(';');       
+        PROCUSAGE = col[0];               
+          
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+            data: {
+                flag: '0'                                
+            },                
+            success: function (data) {                     
+                    $("#basicModal").html(data);   
+                    $("#myModalLabel").html('<h4>Procurement Usage (Copy)</h4>');
+                    $("#basicModal").modal(); 
+                    
+                    $.ajax({
+                        type: "post",
+                        url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+                        data: {                            
+                            ProcUsage : PROCUSAGE                                                          
+                        },                
+                        success: function (data) {                                                        
+                            $("#txtProcUsagePU").val(data.PROC_USAGE_CD);
+                            $("#txtDescPU").val(data.DESCRIPTION);	                                                                                       
+                        }
+                    });   
+                    //                          
+            }
+        });  
+    }        
+}
+
+function onDeleteData() {
+    if ($(".grid-checkbox-body:checked").length == 0)
+        //$("#selected-0-confirm").modal(); 
+        $.messagebox.show(
+            "Warning",
+            "Please Select at Least One Record to be deleted",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )   
+    else 
+        //$("#delete-confirm").modal(); 
+        $.messagebox.show(
+            "Confirmation",
+            "Are You Sure You Want to Delete this Item ?",
+            "INF",
+            "CONFIRM",
+            "onYesDelete()",
+            ""
+        )  
+}
+
+function onYesDelete() {
+    var value = GetSelectedGrid();
+    var key = value[Object.getOwnPropertyNames(value)[1]];
+    var koma;
+    var field;
+    var col;
+        
+    var PROCUSAGE = "";
+           
+    for(var i = 0; i < $(".grid-checkbox-body:checked").length; i++)
+    {
+        koma = key.split(',');
+        field = koma[i];
+        col = field.split(';');       
+        PROCUSAGE += col[0];
+        PROCUSAGE += ';';
+    }    
+    PROCUSAGE = PROCUSAGE.substring(0,PROCUSAGE.length - 1);
+   
+    $.ajax({
+        type: "POST",
+        url: "@Html.Toyota().Page.GetActionUrl("DeleteData")",
+        data: {  
+            Key : key,                     
+            ProcUsage : PROCUSAGE                  
+        },
+        success: function (data) {
+            //$("#selected-info").modal();
+            //$("#infoModal").html(data); 
+             $.messagebox.show(
+                "Info",
+                data,
+                "SUC",
+                "SINGLE",
+                "",
+                ""
+            )
+            onGetData(1);
+        }        
+     });
+}
+
+function OnDownloadTemplate() {     
+      $.ajax({
+        type: "POST",
+        url: "@Html.Toyota().Page.GetActionUrl("CekTemplate")",        
+        success: function (data) {
+         if(data == 'False'){
+            //$("#selected-info").modal();
+            //$("#infoModal").html('Template not found'); 
+             $.messagebox.show(
+                "Error",
+                "Template Not Found",
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+         }
+         else{
+             $.fileDownload("MRPProcUsage/DownloadTemplate/"); 
+         }
+            
+        }        
+     });
+} 
+
+function onDownloadData() {  
+    var param = '?ProcUsage=' + $("#txtProcUsage").val();  
+    param += '&Desc=' + $("#txtDesc").val();
+    param += '&USER_NAME=' + '@user.Name';
+   
+    var link = '@Url.Content("MRPProcUsage/DownloadData/")' + param;        
+    window.location = link;       
+} 
+
+</script>

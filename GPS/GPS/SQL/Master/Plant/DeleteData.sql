@@ -1,0 +1,1 @@
+﻿DELETE FROM TB_M_PLANT WHERE @PlantCd LIKE '%' + PLANT_CD +'%'

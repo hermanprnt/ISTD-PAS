@@ -1,0 +1,1047 @@
+﻿@using GPS.CommonFunc.WebControl
+@using GPS.Constants
+@using GPS.Controllers.Master
+@using GPS.Core.ViewModel
+@using GPS.Models.Master
+@using GPS.Models.Common
+@model GPS.Models.Master.Material
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Paging pg = (Paging)ViewData["Paging"];
+    String processId = ViewData["ProcessId"].ToString();
+}
+@section HeadScript{
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/lib/jquery.inputmask.bundle.min.js")"></script>
+    <style>
+        ._criteria
+        {
+            display: none;
+        }
+        .initial-hide
+        {
+            display: none;
+        }
+    </style>
+}
+
+@section BodyScript{
+<script type="text/javascript">
+    var showDetail = 1;
+
+    $(document).ready(function () {
+        $(".btn-edit").click(function () {
+          $("#edit-popup").modal();
+        });
+
+        $(".btn-delete").click(function () {
+            $("#delete-confirm").modal();
+        });
+
+        $("._datepicker").datepicker();
+
+        $("input[id^=cb-]").each(function(i,a){
+            a.checked = false;
+        });
+
+         /* ============================== Init: begin ============================== */
+
+        function DisableAllFeatures() {
+            $.Disable([
+                "#cmb-class",
+                "#cmb-uom",
+                "#cmb-procusage",
+                "#txt-matno",
+                "#cmb-valclass",
+                "#cmb-assetflag",
+                "#txt-matdesc",
+                "#txt-mrptype",
+                "#cmb-quotaflag",
+                "#btn-search",
+                "#btn-clearsearch",
+                "#btn-add",
+                "#btn-edit",
+                "#btn-delete",
+                "#btn-upload",
+                "#btn-download"
+            ]);
+        }
+
+        function EnableAllFeatures() {
+            $.Enable([
+                "#cmb-class",
+                "#cmb-uom",
+                "#cmb-procusage",
+                "#txt-matno",
+                "#cmb-valclass",
+                "#cmb-assetflag",
+                "#txt-matdesc",
+                "#txt-mrptype",
+                "#cmb-quotaflag",
+                "#btn-search",
+                "#btn-clearsearch",
+                "#btn-add",
+                "#btn-edit",
+                "#btn-delete",
+                "#btn-upload",
+                "#btn-download"
+            ]);
+        }
+
+        function ResetForm() {
+            $.Clear([
+                "#cmb-class",
+                "#cmb-uom",
+                "#cmb-procusage",
+                "#txt-matno",
+                "#cmb-valclass",
+                "#cmb-assetflag",
+                "#txt-matdesc",
+                "#txt-mrptype",
+                "#cmb-quotaflag"
+            ]);
+        }
+
+        function OnAjaxBegin(title) {
+            $.progressbox.show($tdk.PageTitle, title);
+            DisableAllFeatures();
+        }
+
+        function OnAjaxComplete() {
+            EnableAllFeatures();
+            $.progressbox.hide();
+        }
+
+        function OnAjaxError(data) {
+            var result = $.ValidateASPError(data.responseText);
+            $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+        }
+
+        function Init() {
+            ResetForm();
+            EnableAllFeatures();
+
+            ViewData.Clear();
+            ViewData.Add("ProcessId", "@processId");
+            ViewData.Add("OnAjaxBegin", OnAjaxBegin);
+            ViewData.Add("OnAjaxComplete", OnAjaxComplete);
+            ViewData.Add("OnAjaxError", OnAjaxError);
+        }
+
+        Init();
+
+        /* =============================== Init: end =============================== */
+
+        /* =========================== UpdateImage: begin =========================== */
+
+        $(document).on("click", "[id^=lnk-updateimage]", function (e) {
+            var matNo = $(this).data("matno");
+            OnAjaxBegin("Update Image");
+            $.ajax({
+                type: "POST",
+                url: "@MaterialController.Action.MaterialImageUpdate",
+                data: {
+                    matNo: matNo
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#pop-updateimage").html(data);
+                        $("#pop-updateimage").modal();
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        /* ============================ UpdateImage: end ============================ */
+
+        /* ============================= Upload: begin ============================= */
+
+        function UploadMaterialFile(file) {
+            var formData = new FormData();
+            formData.append("uploadedFile", file);
+            formData.append("processId", ViewData.Get("ProcessId"));
+
+            $.ajax({
+                type: "POST",
+                url: "@MaterialController.Action.Upload",
+                contentType: false, // NOTE: disable header to include content-type
+                processData: false, // NOTE: disabe jquery to convert data to string
+                data: formData,
+                success: function (data) {
+                    if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                        $.messagebox.show(data.ResponseType, data.Message, data.ResponseType);
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: function () {
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                }
+            });
+        }
+
+        $(document).on("change", "#filexlsx", function (e) {
+            $.progressbox.show($tdk.PageTitle, "Upload Material");
+            DisableAllFeatures();
+
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: "@MaterialController.Action.GetUploadValidationInfo",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        try {
+                            $(e.target).validatefile(data);
+                            UploadMaterialFile(e.target.files[0]);
+                        }
+                        catch (ex) {
+                            $.messagebox.show("@ActionResponseViewModel.Error", ex.message, "@ActionResponseViewModel.Error");
+                        }
+                    }
+                    else {
+                        $.messagebox.show(data.ResponseType, data.Message, data.ResponseType);
+                    }
+
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                }
+            });
+        });
+
+        /* ============================== Upload: end ============================== */
+
+    });
+
+    function OnScrollDiv(Scrollablediv) {
+        document.getElementById('DivHeaderRow').scrollLeft = Scrollablediv.scrollLeft;
+    }
+
+    function MakeStaticHeader(gridId, height, width, headerHeight) {
+        var tbl = document.getElementById(gridId);
+        if (tbl) {
+            var DivHR = document.getElementById('DivHeaderRow');
+            var DivMC = document.getElementById('DivMainContent');
+
+            //*** Set divheaderRow Properties ****
+            DivHR.style.height = headerHeight + 'px';
+            DivHR.style.width = '98.6%';
+            DivHR.style.position = 'relative';
+            DivHR.style.top = '0px';
+            DivHR.style.zIndex = '10';
+            DivHR.style.verticalAlign = 'top';
+
+            //*** Set divMainContent Properties ****
+            DivMC.style.width = width + '%';
+            DivMC.style.height = height - 350 + 'px';
+            DivMC.style.position = 'relative';
+            DivMC.style.top = -headerHeight + 'px';
+            DivMC.style.zIndex = '1';
+
+            //****Copy Header in divHeaderRow****
+            DivHR.appendChild(tbl.cloneNode(true));
+         }
+    }
+
+
+    function showPopup() {
+        $("input[id='cbMRPFlag']:checked").removeAttr('checked');
+        $("input[id='cbStockFlag']:checked").removeAttr('checked');
+        $("input[id='cbAssetFlag']:checked").removeAttr('checked');
+        $("input[id='cbQuotaFlag']:checked").removeAttr('checked');
+        $("input[id='cbDeletionFlag']:checked").removeAttr('checked');
+
+        $("#txtMatNo").attr('disabled', false);
+        $("#txtMatDesc").attr('disabled', false);
+        $("#txtUOM").attr('disabled', false);
+        $("#txtMRPType").attr('disabled', false);
+        $("#txtReOrderValue").attr('disabled', false);
+        $("#txtReOrderMethod").attr('disabled', false);
+        $("#txtFixMRPQty").attr('disabled', false);
+        $("#txtDelTime").attr('disabled', false);
+        $("#txtAveDailyCon").attr('disabled', false);
+        $("#txtMinStock").attr('disabled', false);
+        $("#txtMaxStock").attr('disabled', false);
+        $("#txtPcsKanban").attr('disabled', false);
+        $("#cbMRPFlag").attr('disabled', false);
+        $("#txtValClass").attr('disabled', false);
+        $("#cbStockFlag").attr('disabled', false);
+        $("#cbAssetFlag").attr('disabled', false);
+        $("#cbQuotaFlag").attr('disabled', false);
+        $("#cbDeletionFlag").attr('disabled', false);
+
+        $("#txtId").val("1"),
+        $("#txtMatNo").val("");
+        $("#txtMatDesc").val("");
+        $("#txtReOrderValue").val("");
+        $("#txtReOrderMethod").val("");
+        $("#txtFixMRPQty").val("");
+        $("#txtDelTime").val("");
+        $("#txtAveDailyCon").val("");
+        $("#txtMinStock").val("");
+        $("#txtMaxStock").val("");
+        $("#txtPcsKanban").val("");
+        $("#txtMRPType").val("");
+        $("#txtCarFamily").val("");
+        $("#txtMatGroup").val("");
+
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEdit")",
+            data: {
+                kelas: $("#cbClass").val(),
+                IsFlagAddEdit : '1'
+            },
+            success: function (data) {
+                $("#basicModal").html(data);
+                $("#txtUOM").val("PC");
+
+                $("#basicModal").modal();
+            }
+        });
+
+    }
+
+     //search data
+    function onSearchData(page) {
+        $.disable_enable_button.disable();
+        $.ajax({
+        type: "POST",
+        url: "@Html.Toyota().Page.GetActionUrl("onGetData")",
+        data: {
+            search :'Y',
+            kelas : $("#cmb-class").val(),
+            mat_no : $("#txt-matno").val(),
+		    mat_desc : $("#txt-matdesc").val(),
+		    uom : $("#cmb-uom").val(),
+            mrp_type: $("#txt-mrptype").val(),
+            valuation_class : $("#cmb-valclass").val(),
+            proc_usage : $("#cmb-procusage").val(),
+            asset_flag : $("#cmb-assetflag").val(),
+            quota_flag : $("#cmb-quotaflag").val(),
+            Display: $("#cbodisplay").val(),
+            Page:page
+        },
+        success: function (data) {
+            $("#divtable").html(data);
+
+            showDetail = 1;
+            $("#btn-detail").html('Show Detail');
+
+            $.disable_enable_button.enable();
+        },
+        error:function (xhr, ajaxOptions, thrownError,data){
+        alert(thrownError);
+        }
+
+        });
+    }
+
+    function onDetailGrid() {
+        $.disable_enable_button.disable();
+
+        if (showDetail > 0) {
+            $("#btn-detail").html('Hide Detail');
+            $(".initial-hide").show();
+            $("#dynamic-table").width("2486px");
+            $("#tblScroll").width("2486px");
+
+            showDetail = 0;
+        }
+        else {
+            $("#btn-detail").html('Show Detail');
+            $(".initial-hide").hide();
+            $("#dynamic-table").width("1261px");
+            $("#tblScroll").width("1261px");
+
+            showDetail = 1;
+        }
+        $.disable_enable_button.enable();
+        return "no refresh";
+    }
+
+    function onMatNo() {
+        $("#txtMatNo").css("background-color", "#FFFFFF");
+    }
+
+    function onMatDesc() {
+        $("#txtMatDesc").css("background-color", "#FFFFFF");
+    }
+
+    function onSaveChange(){
+        var isValid = $.ValidateMandatory(["#txtMatNo", "#txtMatDesc", "#txtUOM", "#txtValClass"]);
+        if(!isValid) return;
+
+	    $.ajax({
+		type: "POST",
+		url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
+		data: {
+            DataNo: $("#txtId").val(),
+            Kelas : $("#cmbClass").val(),
+		    MaterialNo : $("#txtMatNo").val(),
+		    MaterialDesc : $("#txtMatDesc").val(),
+			UOM : $("#txtUOM").val(),
+			CarFamilyCode : $("#txtCarFamily").val(),
+			MaterialTypeCode : $("#txtMatType").val(),
+			MaterialGroupCode : $("#txtMatGroup").val(),
+			MRPType: $("#txtMRPType").val(),
+			ReOrderValue : $("#txtReOrderValue").val().replace(/,/g, "") || 0,
+			ReOrderMethod : $("#txtReOrderMethod").val(),
+			StandardDelivTime : $("#txtDelTime").val().replace(/,/g, "") || 0,
+			AvgDailyConsump : $("#txtAveDailyCon").val().replace(/,/g, "") || 0,
+			MinStock : $("#txtMinStock").val().replace(/,/g, "") || 0,
+			MaxStock : $("#txtMaxStock").val().replace(/,/g, "") || 0,
+			PcsPerKanban : $("#txtPcsKanban").val().replace(/,/g, "") || 0,
+            MRPFlag : $("input[id='cbMRPFlag']:checked").val() != undefined ? 'Y' : 'N',
+            ValuationClass : $("#txtValClass").val(),
+            ConsignmentCode : $("#txtConsignment").val(),
+            ProcUsageCode : $("#txtProcUsage").val(),
+            MatlGroup : $("#txtSAPMatlGroup").val(),
+            StockFlag : $("input[id='cbStockFlag']:checked").val() != undefined ? 'Y' : 'N',
+            AssetFlag : $("input[id='cbAssetFlag']:checked").val() != undefined ? 'Y' : 'N',
+            QuotaFlag : $("input[id='cbQuotaFlag']:checked").val() != undefined ? 'Y' : 'N',
+            DeletionFlag : $("input[id='cbDeletionFlag']:checked").val() != undefined ? 'Y' : 'N'
+		},
+		success: function(data){
+            var result = data.split('|');
+            if(result[0] == 'True'){
+                    $.messagebox.show(
+                        "Success",
+                        result[1],
+                        "SUC",
+                        "SINGLE",
+                        "OkInfoSave()",
+                        ""
+                    )
+                    onSearchData(1);
+                }
+                else if(result[0] == 'False'){
+                $.messagebox.show(
+                    "Error",
+                    result[1],
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                    )
+                }
+                else{
+                    $.messagebox.show(
+                    "Error",
+                    result[1],
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                    )
+                }
+		    }
+	    });
+    }
+
+    function OkInfoSave() {
+        $("#basicModal").modal('hide');
+    }
+
+    //get parameter for detail update delete
+    function GetMaterial(){
+        var ids=[];
+        $("input[id^=cb-]").each(function(i, a){
+            if (a.id!=null && a.id.length > 0 && a.checked) {
+                ids.push($('#'+a.id).data('pc_cd'));
+            }
+        });
+
+        var h = ids.length;
+        var w = ids.join();
+        // alert(h  + ids.join());
+        return [h,w];
+    }
+
+    function CheckedAll()
+    {
+        if ($("#checkall").is(":checked")) {
+            $(".grid-checkbox-body").prop('checked', true);
+        } else {
+            $(".grid-checkbox-body").prop('checked', false);
+        }
+    }
+
+    //update material
+    function UpdateMaterial()
+    {
+        var mat_no = GetMaterial();
+        var count = mat_no[Object.getOwnPropertyNames(mat_no)[0]];
+        var value = mat_no[Object.getOwnPropertyNames(mat_no)[1]].split(';')[0];
+        var kelas = mat_no[Object.getOwnPropertyNames(mat_no)[1]].split(';')[1];
+
+        if (count == 0){
+                $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+            return;
+        }
+        if (count > 1){
+            $.messagebox.show(
+                "Warning",
+                "Please Select only One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+            return;
+        }
+
+        $.ajax({
+		    type: "POST",
+		    url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+		    data: {
+                kelas : kelas,
+			    MAT_NO : value
+		    },
+		    success: function(data){
+                $("input[id='cbMRPFlag']:checked").removeAttr('checked');
+                $("input[id='cbStockFlag']:checked").removeAttr('checked');
+                $("input[id='cbAssetFlag']:checked").removeAttr('checked');
+                $("input[id='cbQuotaFlag']:checked").removeAttr('checked');
+                $("input[id='cbDeletionFlag']:checked").removeAttr('checked');
+
+                $.Disable(["#txtMatNo", "#cmbClass", "#txtCarFamily", "#txtMatGroup", "#txtMatType"]);
+                $("#txtId").val(0);
+                $("#cmbClass").val(data.Class);
+                $("#txtMatNo").val(data.MaterialNo);
+                $("#txtMatDesc").val(data.MaterialDesc);
+                $("#txtUOM").val(data.UOM);
+                $("#txtCarFamily").val(data.CarFamilyCode);
+                $("#txtMatType").val(data.MaterialTypeCode);
+                $("#txtMatGroup").val(data.MaterialGroupCode);
+                $("#txtMRPType").val(data.MRPType);
+                $("#txtReOrderValue").val(data.ReOrderValue);
+                $("#txtReOrderMethod").val(data.ReOrderMethod);
+                $("#txtDelTime").val(data.StandardDelivTime);
+                $("#txtAveDailyCon").val(data.AvgDailyConsump);
+                $("#txtMinStock").val(data.MinStock);
+                $("#txtMaxStock").val(data.MaxStock);
+                $("#txtPcsKanban").val(data.PcsPerKanban);
+                $("#txtConsignment").val(data.ConsignmentCode);
+                $("#txtProcUsage").val(data.ProcUsageCode);
+                if(data.MRPFlag != 'N')
+                $('#cbMRPFlag').prop('checked', true);
+                $("#txtValClass").val(data.ValuationClass);
+                $("#txtSAPMatlGroup").val(data.MatlGroup);
+                if(data.StockFlag != 'N')
+                    $('#cbStockFlag').prop('checked', true);
+                if(data.AssetFlag != 'N')
+                    $('#cbAssetFlag').prop('checked', true);
+                if(data.QuotaFlag != 'N')
+                    $('#cbQuotaFlag').prop('checked', true);
+                if(data.DeletionFlag != 'N')
+                    $('#cbDeletionFlag').prop('checked', true);
+
+                $("#basicModal").modal();
+		    }
+        });
+    }
+
+    //delete material
+    function DeleteMaterial()
+    {
+        if ($(".grid-checkbox-body:checked").length == 0)
+        {
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be deleted",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+        else{
+            $.messagebox.show(
+                "Confirmation",
+                "Are You Sure You Want to Delete this Item ?",
+                "INF",
+                "CONFIRM",
+                "onYesDelete()",
+                ""
+            )
+        }
+    }
+
+    function onYesDelete()
+    {
+         var mat_no = GetMaterial();
+         var value = mat_no[Object.getOwnPropertyNames(mat_no)[1]];
+
+         $.ajax({
+                type:"POST",
+                url:"@Html.Toyota().Page.GetActionUrl("DeleteMaterial")",
+            data: {
+                MAT_NO : value
+            },
+            success: function(resultMessage){
+               $.messagebox.show(
+                    "Info",
+                    "Delete successfully" ,
+                    "SUC",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+               onSearchData(1);
+            },
+            error:function(x, t, e){
+                alert(x.responseText);
+                //window.location.href="/Material";
+            }
+        });
+    }
+
+    function DeleteAllMaterial()
+    {
+        if (!confirm('Delete all material?')) return;
+        $.ajax({
+		    type: "POST",
+		    url: "@Html.Toyota().Page.GetActionUrl("DeleteAllMaterial")",
+            data: {
+                kelas : $("#cmb-class").val(),
+                mat_no : $("#txtMatNoC").val(),
+			    mat_desc : $("#txtMatDescC").val(),
+			    uom : $("#txtUOMC").val(),
+			    mrp_type: $("#txtMRPTypeC").val(),
+                valuation_class : $("#txtValuationC").val(),
+                asset_flag :$("#cbAssetFlagC").val(),
+                quota_flag :$("#cbQuotaFlagC").val()
+            },
+            success: function(data){
+                $.messagebox.show(
+                    "Delete",
+                    data,
+                    "SUC",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+                    onSearchData(1);
+            },
+            error:function(x, t, e){
+                alert(data);
+                //window.location.reload();
+            }
+        });
+    }
+
+    function onGetData(page)
+    {
+        $.progressShow("Material Master", "Loading...");
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("onGetData")",
+            data: {
+            search : 'Y',
+                Display: $("#cbodisplay").val(),
+                Page:page,
+                kelas : $("#cmb-class").val(),
+                mat_no : $("#txtMatNoC").val(),
+			    mat_desc : $("#txtMatDescC").val(),
+			    uom : $("#txtUOMC").val(),
+			    mrp_type: $("#txtMRPTypeC").val(),
+                valuation_class : $("#txtValuationC").val(),
+                asset_flag :$("#cbAssetFlagC").val(),
+                quota_flag :$("#cbQuotaFlagC").val()
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+
+                showDetail = 1;
+                $("#btn-detail").html('Show Detail');
+
+                $.progressHide();
+            },
+            error:function (xhr, ajaxOptions, thrownError,data){
+                $.progressHide()
+                alert(xhr.status);
+            }
+        });
+    }
+
+    function onGetPaging(page)
+    {
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("onGetData")",
+            data: {
+            search : 'Y',
+                Display: $("#cbodisplay").val(),
+                Page:page,
+                kelas : $("#cmb-class").val(),
+                mat_no : $("#txtMatNoC").val(),
+			    mat_desc : $("#txtMatDescC").val(),
+			    uom : $("#txtUOMC").val(),
+			    mrp_type: $("#txtMRPTypeC").val(),
+                valuation_class : $("#txtValuationC").val(),
+                asset_flag :$("#cbAssetFlagC").val(),
+                quota_flag :$("#cbQuotaFlagC").val()
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+            },
+            error:function (xhr, ajaxOptions, thrownError,data){
+                alert(xhr.status);
+            }
+        });
+    }
+
+    $('#btn-clear').click(function () {
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("onGetData")",
+            data: {
+                search :'N',
+                Display: $("#cbodisplay").val(),
+                Page:1,
+                kelas :  $("#cmb-class").val(),
+                mat_no : $("#txtMatNoC").val(),
+		        mat_desc : $("#txtMatDescC").val(),
+		        uom : $("#txtUOMC").val(),
+		        mrp_type: $("#txtMRPTypeC").val(),
+                valuation_class : $("#txtValuationC").val(),
+                proc_usage : $("#txtProcurementUsage").val(),
+                asset_flag :$("#cbAssetFlagC").val(),
+                quota_flag :$("#cbQuotaFlagC").val()
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+            },
+            error:function (xhr, ajaxOptions, thrownError,data){
+                alert(xhr.status);
+            }
+        });
+    });
+
+    function onClear()
+    {
+        $("#txtMatNoC").val('');
+        $("#txtUOMC").val('');
+        $("#txtMatDescC").val('');
+        $("#txtValuationC").val('');
+        $("#txtMRPTypeC").val('');
+        $("#cbAssetFlagC").val('');
+        $("#cbQuotaFlagC").val('');
+        $("#txtProcurementUsage").val('');
+    }
+
+    function onDownloadReport()
+    {
+        $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadReport")", {
+            data: {
+                kelas: $("#cmb-class").val(),
+                Display: $("#cbodisplay").val(),
+                Page : @pg.PositionPage,
+                mat_no : $("#txtMatNoC").val(),
+			    mat_desc : $("#txtMatDescC").val(),
+			    uom : $("#txtUOMC").val(),
+			    mrp_type: $("#txtMRPTypeC").val(),
+                valuation_class : $("#txtValuationC").val(),
+                asset_flag : $("#cbAssetFlagC").val(),
+                quota_flag : $("#cbQuotaFlagC").val()
+            }
+        })
+    }
+
+    function DownloadTemplate() {
+        $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadTemplate")");
+    }
+
+    function DownloadFail() {
+        $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadExcel")");
+    }
+
+     //upload file XLS
+    function UploadExcelFile(uploadElement) {
+        //$.progressShow("Material Master", "Loading...");
+        var uploadFileList = uploadElement.files;
+        if (uploadFileList.length > 0) {
+            for (idx = 0; idx < uploadFileList.length; idx++) {
+                var currentFile = uploadFileList[idx];
+                var isValid = ValidateExcel(currentFile);
+                if (isValid) {
+                    var uploadFormData = new FormData();
+                    uploadFormData.append("excelFile", currentFile);
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/Material/UploadExcel",
+                        contentType: false,
+                        processData: false,
+                        data: uploadFormData,
+                        success: function (data) {
+                            if (data.toLowerCase().indexOf("error") !== -1) {
+                                alert(data);
+                            }
+
+                            else {
+                                $("#info-search").css("display", "inherit");
+                                $("#info-search").html("<strong>Successfully to upload data.</strong>");
+                            }
+
+                            $.progressHide();
+                            //window.location.href="/Material";
+                        },
+                        error: function (data) {
+                            console.log(data);
+                            $.progressHide();
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    function ValidateExcel(currentFile) {
+        var validationMessage = "";
+
+        $.ajax({
+            type: "POST",
+            async: false,
+            url: "/Material/MaterialUploadFileExtensions",
+            success: function (data) {
+                if (data.toLowerCase().indexOf("error") === -1) {
+                    var allowedFileExtensions = JSON.parse(data.toLowerCase());
+                    var splittedName = currentFile.name.split(".");
+                    var currentFileExtension = splittedName[splittedName.length - 1];
+                    if ($.inArray("." + currentFileExtension, allowedFileExtensions) === -1) {
+                        validationMessage = "File extension: " + currentFileExtension + " is not allowed.";
+                        return;
+                    }
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+
+        if (validationMessage !== "")
+        {
+            alert(validationMessage);
+            $.progressHide();
+            return false;
+        }
+
+        return true;
+    }
+
+    function getValClass(page) {
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@MaterialController.Action.GetLookupValClass",
+            data: {
+                PARAM: $('#valsearchbox').val(),
+                page: page,
+                pageSize: 10
+            },
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                $("#valclass-container").html(data);
+                $('#valclass-container').on('shown.bs.modal', function () {
+                    $("#valsearchbox").focus();
+                });
+                $("#valclass-container").modal();
+            },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function getValClassGrid(page) {
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@MaterialController.Action.GetLookupValClassGrid",
+            data: {
+                PARAM: $('#valsearchbox').val(),
+                page: page,
+                pageSize: 10
+            },
+            contentType: "application/json; charset=utf-8",
+            success: function (data) { $("#valclass-grid-container").html(data); },
+            error: function (data) {
+                var e = data.responseText;
+                alert($(e).find("title").text());
+            },
+            complete: function (data) { return false; }
+        });
+    }
+
+    function MoveValuationClassKey(VAL_CLASS) {
+        $("#txtValClass").val(VAL_CLASS);
+        $("#valclass-container").modal('hide');
+    }
+
+    function ClearLookupCriteria(gridID) {
+        $.Clear(["#valsearchbox"]);
+        getValClassGrid(1);
+    }
+
+    function closeLookupValClass() {
+        $.Clear(['#valsearchbox']);
+        $("#valclass-container").modal('hide');
+    }
+
+    function formattingNumeric(id) {
+        if ($('#' + id).val() == "") $('#' + id).val('0')
+
+        if(!isNaN(parseFloat($('#' + id).val().replace(/,/g, ''))) && isFinite($('#' + id).val().replace(/,/g, ''))) {
+            var value = $('#' + id).val().substring(0,2) == "0." ? $('#' + id).val() : parseFloat($('#' + id).val().replace(/,/g, '')).toString();
+            $('#' + id).val($.AsPrice(value));
+        }
+        else {
+            alert("Format Numeric is not valid");
+            $('#' + id).val(0);
+        }
+    }
+    </script>
+}
+
+<form role="form" class="form-horizontal" id="searchForm" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-xs-12 col-md-3 col-sm-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-12 col-md-4 col-sm-5 control-label text-muted">Class</label>
+                <div class="col-xs-12 col-md-8 col-sm-7">
+                    @Html.DropDownListFor(
+                                    m => m.MaterialNo,
+                                    SystemController.GetSystemValue(FunctionId.MaterialClass),
+                                    new {
+                                        id = "cmb-class",
+                                        @class = "form-control"
+                                   })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="col-xs-12 col-md-4 col-sm-5 control-label text-muted">Valuation</label>
+                <div class="col-xs-12 col-md-8 col-sm-7">
+                    @Html.DropDownListFor(
+                                    m => m.ValuationClass,
+                                    MaterialController.SelectValuationClass(),
+                                    new {
+                                        id = "cmb-valclass",
+                                        @class = "form-control"
+                                   })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="col-xs-12 col-md-4 col-sm-5 control-label text-muted">Quota Flag</label>
+                <div class="col-xs-12 col-md-8 col-sm-7">
+                    <select id="cmb-quotaflag" class="form-control">
+                        <option value=""></option>
+                        <option value="@YesNoFlag.No">No</option>
+                        <option value="@YesNoFlag.Yes">Yes</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-3 col-sm-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-12 col-md-4 col-sm-5 control-label text-muted" style="vertical-align: middle">Material No</label>
+                <div class="col-xs-12 col-md-8 col-sm-7">
+                    <input id="txt-matno" type="text" class="form-control" maxlength="23" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="col-xs-12 col-md-4 col-sm-5 control-label text-muted">MRP Type</label>
+                <div class="col-xs-12 col-md-8 col-sm-7">
+                    <input id="txt-mrptype" type="text" class="form-control" maxlength="2" />
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-3 col-sm-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-12 col-md-4 col-sm-5 control-label text-muted" style="vertical-align: middle">Material Desc.</label>
+                <div class="col-xs-12 col-md-8 col-sm-7">
+                    <input id="txt-matdesc" type="text" class="form-control" maxlength="50" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="col-xs-12 col-md-4 col-sm-5 control-label text-muted">Proc. Usage</label>
+                <div class="col-xs-12 col-md-8 col-sm-7">
+                    @Html.DropDownListFor(
+                                    m => m.ProcUsageCode,
+                                    MaterialController.SelectProcurementUsage(),
+                                    new {
+                                        id = "cmb-procusage",
+                                        @class = "form-control"
+                                   })
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-3 col-sm-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-12 col-md-4 col-sm-5 control-label text-muted">UOM</label>
+                <div class="col-xs-12 col-md-8 col-sm-7">
+                     @Html.DropDownListFor(
+                                    m => m.UOM,
+                                    MaterialController.SelectUOM(),
+                                    new {
+                                        id = "cmb-uom",
+                                        @class = "form-control"
+                                   })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="col-xs-12 col-md-4 col-sm-5 control-label text-muted">Asset Flag</label>
+                <div class="col-xs-12 col-md-8 col-sm-7">
+                    <select id="cmb-assetflag" class="form-control">
+                        <option value=""></option>
+                        <option value="@YesNoFlag.No">No</option>
+                        <option value="@YesNoFlag.Yes">Yes</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div class="col-xs-6" style="margin-top: 5px;">
+        </div>
+        <div class="col-xs-6 text-right" style="margin-bottom:3px;">
+            <div class="form-group-xs">
+                <button id="btn-detail" class="btn btn-primary btn-xs btn-std btndisable" onclick="javascript:onDetailGrid(); return false;">Show Detail</button>
+                <button id="btn-search" class="btn btn-primary btn-xs btn-std btndisable" onclick="javascript:onSearchData(1)">Search</button>
+                <button id="btn-clear" class="btn btn-default btn-xs btn-std btndisable" onclick="javascript:onClear()">Clear</button>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="line-br"></div>
+<div>
+    <div id="divtable">
+        @Html.Partial("_ViewTable")
+    </div>
+</div>
+<div class="modal fade" id="basicModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+    @Html.Partial("_PopUpMaterial")
+</div>
+
+@Html.ModalContainer("pop-updateimage")

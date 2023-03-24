@@ -1,0 +1,3 @@
+﻿SELECT COUNT(1)
+FROM TB_R_LOG_D 
+	WHERE PROCESS_ID = @ProcessId

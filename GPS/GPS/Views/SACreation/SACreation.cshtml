@@ -1,0 +1,80 @@
+﻿@{
+    Layout = CommonPage.MainLayout;
+}
+@using GPS.Constants
+
+@section HeadScript {
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/datepicker.css")"/>
+
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/tdk.util.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/tdk.lookupgrid.js")"></script>
+}
+<div class="form-horizontal">
+<div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted  text-left">PO No</label>
+               <div class="col-xs-7 col-sm-5">
+                    <input type="text" id="txtPO" class="form-control" value="" />
+                </div>
+                
+                <div class="col-xs-10 col-sm-3">
+                    <button onclick="onCheck()" id="btnCheck" class="btn btn-primary btn-xs">Check</button>
+                </div>
+            </div>
+            </div>
+            </div>
+        
+        </div>
+
+    <div class="v-space"></div>
+    <div class="line-br"></div>
+    <div id="POData">
+        @Html.Partial("_POData")
+    </div>
+    <div id="pop-runconfirm" class="modal fade" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <p class="modal-title">
+                        Run Confirmation
+                    </p>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Are you sure want to Process MRP?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-group-xs text-right">
+                        <button id="btnrun-ok" type="button" class="btn btn-primary btn-xs">OK</button>
+                        <button id="btnrun-cancel" type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="pop-PObyref" class="modal fade" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p>
+                        Please choose one PO which reference with "<label style="font-weight: bolder;" id="lblReffConfirm"></label>"
+                    </p>
+                    <div class="row" id="poReffGrid">
+                        @Html.Partial("_poReffGrid")
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-group-xs text-right">
+                        <button id="btn-cancel" type="button" class="btn btn-danger btn-xs btn-std" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.Partial("_PartialScript")

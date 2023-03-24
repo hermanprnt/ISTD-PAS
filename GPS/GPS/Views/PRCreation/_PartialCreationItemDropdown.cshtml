@@ -1,0 +1,21 @@
+﻿@using GPS.Constants
+@using GPS.Models.PR.PRCreation
+@{
+    List<PRCreation> PRDTemp = (List<PRCreation>)ViewData["LIST_TEMP_DATA"] != null ? (List<PRCreation>)ViewData["LIST_TEMP_DATA"] : new List<PRCreation>();
+}
+
+<div class="form-group form-group-xs">
+    <label class="col-xs-1 col-sm-1 col-md-2 control-label text-right text-muted">
+        Item
+    </label>
+    <div class="col-xs-11 col-sm-11 col-md-10">
+        <select style="width:100%" id="itemdropdown" onchange="javascript:onClickRowItem('')">
+            <option id="0" value="0">Edit Form</option>
+            @if (PRDTemp.Count > 0 && PRDTemp != null) {
+                foreach (PRCreation dt in PRDTemp) { 
+                    <option id="@dt.ITEM_NO" value="@dt.ITEM_NO">@dt.MAT_DESC</option>
+                }
+            }
+        </select>
+    </div>
+</div>

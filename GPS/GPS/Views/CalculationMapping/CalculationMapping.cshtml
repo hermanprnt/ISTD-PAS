@@ -1,0 +1,160 @@
+﻿@model  GPS.Models.Master.CalculationMapping
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadScript{
+    <style>
+        .initial-hide,
+        .moreinquiry {
+            display:none;
+        }
+
+        ._criteria {
+            display:none;
+        }
+
+        input, select, option {
+            font-size : 12px;
+        }
+
+        .form-group {
+            margin-bottom:10px;
+        }
+
+        .active {
+            color: green;
+        }
+
+        .inactive {
+            color: lightgrey;
+        }
+    </style>
+}
+
+@section BodyScript{
+    <!-- Dropzone file js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/dropzone.js")"></script>
+
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/typeahead.jquery.js")"></script>
+
+    @Html.Partial("_CalculationMappingScript")
+    <script>
+        $(document).ready(function () {
+            $("#lnsearch-toggle").click(function () {
+                var _criteria = $("._criteria");
+                _criteria.toggle(200, "linear");
+                var text = $("#lnsearch-toggle").text();
+                $("#lnsearch-toggle").text(text == "More Search Criteria" ? "Less Search Criteria" : "More Search Criteria");
+            });
+        });
+    </script>
+    }
+<div class="alert alert-danger" role="alert" style="display:none" id="alert-search"></div>
+<div class="alert alert-warning" role="alert" style="display:none" id="warning-search"></div>
+<div class="form-horizontal" id="searchForm">
+    <div class="row">
+        <div class="col-xs-12 col-sm-3 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-4 col-md-5 control-label text-muted">Calculation Scheme</label>
+                <div class="col-xs-8 col-sm-8 col-md-7">
+                    <div class="input-group pos-rel" style="width: 100%;">
+                        @Html.TextBoxFor(m => m.CALCULATION_SCHEME_CD, new {id = "calculation_scheme", @class = "form-control", @style="font-size:12px;height:25px;"})
+					</div>
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-4 col-md-5 control-label text-muted">Inventory</label>
+                <div class="col-xs-8 col-sm-8 col-md-7">
+                    <select id="inventory_flag" class="form-control">
+                        <option value=""></option>
+                        <option value="Y">Y</option>
+                        <option value="N">N</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+         <div class="col-xs-12 col-sm-3 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Description</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    <div class="input-group pos-rel" style="width: 100%;">
+                        @Html.TextBoxFor(m => m.CALCULATION_SCHEME_DESC, new {id = "calculation_desc", @class = "form-control", @style="font-size:12px;height:25px;"})
+                    </div>
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Accrual Flag</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    <div class="input-group pos-rel" style="width: 100%;">
+                        <select id="accrual_flag" class="form-control">
+                            <option value=""></option>
+                            <option value="Y">Y</option>
+                            <option value="N">N</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <div class="col-xs-12 col-sm-3 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-5 col-md-5 control-label text-muted">Comp Price</label>
+                <div class="col-xs-8 col-sm-7 col-md-7">
+                     @Html.TextBoxFor(m => m.COMP_PRICE_CD, new {id = "comp_price", @class = "form-control", @style="font-size:12px;height:25px;"})
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-4 col-sm-5 col-md-5 control-label text-muted">Condition Rule</label>
+                <div class="col-xs-8 col-sm-7 col-md-7" id="cascade-wbs">
+                    @Html.TextBoxFor(m => m.CONDITION_RULE, new {id = "condition_rule", @class = "form-control", @style="font-size:12px;height:25px;"})
+                </div>
+            </div>
+        </div>
+         <div class="col-xs-12 col-sm-3 col-md-3">
+         </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-6" style="margin-top: 5px;"></div>
+        <div class="col-xs-6 text-right">
+            <div class="form-group-xs">
+                <button type="submit" id="btnsearch" name="btnsearch" class="btn btn-primary btn-search btn-xs btndisable" onclick="javascript:SearchCalculationMapping(1, 1)">Search</button>
+                <input type="reset" class="btn btn-default btnclear btn-xs btndisable" value="Clear" onclick="javascript: ClearCriteria()"/>
+                <span id="iscreate" class="hidden"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center" style="margin-bottom: 3px;">
+    <hr id="hrsrc" style="margin:0;padding:0;" />
+</div>
+
+<div class="row">
+    <div class="col-xs-12 col-sm-5 text-left">
+        <div class="btn-group">
+            <div class="form-group form-group-xs" style="margin-bottom: 3px;">
+                @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("CalculationMapping", "btn-add"))
+                {
+                    <a href="#" class="btn btn-primary btnadd btn-xs btndisable" id="btn-add" onclick="javascript:openPopup(0)">Add</a>
+                }
+                @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("CalculationMapping", "btn-edit"))
+                {
+                    <a href="#" class="btn btn-primary btnedit btn-xs btndisable" id="btn-edit" onclick="javascript:openPopup(1)">Edit</a>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-1 text-left">
+        <button data-rel="tooltip" title="Hide filter" onclick="javascript:toggleSearch()" type="button" class="ace-icon fa fa-angle-double-down btn btn-default btn-xs btn-tiny-down"
+            id="toogle-search" style="top: 6px;">
+        </button>
+        <input type="text" id="btnLostFocus" style="display: block; height: 1px; width: 1px;
+            border: none;" />
+    </div>
+</div>
+
+<div class="row TableList">
+    @Html.Partial("_CalculationMappingGrid")
+</div>
+
+<div id="addedit-popup-container" class="modal fade" width="100%" data-backdrop="static" data-keyboard="false"></div>

@@ -1,0 +1,820 @@
+﻿@using GPS.Constants;
+@using GPS.Controllers.PR;
+@{
+    Layout = CommonPage.MainLayout;
+}
+
+<style>
+    .form-group > label[class*="col-"]{
+        margin-bottom: 7px;
+    }
+
+    textarea[name=txtContent] {
+        resize: none;
+    }
+
+    .list-file{
+        font-size: 13px !important;
+        border: solid 1px gray;
+        padding: 5px;
+        background-color: #f5f0dc;
+    }
+
+    ul li{
+        list-style-type: none;
+    }
+
+    .glass{
+	    /* background styles */
+	    display: inline-block;
+	    background-color: green; /*for compatibility with older browsers*/
+	    background-image: linear-gradient(green,lightgreen);
+
+	    /* text styles */
+	    text-decoration: none;
+	    color: #fff;
+	    font-family: sans-serif;
+	    font-weight: 100;
+
+        border-width: 0px;
+        border-radius: 3px;
+        box-shadow: 0px 1px 4px -2px #333;
+    }
+
+    .glass:after{
+	    content: '';
+	    position: absolute;
+	    top: 2px;
+	    left: 2px;
+	    width: calc(100% - 4px);
+	    height: 50%;
+	    background: linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.2));
+    }
+
+    .glass:hover{
+	    background: linear-gradient(#073,#0fa);
+    }
+
+    .btn-combo{
+        position: absolute !important;
+        height: 20px;
+        right: 1px;
+        top: 1px;
+        /*background-color: #9abfd5 !important;
+        border-color: #abbac3;*/
+    }
+
+    /*.btn-combo:hover,
+    .btn-combo:focus{
+        background-color: #a3cee9 !important;
+        border-color: #abbac3;
+    }*/
+
+    ul.list-grid{
+        margin: 2px;
+    }
+
+    .item .item-checkbox{
+        width: 30px;
+        padding-top: 7px !important;
+    }
+
+    .item .item-label{
+        width: calc(100% - 30px);
+        border-left: none  !important;
+        text-align: left  !important;
+        padding-top: 7px;
+    }
+
+    ul.list-grid li .item div{
+        float: left;
+        text-align: center;
+        border: 1px solid #70c4ec;
+        padding: 3px;
+    }
+
+    ul.list-grid li {
+         background: #e6f7ff;
+    }
+
+    ul.list-grid li:nth-child(odd) {
+         background: #fefefe;
+    }
+
+    ul.list-grid li .item {
+        width: 100%;
+        height: 30px;
+    }
+</style>
+
+<script type="text/javascript" src="@Url.Content("~/Content/js/list.min.js")"></script>
+<div class="ncp-theme">
+     <div class="col-xs-9" style="margin-right: 0px; padding-left:0px;">
+         <div class="row">
+             <div class="col-xs-12" style="padding-right: 0px;">
+                 <div class="panel panel-default dashboard-widget" style="border-radius: 10px;">
+                     @*<div class="panel-heading">
+                         <i class="fa fa-comment"></i>&nbsp;
+                         Announcement
+                     </div>*@
+                     <div class="panel-body" style="border-radius: 10px;max-height: 300px;">
+                         <form role="form" class="form-horizontal" id="Header-Creation-Form">
+                             <div class="col-xs-12 col-sm-6 col-md-6">
+                                 <div class="col-xs-12 col-sm-12 col-md-12">
+                                     <div class="row">
+                                         <div class="form-group form-group-xs">
+                                             <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">
+                                                 Recipient Supplier
+                                             </label>
+                                             <div class="col-xs-8 col-sm-9 col-md-8">
+                                                 <div class="input-group pos-rel form-group-text" style="width: 100%;max-width:150px;">
+                                                     <div>
+                                                         <input id="ddlrecSupplier" type="text" class="mandatory" style="width:100%;padding-right: 20px;"/>
+                                                         <button id="btnrecSupplier" data-textid="ddlrecSupplier" onclick="javascript:onRecSupplierClick(this)" type="button" class="btn btn-default btn-xs btn-combo glass"><i class="fa fa-caret-down" aria-hidden="true"></i></button>
+                                                     </div>
+                                                 </div>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+                                 <div class="col-xs-12 col-sm-12 col-md-12">
+                                     <div class="row">
+                                         <div class="form-group form-group-xs">
+                                             <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">
+                                                 Recipient Non Supplier
+                                             </label>
+                                             <div class="col-xs-8 col-sm-9 col-md-8">
+                                                 <div class="input-group pos-rel form-group-text" style="width: 100%;max-width:150px;">
+                                                     <div>
+                                                         <input id="ddlrecNonSupplier" type="text" class="mandatory" style="width:100%;padding-right: 20px;" />
+                                                         <button id="btnrecNonSupplier" data-textid="ddlrecNonSupplier" onclick="javascript:onRecNonSupplierClick(this)" type="button" class="btn btn-default btn-xs btn-combo glass"><i class="fa fa-caret-down" aria-hidden="true"></i></button>
+                                                     </div>
+                                                 </div>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+                                 <div class="col-xs-12 col-sm-12 col-md-12">
+                                     <div class="row">
+                                         <div class="form-group form-group-xs">
+                                             <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">
+                                                 Valid From
+                                             </label>
+                                             <div class="col-xs-8 col-sm-3 col-md-3">
+                                                 <div class="input-group">
+                                                     <span class="input-group-addon" style="cursor: pointer;padding:4px 10px;">
+                                                         <i class="fa fa-calendar bigger-110"></i>
+                                                     </span>
+                                                     <input tabindex="3" class="form-control date-picker mandatory" type="text" name="date-range-picker" id="dtmValidDateFrom" data-date-format="dd.mm.yyyy" style="max-width:100px" />
+                                                 </div>
+                                             </div>
+                                             <label class="col-xs-4 col-sm-3 col-md-2 control-label text-muted required-left">
+                                                 Valid To
+                                             </label>
+                                             <div class="col-xs-8 col-sm-3 col-md-3">
+                                                 <div class="input-group">
+                                                     <span class="input-group-addon" style="cursor: pointer;padding:4px 10px;">
+                                                         <i class="fa fa-calendar bigger-110"></i>
+                                                     </span>
+                                                     <input tabindex="4" class="form-control date-picker mandatory" type="text" name="date-range-picker" id="dtmValidDateTo" data-date-format="dd.mm.yyyy" style="max-width:100px" />
+                                                 </div>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+                                 <div class="col-xs-12 col-sm-12 col-md-12">
+                                     <div class="row">
+                                         <div class="form-group form-group-xs">
+                                             <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">
+                                                 Description
+                                             </label>
+                                             <div class="col-xs-8 col-sm-9 col-md-8">
+                                                 <textarea tabindex="5" class="form-control mandatory" name="txtContent" id="txtContent" style="height: 106px;"></textarea>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+                             </div>
+                             <div class="col-xs-12 col-sm-6 col-md-6">
+                                 <label class="control-label text-muted">Attachment</label>
+                                 <div id="inputfile-list">
+                                     <input tabindex="6" type="file" value="" name="Attachment[]" id="fileAttachment" class="custom-file file1" onchange="javascript:onAttachFile(this)" />
+                                 </div>
+                                 <ul id="listFile" style="margin-top: 5px;margin-left: 0px;">
+
+                                 </ul>
+                             </div>
+                             <div class="col-xs-12 col-sm-12 col-md-12">
+                                 <div class="form-group pull-right" style="margin-top:10px;">
+                                     <button type="button" id="btnClear" class="btn btn-warning btn-xs" onclick="javascript:doClearForm();">Clear</button>
+                                     <button type="button" id="btnSubmitNoAttch" class="btn btn-primary btn-xs" onclick="javascript:doSubmitForm(0);">Submit Without Attachment</button>
+                                     <button type="button" id="btnSubmitWthAttch" class="btn btn-primary btn-xs" onclick="javascript:doSubmitForm(1);">Submit With Attachment</button>
+                                 </div>
+                             </div>
+                         </form>
+                    </div>
+                 </div>
+             </div>
+         </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalRecipient" data-backdrop="false">
+    <div class="modal-dialog modal-md" style="width: 500px;position: absolute;">
+        <div class="modal-content" style="background-color:#00a4f5;color:white;">
+            <div class="modal-body" style="padding:2px !important;background-color:white;color:black;margin:1px !important">
+                <div id="modalRecipientDiv">
+                    <table class="table-header table-bordered">
+                        <thead>
+                            <tr>
+                                <th width="30px"class="text-center" style="padding: 10px;">
+                                    <input id="selectAll" type="checkbox" onchange="javascript: selectAllSupplier(this);"/>
+                                </th>
+                                <th class="text-center" width="462px">
+                                    <label>Name</label>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th width="30px" class="text-center">
+                                </th>
+                                <th width="462px">
+                                    <input class="form-control search" type="text" id="txtSearchDataItem" style="width:90%;margin:3px;">
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+                    <div id="detail-item" style="height:212px;overflow-y:auto;">
+                        <ul class="list list-grid">
+                            @*<li>
+                                <div class="item" style="width:100%;">
+                                    <div class="item-checkbox">
+                                        <input id="select-one" type="checkbox" />
+                                    </div>
+                                    <div class="item-label">
+                                        <label class="label-left">001.agatha</label>
+                                    </div>
+                                </div>
+                            </li>*@
+                        </ul>
+                    </div>
+                    <div style="width:100%;padding: 3px;">
+                        <label id="txtTotalData">Total : (0 Items)</label>
+                    </div>
+                </div>
+                <div class="btn-group-xs text-right" style="margin-top:10px;margin-bottom:10px;">
+                    <button id="btnget-submit" type="button" class="btn btn-primary btn-xs">Ok</button>
+                    <button id="btnget-close" type="button" class="btn btn-danger btn-xs"  data-prevvalue="" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalRecipientNS" data-backdrop="false">
+    <div class="modal-dialog modal-md" style="width: 500px;position: absolute;">
+        <div class="modal-content" style="background-color:#00a4f5;color:white;">
+            <div class="modal-body" style="padding:2px !important;background-color:white;color:black;margin:1px !important">
+                <div id="modalRecipientDivNS">
+                    <table class="table-header table-bordered">
+                        <thead>
+                            <tr>
+                                <th width="30px" class="text-center" style="padding: 10px;">
+                                    <input id="selectAllNS" onchange="javascript: selectAllNonSupplier(this);" type="checkbox" />
+                                </th>
+                                <th class="text-center" width="462px">
+                                    <label>Name</label>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th width="30px" class="text-center">
+                                </th>
+                                <th width="462px">
+                                    <input class="form-control search" type="text" id="txtSearchDataItemNS" style="width:90%;margin:3px;">
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+                    <div id="detail-itemNS" style="height:212px;overflow-y:auto;">
+                        <ul class="list list-grid">
+                        </ul>
+                    </div>
+                    <div style="width:100%;padding: 3px;">
+                        <label id="txtTotalDataNS">Total : (0 Items)</label>
+                    </div>
+                </div>
+                <div class="btn-group-xs text-right" style="margin-top:10px;margin-bottom:10px;">
+                    <button id="btnget-submitNS" type="button" class="btn btn-primary btn-xs">Ok</button>
+                    <button id="btnget-closeNS" type="button" class="btn btn-danger btn-xs" data-prevvalue="" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+         $('.date-picker').datepicker({
+            autoclose: true,
+            todayHighlight: true,
+            startDate: new Date()
+        });
+
+        $('#dtmValidDateFrom').datepicker()
+        .on("input change", function (e) {
+            $("#dtmValidDateTo").datepicker('remove').datepicker({
+                autoclose: true,
+                todayHighlight: true,
+                startDate: convertToDate(this.value)
+            });
+        });
+
+        $('#modalRecipient').click(function (e) {
+            $target = $(e.target);
+            if (!$target.is(":checkbox"))
+                $("#modalRecipient").modal('hide');
+        }).children().click(function (e) {
+            $target = $(e.target);
+            if ($target.data("dismiss") == "modal" || $target.is(":checkbox"))
+                return true;
+            else
+                return false;
+        });
+
+        $('#modalRecipientNS').click(function (e) {
+            $target = $(e.target);
+            if (!$target.is(":checkbox"))
+                $("#modalRecipientNS").modal('hide');
+        }).children().click(function (e) {
+            $target = $(e.target);
+            if ($target.data("dismiss") == "modal" || $target.is(":checkbox"))
+                return true;
+            else
+                return false;
+        });
+
+        checkboxAction();
+        buttonModalAction();
+    });
+
+    function doClearForm() {
+        $("#Header-Creation-Form").get(0).reset();
+
+        $("#fileAttachment.file1").show();
+        $("#listFile").empty();
+        $("#detail-item ul").removeClass("loaded");
+        $("#detail-itemNS ul").removeClass("loaded");
+        $("input[type=file]").not(':first').remove();
+    }
+
+    function doSubmitForm(includeAttach)
+    {
+        var totalFile = $("#listFile li").length;
+
+        var filedata = new FormData();
+        filedata.append("Rec_Supplier", $("#ddlrecSupplier").val());
+        filedata.append("Rec_NonSupplier", $("#ddlrecNonSupplier").val());
+        filedata.append("ValidFrom", $("#dtmValidDateFrom").val());
+        filedata.append("ValidTo", $("#dtmValidDateTo").val());
+        filedata.append("Contents", $("#txtContent").val());
+        if (includeAttach ==1)
+        {
+            for (i = 1; i <= totalFile; i++) {
+                var file = $("#fileAttachment.file" + i).get(0).files[0];
+                filedata.append("files", file);
+            }
+
+            if(totalFile<=0)
+            {
+                $.messagebox.show(
+                        "Submit Data",
+                        "error : invalid file,at least one file must be attached.",
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+                return;
+            }
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "@WallAnnouncementController._SubmitData",
+            data: filedata,
+            contentType: false, // NOTE: disable header to include content-type
+            processData: false, // NOTE: disabe jquery to convert data to string
+            success: function (resultMessage) {
+                console.log(resultMessage);
+                if (resultMessage.ResultType == "E") {
+                    $.messagebox.show(
+                        "Submit Data",
+                        resultMessage.Content,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+                } 
+                else {
+                    $.messagebox.show(
+                        "Submit Data",
+                        "Data Successfully Saved ",
+                        "INF",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+
+                    doClearForm();
+                }
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                console.log(resultMessage);
+                if (resultMessage.responseText) {
+                    $.messagebox.show(
+                        "Submit Data",
+                        resultMessage.responseText,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+                } else {
+                    $.messagebox.show(
+                        "Submit Data",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+                };
+
+                $.progressbox.hide();
+            },
+            complete: function (resultMessage) {
+            }
+        });
+    }
+
+    function checkboxAction()
+    {
+        $(document).on("change", "input[name='select-oneNS']", function () {
+            var prevValue = $("#ddlrecNonSupplier").val();
+
+            if (this.checked) {
+                prevValue = prevValue + $(this).data("value") + ';';
+                $("#selectAllNS").prop('checked', $('.chk-Recipient-Non-Supplier:checkbox:not(:checked)').length <= 0);
+            }
+            else {
+                prevValue = prevValue.replace($(this).data("value") + ';', "");
+                $("#selectAllNS").prop('checked', false);
+            }
+
+            $("#ddlrecNonSupplier").val(prevValue);
+
+        }).on("change", "input[name='select-one']", function () {
+            var prevValue = $("#ddlrecSupplier").val();
+
+            if (this.checked) {
+                prevValue = prevValue + $(this).data("value") + ';';
+                $("#selectAll").prop('checked', $('.chk-Recipient-Supplier:checkbox:not(:checked)').length <= 0);
+            }
+            else {
+                prevValue = prevValue.replace($(this).data("value") + ';', "");
+                $("#selectAll").prop('checked', false);
+            }
+            $("#ddlrecSupplier").val(prevValue);
+        });
+    }
+
+    function buttonModalAction() {
+        $("#btnget-close").click(function () {
+            var prevValue = $(this).data("prevvalue");
+            $("#ddlrecSupplier").val(prevValue);
+            $('.chk-Recipient-Supplier.unchecked:checkbox:checked').prop('checked', false);
+            $('.chk-Recipient-Supplier.checked:checkbox:not(:checked)').prop('checked', true);
+        });
+
+        $("#btnget-submit").click(function () {
+            $("#btnget-close").data("prevvalue", '');
+            $("#modalRecipient").data("submit", "Y");
+            $("#modalRecipient").modal('hide');
+            $('.chk-Recipient-Supplier.unchecked:checkbox:checked').removeClass('unchecked').addClass('checked');
+            $('.chk-Recipient-Supplier.checked:checkbox:not(:checked)').removeClass('checked').addClass('unchecked');
+        });
+
+        $('#modalRecipient').on('hidden.bs.modal', function (e) {
+            var triggerSubmit = $("#modalRecipient").data("submit");
+            if (triggerSubmit !== "Y")
+            {
+                var prevValue = $("#btnget-close").data("prevvalue");
+                $("#ddlrecSupplier").val(prevValue);
+            }
+            $('.chk-Recipient-Supplier.unchecked:checkbox:checked').prop('checked', false);
+            $('.chk-Recipient-Supplier.checked:checkbox:not(:checked)').prop('checked', true);
+            $("#modalRecipient").data("submit", "N");
+        });
+
+        $("#btnget-closeNS").click(function () {
+            var prevValue = $(this).data("prevvalue");
+            $("#ddlrecNonSupplier").val(prevValue);
+            $('.chk-Recipient-Non-Supplier.unchecked:checkbox:checked').prop('checked', false);
+            $('.chk-Recipient-Non-Supplier.checked:checkbox:not(:checked)').prop('checked', true);
+        });
+
+        $("#btnget-submitNS").click(function () {
+            $("#btnget-closeNS").data("prevvalue", '');
+            $("#modalRecipientNS").data("submit", "Y");
+            $("#modalRecipientNS").modal('hide');
+            $('.chk-Recipient-Non-Supplier.unchecked:checkbox:checked').removeClass('unchecked').addClass('checked');
+            $('.chk-Recipient-Non-Supplier.checked:checkbox:not(:checked)').removeClass('checked').addClass('unchecked');
+        });
+
+        $('#modalRecipientNS').on('hidden.bs.modal', function (e) {
+            var triggerSubmit = $("#modalRecipientNS").data("submit");
+            if (triggerSubmit !== "Y") {
+                var prevValue = $("#btnget-submitNS").data("prevvalue");
+                $("#ddlrecNonSupplier").val(prevValue);
+            }
+
+            $('.chk-Recipient-Non-Supplier.unchecked:checkbox:checked').prop('checked', false);
+            $('.chk-Recipient-Non-Supplier.checked:checkbox:not(:checked)').prop('checked', true);
+            $("#modalRecipientNS").data("submit", "N");
+        });
+    }
+
+    function convertToDate(strDate) {
+        // str1 format should be dd/mm/yyyy. Separator can be anything e.g. / or -. It wont effect
+        var dt = parseInt(strDate.substring(0, 2));
+        var mon = parseInt(strDate.substring(3, 5));
+        var yr = parseInt(strDate.substring(6, 10));
+        var date = new Date(yr, mon - 1, dt);
+        return date;
+    }
+
+    function onAttachFile($_obj) {
+        var $_objfile = $($_obj);
+        var file = $_objfile.get(0).files[0];
+
+        if ((file === null) || (file === "")) {
+            $.messagebox.show(
+                "Upload Attachment",
+                "File is NULL, please Upload Another File",
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+
+            return
+        }
+
+        var $_clone_objfile = $_objfile.clone();
+        $($_clone_objfile).wrap('<form>').closest('form').get(0).reset();
+        $($_clone_objfile).unwrap();
+
+        $_objfile.hide();
+        var num = $("#listFile li").length +1;
+
+        $("#listFile").append('<li id="file' + num + '" style="margin-top: 1px;"><div class="list-file"><a href="javascript:void(0);" style="font-size: 13px;" data-num="'+num+'" onclick="downloadFile(this)">' + file.name + "</a>" +
+                                        "<a href='javascript:void(0);' onclick='deleteFiles(this)' style='float: right;' data-num='" + num + "'>" +
+                                            "<img width='15' height='15' src='@Url.Content("../Content/img/error.png")' title='Delete " + file.name + "'>" +
+                                        "</a>" +
+                                    '</div></li>');
+
+        $_clone_objfile.removeClass("file" + num).addClass("file" + (num+1));
+        $("#inputfile-list").append($_clone_objfile);
+    }
+
+    function selectAllSupplier(e)
+    {
+        $(".chk-Recipient-Supplier").prop('checked', e.checked);
+
+        if (e.checked) {
+            var value = "";
+            $("input[name='select-one']").each(function () {
+                if (this.checked) {
+                    value = value + $(this).data("value") + ';';
+                }
+            });
+            $("#ddlrecSupplier").val(value);
+        }
+        else {
+            $("#ddlrecSupplier").val("");
+        }
+    }
+
+    function selectAllNonSupplier(e) {
+        $(".chk-Recipient-Non-Supplier").prop('checked', e.checked);
+
+        if (e.checked) {
+            var value = "";
+            $("input[name='select-oneNS']").each(function () {
+                if (this.checked) {
+                    value = value + $(this).data("value") + ';';
+                }
+            });
+            $("#ddlrecNonSupplier").val(value);
+        }
+        else {
+            $("#ddlrecNonSupplier").val("");
+        }
+    }
+
+    function deleteFiles($this) {
+        var totalFile = $("#listFile li").length;
+        var num = parseInt( $($this).data("num"));
+        $("#fileAttachment.file" + (num + 1)).remove();
+        var $el = $("#fileAttachment.file" +num);
+        $el.wrap('<form>').closest('form').get(0).reset();
+        $el.unwrap();
+        //$("#listFile").empty();
+        $($this).closest("li").remove();
+
+        for (i = num; i <= totalFile; i++) {
+            $("#fileAttachment.file" + (i + 1)).removeClass("file" + (i + 1)).addClass("file" + (i));
+            $("#file" + (i + 1) + " .list-file a").attr("data-num", i);
+            $("#file" + (i + 1)).attr("id", "file" + (i));
+        }
+
+        $("#fileAttachment.file" + ($("#listFile li").length)).show();
+    }
+
+    function downloadFile($this) {
+        var num = parseInt( $($this).data("num"));
+        var $el = $("#fileAttachment.file" + num);
+        var file = $el.get(0).files[0];
+        var fileName = file.name;
+        var blob = new Blob([file]);
+        var url = URL.createObjectURL(blob);
+
+        $($this).attr({ 'download': fileName, 'href': url });
+    }
+
+    function onRecSupplierClick($obj) {
+        $.progressbox.show("Lookup Recipient Supplier", "Retrieve Data..");
+        $("#btnget-close").data("prevvalue", $("#ddlrecSupplier").val());
+
+        if ($("#detail-item ul").hasClass("loaded"))
+        {
+            showModal($obj, "modalRecipient");
+            $.progressbox.hide();
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "@WallAnnouncementController._LookupRecipientSupplier",
+                data: {},
+                success: function (resultMessage) {
+                    var html = "";
+                    if (resultMessage.ResultType != 'S') {
+                        $.messagebox.show(
+                                "Error Retrieve Data",
+                                resultMessage.Content,
+                                "ERR",
+                                "SINGLE",
+                                "",
+                                ""
+                            )
+                    }
+                    else {
+                        showModal($obj, "modalRecipient");
+
+                        $.each(resultMessage.Content, function (key, value) {
+                            $user = value;
+
+                            html = html + '<li> ' +
+                                            '<div class="item" style="width:100%;">' +
+                                                '<div class="item-checkbox">' +
+                                                    '<input name="select-one" id="select-one" class="chk-Recipient-Supplier unchecked" type="checkbox" data-text ="' + getUsername($user.Name) + '" data-value ="' + $user.Value + '"  />' +
+                                                '</div>' +
+                                                '<div class="item-label">' +
+                                                    '<label class="label-left name">' + $user.Name + '</label>' +
+                                                '</div>' +
+                                            '</div>' +
+                                        '</li>';
+                        });
+
+                        $("#detail-item ul").empty().append(html);
+                        $("#txtTotalData").html("Total : (" + resultMessage.Content.length + " Items)");
+                        $("#detail-item ul").addClass("loaded");
+
+                        var options = {
+                            valueNames: ['name']
+                        };
+                        var userList = new List('modalRecipientDiv', options);
+
+                        $.progressbox.hide();
+                    }
+                },
+                error: function (resultMessage) {
+                    $.messagebox.show(
+                        "Upload Attachment",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+
+                    $.progressbox.hide();
+                }
+            });
+        }
+
+    }
+
+    function getUsername($value) {
+        var matches = $value.match(/\[(.*?)\]/);
+
+        if (matches) {
+            return matches[1];
+        }
+
+        return $value;
+    }
+
+    function showModal($obj, $modalId)
+    {
+        $objCombo = $($obj);
+        $comboPosition = $objCombo.offset();
+        $text = $("#" + $objCombo.data("textid"));
+
+        var $modal = $("#" + $modalId);
+        var $modal_child = $modal.children();
+        $modal_child.css({ 'left': $comboPosition.left - ($text.width() - 7), 'top': $comboPosition.top - 9 });
+        $modal.modal('show');
+    }
+
+    function onRecNonSupplierClick($obj) {
+        $.progressbox.show("Lookup Recipient Non Supplier", "Retrieve Data..");
+        $("#btnget-closeNS").data("prevvalue", $("#ddlrecNonSupplier").val());
+
+        if ($("#detail-itemNS ul").hasClass("loaded")) {
+            showModal($obj, "modalRecipientNS");
+            $.progressbox.hide();
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "@WallAnnouncementController._LookupRecipientNonSupplier",
+                data: {},
+                success: function (resultMessage) {
+                    var html = "";
+                    if (resultMessage.ResultType != 'S') {
+                        $.messagebox.show(
+                                "Error Retrieve Data",
+                                resultMessage.Content,
+                                "ERR",
+                                "SINGLE",
+                                "",
+                                ""
+                            )
+                    }
+                    else {
+                        showModal($obj, "modalRecipientNS");
+
+                        $.each(resultMessage.Content, function (key, value) {
+                            $user = value;
+
+                            html = html + '<li> ' +
+                                            '<div class="item" style="width:100%;">' +
+                                                '<div class="item-checkbox">' +
+                                                    '<input name="select-oneNS" id="select-oneNS" class="chk-Recipient-Non-Supplier unchecked" type="checkbox" data-text ="' + getUsername($user.Name) + '" data-value ="' + $user.Value + '" />' +
+                                                '</div>' +
+                                                '<div class="item-label">' +
+                                                    '<label class="label-left name">' + $user.Name + '</label>' +
+                                                '</div>' +
+                                            '</div>' +
+                                        '</li>';
+                        });
+
+                        $("#detail-itemNS ul").empty().append(html);
+                        $("#txtTotalDataNS").html("Total : (" + resultMessage.Content.length + " Items)");
+                        $("#detail-itemNS ul").addClass("loaded");
+                        $.progressbox.hide();
+
+                        var options = {
+                            valueNames: ['name']
+                        };
+                        var userListNS = new List('modalRecipientDivNS', options);
+                    }
+                },
+                error: function (resultMessage) {
+                    $.messagebox.show(
+                        "Upload Attachment",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+
+                    $.progressbox.hide();
+                }
+            });
+        }
+    }
+</script>

@@ -1,0 +1,1 @@
+﻿EXEC [sp_PRApproval_CountDetailList] @DOC_NO, @DOC_TYPE, @REG_NO, @USER_TYPE

@@ -1,0 +1,592 @@
+﻿@using GPS.Core.ViewModel
+@using GPS.Models
+@using GPS.Models.Common
+@using GPS.CommonFunc
+@using GPS.Controllers.Master
+@using GPS.Models.Master
+@model GPS.Models.Master.ExchangeRate
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Paging pg = (Paging)ViewData["Paging"];
+
+    List<ExchangeRate> _ReleasedFlag = (List<ExchangeRate>)ViewData["ReleasedFlag"];
+}
+
+@section HeadScript{
+    <script type="text/javascript" src="@Url.Content("~/Content/js/custom-tdk.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/js/jquery.filedownload.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/lib/jquery.inputmask.bundle.min.js")"></script>
+
+     <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+
+    <!-- NOTE: moment.js is referenced by daterangepicker -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/tdk.util.js")"></script>
+    <style>
+        .table > thead > tr > th
+        {
+            vertical-align : middle;
+        }
+        ._criteria
+        {
+            display: none;
+        }
+        .initial-hide
+        {
+            display: none;
+        }
+
+        .datepicker {
+            z-index: 9999999 !important;
+        }
+    </style>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#txtedit-validdate").todaterangepicker();
+    });
+</script>
+
+<div class="alert alert-danger" role="alert" style="display:none" id="alert-search"></div>
+<div class="alert alert-success" role="alert" style="display:none" id="success-search"></div>
+<div class="alert alert-warning" role="alert" style="display:none" id="warning-search"></div>
+
+<form role="form" class="form-horizontal" id="searchForm" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="form-group form-group-xs">
+                <label for="ddlCurrencyCode" class="col-sm-3 control-label text-muted">Currency</label>
+                <div class="col-sm-9">
+                    @Html.DropDownListFor(m => m.CURR_CD, CurrencyController.CurrencySelectList, new {id = "ddlCurrencyCode", @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                 <label for="dtValidDateFrom" class="col-sm-3 control-label text-muted">Valid Date</label>
+                <div class="col-sm-9">
+                    <input type="text" id="txtedit-validdate" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-4">
+            <div class="form-group form-group-xs">
+                <label for="txtExchangeRate" class="col-sm-4 control-label text-muted">Exchange Rate</label>
+                <div class="col-sm-8">
+                    <input type="text" id="txtExchangeRate" class="form-control"/>
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="txtForexType" class="col-sm-4 control-label text-muted">Forex Type</label>
+                <div class="col-sm-8">
+                    <input type="text" id="txtForexType" class="form-control"/>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-4">
+            <div class="form-group form-group-xs">
+                <label for="ddlReleasedFlag" class="col-sm-4 control-label text-muted">Released Flag</label>
+                <div class="col-sm-8">
+                    <select id="ddlReleasedFlag" class="form-control">
+                        <option value=""></option>
+                        @foreach (ExchangeRate item in _ReleasedFlag)
+                        {
+                            <option value="@item.RELEASED_FLAG">@if (item.RELEASED_FLAG == "1") { <p>Yes</p> } else { <p>No</p> }</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-xs-6" style="margin-top: 5px;"></div>
+        <div class="col-xs-6 text-right">
+            <div class="form-group-xs">
+                <button type="button" class="btn  btn-xs  btn-primary btn-standard text-right btn-std btndisable" onclick="onGetData(1, true)">Search</button>
+                <button type="button" class="btn  btn-xs  btn-default btn-standard text-right btn-std btndisable" onclick="onClear()"> Clear</button>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="v-space"></div>
+<div class="line-br"></div>
+<div class="row">
+    <div class="col-xs-12 col-sm-6 text-left">
+        <div class="form-group form-group-xs" >
+            <button type="button" id="btnNew" class="btn btn-xs btn-primary btn-standard bnt-std btndisable hidden" onclick="showPopup()">Add</button>
+            <button type="button" id="del" class="btn btn-danger btn-xs btn-std btndisable hidden" onclick="onDeleteData()">Delete</button>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 text-right">
+        <div class="form-group form-group-xs" >
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("ExchangeRate", "lnk-download"))
+            {
+                <a href="javascript:OnDownloadTemplate()" id="lnk-download"><span style="font-family: Open Sans; font-size: 12px">Download Template</span></a>
+            }
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("ExchangeRate", "btn-upload"))
+            {
+                <input type="file" id="upfile" name="upfile" style="display: none" />  
+                <button id="btn-upload" class="btn btn-warning btn-xs btn-std btndisable" onclick="$('input[id=upfile]').click();">
+                    <span style="font-family: Open Sans; font-size: 12px">Upload</span>
+                </button>
+            }
+          
+                <button id="btn-download"  class="btn btn-success btn-xs btn-std btndisable" onclick="onDownloadReport()">
+                    <span style="font-family: Open Sans; font-size: 12px">Download</span>
+                </button>
+          
+        </div>
+    </div>
+</div>
+<div id="divtable">
+    @Html.Partial("_ViewTable")
+</div>
+
+@Html.Partial("_PopUpExchangeRate")
+
+@section BodyScript{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("._datePicker").inputmask("dd.mm.yyyy", {
+
+            });
+
+            ToDatePicker($("#dtMValidDateFrom"));
+
+            $('#txtMCurrCode').inputmask('AAA');
+
+            $("#txtExchangeRate").inputmask("decimal", { radixPoint: ".", autoGroup: true, groupSize: 3 });
+
+            ToDatePicker($("#dtValidDateFrom"), $("#dtValidDateTo"));
+
+            $(".btn-delete").click(function () {
+                $("#delete-confirm").modal();
+            });
+
+            //toggle detail
+            var showDetail = 0;
+            $("#btnToggleDetail2").click(function () {
+                if (showDetail > 0) {
+                    $("#btnToggleDetail2").html('Show Detail');
+                    $(".initial-hide").hide();
+                    //$("#displaytable").width(1277);
+                    showDetail = 0;
+                }//detail show
+                else {
+                    $("#btnToggleDetail2").html('Hide Detail');
+                    $(".initial-hide").show();
+                    //$("#displaytable").width(3200);
+                    showDetail = 1;
+                }
+            });
+
+            ViewData.Add("IsValidOnly", true);
+        });
+
+        function GetInquiryFeatureSelectors() {
+            return [
+                "#ddlCurrencyCode",
+                "#txtedit-validdate",
+                "#txtExchangeRate",
+                "#txtForexType",
+                "#ddlReleasedFlag"
+            ];
+        }
+
+        function GetCreationFeatureSelectors() {
+            return [
+                "#txtMCurrCode",
+                "#txtMExchangeRate",
+                "#dtMValidDateFrom",
+                "#dtMValidDateTo"
+            ];
+        }
+
+        function DisableAllFeatures() {
+            $.Disable(GetInquiryFeatureSelectors());
+            $.Disable(GetCreationFeatureSelectors());
+        }
+
+        function EnableAllFeatures() {
+            $.Enable(GetInquiryFeatureSelectors());
+            $.Enable(GetCreationFeatureSelectors());
+        }
+
+        function OnAjaxBegin(title) {
+            $.progressbox.show($tdk.PageTitle, title);
+            DisableAllFeatures();
+        }
+
+        function OnAjaxComplete() {
+            EnableAllFeatures();
+            $.progressbox.hide();
+        }
+
+        function OnAjaxError(data) {
+            var result = $.ValidateASPError(data.responseText);
+            $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+        }
+
+        function onClear() {
+            //$.progressShow("Clear Data", "Clearing...");
+            $("#ddlCurrencyCode").val(''),
+            $("#txtedit-validdate").val(''),
+            $("#txtExchangeRate").val(''),
+            $("#txtForexType").val(''),
+            $("#ddlReleasedFlag").val('')
+            onGetData(1, true);
+            //$.progressHide();
+        }
+
+//         //for delete
+//        function onDelete(){
+//             DeleteExchangeRate();
+//         }
+
+        //getvalidate
+        function GetValidDate(date)
+        {
+            if(date !=""){
+                date = date.split('.');
+                var date = date[2] + '-' + date[1] + '-' + date[0];
+            }
+            return date;
+        }
+
+        //get Data
+        function onGetData(page, isValidOnly) {
+            OnAjaxBegin("Exhange Rate Master", "Loading...");
+            var validdate = $("#txtedit-validdate").parsedaterange();
+            if (isValidOnly === undefined) isValidOnly = ViewData.Get("IsValidOnly");
+            ViewData.Add("IsValidOnly", isValidOnly);
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("onGetData")",
+                data: {
+                    Display: $("#cbodisplay").val(),
+                    Page: page,
+                    curr_cd: $("#ddlCurrencyCode").val(),
+                    exchange_rate: $("#txtExchangeRate").val(),
+                    valid_dt_from: GetValidDate(validdate.From),
+                    valid_dt_to: GetValidDate(validdate.To),
+                    forex_type: $("#txtForexType").val(),
+                    released_flag: $("#ddlReleasedFlag").val(),
+                    isValidOnly: isValidOnly
+                },
+                success: function (data) {
+                    $("#divtable").html(data);
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        }
+
+        // Show Popup
+        function showPopup(){
+            //$.progressShow("Exchange Rate Master", "Loading...");
+            $("#txtId").val("1");
+            $("#txtMCurrCode").val("");
+            $("#txtMExchangeRate").val("");
+            $("#txtMExchangeRate").inputmask("decimal", { radixPoint: ".", autoGroup: true, groupSize: 3 });
+            $("#dtMValidDateFrom").val("");
+
+            $("#ExchangeRateModal").modal();
+            //$.progressHide();
+        }
+
+        //CheckedAll
+        function onCekAll()
+        {
+            if ($("#checkall").is(":checked")) {
+                $(".grid-checkbox-body").prop('checked', true);
+            } else {
+                $(".grid-checkbox-body").prop('checked', false);
+            }
+        }
+
+//        //get parameter for detail delete
+//        function GetExchangeRate(){
+//            var ids=[];
+//            $("input[id^=cb-]").each(function(i, a){
+//                if (a.id!=null && a.id.length > 0 && a.checked) {
+//                    ids.push($('#'+a.id).data('currcode') + "|" + $('#'+a.id).data('validfrom'));
+//                }
+//        }
+//        );
+//        var h = ids.length;
+//        var w = ids.join();
+//        // alert(h  + ids.join());
+//        return [h,w];
+//        }
+
+        function GetSelectedGrid() {
+            var ids = [];
+            $("input[id^=cb-]").each(function (i, a) {
+                if (a.id != null && a.id.length > 0 && a.checked) {
+                    ids.push({
+                        currcode: $('#' + a.id).data('currcode'),
+                        validfrom: $('#' + a.id).data('validfrom'),
+                        validto: $('#' + a.id).data('validto')
+                    });
+                }
+            });
+
+            return ids;
+        }
+
+        //onSaveChange new data
+        function onSaveChange(){
+            //$.progressShow("Exchange Rate Master", "Loading...");
+            var date = GetValidDate($("#dtMValidDateFrom").val());
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
+                data: {
+                    Number: $("#txtId").val(),
+                    CURR_CD : $("#txtMCurrCode").val(),
+                    EXCHANGE_RATE : $("#txtMExchangeRate").val(),
+                    VALID_DT_FROM : date,
+                },
+                success: function(data){
+                    //$.progressHide();
+                    if(data.split('|')[0] == "Error") {
+                        $.messagebox.show(
+                            "Error",
+                            data.split('|')[1],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                    else {
+                        $.messagebox.show(
+                            "Success",
+                            data,
+                            "SUC",
+                            "SINGLE",
+                            "onOKSave()",
+                            ""
+                        )
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError,data){
+                    $.messagebox.show(
+                        "Error",
+                        "Save data failed!",
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    //$.progressHide();
+                }
+            });
+        }
+
+        function onOKSave()
+        {
+            window.location.href="/ExchangeRate";
+        }
+
+          //Delete Exchaneg Rate
+        function onDeleteData()
+        {
+             if ($(".grid-checkbox-body:checked").length == 0) {
+                    $.messagebox.show(
+                        "Warning",
+                        "Please Select at Least One Record to be deleted",
+                        "WRN",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    return;
+                }
+                else if ($(".grid-checkbox-body:checked").length > 1) {
+                    $.messagebox.show(
+                        "Warning",
+                        "Please Select Only One Record to be deleted",
+                        "WRN",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    return;
+                }
+                else
+                   $.messagebox.show(
+                        "Confirmation",
+                        "Are You Sure You Want to Delete this Item ?",
+                        "INF",
+                        "CONFIRM",
+                        "onYesDelete()",
+                        ""
+                    )
+            }
+
+        function onYesDelete() {
+            var selectedData = GetSelectedGrid();
+            var keyArray = [];
+            for (var i = 0; i < selectedData.length; i++) {
+                keyArray.push(selectedData[i].currcode + ";" + GetValidDate(selectedData[i].validfrom) + ";" + GetValidDate(selectedData[i].validto));
+            }
+            var selectedKey = keyArray.join(",");
+
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("DeleteExchangeRate")",
+                data: {
+                    Key: selectedKey
+                },
+                success: function(data){
+                    if(data.split('|')[0] == "Error"){
+                        $.messagebox.show(
+                            "Error",
+                            data.split('|')[1],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                    else {
+                        window.location.href="/ExchangeRate";
+
+                        $.messagebox.show(
+                            "Success",
+                            data,
+                            "SUC",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                },
+                error:function(x, t, e){
+                    alert(x.responseText);
+                    window.location.href="/ExchangeRate";
+                }
+            });
+        }
+
+        function OnDownloadTemplate() {     
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("CekTemplate")",        
+                success: function (data) {
+                    if(data == 'False'){
+                        $.messagebox.show(
+                           "Error",
+                           "Template Not Found",
+                           "ERR",
+                           "SINGLE",
+                           "",
+                           ""
+                       )
+                    }
+                    else{
+                        $.fileDownload("ExchangeRate/DownloadTemplate/"); 
+                    }
+            
+                }        
+            });
+        }
+
+        //download Report by search criteria
+        function onDownloadReport()
+        {
+            //$.progressShow("Exchange Rate Master", "Downloading...");
+            var validdate = $("#txtedit-validdate").parsedaterange();
+            $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadReport")", {
+                data: {
+                    Display: $("#cbodisplay").val(),
+                    Page : @pg.PositionPage,
+                    curr_cd : $("#ddlCurrencyCode").val(),
+                    valid_dt_from : GetValidDate(validdate.From),
+                    valid_dt_to : GetValidDate(validdate.To),
+                    exchange_rate : $("#txtExchangeRate").val(),
+                    forex_type : $("#txtForexType").val(),
+                    released_flag : $("#ddlReleasedFlag").val(),
+                    isValidOnly: ViewData.Get("IsValidOnly")
+                }
+            })
+            //$.progressHide();
+        }
+
+        function GetExchangeRate(){
+            var ids=[];
+            $("input[id^=cb-]").each(function(i, a){
+                if (a.id!=null && a.id.length > 0 && a.checked) {
+                    ids.push($('#'+a.id).data('er') + "|" + $('#'+a.id).data('rf'));
+                }
+            });
+            var h = ids.length;
+            var w = ids.join();
+
+            return [h,w];
+        }
+
+        function CheckedAll()
+        {
+            if ($("input[id='checkall']:checked").val() != undefined)
+            {
+                for(var i=1; i<= @pg.CountData; i++)
+                {
+                    $('#cb-'+i+'').prop('checked', true);
+                }
+            }
+            else
+            {
+                for(var j=1; j<=@pg.CountData; j++)
+                {
+                    $('#cb-'+j+'').prop('checked', false);
+                }
+            }
+        }
+
+        //update Exchange Rate
+        function UpdateExchangeRate()
+        {
+            //var date = GetValidDate($("#dtValidfrom").val());
+            var exchangerate = GetExchangeRate();
+            var count = exchangerate[Object.getOwnPropertyNames(exchangerate)[0]];
+            var value = exchangerate[Object.getOwnPropertyNames(exchangerate)[1]];
+
+            if (count == 0){
+                $("#alert-search").css("display", "inherit");
+                $("#alert-search").html("Please select <strong> one record </strong> to be <strong> edited! </strong> ");
+                return;
+            }
+            if (count > 1){
+                 $("#alert-search").css("display", "inherit");
+                 $("#alert-search").html("Please select <strong> one record </strong> only");
+                return;
+            }
+
+           // $.progressShow("Exchange Rate Master", "Loading...");
+            $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+            data: {
+                curr_cd : value
+            },
+            success: function(data){
+
+                $("#txtMCurrCode").val(data.CURR_CD);
+                $("#txtMExchangeRate").val(data.EXCHANGE_RATE);
+                $("#dtMValidDateFrom").val(data.VALID_DT_FROM);
+
+                $("#ExchangeRateModal").modal();
+                //$.progressHide();
+                }
+            });
+        }
+
+    </script>
+}

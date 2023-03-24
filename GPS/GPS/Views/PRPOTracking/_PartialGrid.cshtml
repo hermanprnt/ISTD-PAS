@@ -1,0 +1,188 @@
+﻿@using GPS.Constants
+@using GPS.Models.Common
+@{
+    Tuple<List<PRPOTrackingList>, int, string> GridData = ViewData["GridData"] != null ?
+                            (Tuple<List<PRPOTrackingList>, int, string>)ViewData["GridData"] :
+                            new Tuple<List<PRPOTrackingList>, int, string>(new List<PRPOTrackingList>(), 0, "");
+                            
+    string errormessage = ViewData["Message"] != null ? ViewData["Message"].ToString() : String.Empty;
+}
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <div style="border: 1pt solid #ccc;">
+        <div id="tScrollHead" style="width: 98.65%; overflow: hidden;">
+            <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 3355px; max-width: 3355px;">
+                <thead>
+                    <tr>
+                        <th style="width:20px" rowspan="3"></th>
+                        <th style="width:20px" rowspan="3"></th>
+                        <th style="width:90px" rowspan="3">Reference No</th>
+                        <th style="width:90px" rowspan="3">Document No</th>
+                        <th style="width:200px" rowspan="3">Description</th>
+                        <th style="width:75px" rowspan="3">Doc Date</th>
+                        <th style="width:110px" rowspan="3">Status</th>
+                        <th colspan="8">Organization</th>
+                        <th colspan="8">Coordinator</th>
+                        <th colspan="4">Finance</th>
+                    </tr>
+                    <tr>
+                        <th colspan="2">Registered</th>
+                        <th colspan="2">SH</th>
+                        <th colspan="2">DpH</th>
+                        <th colspan="2">DH</th>
+                        <th colspan="2">Staff</th>
+                        <th colspan="2">SH</th>
+                        <th colspan="2">DpH</th>
+                        <th colspan="2">DH</th>
+                        <th colspan="2">Staff</th>
+                        <th colspan="2">SH</th>
+                    </tr>
+                    <tr>
+                        <th style="width:200px">By</th>
+                        <th style="width:75px">Date</th>
+                        <th style="width:200px">By</th>
+                        <th style="width:75px">Date</th>
+                        <th style="width:200px">By</th>
+                        <th style="width:75px">Date</th>
+                        <th style="width:200px">By</th>
+                        <th style="width:75px">Date</th>
+                        <th style="width:200px">By</th>
+                        <th style="width:75px">Date</th>
+                        <th style="width:200px">By</th>
+                        <th style="width:75px">Date</th>
+                        <th style="width:200px">By</th>
+                        <th style="width:75px">Date</th>
+                        <th style="width:200px">By</th>
+                        <th style="width:75px">Date</th>
+                        <th style="width:200px">By</th>
+                        <th style="width:75px">Date</th>
+                        <th style="width:200px">By</th>
+                        <th style="width:75px">Date</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div id="tScrollBody" style="overflow: scroll; height: 320px;">
+            <table id="tblScroll" class="table table-striped table-bordered table-condensed table-fixed" style="width: 3355px; max-width: 3355px;">
+                <tbody>
+                @if ((GridData.Item1.Count() > 0) && (GridData.Item1 != null) && (errormessage == ""))
+                    {
+                        foreach (PRPOTrackingList item in GridData.Item1)
+                        {
+                            <tr class="lvl1grid-@item.DOC_NO-@item.DOC_TYPE">
+                            <td class="text-center" style="width:20px">
+                                <div id="doc-@item.DOC_NO-@item.DOC_TYPE" onclick="javascript:CollapseHeader('@item.DOC_NO', '@item.DOC_TYPE')">
+                                    <span class="fa fa-plus-square-o" style="cursor: pointer;"></span>
+                                </div>
+                            </td>
+                            <td class="text-center" style="width:20px"></td>
+                            <td class="text-center" style="width:90px">@item.REFERENCE_DOC_NO</td>
+                            <td class="text-center" style="width:90px">@item.DOC_NO</td>
+                            <td class="text-left" style="width:200px">@item.DOC_DESC</td>
+                            <td class="text-center" style="width:75px">@item.DOC_DATE</td>
+                            <td class="text-left" style="width:110px">@item.DOC_STATUS</td>
+                            <td class="text-left" style="width:200px">@item.REGISTERED_BY</td>
+                            <td class="text-center" style="width:75px">@item.REGISTERED_DT</td>
+                            <td class="text-left" style="width:200px">@item.ORG_SH_BY</td>
+                            <td class="text-center" style="width:75px">@item.ORG_SH_DT</td>
+                            <td class="text-left" style="width:200px">@item.ORG_DPH_BY</td>
+                            <td class="text-center" style="width:75px">@item.ORG_DPH_DT</td>
+                            <td class="text-left" style="width:200px">@item.ORG_DH_BY</td>
+                            <td class="text-center" style="width:75px">@item.ORG_DH_DT</td>
+                            <td class="text-left" style="width:200px">@item.COOR_STAFF_BY</td>
+                            <td class="text-center" style="width:75px">@item.COOR_STAFF_DT</td>
+                            <td class="text-left" style="width:200px">@item.COOR_SH_BY</td>
+                            <td class="text-center" style="width:75px">@item.COOR_SH_DT</td>
+                            <td class="text-left" style="width:200px">@item.COOR_DPH_BY</td>
+                            <td class="text-center" style="width:75px">@item.COOR_DPH_DT</td>
+                            <td class="text-left" style="width:200px">@item.COOR_DH_BY</td>
+                            <td class="text-center" style="width:75px">@item.COOR_DH_DT</td>
+                            <td class="text-left" style="width:200px">@item.FD_STAFF_BY</td>
+                            <td class="text-center" style="width:75px">@item.FD_STAFF_DT</td>
+                            <td class="text-left" style="width:200px">@item.FD_SH_BY</td>
+                            <td class="text-center" style="width:75px">@item.FD_SH_DT</td>
+                        </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="27" style="text-align:center">@CommonDisplayMessage.NoData</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                <tfoot>
+                    <tr>
+                        <td colspan="13">
+                            <div class="col-xs-8" style="margin-bottom: 20px;">
+                                @Html.Partial("_UIPaging")
+                            </div>
+                            <div class="col-xs-8 col-sm-4">
+                                @if ((GridData.Item1.Count() > 0) && (GridData.Item1 != null) && (errormessage == ""))
+                                {
+                                    <div id="prc-pagesize" class="form-inline text-right">
+                                        <label>
+                                            Page Size
+                                            <select class="cursor-1 page" onchange="javascript: Search(1)" style="height:25px;">
+                                                <option>10</option>
+                                                <option>25</option>
+                                                <option>50</option>
+                                                <option>100</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+    
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var errormessage = "@errormessage";
+        var page = Number("@GridData.Item2");
+        var warningmessage = "@GridData.Item3";
+
+        if ((errormessage !== "") && ((page === 1) || (page === 0)) && (messagelife !== 0)) {
+            $.messagebox.show(
+                "Search PR",
+                errormessage,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+            messagelife--;
+        }
+
+        if ((warningmessage !== "") && ((page === 1) || (page === 0)) && (messagelife !== 0)) {
+            $.messagebox.show(
+                "Search Document",
+                warningmessage,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+            messagelife--;
+        }
+    })
+
+
+    $("#tScrollBody").scroll(function () {
+        $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+    });
+    
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip({ placement: 'right' });
+    });
+</script>

@@ -1,0 +1,108 @@
+﻿@using System.Web.Mvc.Html
+@using GPS.Constants
+@using GPS.Constants.PO
+@using GPS.Controllers.PO
+@using GPS.Models.Common
+@using GPS.ViewModels.PO
+@model CreationVendorLookupViewModel
+
+<div class="modal-dialog modal-xs">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>@Model.Title - Lookup</div>
+        </div>
+        <div class="modal-body lookup">
+            <div class="row">
+                <div class="col-xs-12">
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a id="tab-vendorlookup-registered" data-toggle="tab" href="#tabcontent-vendorlookup-registered">Registered Vendor</a>
+                        </li>
+                        <li>
+                            <a id="tab-vendorlookup-onetime" data-toggle="tab" href="#tabcontent-vendorlookup-onetime">One-Time Vendor</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="tabcontent-vendorlookup-registered" class="tab-pane fade active in">
+                            <div class="input-group">
+                                <input id="txtfilter-@Model.GridPaging.DataName" class="form-control" type="text" placeholder="Filter item"/>
+                                <div class="input-group-btn">
+                                    <button id="btnfilter-@Model.GridPaging.DataName" class="btn btn-primary btn-xs">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                    <button id="btnclearfilter-@Model.GridPaging.DataName" class="btn btn-default btn-xs">
+                                        <i class="fa fa-eraser"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="v-space"></div>
+                            <div id="datagrid-@Model.GridPaging.DataName" style="overflow: hidden;">
+                                @Html.Partial(POCreationController.Partial.VendorLookupGrid, Model)
+                            </div>
+                        </div>
+                        <div id="tabcontent-vendorlookup-onetime" class="form-horizontal tab-pane fade">
+                            <div class="form-group form-group-xs">
+                                <label for="txtotv-@Model.GridPaging.DataName-code" class="col-xs-3 col-sm-2 control-label text-muted">Code</label>
+                                <div class="col-xs-9 col-sm-10">
+                                    <input type="text" class="form-control" id="txtotv-@Model.GridPaging.DataName-code" value="@Model.OneTimeVendor.Value" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group form-group-xs">
+                                <label for="txtotv-@Model.GridPaging.DataName-name" class="col-xs-3 col-sm-2 control-label text-muted">Name</label>
+                                <div class="col-xs-9 col-sm-10">
+                                    <input type="text" class="form-control mandatory" id="txtotv-@Model.GridPaging.DataName-name" value="One-Time Vendor" />
+                                </div>
+                            </div>
+                            <div class="form-group form-group-xs">
+                                <label for="txtotv-@Model.GridPaging.DataName-address" class="col-xs-3 col-sm-2 control-label text-muted">Address</label>
+                                <div class="col-xs-9 col-sm-10">
+                                    <input type="text" class="form-control" id="txtotv-@Model.GridPaging.DataName-address"/>
+                                </div>
+                            </div>
+                            <div class="form-group form-group-xs">
+                                <label for="cmbotv-@Model.GridPaging.DataName-country" class="col-xs-3 col-sm-2 control-label text-muted">Country</label>
+                                <div class="col-xs-9 col-sm-10">
+                                    @Html.DropDownList("cmbotv-" + Model.GridPaging.DataName + "-country", POCreationController.CountrySelectList, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="form-group form-group-xs">
+                                <label for="txtotv-@Model.GridPaging.DataName-city" class="col-xs-3 col-sm-2 control-label text-muted">City</label>
+                                <div class="col-xs-9 col-sm-10">
+                                    <input type="text" class="form-control" id="txtotv-@Model.GridPaging.DataName-city" />
+                                </div>
+                            </div>
+                            <div class="form-group form-group-xs">
+                                <label for="txtotv-@Model.GridPaging.DataName-postalcode" class="col-xs-3 col-sm-2 control-label text-muted">Postal Code</label>
+                                <div class="col-xs-9 col-sm-10">
+                                    <input type="text" class="form-control" id="txtotv-@Model.GridPaging.DataName-postalcode" />
+                                </div>
+                            </div>
+                            <div class="form-group form-group-xs">
+                                <label for="txtotv-@Model.GridPaging.DataName-phone" class="col-xs-3 col-sm-2 control-label text-muted">Phone</label>
+                                <div class="col-xs-9 col-sm-10">
+                                    <input type="text" class="form-control" id="txtotv-@Model.GridPaging.DataName-phone" />
+                                </div>
+                            </div>
+                            <div class="form-group form-group-xs">
+                                <label for="txtotv-@Model.GridPaging.DataName-fax" class="col-xs-3 col-sm-2 control-label text-muted">Fax</label>
+                                <div class="col-xs-9 col-sm-10">
+                                    <input type="text" class="form-control" id="txtotv-@Model.GridPaging.DataName-fax" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="row">
+                <div class="col-xs-12 text-right">
+                    <div class="col-xs-12 text-right">
+                    <button type="button" class="btn btn-primary btn-xs btn-action" data-role="select-lookup">OK</button>
+                    <button type="button" class="btn btn-danger btn-xs btn-action" data-role="dismiss-lookup">Cancel</button>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

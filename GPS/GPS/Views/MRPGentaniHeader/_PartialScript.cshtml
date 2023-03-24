@@ -1,0 +1,630 @@
+﻿@using Toyota.Common.Credential
+@{
+   User user = Html.Toyota().Page.User;
+}
+<script type="text/javascript"> 
+$(document).ready(function () {   
+    onClear();     
+        
+    $('.date-picker').datepicker({
+        autoclose: true,
+        todayHighlight: true
+    })
+    //show datepicker when clicking on the icon
+	.next().on(ace.click_event, function () {
+		$(this).prev().focus();
+	});            
+}); 
+
+$.fn.addOption = function (optText, optValue) {
+    var option = new Option(optText, optValue);
+    return this.append(option);
+};
+function toggleSearch() {
+        $("._criteria").toggle(200, "linear");
+        //toogle('moreinquiry', 'Search Criteria');
+        if ($("#toogle-search").hasClass("fa-angle-double-up")) {
+            $("#toogle-search").removeClass("fa-angle-double-up");
+            $("#toogle-search").addClass("fa-angle-double-down");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            $("#tScrollBody").height(355);
+            $("#toogle-search").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-search").removeClass("fa-angle-double-down");
+            $("#toogle-search").addClass("fa-angle-double-up");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            $("#tScrollBody").height(280);
+            $("#toogle-search").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+function onGetData(page) {     
+    var procusage = $("#txtProcUsage").val();
+    if(procusage == '') procusage = 'x';    
+        $.progressbox.show("Waiting Process", "Loading Data...");
+    $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val() ,
+                Page:page,  
+                USER_NAME :  '@user.Name',              
+                ProcUsage : procusage,
+                HeaderType : $("#txtHdrType").val(),
+			    HeaderCd : $("#txtHdrCD").val(),               
+                ValidDt : $("#txtValidDate").val(),
+                Model : $("#txtModel").val(),
+                Transmission: $("#txtTrans").val(),
+                Engine : $("#txtEngine").val(),
+                DE : $("#txtDE").val(),
+                Color : $("#txtColor").val(),
+                ProdSfx : $("#txtProdSfx").val()
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+            }        
+            ,complete:function(){
+                 $.progressbox.hide();
+            }
+        });
+}
+
+/*Checkbox all*/   
+function onCekAll() { 
+    if ($("#checkall").is(":checked")) {
+            $(".grid-checkbox-body").prop('checked', true);
+        } else {
+            $(".grid-checkbox-body").prop('checked', false);
+        }
+}
+
+function GetSelectedGrid() {
+    var ids = [];
+    $("input[id^=cb-]").each(function (i, a) {
+        if (a.id != null && a.id.length > 0 && a.checked) {
+            ids.push($('#' + a.id).data('pc_cd'));
+        }
+    }
+    );
+    var h = ids.length;
+    var w = ids.join();
+    return [h, w];
+}
+
+function onClear() {    
+    $("#txtProcUsage").val('');
+    $("#txtHdrType").val('');
+	$("#txtHdrCD").val('');   
+    $("#txtValidDate").val('');
+    $(".btnDownload").attr('disabled',true);
+      
+    $("input[id^=cb-]").each(function(i,a){
+        a.checked = false;          
+    }); 
+          
+    ClearGrid(1);    
+}
+
+function ClearGrid(page) { 
+ $.progressbox.show("Waiting Process", "Loading Data...");
+    $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val() ,
+                Page:page,  
+                USER_NAME :  '@user.Name',             
+                ProcUsage : '',
+                HeaderType : '',
+			    HeaderCd : '',               
+                ValidDt : ''           
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+            }    ,
+            complete: function()
+            {
+                 $.progressbox.hide();
+            }
+        });
+}
+
+function ProcUsagePU() { 
+    $("#txtProcUsagePU").css("background-color", "#FFFFFF");
+}
+function HdrCDPU() { 
+    $("#txtHdrCDPU").css("background-color", "#FFFFFF");
+}
+function ValidFrom() { 
+    $("#txtValidFrom").css("background-color", "#FFFFFF");
+}
+
+function onSaveData() { 
+   if ($("#txtProcUsagePU").val() == '' && $("#txtHdrTypePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtValidFrom").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");       
+        $("#txtValidFrom").css("background-color", "#F2BCD5");
+        return;
+    }    
+    else if ($("#txtProcUsagePU").val() == '' && $("#txtHdrTypePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '')){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");           
+        return;
+    }
+    else if ($("#txtProcUsagePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtValidFrom").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");           
+        return;
+    }
+    else if ($("#txtHdrTypePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtValidFrom").val() == ''){
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");           
+        return;
+    } 
+   
+    else if ($("#txtProcUsagePU").val() == '' && $("#txtHdrTypePU").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");                      
+        return;
+    }
+    else if ($("#txtProcUsagePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '')){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");                      
+        return;
+    }
+    else if ($("#txtProcUsagePU").val() == '' && $("#txtValidFrom").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");                      
+        return;
+    } 
+    else if ($("#txtHdrTypePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '')){
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");                      
+        return;
+    } 
+    else if ($("#txtHdrTypePU").val() == '' && $("#txtValidFrom").val() == ''){
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");                      
+        return;
+    } 
+    else if (($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtValidFrom").val() == ''){
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");                      
+        return;
+    } 
+    
+    else if ($("#txtProcUsagePU").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");                      
+        return;
+    }
+    else if ($("#txtHdrTypePU").val() == ''){
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");                      
+        return;
+    }
+    else if (($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '')){
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");                      
+        return;
+    }    
+    else if ($("#txtValidFrom").val() == ''){
+        $("#txtValidFrom").css("background-color", "#F2BCD5");                      
+        return;
+    }   
+    
+
+   if($("#txtValidTo").val() <= $("#txtValidFrom").val()) {
+        //$("#confirm-save").modal();
+        //$("#ConfirmModal").html('Valid From must be earlier than Valid To');
+        $.messagebox.show(
+            "Error",
+            "Valid From must be earlier than Valid To",
+            "ERR",
+            "SINGLE",
+            "",
+            ""
+        )   
+   }  
+   else{
+    $.progressbox.show("Waiting Process", "Loading Data...");
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
+            data: {
+                flag : $("#txtEdit").val(), 
+                USER_NAME :  '@user.Name',              
+                PROC_USAGE_CD : $("#txtProcUsagePU").val(),
+                GENTANI_HEADER_TYPE : $("#txtHdrTypePU").val(),
+			    GENTANI_HEADER_CD : $("#txtHdrCDPU").val(),
+                GENTANI_HEADER_CD_hidden : $("#txtHdrCDPU_hidden").val(),                                 
+                VALID_DT_FR : $("#txtValidFrom").val(),
+                VALID_DT_TO : $("#txtValidTo").val(),
+                MODEL :$("#txtModelPU").val(),
+                TRANSMISSION :$("#txtTransPU").val(),
+                ENGINE :$("#txtEnginePU").val(),
+                DE :$("#txtDEPU").val(),
+                PROD_SFX :$("#txtProdSfxPU").val(),
+                COLOR :$("#txtColorPU").val()
+                                               
+            },                
+            success: function (data) { 
+                var result = data.message.split('|');
+                if(result[0] == 'True') {
+                     //$("#info-save").modal();
+                     //$("#infoSave").html(data.message);
+                     $.messagebox.show(
+                        "Info",
+                        result[1],
+                        "SUC",
+                        "SINGLE",
+                        "OkInfoSave()",
+                        ""
+                     )     
+                     onGetData(1);
+                }              
+                else {
+                    //$("#confirm-save").modal();
+                    //$("#ConfirmModal").html(data.message); 
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )                      
+                }                            
+            },
+            complete: function(){
+                 $.progressbox.hide();
+            }
+        });  
+   }    
+}
+
+function OkWarningSave() {
+    $("#confirm-save").modal('hide');
+}
+
+function OkInfoSave() {
+    //$("#info-save").modal('hide');
+    $("#basicModal").modal('hide');
+}
+
+function onAddData() { 
+ $.progressbox.show("Waiting Process", "Loading Data...");
+    $.ajax({
+        type: "post",
+        url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+        data: {
+            flag: '0'                                
+        },                
+        success: function (data) {  
+             $("#basicModal").html(data);
+             $("#myModalLabel").html('<h4>Gentani Header (Add)</h4>');    
+             $("#basicModal").modal();                            
+        },
+        complete: function(){
+             $.progressbox.hide();
+        }
+    });   
+}
+
+function onEditData() {      
+    if ($(".grid-checkbox-body:checked").length == 0){
+        //$("#selected-0-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select at Least One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else if ($(".grid-checkbox-body:checked").length > 1){
+        //$("#selected-more-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select only One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else {
+        var value = GetSelectedGrid();
+        var key = value[Object.getOwnPropertyNames(value)[1]];       
+        var col;
+               
+        var PROCUSAGE = "";
+        var HEADERTYPE = "";
+        var HEADERCODE = "";        
+        var VALIDFOR = "";
+              
+        col = key.split(';');           
+        PROCUSAGE = col[0];        
+        HEADERTYPE = col[1];       
+        HEADERCODE = col[2];      
+        VALIDFOR = col[3];            
+        $.progressbox.show("Waiting Process", "Loading Data...");
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+            data: {
+                flag: '1'                                 
+            },                
+            success: function (data) {                    
+                    $("#basicModal").html(data);   
+                    $("#myModalLabel").html('<h4>Gentani Header (Edit)</h4>');
+                    $("#basicModal").modal(); 
+                    
+                    $.ajax({
+                        type: "post",
+                        url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+                        data: {
+                            ProcUsage : PROCUSAGE,
+                            HeaderType : HEADERTYPE,
+			                HeaderCd : HEADERCODE,                           
+                            ValidDt : VALIDFOR                                
+                        },                
+                        success: function (data) {                      
+                            $("#txtProcUsagePU").val(data.PROC_USAGE_CD);
+                            $("#txtHdrTypePU").val(data.GENTANI_HEADER_TYPE);
+	                        $("#txtHdrCDPU").val(data.GENTANI_HEADER_CD); 
+                            $("#txtHdrCDPU_hidden").val(data.GENTANI_HEADER_CD);                                                                          
+                            $("#txtValidFrom").val(data.VALID_DT_FR);
+                            $("#txtValidTo").val(data.VALID_DT_TO);
+                            $("#txtModelPU").val(data.MODEL);
+                            $("#txtTransPU").val(data.TRANSMISSION);
+                            $("#txtEnginePU").val(data.ENGINE);
+                            $("#txtDEPU").val(data.DE);
+                            $("#txtProdSfxPU").val(data.PROD_SFX);
+                            $("#txtColorPU").val(data.COLOR);                                                  
+                        }
+                    });   
+                    //                          
+            },
+            complete: function(){
+                $.progressbox.hide();
+            }
+        });  
+    }        
+}
+
+function onCopyData() {      
+    if ($(".grid-checkbox-body:checked").length == 0){
+        //$("#selected-0-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select at Least One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else if ($(".grid-checkbox-body:checked").length > 1){
+        //$("#selected-more-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select only One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else {
+        var value = GetSelectedGrid();
+        var key = value[Object.getOwnPropertyNames(value)[1]];       
+        var col;
+                
+        var PROCUSAGE = "";
+        var HEADERTYPE = "";
+        var HEADERCODE = "";       
+        var VALIDFOR = "";
+              
+        col = key.split(';');       
+        PROCUSAGE = col[0];        
+        HEADERTYPE = col[1];       
+        HEADERCODE = col[2];              
+        VALIDFOR = col[3];          
+        $.progressbox.show("Waiting Process", "Loading Data...");
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+            data: {
+                flag: '0'                                
+            },                
+            success: function (data) {                     
+                    $("#basicModal").html(data);   
+                    $("#myModalLabel").html('<h4>Gentani Header (Copy)</h4>');
+                    $("#basicModal").modal(); 
+                    
+                    $.ajax({
+                        type: "post",
+                        url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+                        data: {                            
+                            ProcUsage : PROCUSAGE,
+                            HeaderType : HEADERTYPE,
+			                HeaderCd : HEADERCODE,                            
+                            ValidDt : VALIDFOR                                
+                        },                
+                        success: function (data) {                                                        
+                            $("#txtProcUsagePU").val(data.PROC_USAGE_CD);
+                            $("#txtHdrTypePU").val(data.GENTANI_HEADER_TYPE);
+	                        $("#txtHdrCDPU").val(data.GENTANI_HEADER_CD);                                                  
+                            $("#txtValidFrom").val(data.VALID_DT_FR);
+                            $("#txtValidTo").val(data.VALID_DT_TO);                                                                       
+                        }
+                    });   
+                    //                          
+            },
+            complete: function(){
+                $.progressbox.hide();
+            }
+        });  
+    }        
+}
+
+function onDeleteData() {
+    if ($(".grid-checkbox-body:checked").length == 0)
+        //$("#selected-0-confirm").modal(); 
+        $.messagebox.show(
+            "Warning",
+            "Please Select at Least One Record to be deleted",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )       
+    else 
+        //$("#delete-confirm").modal(); 
+        $.messagebox.show(
+            "Confirmation",
+            "Are You Sure You Want to Delete this Item ?",
+            "INF",
+            "CONFIRM",
+            "onYesDelete()",
+            ""
+        )  
+}
+
+function onYesDelete() {
+    var value = GetSelectedGrid();
+    var key = value[Object.getOwnPropertyNames(value)[1]];
+    var koma;
+    var field;
+    var col;
+        
+    var PROCUSAGE = "";
+    var HEADERTYPE = "";
+    var HEADERCODE = "";   
+    var VALIDFOR = "";
+        
+    for(var i = 0; i < $(".grid-checkbox-body:checked").length; i++)
+    {
+        koma = key.split(',');
+        field = koma[i];
+        col = field.split(';');       
+        PROCUSAGE += col[0];
+        PROCUSAGE += ';';
+        HEADERTYPE += col[1];
+        HEADERTYPE += ';';
+        HEADERCODE += col[2];
+        HEADERCODE += ';';       
+        VALIDFOR += col[3];
+        VALIDFOR += ';';
+    }    
+    PROCUSAGE = PROCUSAGE.substring(0,PROCUSAGE.length - 1);
+    HEADERTYPE = HEADERTYPE.substring(0,HEADERTYPE.length - 1);
+    HEADERCODE = HEADERCODE.substring(0,HEADERCODE.length - 1);   
+    VALIDFOR = VALIDFOR.substring(0,VALIDFOR.length - 1); 
+    $.progressbox.show("Waiting Process", "Loading Data...");
+    $.ajax({
+        type: "POST",
+        url: "@Html.Toyota().Page.GetActionUrl("DeleteData")",
+        data: {  
+            Key : key,                     
+            ProcUsage : PROCUSAGE,
+            HeaderType : HEADERTYPE,
+			HeaderCd : HEADERCODE,           
+            ValidDt : VALIDFOR          
+        },
+        success: function (data) {
+            //$("#selected-info").modal();
+            //$("#infoModal").html(data); 
+            $.messagebox.show(
+                "Info",
+                data,
+                "SUC",
+                "SINGLE",
+                "",
+                ""
+            ) 
+            onGetData(1);
+        },
+        complete: function(){
+            $.progressbox.hide();
+        }        
+     });
+}
+
+function OnDownloadTemplate() {     
+    $.progressbox.show("Waiting Process", "Loading Data...");
+      $.ajax({
+        type: "POST",
+        url: "@Html.Toyota().Page.GetActionUrl("CekTemplate")",        
+        success: function (data) {
+             if(data == 'False'){
+                //$("#selected-info").modal();
+                //$("#infoModal").html('Template not found'); 
+                 $.messagebox.show(
+                    "Error",
+                    "Template Not Found",
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+             }
+             else{
+                 $.fileDownload("MRPGentaniHeader/DownloadTemplate/"); 
+             }
+            
+        },
+        complete: function()
+        {
+            $.progressbox.hide();
+        }        
+     });
+} 
+
+function onDownloadData() {   
+    var procusage = $("#txtProcUsage").val();
+    if(procusage == '') procusage = 'x'; 
+    $.progressbox.show("Waiting Process", "Loading Data...");    
+    $.ajax({
+        type: "POST",
+        url: '@Url.Content("MRPGentaniHeader/ValidateDownloadData/")',
+        data: { 
+                ProcUsage : procusage,
+                HeaderType : $("#txtHdrType").val(),
+			    HeaderCd : $("#txtHdrCD").val(),               
+                ValidDt : $("#txtValidDate").val()                             
+        },
+        success: function (data) {
+            if(data == 0) {
+                 $("#selected-info").modal();
+                 $("#infoModal").html('No data found. Disable for download'); 
+            } 
+            else{
+                var procusages = $("#txtProcUsage").val();
+                if(procusages == '') procusages = 'x'; 
+
+                var param = '?ProcUsage=' + procusage;  
+                param += '&HeaderType=' + $("#txtHdrType").val();
+                param += '&HeaderCd=' + $("#txtHdrCD").val();   
+                param += '&ValidDt=' + $("#txtValidDate").val();   
+
+                var link = '@Url.Content("MRPGentaniHeader/DownloadData/")' + param;        
+                window.location = link;  
+            }                      
+        },
+        complete: function()
+        {
+            $.progressbox.hide();
+        }        
+     });       
+} 
+
+</script>

@@ -1,0 +1,2 @@
+﻿select GENTANI_HEADER_TYPE
+from TB_M_GENTANI_TYPE

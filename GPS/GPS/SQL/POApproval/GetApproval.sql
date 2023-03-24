@@ -1,0 +1,1 @@
+﻿EXEC sp_POApproval_GetApproval @DocNo

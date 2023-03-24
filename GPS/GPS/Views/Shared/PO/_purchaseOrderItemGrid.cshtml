@@ -1,0 +1,406 @@
+﻿@using System.Linq
+@using GPS.CommonFunc
+@using GPS.CommonFunc.WebControl
+@using GPS.Constants
+@using GPS.Constants.PO
+@using GPS.Controllers.Master
+@using GPS.Controllers.PO
+@using GPS.Core.ViewModel
+@using GPS.Models.PO
+@using GPS.ViewModels.PO
+@model PRItemAdoptResultViewModel
+
+<style type="text/css">
+    .CategoryObject {
+        width: 65px !important;
+        text-align: right;
+    }
+
+    .MaterialObject {
+        width: 110px !important;
+    }
+
+    .QtyObject {
+        width: 65px !important;
+        text-align: right;
+    }
+
+    .WBSObject {
+        width: 175px !important;
+    }
+
+    .CostCenterObject {
+        width: 75px !important;
+    }
+
+    .GLAccountObject {
+        width: 80px !important;
+    }
+
+    .button-group-reject {
+        position: relative;
+        top: -10px;
+    }
+</style>
+
+@*<div class="button-group-reject @(Model.IsFromEcatalogue?"":"hidden")">
+        <button id="btn-reject-item" class="btn btn-warning btn-xs">Reject</button>
+    </div>*@
+<div style="overflow: auto;">
+    <table class="table table-striped table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th width="25px"></th>
+                <th width="40px" class="itemedit-col-check hidden">
+                    @*<th width="40px" class="itemedit-col-check @(Model.IsFromEcatalogue?"":"hidden")">*@
+                    <input id="chkall-@Model.GridPaging.DataName" type="checkbox" />
+                </th>
+                <th width="75px" class="not-in-pomanual">PR No</th>
+                <th width="35px" class="not-in-pomanual">Item</th>
+                <th width="40px">Category</th>
+                <th width="65px">Material No</th>
+                <th width="180px">Material Description</th>
+                <th width="50px">Qty</th>
+                <th width="65px">UOM</th>
+                <th width="90px">Price</th>
+                <th width="90px">Amount</th>
+                <th width="125px">WBS</th>
+                <th width="60px">Cost center</th>
+                <th width="50px">GL Account</th>
+                <th width="75px" class="itemedit-col-action hidden">Action</th>
+            </tr>
+            <tr id="rowedit" class="hidden">
+                <td></td>
+                <td class="itemedit-col-check hidden"></td>
+                <td class="not-in-pomanual"><input id="txt-itemedit-prno" type="text" class="form-control" disabled /></td>
+                <td class="not-in-pomanual"><input id="txt-itemedit-pritemno" type="text" class="form-control" disabled /></td>
+                <td>@Html.Lookup("itemedit-category", true, "CategoryObject")</td>
+                <td>@Html.Lookup("itemedit-matno", false, "MaterialObject")</td>
+                <td><input id="txt-itemedit-matdesc" type="text" class="form-control" /></td>
+                <td><input id="txt-itemedit-qty" type="text" class="form-control QtyObject" /></td>
+                <td>@Html.DropDownList("cmb-itemedit-uom", POCreationController.UOMSelectList, new { @class = "form-control" })</td>
+                <td><input id="txt-itemedit-price" type="text" class="form-control" /></td>
+                <td><input id="txt-itemedit-amount" type="text" class="form-control" readonly /></td>
+                <td>@Html.Lookup("itemedit-wbsno", true, "WBSObject")</td>
+		@*<td>@Html.DropDownList("cmb-itemedit-costcenter", POCreationController.GetCostCenterSelectList(Model.CurrentUser.RegistrationNumber), new { @class = "form-control CostCenterObject" })</td>*@
+                <td>@Html.DropDownList("cmb-itemedit-costcenter", POCreationController.GetCostCenterSelectListAll(), new { @class = "form-control CostCenterObject" })</td> @*20190624 : isid.rgl : bind cost center*@
+                <td>@Html.Lookup("itemedit-glaccount", false, "GLAccountObject")</td>
+                <td class="text-center editor-action">
+                    <button id="btn-itemedit-save" class="btn btn-xs btn-primary"><i class="fa fa-save"></i></button>
+                    <button id="btn-itemedit-cancel" class="btn btn-xs btn-danger"><i class="fa fa-remove"></i></button>
+                </td>
+            </tr>
+            <tr id="subrowedit" class="form-group-xs hidden">
+                <td></td>
+                <td class="subitemedit-col-check hidden"></td>
+                <td class="not-in-pomanual"><input id="txt-subitemedit-prno" type="text" class="form-control" readonly /></td>
+                <td class="not-in-pomanual"><input id="txt-subitemedit-pritemno" type="text" class="form-control" readonly /></td>
+                <td><input id="txt-subitemedit-category" type="text" class="form-control" readonly /></td>
+                <td colspan="2"><input id="txt-subitemedit-matdesc" type="text" class="form-control" /></td>
+                <td><input id="txt-subitemedit-qty" class="form-control QtyObject" type="text" /></td>
+                <td>@Html.DropDownList("cmb-subitemedit-uom", POCreationController.UOMSelectList, new { @class = "form-control " })</td>
+                <td><input id="txt-subitemedit-price" type="text" class="form-control" /></td>
+                <td><input id="txt-subitemedit-amount" type="text" class="form-control" readonly /></td>
+                <td>@Html.Lookup("subitemedit-wbsno")</td>
+                <td>
+                    @Html.DropDownList("cmb-subitemedit-costcenter", POCreationController.GetCostCenterSelectListAll(), new { @class = "form-control CostCenterObject " })
+                    <input id="txt-subitemedit-costcenter" type="text" class="form-control hidden" readonly />
+                </td>
+                <td>@Html.Lookup("subitemedit-glaccount")</td>
+                <td style="display:none"></td>
+                <td class="text-center editor-action">
+                    <button id="btn-subitemedit-save" class="btn btn-xs btn-primary"><i class="fa fa-save"></i></button>
+                    <button id="btn-subitemedit-cancel" class="btn btn-xs btn-danger"><i class="fa fa-remove"></i></button>
+                </td>
+            </tr>
+            <tr id="rowedited" class="hidden"></tr>
+        </thead>
+        <tbody>
+            <tr id="rowadded" class="hidden"></tr>
+            <tr id="subrowadded" class="hidden"></tr>
+            @if (Model.DataList.Any())
+            {
+                foreach (PRPOItem item in Model.DataList)
+                {
+                    <tr id="exprow-@(Model.GridPaging.DataName + "-" + item.DataNo)" data-no="@item.DataNo" data-embedded="@item.AsEmbeddedData()">
+                        <td class="text-center">
+                            @if (item.HasItem)
+                            {
+                                <i id="exp-@Model.GridPaging.DataName-@item.DataNo" class="fa fa-plus-square-o" style="cursor: pointer;" data-embedded="@item.AsEmbeddedData()"></i>
+                            }
+                        </td>
+                        <td class="text-center itemedit-col-check hidden">
+                            @*<td class="text-center itemedit-col-check @(Model.IsFromEcatalogue?"":"hidden")">*@
+                            <input id="chk-@Model.GridPaging.DataName-@item.DataNo" type="checkbox" data-embedded="@item.AsEmbeddedData()" />
+                        </td>
+                        <td class="text-center not-in-pomanual">@item.PRNo</td>
+                        <td class="text-right not-in-pomanual">@(String.IsNullOrEmpty(item.POItemNo) ? String.Empty : int.Parse(item.POItemNo).ToString())</td>
+                        <td class="text-center">@item.ValuationClass</td>
+                        <td class="text-left">@item.MatNo</td>
+                        <td>@item.MatDesc</td>
+                        <td class="text-right">@item.Qty.ToStandardFormat()</td>
+                        <td class="text-center">@item.UOM</td>
+                        <td class="text-right">@item.PricePerUOM.ToStandardFormat()</td>
+                        <td class="text-right">@item.PriceAmount.ToStandardFormat()</td>
+                        <td class="text-left">@item.WBSNo</td>
+                        <td class="text-center">@item.CostCenter</td>
+                        <td class="text-center">@item.GLAccount</td>
+                        <td id="txt-currcd-@item.DataNo" style="display:none">@item.Currency</td>
+                        <td class="text-center itemedit-col-action hidden">
+                            @if (!item.IsLocked)
+                            {
+                                <button id="btn-@Model.GridPaging.DataName-copy-@item.DataNo" class="btn btn-xs btn-primary hidden" data-pono="@item.PONo" data-poitemno="@item.POItemNo" data-seqitemno="@item.SeqItemNo" data-no="@item.DataNo" data-embedded="@item.AsEmbeddedData()"><i class="fa fa-copy"></i></button>
+                                <button id="btn-@Model.GridPaging.DataName-edit-@item.DataNo" class="btn btn-xs btn-primary" data-pono="@item.PONo" data-poitemno="@item.POItemNo" data-seqitemno="@item.SeqItemNo" data-no="@item.DataNo" data-embedded="@item.AsEmbeddedData()"><i class="fa fa-pencil"></i></button>
+                                <button id="btn-@Model.GridPaging.DataName-delete-@item.DataNo" class="btn btn-xs btn-danger" data-pono="@item.PONo" data-poitemno="@item.POItemNo" data-seqitemno="@item.SeqItemNo" data-no="@item.DataNo" data-embedded="@item.AsEmbeddedData()"><i class="fa fa-trash"></i></button>
+                            }
+                            else
+                            {
+                                <a class="ref" href="#"><i class="fa fa-lock" data-toggle="tooltip" title="Data imported from SAP or already used by GR"></i></a>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr class="hidden">
+                    <td colspan="14" class="text-center">@CommonDisplayMessage.NoData</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div class="v-space"></div>
+
+<div id="additional-@(Model.GridPaging.DataName)-container" class="row">
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="col-xs-3">
+            <label for="cmb-@(Model.GridPaging.DataName)-additional" class="control-label text-muted">Additional for</label>
+        </div>
+        <div id="additional-@(Model.GridPaging.DataName)-container" class="col-xs-9">
+            @Html.DropDownList("cmb-" + Model.GridPaging.DataName + "-additional", POCreationController.GetPOItemSelectList(Model.DataList), new { tabindex = "5", @class = "form-control" })
+        </div>
+    </div>
+    <div class="col-xs-8">
+        <fieldset>
+            <legend>Additional</legend>
+            <div class="col-xs-12 col-sm-6">
+                <div class="form-group form-group-xs">
+                    <label for="cmb-@(Model.GridPaging.DataName)additional-plant" class="col-xs-5 col-sm-4 control-label required-left text-muted">Plant</label>
+                    <div class="col-xs-7 col-sm-8">
+                        @Html.DropDownList("cmb-" + Model.GridPaging.DataName + "additional-plant", PlantController.PlantSelectList, new { tabindex = "5", @class = "form-control", disabled = "disabled" })
+                    </div>
+                </div>
+                <div class="form-group form-group-xs">
+                    <label for="cmb-@(Model.GridPaging.DataName)additional-sloc" class="col-xs-5 col-sm-4 control-label required-left text-muted">Sloc</label>
+                    <div id="@(Model.GridPaging.DataName)additional-sloc-container" class="col-xs-7 col-sm-8">
+                        @Html.EmptyDropdownList(Model.GridPaging.DataName + "additional-sloc", "Select Plant first", new { tabindex = "5", @class = "form-control", disabled = "disabled" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-6">
+                <div class="form-group form-group-xs">
+                    <label for="txt-@(Model.GridPaging.DataName)additional-deliverydate" class="col-xs-5 col-sm-4 control-label required-left text-muted">Delivery Date</label>
+                    <div class="col-xs-7 col-sm-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            <input type="text" id="txt-@(Model.GridPaging.DataName)additional-deliverydate" tabindex="2" class="form-control" readonly />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+@Html.LookupContainer("itemedit-category")
+@Html.LookupContainer("itemedit-matno")
+@Html.LookupContainer("itemedit-wbsno")
+@Html.LookupContainer("itemedit-glaccount")
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        /* ============================== Init: begin ============================== */
+
+        var isCreation = ViewData.Get("IsCreation"),
+            processId = ViewData.Get("ProcessId"),
+            poNo = ViewData.Get("PONo"),
+            ShowInlineItemEditor = ViewData.Get("ShowInlineItemEditor"),
+            RefreshSLoc = ViewData.Get("RefreshSLoc"),
+            OnAjaxBegin = ViewData.Get("OnAjaxBegin"),
+            OnAjaxComplete = ViewData.Get("OnAjaxComplete"),
+            OnAjaxError = ViewData.Get("OnAjaxError");
+
+        ViewData.Add("UrgentPR", !!(Number("@Model.AreThereAnyUrgentPR ? 1 : 0"))); // NOTE: this is the hackish way to convert Razor bool to Js bool
+        ViewData.Add("ServiceItem", !!(Number("@Model.AreThereAnyServiceItem ? 1 : 0")));
+
+        if (isCreation)
+            $("#txt-@(Model.GridPaging.DataName)additional-deliverydate").todatepicker(true);
+
+        // NOTE: this editor only valid in POCreation and in PO Manual mode
+        var creationType = $("#cmb-poitem-creationtype").valOrDefault();
+        if (isCreation && creationType === "@POCreationType.Manual")
+            ShowInlineItemEditor(creationType);
+
+        /* =============================== Init: end =============================== */
+
+        /* ============================= Changed: begin ============================= */
+
+        $(document).onOnce("change", "#cmb-@(Model.GridPaging.DataName)-additional", function (e) {
+            OnAjaxBegin("PO Item Additional");
+            var splittedValue = $("#cmb-@(Model.GridPaging.DataName)-additional").valOrDefault().split(";");
+
+            if (splittedValue.length === 1) {
+                splittedValue.push(0);
+                splittedValue.push(0);
+            }
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.GetItemAdditionalList",
+                data: {
+                    processId: processId,
+                    poNo: poNo,
+                    poItemNo: splittedValue[1],
+                    seqItemNo: Number(splittedValue[2])
+                },
+                success: function (data) {
+                    if (data.ResponseType) {
+                        if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                            var additionalData = JSON.parse(data.Message);
+                            $("#txt-@(Model.GridPaging.DataName)additional-deliverydate").val(additionalData.DeliveryPlanDateString);
+                            $("#cmb-@(Model.GridPaging.DataName)additional-plant").val(additionalData.Plant);
+                            RefreshSLoc("@Model.GridPaging.DataName", additionalData.Plant, function () {
+                                $("#cmb-@(Model.GridPaging.DataName)additional-sloc").val(additionalData.SLoc);
+                            });
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        $("#cmb-@(Model.GridPaging.DataName)additional-plant").change(function (e) {
+            OnAjaxBegin("Plant changed");
+            var plantCode = $(this).valOrDefault();
+            if (plantCode !== "" || plantCode !== undefined) {
+                RefreshSLoc("@Model.GridPaging.DataName", plantCode, function () { });
+            }
+        });
+
+        /* ============================== Changed: end ============================== */
+
+        if (!isCreation) {
+            $("#cmb-@(Model.GridPaging.DataName)-additional option[value='']").remove();
+            $("#cmb-@(Model.GridPaging.DataName)-additional").trigger("change");
+        }
+
+        $("#btn-reject-item").click(function (e) {
+            OnAjaxBegin("Reject Purchase Order");
+            e.preventDefault();
+
+            var selectedDataList = $("[id^=chk-poitem-]:checked");
+            if (selectedDataList.length === 0) {
+                $.displaymessagebox.show("@DisplayMessageId.SelectOneCriteria");
+
+                OnAjaxComplete();
+            }
+            else {
+                var poData = $(selectedDataList[0]).data("embedded");
+                var item = "";
+                var i = 0;
+                selectedDataList.each(function () {
+                    var poItemData = $(this).data("embedded");
+                    if (i === 0)
+                        item = poItemData.POItemNo;
+                    else
+                        item = item + ", " + poItemData.POItemNo;
+                    i++;
+                });
+
+                if (poData.PoStatus == '49') {
+                    $.messagebox.show(
+                            "Reject PO",
+                            "cannot reject PO with number " + item.PONo + " because it has been cancelled.",
+                            "WRN",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                    OnAjaxComplete();
+                }
+                else if (poData.PoStatus == '45') {
+                    $.messagebox.show("@ActionResponseViewModel.Warning", "PO Already Rejected", "@ActionResponseViewModel.Warning");
+                    OnAjaxComplete();
+                }
+                else {
+                    $.messagebox.show(
+                        "Confirmation",
+                        "This order will be removed from your list after it rejected. Are You Sure You Want to Reject this?",
+                        "INF",
+                        "CONFIRM",
+                        "doRejectSelectedItemPO('" + poData.PONo + "', '" + item + "')",
+                        "OnAjaxComplete"
+                    );
+                }
+            }
+
+        });
+
+
+    });
+
+    function doRejectSelectedItemPO(poNo, itemPoList) {
+        $.ajax({
+            type: "POST",
+            url: "@POInquiryController.Action.RejectItemByVendor",
+            data: {
+                poNo: poNo,
+                poItem: itemPoList
+            },
+            success: function (result) {
+                console.log(result);
+                if (result.ResponseType === 'S') {
+                    setTimeout(function () {
+                        $.messagebox.show(
+                                "Reject PO Document",
+                                "PO No " + poNo + " successfully rejected.",
+                                "INF",
+                                "SINGLE",
+                                "FinishProcessReject()",
+                                ""
+                            );
+                    }, 300);
+
+                }
+                else {
+                    var error = result.Message;
+                    setTimeout(function () { $.messagebox.show("Reject PO Document", error, "ERR", "", ""); FinishAjax(); }, 300);
+                }
+            },
+            complete: FinishAjax,
+            error: ErrorAjax
+        });
+    }
+
+    function FinishProcessReject() {
+        $('#pop-purchaseorder').modal('hide');
+        $('#btn-search').click();
+    }
+
+    function FinishAjax() {
+        EnableState();
+        $.progressbox.hide();
+    }
+
+    function ErrorAjax(data) {
+        console.log(data);
+        var result = $.ValidateASPError(data.responseText);
+        $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+    }
+    //# sourceURL=_purchaseOrderItemGrid.cshtml
+</script>

@@ -1,0 +1,104 @@
+﻿@{
+    Layout = CommonPage.MainLayout;
+}
+@using GPS.Constants
+@using GPS.Constants.MRP
+@model GPS.ViewModels.MRP.MRPCreationViewModel
+
+@section HeadScript {
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/tdk.lookupgrid.js")"></script>
+}
+
+<div class="form-horizontal">
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="form-group form-group-xs">
+                <label for="txtlookup-procgroup" class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Procurement Usage Group</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    <div id="cmb-procgroup" class="input-group input-group-xs lookup-grid">
+                        <input id="txtlookup-procgroup" class="form-control" type="text" placeholder="Select item" readonly="readonly"/>
+                        <div class="input-group-btn">
+                            <button id="btnlookup-procgroup" class="btn btn-default btn-sm">
+                                <i class="fa fa-caret-down"></i>
+                            </button>
+                        </div>
+
+                        <div class="popup-lookup-grid">
+                            <div class="form-horizontal multiselect multiselect-container dropdown-toggle dropdown-menu">
+                                <div class="form-group form-group-xs">
+                                    <div class="input-group">
+                                        <input id="txtfilter-procgroup" class="form-control" type="text" placeholder="Filter item"/>
+                                        <div class="input-group-btn">
+                                            <button id="btnfilter-procgroup" class="btn btn-default btn-sm">
+                                                <i class="fa fa-search"></i>
+                                            </button>
+                                            <button id="btnclearfilter-procgroup" class="btn btn-default btn-sm">
+                                                <i class="fa fa-eraser"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-group-xs">
+                                    <div class="table-responsive multiselect-item filter" style="overflow: hidden;">
+                                        @Html.Partial(MRPCommonPage.ProcUsageGroupLookupGridPartial, Model.ProcUsageGroup)
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-group-xs">
+                                    <div class="text-right">
+                                        <button type="button" class="btn btn-primary btn-xs btn-action btn-std" data-role="select-lookupgrid">OK</button>
+                                        <button type="button" class="btn btn-danger btn-xs btn-action btn-std" data-role="dismiss-lookupgrid">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <button id="btnmrp-check" class="btn btn-primary btn-xs btn-std">Check</button>
+            <button id="btnmrp-run" class="btn btn-primary btn-xs btn-std hidden">Run MRP</button>
+        </div>
+    </div>
+
+    <div id="procusagegroup-check" class="row"></div>
+
+    @*<div class="row hidden">
+        <div class="col-xs-6"></div>
+        <div class="col-xs-6">
+            <div class="well well-lg warning">
+                <h4>MRP Process in progress</h4>
+            </div>
+        </div>
+    </div>
+*@
+    <div id="pop-runconfirm" class="modal fade" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <p class="modal-title">
+                        Run Confirmation
+                    </p>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Are you sure want to Process MRP?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-group-xs text-right">
+                        <button id="btnrun-ok" type="button" class="btn btn-primary btn-xs btn-std">OK</button>
+                        <button id="btnrun-cancel" type="button" class="btn btn-danger btn-xs btn-std" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div id="divtable">
+        @Html.Partial("_MRPGrid")
+    </div>
+    @Html.Partial("_PartialScript")

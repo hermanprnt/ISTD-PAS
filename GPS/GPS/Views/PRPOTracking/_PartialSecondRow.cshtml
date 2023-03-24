@@ -1,0 +1,55 @@
+﻿@using GPS.Constants
+@using GPS.Models.Common
+@model  GPS.Models.Common.PRPOTrackingList
+@{
+    List<PRPOTrackingList> data = ViewData["SecondRow"] != null ?
+                            (List<PRPOTrackingList>)ViewData["SecondRow"] :
+                            new List<PRPOTrackingList>(new List<PRPOTrackingList>());      
+}
+@if(data.Count > 0)
+{
+    int i = 1;
+    foreach(var si in data) 
+    {
+        <tr class="lvl2grid-@si.DOC_NO-@si.DOC_TYPE-@si.DOC_ITEM_NO">
+            @if(i <= 1)
+            {
+                <td rowspan="@data.Count" style="width:20px" id="td-lvl2-@si.DOC_NO-@si.DOC_TYPE"></td>
+                i = i + 1;
+            }
+            <td style="width:20px" id="td-lvl3-@si.DOC_NO-@si.DOC_ITEM_NO-@si.DOC_TYPE">
+                @if(si.IS_HAVE_CHILD == "Y")
+                {
+                    <div class="text-center" id="item-@si.DOC_NO-@si.DOC_ITEM_NO-@si.DOC_TYPE" onclick="javascript:CollapseItem('@si.DOC_NO', '@si.DOC_ITEM_NO', '@si.DOC_TYPE')">
+                        <span class="fa fa-plus-square-o" style="cursor: pointer;"></span>
+                    </div>
+                }
+            </td>
+            <td class="text-center" style="width:90px">@si.REFERENCE_DOC_NO</td>
+            <td class="text-center" style="width:90px">@int.Parse(si.DOC_ITEM_NO).ToString()</td>
+            <td class="text-left" style="width:200px">@si.DOC_DESC</td>
+            <td class="text-center" style="width:75px">@si.DOC_DATE</td>
+            <td class="text-left" style="width:110px">@si.DOC_STATUS</td>
+            <td class="text-left" style="width:200px">@si.REGISTERED_BY</td>
+            <td class="text-center" style="width:75px">@si.REGISTERED_DT</td>
+            <td class="text-left" style="width:200px">@si.ORG_SH_BY</td>
+            <td class="text-center" style="width:75px">@si.ORG_SH_DT</td>
+            <td class="text-left" style="width:200px">@si.ORG_DPH_BY</td>
+            <td class="text-center" style="width:75px">@si.ORG_DPH_DT</td>
+            <td class="text-left" style="width:200px">@si.ORG_DH_BY</td>
+            <td class="text-center" style="width:75px">@si.ORG_DH_DT</td>
+            <td class="text-left" style="width:200px">@si.COOR_STAFF_BY</td>
+            <td class="text-center" style="width:75px">@si.COOR_STAFF_DT</td>
+            <td class="text-left" style="width:200px">@si.COOR_SH_BY</td>
+            <td class="text-center" style="width:75px">@si.COOR_SH_DT</td>
+            <td class="text-left" style="width:200px">@si.COOR_DPH_BY</td>
+            <td class="text-center" style="width:75px">@si.COOR_DPH_DT</td>
+            <td class="text-left" style="width:200px">@si.COOR_DH_BY</td>
+            <td class="text-center" style="width:75px">@si.COOR_DH_DT</td>
+            <td class="text-left" style="width:200px">@si.FD_STAFF_BY</td>
+            <td class="text-center" style="width:75px">@si.FD_STAFF_DT</td>
+            <td class="text-left" style="width:200px">@si.FD_SH_BY</td>
+            <td class="text-center" style="width:75px">@si.FD_SH_DT</td>
+        </tr>
+    }
+}

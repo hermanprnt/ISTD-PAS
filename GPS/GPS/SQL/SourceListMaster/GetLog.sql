@@ -1,0 +1,3 @@
+DECLARE @@PROCESS_ID BIGINT
+EXEC dbo.sp_PutLog 'SourceList Master', @USERID, 'Create SourceList', @@PROCESS_ID OUTPUT, 'PR00020INF', 'INF', '020', 'PR020',0;
+SELECT @@PROCESS_ID

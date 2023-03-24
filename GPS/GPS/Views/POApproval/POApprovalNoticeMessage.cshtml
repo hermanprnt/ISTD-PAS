@@ -1,0 +1,207 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Models.PRPOApproval
+@{    
+    List<CommonApprovalNotice> poApprovalNoticeList = (List<CommonApprovalNotice>)ViewData["POApprovalNotice"];
+    string poApprovalNoticeCurrentUser = (string)ViewData["POApprovalNoticeCurrentUser"];  
+}
+
+<style type="text/css">
+    .notice-message-action-link:hover,
+    .notice-message-replyfor-link:hover
+    {
+        cursor: pointer;
+    }
+</style>
+
+@{
+    if (poApprovalNoticeList.Count > 0)
+    {
+        string backgroundColor = "";
+        string marginLeft = "";
+        foreach (CommonApprovalNotice poApprovalNotice in poApprovalNoticeList)
+        {
+            switch (poApprovalNotice.NOTICE_IMPORTANCE)
+            {
+                case "H":
+                    backgroundColor = "#FD696D";
+                    break;
+                case "N":
+                    backgroundColor = "#B7F8C2";
+                    break;
+                case "L":
+                    backgroundColor = "#A8DBB1";
+                    break;
+            }
+            if (poApprovalNotice.NOTICE_FROM_USER.Equals(poApprovalNoticeCurrentUser))
+            {
+                marginLeft = "39.50%";
+            }
+            else
+            {
+                marginLeft = "0%";
+            }
+                                
+            <div id="notice-message-@poApprovalNotice.SEQ_NO" style="position:relative;padding:5px;color:#263088;">
+                <div style="
+                        background-color: @backgroundColor;
+                        border-top-left-radius: 4px;
+                        border-top-right-radius: 4px;
+                        padding: 5px;
+                        width: 60%;
+                        margin-left: @marginLeft;
+                        word-wrap: normal;
+                        margin-bottom:2px;
+                    ">
+                    <div style="float:right;font-size:x-small;font-weight:bold;">
+                        @(poApprovalNotice.CREATED_DT != DateTime.MinValue ? poApprovalNotice.CREATED_DT.ToString(CommonFormat.CommDateTime) : "")
+                    </div>
+                    From : @(CaseConverter.ToPascalCase(poApprovalNotice.NOTICE_FROM_ALIAS ))
+                    <br />
+                    To : 
+                        @{  
+                            string noticeToAliasList = string.Empty;
+                            if (poApprovalNotice.NOTICE_TO_ALIAS != string.Empty)
+                            {
+                                noticeToAliasList = poApprovalNotice.NOTICE_TO_ALIAS.Replace("[", string.Empty).Replace("]", string.Empty);
+                                noticeToAliasList = noticeToAliasList.Substring(0, noticeToAliasList.Length - 1);
+                                <text>@(CaseConverter.ToPascalCase(noticeToAliasList))</text>
+                            }
+                        }
+                </div>
+                <div style="
+                        background-color: @backgroundColor;
+                        border-radius: 4px;
+                        padding: 5px;
+                        width: 60%;
+                        margin-left: @marginLeft;
+                        min-height: 60px;
+                        word-wrap: normal;
+                        position: relative;
+                    ">
+                    <div>
+                        @poApprovalNotice.NOTICE_MESSAGE
+                    </div>
+                    <div style="position:absolute;bottom:0;right:0;padding:5px;font-size:x-small;font-weight:bold;">
+                        @{
+                            if (poApprovalNotice.NOTICE_FROM_USER.Equals(poApprovalNoticeCurrentUser))
+                            {
+                                <label id="notice-message-delete-link-@poApprovalNotice.SEQ_NO" class="notice-message-action-link" data-docno="@poApprovalNotice.DOC_NO" data-seqno="@poApprovalNotice.SEQ_NO" data-noticefromuser="@poApprovalNotice.NOTICE_FROM_USER" data-noticefromalias="@(CaseConverter.ToPascalCase(poApprovalNotice.NOTICE_FROM_ALIAS))" style="color:#263088;">Delete</label>
+                                <text>&nbsp;|&nbsp;</text>
+                            }
+                        }
+                        <label id="notice-message-reply-link-@poApprovalNotice.SEQ_NO" class="notice-message-action-link" data-docno="@poApprovalNotice.DOC_NO" data-seqno="@poApprovalNotice.SEQ_NO" data-noticefromuser="@poApprovalNotice.NOTICE_FROM_USER" data-noticefromalias="@(CaseConverter.ToPascalCase(poApprovalNotice.NOTICE_FROM_ALIAS))" style="color:#263088;">Reply</label>
+                    </div>
+                </div>  
+                @{  
+                    if (poApprovalNotice.REPLY_FOR != 0 
+                        && !String.IsNullOrEmpty(poApprovalNotice.NOTICE_REPLY_FROM_ALIAS)
+                        && !String.IsNullOrEmpty(poApprovalNotice.NOTICE_REPLY_MESSAGE))
+                    {
+                        <div 
+                            id="notice-message-replyfor-message-@poApprovalNotice.SEQ_NO"  
+                            style="
+                            background-color: #555;
+                            color: white;
+                            padding: 5px 5px 8px 5px;
+                            width: 60%;
+                            margin-left: @marginLeft;
+                            word-wrap: normal;
+                            position: relative;
+                            font-size:x-small;
+                            font-weight:bold;
+                            margin-top: -0.3em;
+                            border-bottom-right-radius: 4px;
+                            border-bottom-left-radius: 4px;
+                            display: none;
+                            "
+                        >
+                            From : @(CaseConverter.ToPascalCase(poApprovalNotice.NOTICE_REPLY_FROM_ALIAS))<br />
+                            @poApprovalNotice.NOTICE_REPLY_MESSAGE
+                        </div>
+                        <div 
+                            id="notice-message-replyfor-link-@poApprovalNotice.SEQ_NO"
+                            class="notice-message-replyfor-link"
+                            style="
+                            background-color: #333;
+                            color: white;
+                            padding: 5px;
+                            width: 60%;
+                            margin-left: @marginLeft;
+                            word-wrap: normal;
+                            position: relative;
+                            text-align: center;
+                            font-size:x-small;
+                            font-weight:bold;
+                            margin-top: -0.3em;
+                            border-bottom-right-radius: 4px;
+                            border-bottom-left-radius: 4px;
+                            "
+                            data-seqno="@poApprovalNotice.SEQ_NO"
+                        >
+                            Reply For
+                        </div>
+                    }
+                }
+            </div>
+        }
+    }
+}
+
+<script type="text/javascript">
+    var docNo;
+    var seqNo;
+    var noticeFromUser;
+    var noticeFromAlias;
+    
+    $(document).ready(function () {
+        $("[id^=notice-message-reply-message-]").css("display", "none");
+    });
+
+    $("[id^=notice-message-delete-link-]").click(function (e) {
+        docNo = $(this).data("docno");
+        seqNo = $(this).data("seqno");
+
+        DeletePOApprovalNotice(function (data) {
+            resetNotice();
+            $("#notice-message-container").html(data);
+        });
+    });
+
+    $("[id^=notice-message-reply-link-]").click(function (e) {
+        docNo = $(this).data("docno");
+        seqNo = $(this).data("seqno");
+        noticeFromUser = $(this).data("noticefromuser");
+        noticeFromAlias = $(this).data("noticefromalias");
+
+        $("#btn-post-notice").text("Reply Notice");
+
+        noticeToUserList = $("#notice-to-user-list").val()
+        noticeToAliasList = $("#notice-to-alias-list").val()
+        noticeToUser = noticeFromUser;
+        noticeToAlias = noticeFromAlias;
+        if (noticeToUser != '' && noticeToUser != undefined) {
+            var noticeToIndex = noticeToUserList.indexOf("[" + noticeToUser + "]");
+            if (noticeToIndex == -1) {
+                var html = '<div id="notice-list-container-' + noticeToUser + '" style="float:left;vertical-align:middle;padding:0.2em;line-height:1.5em;">' +
+                    '<label class="text-muted" style="margin:0;"><span>' + noticeToAlias + '</span></label>' +
+                    '</div>'
+                $("#notice-list-container").append(html);
+                $("#notice-list-container").show();
+
+                noticeToUserList = noticeToUserList + "[" + noticeToUser + "],";
+                $("#notice-to-user-list").val(noticeToUserList);
+                noticeToAliasList = noticeToAliasList + "[" + noticeToAlias + "],";
+                $("#notice-to-alias-list").val(noticeToAliasList);
+
+                $("#cmb-notice-to").val($("#cmb-notice-to")[0].defaultValue);
+            }
+        }
+    });
+
+    $("[id^=notice-message-replyfor-link-]").click(function (e) {
+        seqNo = $(this).data("seqno");
+
+        $("#notice-message-replyfor-message-" + seqNo).toggle(0, "linear");
+    });
+</script>

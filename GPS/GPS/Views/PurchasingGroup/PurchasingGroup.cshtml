@@ -1,0 +1,510 @@
+﻿@using GPS.CommonFunc.WebControl
+@using GPS.Constants
+@using GPS.Constants.Master
+@using GPS.Controllers.Master
+@using GPS.Core.ViewModel
+@using GPS.Models.Master
+@using GPS.ViewModels
+@model GenericViewModel<PurchasingGroup>
+@{
+    Layout = CommonPage.MainLayout;
+}
+
+@section HeadScript{
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+
+    <link rel="stylesheet" href="@Url.Content("~/Content/afixedtable/afixedtable.css")"/>
+    <script type="text/javascript" src="@Url.Content("~/Content/afixedtable/afixedtable.js")"></script>
+}
+
+<div class="form-horizontal">
+    <div class="row">
+        <div class="col-xs-12 col-sm-3 col-md-4">
+            <div class="form-group form-group-xs">
+                <label for="cmb-purchasinggrpcode" class="col-xs-5 col-sm-4 control-label text-muted">Purch. Group</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-purchasinggrpcode", PurchasingGroupController.PurchasingGroupSelectList, new { @class = "form-control" })
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-3 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-description" class="col-xs-5 col-sm-4 control-label text-muted">Description</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-description" class="form-control"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div class="col-sm-6 hidden-xs"></div>
+        <div class="col-xs-12 col-sm-6 text-right">
+            <button id="btn-search" class="btn btn-xs btn-primary btn-std">Search</button>
+            <button id="btn-clearsearch" class="btn btn-xs btn-default btn-std">Clear</button>
+        </div>
+    </div>
+</div>
+<div class="v-space"></div>
+<div class="line-br"></div>
+<div class="row">
+    <div class="col-xs-12 col-sm-6">
+        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PurchasingGroup", "btn-add"))
+        {
+            <button id="btn-add" class="btn btn-xs btn-primary btn-std">Add</button>
+        }
+        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PurchasingGroup", "btn-edit"))
+        {
+            <button id="btn-edit" class="btn btn-xs btn-primary btn-std">Edit</button>
+        }
+        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PurchasingGroup", "btn-delete"))
+        {
+            <button id="btn-delete" class="btn btn-xs btn-danger btn-std">Delete</button>
+        }
+    </div>
+    <div class="col-xs-12 col-sm-6 text-right">
+        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PurchasingGroup", "lnk-downloadtemplate"))
+        {
+            <a id="lnk-downloadtemplate" href="javascript:void(0)">Download Template</a>
+        }
+        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PurchasingGroup", "btn-upload"))
+        {
+            <input type="file" id="upl-purchasinggrp" class="hidden" value="" />
+            <button id="btn-upload" class="btn btn-xs btn-warning btn-std">
+                <i class="fa fa-upload"></i>
+                Upload
+            </button>
+        }
+        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("PurchasingGroup", "btn-download"))
+        {
+            <button id="btn-download" class="btn btn-xs btn-success btn-std">
+                <i class="fa fa-download"></i>
+                Download
+            </button>
+        }
+    </div>
+</div>
+<div class="v-space"></div>
+<div class="row">
+    <div id="grid-purchasinggrp">
+        @Html.Partial(PurchasingGroupController.Partial.Grid, Model)
+    </div>
+</div>
+
+<div id="pop-purchasinggrp" class="modal fade" data-backdrop="static" data-keyboard="false">
+    @Html.Partial(PurchasingGroupController.Partial.Edit, new PurchasingGroup())
+</div>
+@Html.ModalContainer("pop-purchgrpusermap")
+@Html.ModalContainer("pop-purchgrpusermapedit")
+
+@section BodyScript{
+    <script type="text/javascript">
+        $(document).ready(function() {
+
+            /* ============================= Search: begin ============================= */
+
+            function GetSearchCriteria(page, pageSize) {
+
+                page = page || 1;
+                pageSize = pageSize || $("#cmb-perpage-purchasinggrp").GetPageSize();
+                return {
+                    Code: $("#cmb-purchasinggrpcode").valOrDefault(),
+                    Desc: $("#txt-description").valOrDefault(),
+
+                    CurrentPage: page,
+                    PageSize: pageSize
+                };
+            }
+
+            // NOTE: this method is used in Paging
+            var Search = window["Search" + "@PurchasingGroupRepository.DataName"] = function(page, pageSize, responseCallback) {
+                $.progressbox.show($tdk.PageTitle, "Search");
+                DisableAllFeatures();
+                $.ajax({
+                    type: "POST",
+                    url: "@PurchasingGroupController.Action.Search",
+                    data: JSON.stringify(GetSearchCriteria(page, pageSize)),
+                    contentType: "@CommonFormat.JsonMimeType",
+                    success: responseCallback,
+                    complete: function() {
+                        EnableAllFeatures();
+                        $.progressbox.hide();
+                    },
+                    error: function(data) {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                        $.progressbox.hide();
+                    }
+                });
+            };
+
+            var SearchResponseCallback = window["Search" + "@PurchasingGroupRepository.DataName" + "ResponseCallback"] = function(data) {
+                if (!data.ResponseType) {
+                    $("#grid-purchasinggrp").html(data);
+                    $.remakeFixedTable();
+                } else {
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                }
+            };
+
+            $("#btn-search").click(function(e) {
+                $.progressbox.show($tdk.PageTitle, "Search");
+                DisableAllFeatures();
+
+                Search(undefined, undefined, SearchResponseCallback);
+
+                EnableAllFeatures();
+                $.progressbox.hide();
+            });
+
+            $("#btn-clearsearch").click(function(e) {
+                $.progressbox.show($tdk.PageTitle, "Clear Search");
+                DisableAllFeatures();
+                ResetForm();
+
+                $.ajax({
+                    type: "POST",
+                    url: "@PurchasingGroupController.Action.ClearSearch",
+                    success: function(data) {
+                        if (!data.ResponseType) {
+                            $("#grid-purchasinggrp").html(data);
+                        } else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: function() {
+                        EnableAllFeatures();
+                        $.progressbox.hide();
+                    },
+                    error: function(data) {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                    }
+                });
+            });
+
+            /* ============================== Search: end ============================== */
+
+            /* ============================== Init: begin ============================== */
+
+            function GetDisableList() {
+                return [
+                    "#cmb-purchasinggrpcode",
+                    "#txt-description",
+                    "#btn-search",
+                    "#btn-clearsearch",
+                    "#btn-add",
+                    "#btn-edit",
+                    "#btn-delete",
+                    "#btn-upload",
+                    "#btn-download"
+                ];
+            }
+
+            function DisableAllFeatures() {
+                $.Disable(GetDisableList());
+                $("#lnk-downloadtemplate").addClass("link-disabled");
+            }
+
+            function EnableAllFeatures() {
+                $.Enable(GetDisableList());
+                $("#lnk-downloadtemplate").removeClass("link-disabled");
+            }
+
+            function DisableAllEditFeatures() {
+                $.Disable([
+                    "#cmbedit-procchannel",
+                    "#txtedit-code",
+                    "#txtedit-description",
+                    "#btnedit-save",
+                    "#btnedit-close"
+                ]);
+            }
+
+            function EnableAllEditFeatures() {
+                var list = [
+                    "#txtedit-description",
+                    "#btnedit-save",
+                    "#btnedit-close"
+                ];
+
+                if ($("#pop-purchasinggrp").data("editmode") === "@EditMode.Add")
+                    list = list.concat(["#cmbedit-procchannel", "#txtedit-code"]);
+
+                $.Enable(list);
+            }
+
+            function OnAjaxBegin(title) {
+                $.progressbox.show($tdk.PageTitle, title);
+                DisableAllFeatures();
+            }
+
+            function OnAjaxComplete() {
+                EnableAllFeatures();
+                $.progressbox.hide();
+            }
+
+            function OnAjaxError(data) {
+                var result = $.ValidateASPError(data.responseText);
+                $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+            }
+
+            function ResetCheckbox() {
+                $("[id^=chkall-]:checked").each(function(e) { $(this).prop("checked", false); });
+                $("[id^=chk-]:checked").each(function(e) { $(this).prop("checked", false); });
+            }
+
+            function ResetEditForm() {
+                $.Clear([
+                    "#cmbedit-procchannel",
+                    "#txtedit-code",
+                    "#txtedit-description"
+                ]);
+            }
+
+            function ResetForm() {
+                $.Clear([
+                    "#cmb-purchasinggrpcode",
+                    "#txt-description"
+                ]);
+
+                ResetCheckbox();
+            }
+
+            function Init() {
+                ResetForm();
+                EnableAllFeatures();
+            }
+
+            Init();
+            Search(undefined, undefined, SearchResponseCallback);
+
+            ViewData.Clear();
+            ViewData.Add("OnAjaxBegin", OnAjaxBegin);
+            ViewData.Add("OnAjaxComplete", OnAjaxComplete);
+            ViewData.Add("OnAjaxError", OnAjaxError);
+            ViewData.Add("DisableAllEditFeatures", DisableAllEditFeatures);
+            ViewData.Add("EnableAllEditFeatures", EnableAllEditFeatures);
+
+            /* =============================== Init: end =============================== */
+
+            /* ============================== CRUD: begin ============================== */
+
+            $("#btn-add").click(function(e) {
+                $.progressbox.show($tdk.PageTitle, "Add Purchasing Group");
+                DisableAllFeatures();
+
+                $("#pop-purchasinggrp").data("editmode", "@EditMode.Add");
+                $("#pop-purchasinggrp").modal();
+                ResetCheckbox();
+                EnableAllEditFeatures();
+                ResetEditForm();
+
+                EnableAllFeatures();
+                $.progressbox.hide();
+            });
+
+            $("#btn-edit").click(function(e) {
+                $.progressbox.show($tdk.PageTitle, "Edit Purchasing Group");
+                DisableAllFeatures();
+                $("#pop-purchasinggrp").data("editmode", "@EditMode.Edit");
+                var selectedDataList = $("[id^=chk-purchasinggrp-]:checked");
+                if (selectedDataList.length > 1 || selectedDataList.length === 0) {
+                    $.displaymessagebox.show("@DisplayMessageId.SelectOnlyOne");
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                }
+                else {
+                    $.ajax({
+                        type: "POST",
+                        url: "@PurchasingGroupController.Action.Edit",
+                        data: {
+                            procChannelCode: $(selectedDataList[0]).data("procchannel"),
+                            code: $(selectedDataList[0]).data("code")
+                        },
+                        success: function(data) {
+                            if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                                $("#pop-purchasinggrp").html(data);
+                                $("#pop-purchasinggrp").modal();
+                                ResetCheckbox();
+                            } else {
+                                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                            }
+                        },
+                        complete: function() {
+                            EnableAllFeatures();
+                            $.progressbox.hide();
+                        },
+                        error: function(data) {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                        }
+                    });
+                }
+            });
+
+            $("#btn-delete").click(function(e) {
+                $.progressbox.show($tdk.PageTitle, "Delete Purchasing Group");
+                DisableAllFeatures();
+                var selectedDataList = $("[id^=chk-purchasinggrp-]:checked");
+                if (selectedDataList.length === 0) {
+                    $.displaymessagebox.show("@DisplayMessageId.DeleteAtLeastOne");
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                } else {
+                    var selectedPKList = [];
+                    selectedDataList.each(function() {
+                        selectedPKList.push($(this).data("procchannel") + ";" + $(this).data("code"));
+                    });
+                    $.ajax({
+                        type: "POST",
+                        url: "@PurchasingGroupController.Action.Delete",
+                        data: {
+                            primaryKeyList: selectedPKList.join(",")
+                        },
+                        success: function(data) {
+                            if (data.ResponseType) {
+                                $.messagebox.show(data.ResponseType, data.Message, data.ResponseType, "SINGLE", "(function () { location.href = '/PurchasingGroup'; })()");
+                            } else {
+                                $.messagebox.show("@ActionResponseViewModel.Error", data, "@ActionResponseViewModel.Error");
+                            }
+                        },
+                        complete: function() {
+                            EnableAllFeatures();
+                            $.progressbox.hide();
+                        },
+                        error: function(data) {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                        }
+                    });
+                }
+            });
+
+            $(document).on("click", "[id^=lnk-@PurchasingGroupRepository.DataName-]", function(e) {
+                e.preventDefault();
+                OnAjaxBegin("Add user mapping");
+                var embedded = $(this).data("embedded");
+                var purchgrpCode = embedded.PurchasingGroupCode;
+                ViewData.Add("PurchasingGroup", purchgrpCode);
+                $.ajax({
+                    type: "POST",
+                    url: "@PurchasingGroupController.Action.UserMap",
+                    data: {
+                        purchasingGroup: purchgrpCode
+                    },
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            $("#pop-purchgrpusermap").html(data);
+                            $("#pop-purchgrpusermap").modal();
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            });
+
+            /* =============================== CRUD: end =============================== */
+
+            /* ============================= Upload: begin ============================= */
+
+            function UploadPurchasingGroupFile(file) {
+                var formData = new FormData();
+                formData.append("uploadedFile", file);
+                formData.append("purchasingGroupCode", $("#upl-purchasinggrp").data("purchasinggrpcode"));
+
+                $.progressbox.show("Upload Purchasing Group", "Uploading file...");
+                $.ajax({
+                    type: "POST",
+                    url: "@PurchasingGroupController.Action.Upload",
+                    contentType: false, // NOTE: disable header to include content-type
+                    processData: false, // NOTE: disabe jquery to convert data to string
+                    data: formData,
+                    success: function(data) {
+                        if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                            $.messagebox.show(data.ResponseType, data.Message, data.ResponseType, "SINGLE", "$('#btn-search').trigger('click')");
+                            
+                        } else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: function() {
+                        EnableAllFeatures();
+                        $.progressbox.hide();
+                    },
+                    error: function(data) {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                    }
+                });
+            }
+
+            $(document).on("change", "#upl-purchasinggrp", function(e) {
+                $.progressbox.show($tdk.PageTitle, "Upload Purchasing Group");
+                DisableAllFeatures();
+
+                $.ajax({
+                    type: "POST",
+                    async: false,
+                    url: "@PurchasingGroupController.Action.GetUploadValidationInfo",
+                    success: function(data) {
+                        if (!data.ResponseType) {
+                            try {
+                                $(e.target).validatefile(data);
+                                UploadPurchasingGroupFile(e.target.files[0]);
+                            } catch (ex) {
+                                $.messagebox.show("@ActionResponseViewModel.Error", ex.message, "@ActionResponseViewModel.Error");
+                            }
+                        } else {
+                            $.messagebox.show(data.ResponseType, data.Message, data.ResponseType);
+                        }
+
+                        EnableAllFeatures();
+                        $.progressbox.hide();
+                    },
+                    error: function(data) {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                        EnableAllFeatures();
+                        $.progressbox.hide();
+                    }
+                });
+            });
+
+            $("#btn-upload").click(function(e) {
+                $("#upl-purchasinggrp").trigger("click");
+            });
+
+            /* ============================== Upload: end ============================== */
+
+            /* ============================ Download: begin ============================ */
+
+            $("#lnk-downloadtemplate").click(function(e) {
+                $.progressbox.show($tdk.PageTitle, "Download Purchasing Group template");
+                DisableAllFeatures();
+
+                $.fileDownload("@PurchasingGroupController.Action.DownloadTemplate", {
+                    httpMethod: "POST",
+                    async: false
+                });
+
+                EnableAllFeatures();
+                $.progressbox.hide();
+            });
+
+            $("#btn-download").click(function(e) {
+                $.progressbox.show($tdk.PageTitle, "Download Purchasing Group");
+                DisableAllFeatures();
+
+                var currentPage = $("li.active > [id^=lnk-page-" + "@Model.GridPaging.DataName" + "-]").data("page");
+                $.fileDownload("@PurchasingGroupController.Action.Download", {
+                    httpMethod: "POST",
+                    async: false,
+                    data: GetSearchCriteria(currentPage)
+                });
+
+                EnableAllFeatures();
+                $.progressbox.hide();
+            });
+
+            /* ============================= Download: end ============================= */
+        });
+    </script>
+}

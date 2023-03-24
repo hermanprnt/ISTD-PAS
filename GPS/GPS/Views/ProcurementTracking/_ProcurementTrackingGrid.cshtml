@@ -1,0 +1,234 @@
+﻿@using GPS.Models.Report
+@using GPS.CommonFunc
+@using GPS.Constants
+@{
+    List<ProcurementTracking> listProcurementTracking = ViewData["ListProcurementTracking"] != null ? (List<ProcurementTracking>)ViewData["ListProcurementTracking"] : new List<ProcurementTracking>();
+}
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <div style="border: 1pt solid #ccc;">
+        @*<div id="tScrollHead" style="width: 98.65%; overflow: hidden;">
+            <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1270px;">
+                <thead>
+                    <tr>
+                        <th style="width:100px">PR No</th>
+                        <th style="width:100px" class="sorting" data-field="PR_ITEM_NO" data-sort="none">PR Item No</th>
+                        <th style="width:100px" class="sorting" data-field="PR_SUBITEM_NO" data-sort="none">PR Sub Item No</th>
+                        <th style="width:100px">PR Date</th>
+                        <th style="width:100px">Plant Code</th>
+                        <th style="width:100px">Sloc Code</th>
+                        <th style="width:100px">Mat No</th>
+                        <th style="width:100px">Mat Desc</th>
+                        <th style="width:100px">PR Qty</th>
+                        <th style="width:100px">Unit of Measure</th>
+                        <th style="width:100px">PR Amount Ori</th>
+                        <th style="width:100px">PR CURR</th>
+                        <th style="width:100px">Created</th>
+                        <th style="width:100px">PO No.</th>
+                        <th style="width:100px">PO Item No.</th>
+                        <th style="width:100px">PO Sub Item No.</th>
+                        <th style="width:100px">Purc GRP</th>
+                        <th style="width:100px">PO Date</th>
+                        <th style="width:100px">PO CURR</th>
+                        <th style="width:100px">PO Qty</th>
+                        <th style="width:100px">PO UoM</th>
+                        <th style="width:100px">PO Amount</th>
+                        <th style="width:100px">Vendor </th>
+                        <th style="width:100px">GR/SA No </th>
+                        <th style="width:100px">GR/SA Item No </th>
+                        <th style="width:100px">GR/SA Sub Item No </th>
+                        <th style="width:100px">GR Date</th>
+                        <th style="width:100px">GR Amount</th>
+                        <th style="width:100px">Invoice No</th>
+                        <th style="width:100px">Invoice Date</th>
+                        <th style="width:100px">Invoice Amount</th>
+                        <th style="width:100px">Invoice Curr</th>
+                        <th style="width:100px">Clearing No</th>
+                        <th style="width:100px">Clearing Date</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>*@
+        <div id="tScrollBody" style="overflow: scroll; height: 270px;">
+            <table id="tblScroll" class="table table-striped table-bordered table-condensed table-fixed" style="width: 1500px;">
+                <thead>
+                    <tr>
+                        <th style="min-width:100px">PR No</th>
+                        <th style="min-width:100px" class="sorting" data-field="PR_ITEM_NO" data-sort="none">PR Item No</th>
+                        <th style="min-width:100px" class="sorting" data-field="PR_SUBITEM_NO" data-sort="none">PR Sub Item No</th>
+                        <th style="min-width:100px">PR Date</th>
+                        <th style="min-width:100px">Plant</th>
+                        <th style="min-width:100px">Sloc</th>
+                        <th style="min-width:100px">Mat No</th>
+                        <th style="min-width:100px">Mat Desc</th>
+                        <th style="min-width:100px">PR Qty</th>
+                        <th style="min-width:100px">PR UoM</th>
+                        <th style="min-width:100px">PR Amount Ori</th>
+                        <th style="min-width:100px">PR CURR</th>
+                        <th style="min-width:100px">Budget Number</th>
+                        <th style="min-width:100px">Created</th>
+                        <th style="min-width:100px">PO No.</th>
+                        <th style="min-width:100px">PO Item No.</th>
+                        <th style="min-width:100px">PO Sub Item No.</th>
+                        <th style="min-width:100px">Purc GRP</th>
+                        <th style="min-width:100px">PO Date</th>
+                        <th style="min-width:100px">PO CURR</th>
+                        <th style="min-width:100px">PO Qty</th>
+                        <th style="min-width:100px">PO UoM</th>
+                        <th style="min-width:100px">PO Amount</th>
+                        <th style="min-width:100px">Vendor </th>
+                        <th style="min-width:100px">GR/SA No </th>
+                        <th style="min-width:100px">GR/SA Item No </th>
+                        <th style="min-width:100px">GR/SA Sub Item No </th>
+                        <th style="min-width:100px">GR Date</th>
+                        <th style="min-width:100px">GR Amount</th>
+                        <th style="min-width:100px">Invoice No</th>
+                        <th style="min-width:100px">Invoice Date</th>
+                        <th style="min-width:100px">Invoice Amount</th>
+                        <th style="min-width:100px">Invoice Curr</th>
+                        <th style="min-width:100px">SAP Doc No (Invoice)</th>
+                        <th style="min-width:100px">SAP Doc Year (Invoice)</th>
+                        <th style="min-width:100px">Clearing No</th>
+                        <th style="min-width:100px">Clearing Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        if (listProcurementTracking.Count > 0)
+                        {
+                            foreach (ProcurementTracking item in listProcurementTracking)
+                            {
+                                <tr>
+                                    <td class="text-center">@item.PR_NO</td>
+                                    <td class="text-center">@item.PR_ITEM_NO</td>
+                                    <td class="text-center">@item.PR_SUBITEM_NO</td>
+                                    <td class="text-center">@item.PR_DOC_DT.ToStandardFormat()</td>
+                                    <td class="text-center">@item.PLANT_CD</td>
+                                    <td class="text-center">@item.SLOC_CD</td>
+                                    <td class="text-left">@item.MAT_NO</td>
+                                    <td class="text-left">@item.MAT_DESC</td>
+                                    <td class="text-right">@item.PR_QTY</td>
+                                    <td class="text-center">@item.UNIT_OF_MEASURE_CD</td>
+                                    <td class="text-right">@(item.PR_ORI_AMOUNT.ToStandardFormat() == "0" ? "" : item.PR_ORI_AMOUNT.ToStandardFormat() )</td>
+                                    <td class="text-center">@item.ORI_CURR_CD</td>
+                                    <td class="text-center">@item.BUDGET_REF</td>
+                                    <td class="text-left">@item.CREATED_BY</td>
+                                    <td class="text-center">@item.PO_NO</td>
+                                    <td class="text-center">@item.PO_ITEM_NO</td>
+                                    <td class="text-center">@item.PO_SUBITEM_NO</td>
+                                    <td class="text-left">@item.PURCHASING_GRP_CD</td>
+                                    <td class="text-center">@item.PO_DOC_DT.ToStandardFormat()</td>
+                                    <td class="text-center">@item.PO_CURR</td>
+                                    <td class="text-right">@(item.PO_QTY_ORI.ToString() == "0" ? "" :item.PO_QTY_ORI.ToString())</td>
+                                    <td class="text-center">@item.UOM</td>
+                                    <td class="text-right">@( item.PO_ORI_AMOUNT.ToStandardFormat() == "0"?  "" : item.PO_ORI_AMOUNT.ToStandardFormat() )</td>
+                                    <td class="text-left">@(item.VENDOR_CD +" - "+ item.VENDOR_NAME)</td>
+                                    <td class="text-center">@item.MAT_DOC_NO</td>
+                                    <td class="text-center">@item.MAT_DOC_ITEM_NO</td>
+                                    <td class="text-center">@item.GR_PO_SUBITEM_NO</td>
+                                    <td class="text-center">@item.DOCUMENT_DT.ToStandardFormat()</td>
+                                    <td class="text-right">@(item.GR_IR_AMOUNT.ToStandardFormat() == "0" ? "" : item.GR_IR_AMOUNT.ToStandardFormat())</td>
+                                    <td class="text-center">@item.InvoiceNo</td>
+                                    <td class="text-center">@item.InvoiceDate.ToStandardFormat()</td>
+                                    <td class="text-right">@(item.InvoiceAmount.ToStandardFormat() == "0" ? "" : item.InvoiceAmount.ToStandardFormat())</td>
+                                    <td class="text-center">@item.InvoiceCurrency</td>
+                                    @*FID.Ridwan:20220704*@
+                                    <td class="text-center">@item.SAPDocNo</td>
+                                    <td class="text-center">@item.SAPDocYear</td>
+                                    <td class="text-center">@item.ClearingNo</td>
+                                    <td class="text-center">@item.ClearingDate.ToStandardFormat()</td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="33" class="text-center">@CommonDisplayMessage.NoData</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                <tfoot>
+                    <tr>
+                        <td colspan="13">
+                            @Html.Partial("_ProcurementTrackingPaging")
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+        //for sorting
+    var table = document.getElementById("dynamic-table");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+
+    function tableText(tableCell) {
+        var removeClass;
+        var addClass;
+        var dataSort;
+
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            if (tableCell.getAttribute("class").indexOf('sorting_asc') >= 0) {
+
+                removeClass = 'sorting_asc';
+                addClass = 'sorting_desc';
+                dataSort = 'desc';
+
+            } else if (tableCell.getAttribute("class").indexOf('sorting_desc') >= 0) {
+
+                removeClass = 'sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+
+            } else {
+
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'asc';
+
+            }
+        }
+
+        //reset all
+        var tableReset = document.getElementById("dynamic-table");
+        if (tableReset != null) {
+            for (var i = 0; i < tableReset.rows.length; i++) {
+                for (var j = 0; j < tableReset.rows[i].cells.length; j++) {
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_asc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_asc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_desc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_desc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                }
+            }
+        }
+        // end
+
+
+    }
+</script>

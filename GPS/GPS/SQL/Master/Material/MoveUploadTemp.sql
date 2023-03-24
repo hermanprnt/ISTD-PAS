@@ -1,0 +1,1 @@
+EXEC sp_Material_MoveUploadTemp @ProcessId

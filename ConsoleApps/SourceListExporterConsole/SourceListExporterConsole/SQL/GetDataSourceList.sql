@@ -1,0 +1,1 @@
+﻿EXEC dbo.SAP_Synchronous_GetSourceListExportList @FunctionId, @Process_Id OUTPUT

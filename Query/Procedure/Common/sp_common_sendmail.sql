@@ -1,0 +1,75 @@
+﻿-- =============================================
+-- Author	  :	FID) Intan Puspitasari
+-- Create date: 31.05.2016
+-- Description:	Send Mail for Vendor 
+-- =============================================
+ALTER PROCEDURE [dbo].[sp_common_sendmail]
+	@PMAIL_TO VARCHAR(MAX) = '',
+	@PMAIL_CC VARCHAR(MAX) = '',
+	@FUNCTION_ID VARCHAR(10),
+	@CONTENT_ID VARCHAR(2),
+	@PARAM VARCHAR(MAX),
+	@STATUS VARCHAR(MAX) OUTPUT
+AS
+BEGIN
+	DECLARE @BODY VARCHAR(MAX) = '',
+			@MAIL_SUBJECT VARCHAR(MAX) = '',
+			@MAIL_TO VARCHAR(MAX) = '',
+			@MAIL_CC VARCHAR(MAX) = '',
+			@MAIL_BCC VARCHAR(MAX) = '',
+			@MAIL_PROFILER VARCHAR(100) = '',
+			@IMPORTANCE VARCHAR(10) = 'Low'
+
+	BEGIN TRY
+		SELECT @MAIL_SUBJECT = ISNULL(MAIL_SUBJECT, ''), @BODY = ISNULL(MAIL_BODY, ''), @MAIL_CC = ISNULL(MAIL_CC, ''), @MAIL_BCC = ISNULL(MAIL_BCC, ''),
+			   @IMPORTANCE = CASE WHEN(MAIL_PRIORITY = 'H') THEN 'High' ELSE (CASE WHEN(MAIL_PRIORITY = 'N') THEN 'Normal' ELSE 'Low' END ) END
+			FROM TB_M_CONTENT WHERE FUNCTION_ID = @FUNCTION_ID AND CONTENT_ID = @CONTENT_ID
+
+		--IF(ISNULL(@MAIL_TO, '') = '') BEGIN SELECT @MAIL_TO = MAIL_TO FROM TB_M_CONTENT WHERE FUNCTION_ID = @FUNCTION_ID AND CONTENT_ID = @CONTENT_ID END
+		SELECT @MAIL_TO = MAIL_TO FROM TB_M_CONTENT WHERE FUNCTION_ID = @FUNCTION_ID AND CONTENT_ID = @CONTENT_ID
+
+		IF (@PMAIL_TO <> '')
+		BEGIN
+			IF ((SELECT SUBSTRING(@PMAIL_TO, LEN(@PMAIL_TO), LEN(@PMAIL_TO)+1)) = ';')
+				SET @MAIL_TO = @PMAIL_TO + ';' + @MAIL_TO
+			ELSE
+				SET @MAIL_TO = @PMAIL_TO + @MAIL_TO
+
+			IF (@MAIL_TO IS NULL OR @MAIL_TO = '') SET @MAIL_TO = @PMAIL_TO
+		END
+
+		IF (@PMAIL_CC <> '')
+		BEGIN
+			IF ((SELECT SUBSTRING(@PMAIL_CC, LEN(@PMAIL_CC), LEN(@PMAIL_CC)+1)) <> ';')
+				SET @MAIL_CC = @PMAIL_CC + ';' + @MAIL_CC
+			ELSE
+				SET @MAIL_CC = @PMAIL_CC + @MAIL_CC
+
+			IF (@MAIL_CC IS NULL OR @MAIL_CC = '') SET @MAIL_CC = @PMAIL_CC
+		END
+
+		SELECT @MAIL_PROFILER = SYSTEM_VALUE 
+			FROM TB_M_SYSTEM WHERE FUNCTION_ID = 'MAIL' AND SYSTEM_CD = 'MAIL_PROFILER'
+		IF(ISNULL(@MAIL_PROFILER, '') = '')
+		BEGIN
+			RAISERROR('Mail Profiler Not Set Yet', 16, 1)
+		END
+		
+		SELECT @BODY ='<html><body>' + REPLACE(@BODY, '@' + CAST([No]-1 AS VARCHAR), Split) + '</body></html>' FROM [dbo].[SplitString](@PARAM, '|' )
+
+		EXEC msdb.dbo.sp_send_dbmail
+			 @profile_name = @MAIL_PROFILER,
+			 @recipients = @MAIL_TO,
+			 @copy_recipients = @MAIL_CC,
+			 @blind_copy_recipients = @MAIL_BCC,
+			 @subject = @MAIL_SUBJECT,
+			 @body_format = 'HTML',
+			 @body = @BODY,
+			 @IMPORTANCE = @IMPORTANCE
+
+		SET @STATUS = 'SUCCESS'
+	END TRY
+	BEGIN CATCH
+		SELECT @STATUS = ERROR_MESSAGE()
+	END CATCH
+END

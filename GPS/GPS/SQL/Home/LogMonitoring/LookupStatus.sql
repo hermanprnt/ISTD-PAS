@@ -1,0 +1,5 @@
+﻿SELECT SYSTEM_CD AS ProcessStatus,
+	   SYSTEM_VALUE AS StatusValue
+FROM TB_M_SYSTEM 
+	WHERE SYSTEM_REMARK = 'Process Status Master'
+	AND FUNCTION_ID = '00000'

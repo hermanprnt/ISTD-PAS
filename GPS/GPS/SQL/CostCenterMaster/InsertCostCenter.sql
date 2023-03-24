@@ -1,0 +1,20 @@
+INSERT INTO TB_M_COST_CENTER 
+	([COST_CENTER_CD]
+    ,[COST_CENTER_DESC]
+    ,[VALID_DT_FROM]
+    ,[VALID_DT_TO]
+    ,[CREATED_BY]
+    ,[CREATED_DT]
+    ,[CHANGED_BY]
+    ,[CHANGED_DT])
+VALUES
+(
+	@COST_CENTER_CD,
+	@COST_CENTER_DESC,
+	@VALID_DT_FROM,
+	'9999-12-31',
+	'System',
+	GETDATE(),
+	null,
+	null
+)

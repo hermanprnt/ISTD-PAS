@@ -1,0 +1,190 @@
+﻿@using GPS.Models.MRP
+@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Constants.PO
+@{
+    String information = ViewData["info"].ToString();
+    String poNo = ViewData["PONumber"].ToString();
+    String poDesc = ViewData["PODesc"].ToString();
+    String vendor = ViewData["Vendor"].ToString();
+    String month = ViewData["Month"].ToString();
+    String purchase = ViewData["Purchase"].ToString();
+    String currency = ViewData["Currency"].ToString();
+    String amount = ViewData["Amount"].ToString();
+    if(amount != "") {
+        amount = decimal.Parse(amount).ToStandardFormat().ToString();
+    }
+
+    List<GRCreation> ListDetail = (List<GRCreation>)ViewData["DetailList"];
+    List<GRCreation> ListItem = ViewData["ListItem"] != null ? (List<GRCreation>)ViewData["ListItem"] : new List<GRCreation>();
+
+    String listColor = "", disable = "", icon = "";
+    String processId = ViewBag.processId;
+}
+<div id="a" class="form-horizontal">
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted  text-left">PO No</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@poNo" class="form-control" id="txtPoNo" />
+                    <input type="hidden" value="@processId" class="form-control" id="txtProcessId" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted text-left">Purch. Group</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@purchase" class="form-control" id="txtPurcGroup" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label form="txt-postingdate" class="control-label col-xs-5 col-sm-4 text-muted text-left">Posting Date</label>
+                <div class="col-xs-7 col-sm-8">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" id="txt-postingdate" class="form-control" value="@DateTime.Now.ToStandardFormat()" placeholder='@CommonDisplayMessage.DateTimePlaceholder' readonly autocomplete="off"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted  text-left">PO Desc</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@poDesc" class="form-control" id="txtPoDesc" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted  text-left">Vendor</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@vendor" class="form-control" id="txtVendorName" />
+                    <input type="hidden" id="txtVendorCode" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4  text-muted text-left">Short Text</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" class="form-control" id="txt-shorttext" />
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted text-left">Month</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@month" class="form-control" id="txtMonth" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted text-left">Currency</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" type="text" value="@currency" class="form-control" id="txtCurrency" />
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label form="txt-docdate" class="control-label col-xs-5 col-sm-4 text-muted text-left">Doc Date</label>
+                <div class="col-xs-7 col-sm-8">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" id="txt-docdate" class="form-control" value="@DateTime.Now.ToStandardFormat()" placeholder='@CommonDisplayMessage.DateTimePlaceholder' readonly autocomplete="off"/>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="control-label col-xs-5 col-sm-4 text-muted text-left">Amount</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input disabled="disabled" style="text-align:right" type="text" value="@amount" class="form-control" id="txtAmount" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="v-space">
+        @if (information.Length > 1)
+        { 
+            <label class="control-label note-expired text-left" style="color:red" >This PO already Expired !!</label>
+        }
+    </div>
+    <div id="POItem">
+        <div class="table-responsive">
+            <div style="border: 1pt solid #ccc;">
+                <div id="DivHeaderRow"></div>
+                <div  onscroll="OnScrollDiv(this)" id="DivMainContent">
+                    <table id="tscroll" class="table table-striped table-bordered table-condensed table-fixed" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Material Number</th>
+                                <th>Material Description</th>
+                                <th>PO Qty</th>
+                                <th>UOM</th>
+                                <th>Price</th>
+                                <th>Amount</th>
+                                <th>Delivery Date</th>
+                                <th>Plant</th>
+                                <th>Sloc</th>
+                                <th>Remain</th>
+                                <th>Accepted</th>
+                                <th>Receive</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ListItem.Count > 0)
+                            {
+                                foreach (GRCreation item in ListItem)
+                                {
+                                    listColor = ""; disable = ""; icon = "45F500";
+                                    if (item.PO_QTY_ORI == item.PO_QTY_USED)
+                                    {
+                                        listColor = "background-color:#E8E8E8";
+                                        disable = "disabled";
+                                        icon = "737373";
+                                    }
+                                    <tr style="@listColor">
+                                        <td class="text-center"><i class="fa fa-circle text-center" style="color:#@icon" title="" data-toggle="tooltip" data-original-title="Enable"></i></td>
+                                        <td class="text-left">@item.MAT_NO </td>
+                                        <td class="text-left">@item.MAT_DESC</td>
+                                        <td class="text-right">@item.PO_QTY_ORI</td>
+                                        <td class="text-center">@item.UOM</td>
+                                        <td class="text-right">@decimal.Parse(item.PRICE_PER_UOM).ToStandardFormat().ToString()</td>
+                                        <td class="text-right">@decimal.Parse(item.ORI_AMOUNT).ToStandardFormat().ToString()</td>
+                                        <td class="text-center">@item.DELIVERY_PLAN_DT</td>
+                                        <td class="text-left">@item.PLANT_NAME</td>
+                                        <td class="text-left">@item.SLOC_NAME</td>
+                                        <td class="text-right">@item.PO_QTY_REMAIN.ToString("0.###")</td>
+                                        <td class="text-right">@item.PO_QTY_USED.ToString("0.###")</td>
+                                        <td class="text-center">
+                                            <input style="width:100px;text-align:right;" value="0" @disable
+                                                name="receive" type="number" data-pono="@item.PO_NO" data-poitemno="@item.PO_ITEM_NO" data-remqty="@item.PO_QTY_REMAIN.ToString("0.###")"
+                                                id="txtgrqty-@item.PO_ITEM_NO" />
+                                        </td>
+                                        @*<td class="text-center"><button class="btn btn-primary btn-xs" title="Submit" onclick="onSubmit(@item.PO_ITEM_NO)"><span class='glyphicon glyphicon-ok'></span></button>
+                                        <button class="btn btn-success btn-xs" title="Edit" onclick="onEdit(@item.PO_ITEM_NO)"><span class='glyphicon glyphicon-pencil'></span></button></td>*@
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="13" class="text-center">
+                                        No data found
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <br />
+    <div class="row">
+        <div id="Submit" class="col-sm-2 col-sm-offset-10 text-right">
+        <button type="button" onclick="onSubmit()" class="btn btn-primary btn-xs hidden" id="btnSubmit" >Submit</button></div>
+    </div>
+</div>
+<script type="text/javascript">
+    $("#txt-postingdate").todatepicker();
+</script>

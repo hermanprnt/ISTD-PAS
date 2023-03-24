@@ -1,0 +1,23 @@
+﻿@using GPS.Models.Common
+@{
+    List<Notification> notificationList = (List<Notification>)ViewData["HomeNotification"];
+    int counter = 1;
+}
+
+<style>
+    .notification-content ul li a{
+        color:gold;
+    }
+</style>
+
+@if (notificationList.Count > 0)
+{
+    foreach (Notification item in notificationList)
+    {
+        <div style="font-size: 12px;font-weight: 700;">Notification #@(counter++)</div>
+        <div class="notification-content" style="width:100%;overflow:auto;border:0.1em solid #DDD;background-color: #0aa0db;color: white;padding: 5px;border-radius: 10px;">
+            @Html.Raw(item.CONTENT.Replace(Environment.NewLine, "<br />").Replace("\\r?\\n", "<br />"))
+        </div>
+    } 
+}
+

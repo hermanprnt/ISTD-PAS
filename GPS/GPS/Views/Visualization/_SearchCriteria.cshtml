@@ -1,0 +1,62 @@
+﻿<form role="form" class="form-horizontal" id="searchForm">
+    <div class="row">
+        
+        <div class="col-xs-7">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-3 col-sm-2 control-label text-muted">Period</label>
+                <div class="col-xs-7 col-sm-6">
+                    <div class="input-group mandatory">
+						<span class="input-group-addon">
+							<i class="fa fa-calendar bigger-110"></i>
+						</span>
+
+						<input class="form-control mandatory" type="text" name="date-range-picker" id="id-date-range-picker-1" data-date-format="dd.mm.yyyy" />
+					</div>
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="col-xs-3 col-sm-2 control-label text-muted">Criteria</label>
+                <div class="col-xs-9 col-sm-10">
+                    <input type="text" class="form-control" value="" style="float: left; width: 57.7%;" />
+                    <button type="button" class="btn btn-primary btn-sm" style="line-height: 1.1; margin-left: 5px; float: left;">Search</button>
+                    <button type="button" class="btn btn-default btn-sm" style="line-height: 1.1; margin-left: 5px; float: left;">Clear</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xs-5">
+            
+            <div class="form-group form-group-xs">
+                <label class="col-xs-3 col-sm-2 control-label text-muted">Group</label>
+                <div class="col-xs-7 col-sm-10" style="padding-right: 0px;">
+                    <div class="input-group mandatory col-xs-12">
+                        <div class="col-xs-11" style="padding-right: 0px;">
+                            <select class="form-control" style="margin-bottom: 5px; display:inline-block;" 
+                                    ng-change="changeDashboard()" ng-model="selectedDashboardId" 
+                                    ng-options="d.id as d.name for d in dashboards | object2Array | orderBy:'id'">
+	                        </select>
+                        </div>
+					</div>
+                </div>
+            </div>
+
+            <div class="form-group form-group-xs">
+                <label class="col-xs-3 col-sm-2 control-label text-muted">Widget</label>
+                <div class="col-xs-7 col-sm-10"">
+                    <div class="input-group mandatory col-xs-12">
+                        <div class="col-xs-12">
+                            <select class="form-control" id="cbWidget" ng-model="selectedWidgetId" 
+                                    ng-options="d.id as d.name for d in widgetOpt | object2Array | orderBy:'id'" style="width: 43.5%; float: left;"></select>
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-primary btn-sm" id="btnAddWidget" ng-click="addWidget()" style="line-height: 1.1; margin-left: 5px; float: left;">Add Widget</button>
+                                <button type="button" class="btn btn-default btn-sm" id="btnClearWidget" ng-click="clear()" style="line-height: 1.1; margin-left: 5px; float: left;">Clear</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</form>

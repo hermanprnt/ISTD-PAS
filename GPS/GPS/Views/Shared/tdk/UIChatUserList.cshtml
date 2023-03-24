@@ -1,0 +1,14 @@
+﻿<div>
+    <ul class="media-list">
+        @for (int i = 1; i <= 10; i++)
+        {
+            <li class="media"><a class="pull-left" href="#">
+                <img class="media-object" src="@Url.Content("~/Content/tdk/theme/simplex/img/user-anonymous.png")" alt="Anonymous user"/>
+            </a>
+                <div class="media-body">
+                    <h4 class="media-heading">User @i</h4>
+                </div>
+            </li>
+        }        
+    </ul>
+</div>

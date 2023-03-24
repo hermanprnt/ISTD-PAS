@@ -1,0 +1,89 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Models.PRPOApproval
+@using CommonFormat = GPS.Constants.CommonFormat
+@{
+    List<CommonApprovalNotice> prApprovalNoticeList = (List<CommonApprovalNotice>)ViewData["HomeNotice"];
+}
+
+<div style="width:100%;overflow:auto;">
+    <table id="table-HomeNotice" class="table table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th style="width:7em;">Doc. No</th>
+                <th style="width:18em;">From</th>
+                <th>Notice Content</th>
+                <th style="width:7em;">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (prApprovalNoticeList.Count > 0)
+        {
+            foreach (CommonApprovalNotice item in prApprovalNoticeList)
+            {
+                <tr class="data" data-embedded="@item.AsEmbeddedData()">
+                    <td class="text-center">@item.DOC_NO</td>
+                    @{
+                        string noticeFromAlias = string.Empty;
+                        //noticeFromAlias = noticeFromAlias.Substring(0, noticeFromAlias.Length - 1);
+                        if (item.NOTICE_FROM_ALIAS != string.Empty)
+                        {
+                            noticeFromAlias = item.NOTICE_FROM_ALIAS.Replace("[", string.Empty).Replace("]", string.Empty);
+                            noticeFromAlias = noticeFromAlias;
+                            <td class="text-left">@noticeFromAlias</td>
+                        }
+                    }
+                    <td class="text-left">@item.NOTICE_MESSAGE</td>
+                    <td class="text-center">@(item.CREATED_DT != DateTime.MinValue ? item.CREATED_DT.ToString(CommonFormat.Date) : "")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">@CommonDisplayMessage.NoData</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#table-HomeNotice tr[class='data']").click(function () {
+            var embedded = $(this).data("embedded");
+            docNo = embedded.DOC_NO;
+            docType = embedded.DOC_TYPE;
+            docDt = embedded.DOC_DATE;
+
+            detailSelectionMode = "INC";
+            docItemNoCount = 0;
+            docItemNoList = "";
+            $("#detail-selection-mode").val(detailSelectionMode);
+            $("#docitemno-list-value").val(docItemNoList);
+            $("#docitemno-count-value").val(docItemNoCount);
+
+            var onOpenApprovalDetail = function (data) {
+                var isError = false;
+                if (!data.ResponseType)
+                    isError = data.toLowerCase().indexOf("not authorized") > -1;
+                else
+                    isError = true;
+
+                if (isError)
+                    $.messagebox.show("E", data, "E");
+                else {
+                    $("#popup-container").html(data);
+                    $("#popup-container").modal();
+                }
+            };
+
+            if (docType === "PR") {
+                openPRApprovalDetail(undefined, undefined, onOpenApprovalDetail);
+            } else {
+                openPOApprovalDetail(undefined, undefined, true, onOpenApprovalDetail);
+            }
+        });
+    });
+</script>
+

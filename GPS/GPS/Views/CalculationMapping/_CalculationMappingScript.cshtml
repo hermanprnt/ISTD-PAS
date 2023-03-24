@@ -1,0 +1,735 @@
+﻿@using GPS.Constants.Master
+<script type="text/javascript" id="Common-ValuationClass">
+    $tdk.AjaxMethod = "POST";
+    $tdk.Alert = "#alert-search";
+    $tdk.AlertDetail = "#alert-detail";
+    $tdk.Success = "#success-search";
+    $tdk.Warning = "#warning-search";
+    $tdk.Division = "";
+    $tdk.isDetail = 0;
+    messagelife = 1;
+
+    function toggleSearch() {
+        $("._criteria").toggle(200, "linear");
+        //toogle('moreinquiry', 'Search Criteria');
+        if ($("#toogle-search").hasClass("fa-angle-double-up")) {
+            $("#toogle-search").removeClass("fa-angle-double-up");
+            $("#toogle-search").addClass("fa-angle-double-down");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            $("#tScrollBody").height(350);
+            $("#toogle-search").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-search").removeClass("fa-angle-double-down");
+            $("#toogle-search").addClass("fa-angle-double-up");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            $("#tScrollBody").height(300);
+            $("#toogle-search").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+
+    function toggleDetail() {
+        $("._detailpr").toggle(200, "linear");
+        //toogle('moreinquiry', 'Search Criteria');
+        if ($("#toogle-detail").hasClass("fa-angle-double-up")) {
+            $("#toogle-detail").removeClass("fa-angle-double-up");
+            $("#toogle-detail").addClass("fa-angle-double-down");
+            $("#toogle-detail").removeClass("btn-tiny-down");
+            $("#toogle-detail").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            //$("#tScrollBody_detail").height(300);
+            $("#toogle-detail").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-detail").removeClass("fa-angle-double-down");
+            $("#toogle-detail").addClass("fa-angle-double-up");
+            $("#toogle-detail").removeClass("btn-tiny-down");
+            $("#toogle-detail").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            //$("#tScrollBody_detail").height(190);
+            $("#toogle-_detail").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+
+    function toogle(_class, displaytext) {
+        var _criteria = $("." + _class);
+        var text = $("#lnsearch-toggle-" + _class).text();
+        _criteria.toggle(200, "linear");
+        $("#lnsearch-toggle-" + _class).text(text == "More " + displaytext ? "Less " + displaytext : "More " + displaytext);
+    }
+
+    function detailGrid() {
+        if ($tdk.isDetail > 0) {
+            $("#btnToggleDetail").html('Show Detail');
+            $("._toggle-detail").hide();
+            $tdk.isDetail = 0;
+        }
+        else {
+            $("#btnToggleDetail").html('Hide Detail');
+            $("._toggle-detail").show();
+            $tdk.isDetail = 1;
+        }
+    }
+
+    function ClearEditor() {
+        ClearHtml(["#no"]);
+        ClearVal(["#compprice_cd", "#basevalue_from", "#basevalue_to", "#qtyperuom", "#inventory", "#plusminus",
+                  "#calculation_type", "#condition_cat", "#accrual", "#conditionrule"]);
+    }
+
+    function ClearVal(id) {
+        for (var i = 0; i < id.length ; i++) {
+            if (id[i] != "")
+                $(id[i]).val("");
+        }
+    }
+
+    function ClearHtml(id) {
+        for (var i = 0; i < id.length ; i++) {
+            if (id[i] != "")
+                $(id[i]).html("");
+        }
+    }
+
+    function MessageFormat(message, param) {
+        for (var i = 0; i < param.length; i++) {
+            message = message.replace("{" + i + "}", param[i].toString());
+        }
+        return message;
+    }
+
+    function IgnoreInput(e) {
+        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+            (e.keyCode == 65 && e.ctrlKey === true) ||
+            (e.keyCode >= 35 && e.keyCode <= 40)) {
+            e.preventDefault();
+        }
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+        if ((e.shiftKey >= 48) || (e.shiftKey <= 57))
+        { e.preventDefault(); }
+    }
+
+    function Messages(id, display, msg) {
+        $(id).css("display", display);
+        $(id).html(msg);
+    }
+
+    function AssignVariable(message, param) {
+        for (var i = 0; i < param.length; i++) {
+            message = message.replace("{" + i + "}", param[i]);
+        }
+        return message;
+    }
+</script>
+
+<script type="text/javascript" id="Search-Data">
+    function ClearCriteria() {
+        $.progressbox.show("Search Valuation Class", "Clearing Data...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._SearchCalculationMapping)",
+            data: { issearch: 'N' },
+            success: function (resultMessage) {
+                $('.TableList').html(resultMessage);
+                messagelife = 1;
+                $("#calculation_scheme").val("");
+                $("#calculation_desc").val("");
+                $("#comp_price").val("");
+                $("#inventory_flag").val("");
+                $("#accrual_flag").val("");
+                $("#condition_rule").val("");
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function GetSearchCMParam(page) {
+        return {
+            CALCULATION_SCHEME_CD: $("#calculation_scheme").val(),
+            INVENTORY_FLAG: $("#inventory_flag").val(),
+            CALCULATION_SCHEME_DESC: $("#calculation_desc").val(),
+            ACCRUAL_FLAG_TYPE: $("#accrual_flag").val(),
+            COMP_PRICE_CD: $("#comp_price").val(),
+            CONDITION_RULE: $("#condition_rule").val(),
+            issearch: 'Y',
+            page: page,
+            pageSize: $('.page').val() || 10
+        };
+    }
+
+    function SearchCalculationMapping(page, isbutton) {
+        var param = GetSearchCMParam(page);
+
+        if (isbutton === 1)
+            messagelife = 1;
+
+        $.disable_enable_button.disable(); 
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._SearchCalculationMapping)",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (resultMessage) {
+                var maxperpage = $('.page').val() || 10;
+                $('.TableList').html(resultMessage);
+                $('.page').val(maxperpage);
+                $.disable_enable_button.enable(); 
+            },
+            error: function (resultMessage) {               
+            }
+        });
+    }
+
+    function changeIcon(CALCULATION_SCHEME_CD) {
+        if ($("#" + CALCULATION_SCHEME_CD).children('.fa').hasClass("fa-plus-square-o")) {
+            // expand grid
+            $("#" + CALCULATION_SCHEME_CD).children('.fa').removeClass("fa-plus-square-o");
+            $("#" + CALCULATION_SCHEME_CD).children('.fa').addClass("fa-minus-square-o");
+            $("#" + CALCULATION_SCHEME_CD).closest('tr').after('<tr><td colspan="4"><div id="dt' + CALCULATION_SCHEME_CD + '"></div></td></tr>');
+
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._SearchDetailCalculationMapping)",
+                data: { CALCULATION_SCHEME_CD: CALCULATION_SCHEME_CD },
+                success: function (data) {
+                    $("#dt" + CALCULATION_SCHEME_CD).html(data);
+                    freezeTable.init();
+                }
+            });
+        } else {
+            // collapse grid
+            $("#" + CALCULATION_SCHEME_CD).children('.fa').removeClass("fa-minus-square-o");
+            $("#" + CALCULATION_SCHEME_CD).children('.fa').addClass("fa-plus-square-o");
+            $("#dt" + CALCULATION_SCHEME_CD).closest('tr').remove();
+        }
+    }
+</script>
+
+<script type="text/javascript" id="CRUDS">
+    function openPopup(flag) {
+        var validmsg = "";
+        var calculationscheme;
+
+        if (flag == 0) {
+            calculationscheme = null;
+        }
+        else {
+            var checked = []
+            $("input[name='checkdata[]']:checked").each(function () { checked.push($(this).val()); });
+            validmsg = ValidChecked(checked, "edited");
+            if (validmsg != "") {
+                $.messagebox.show(
+                    "Edit Calculation Mapping",
+                    validmsg,
+                    "WRN",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+            }
+            else calculationscheme = checked[0];
+        }
+
+        if (validmsg == "") {
+            $.progressbox.show("Load Calculation Mapping Data...");
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._GetSelectedCMData)",
+                data: { isedit: flag, CALCULATION_SCHEME_CD: calculationscheme, PROCESS_ID: 0 },
+                success: function (data) {
+                    $("#addedit-popup-container").html(data);
+                    $.progressbox.hide();
+                    $("#addedit-popup-container").modal();
+                },
+                error: function (resultMessage) {
+                    $.progressbox.hide();
+                    //Display Ajay Error Message
+                }
+            });
+        }
+    }
+
+    function ValidChecked(checked, method) {
+        return checked.length > 1 ? MessageFormat("@MasterMessages.singleChecked", [method]) :
+                  (checked.length <= 0 ? MessageFormat("@MasterMessages.selectRecord", [method]) : "");
+    }
+
+    function onChangeCalculationHeader() {
+        if ($("#calculationscheme").val() == "") {
+            $("#calculationdesc").val("");
+            $.Enable(["#calculationdesc"]);
+        }
+        else {
+            $.Disable(["#calculationdesc"]);
+            $("#calculationdesc").val($("#" + $("#calculationscheme").val()).data("caldesc"));
+        }
+    }
+
+    function onChangeCompPrice() {
+        var compprice = $("#compprice_cd").val();
+        
+        if (compprice == "") compprice = "none";
+
+        $("#compprice_desc").html($("#" + compprice).data("compprice_desc"));
+    }
+
+    function AddDetail() {
+        var basevaluemax;
+        $("#addrow").show();
+
+        if ($(".isrow").length == 0) basevaluemax = 1;
+        else basevaluemax = $(".isrow").length;
+        
+        $("#basevalue_from").empty();
+        var _select = $('<select>');
+        _select.append(
+            $("<option></option>").val("").html("")
+        );
+
+        for (i = 1; i <= basevaluemax; ++i) {
+            _select.append(
+                $("<option></option>").val(i).html(i)
+            );
+        }
+        $('#basevalue_from').append(_select.html());
+
+        onChangeBaseValue();
+    }
+
+    function editStatus() {
+        if ($("#status").hasClass("active-item")) {
+            $("#status").removeClass("active-item");
+            $("#status").addClass("inactive-item");
+        }
+        else {
+            $("#status").removeClass("inactive-item");
+            $("#status").addClass("active-item");
+        }
+    }
+
+    function onChangeStatusHeader() {
+        if ($("#header_status").hasClass("active-header")) {
+            $("#header_status").removeClass("active-header");
+            $("#header_status").addClass("inactive-header");
+        }
+        else {
+            $("#header_status").removeClass("inactive-header");
+            $("#header_status").addClass("active-header");
+        }
+    }
+
+    function onChangeBaseValue() {
+        var basevalue_from = $("#basevalue_from").val();
+        var basevalue_max;
+
+        if (basevalue_from != "") {
+            if ($(".isrow").length == 0) basevaluemax = 1;
+            else basevaluemax = $(".isrow").length;
+
+            $("#basevalue_to").empty();
+            var _select = $('<select>');
+            _select.append(
+                $("<option></option>").val("").html("")
+            );
+
+            for (i = basevalue_from; i <= basevaluemax; ++i) {
+                _select.append(
+                    $("<option></option>").val(i).html(i)
+                );
+            }
+            $('#basevalue_to').append(_select.html());
+        }
+        else $("#basevalue_to").empty();
+    }
+
+    function EditDetail(thisindex) {
+        AddDetail();
+
+		$("[id^=editlink]").addClass("_link-disabled");
+		$("[id^=dellink]").addClass("_link-disabled");
+
+		$("#hiddenrow").empty();
+		$("#hiddenrow").html($("#row-" + thisindex).html());
+		$("#row-" + thisindex).empty();
+		$("#row-" + thisindex).html($("#addrow").html());
+		$("#addrow").empty();
+
+		$("#compprice_cd").val($(".tcompcd-" + thisindex).html());
+		$("#compprice_desc").html($(".tcompdesc-" + thisindex).html());
+		$("#basevalue_from").val($(".tbasefrom-" + thisindex).html());
+		$("#basevalue_to").val($(".tbaseto-" + thisindex).html());
+		$("#qtyperuom").val($(".tqty-" + thisindex).html());
+		$("#inventory").val($(".tinventory-" + thisindex).html());
+		$("#calculation_type").val($(".tcaltype-" + thisindex).data("calculation_type"));
+		$("#plusminus").val($(".tplusminus-" + thisindex).data("plusminus_sign"));
+		$("#condition_cat").val($(".tconcat-" + thisindex).data("condition_cd"));
+		$("#accrual").val($(".taccrual-" + thisindex).html());
+		$("#conditionrule").val($(".tconrule-" + thisindex).html());
+		$("#no").html(thisindex);
+
+		if ($("#isedit-" + thisindex).html() != "Y") EditorInitialize("Edit");
+		else EditorInitialize("Add");
+    }
+
+    function EditorInitialize(mode) {
+        $.Disable([".btnadddetail", ".btnsavehead", ".btncancelhead"]);
+    }
+
+    function validateDetail() {
+        var msg = "";
+        var mandatoryDetailItem = "";
+
+        if ($("#compprice_cd").val() == "") mandatoryDetailItem = mandatoryDetailItem + "Comp Price Code, ";
+        if ($("#inventory").val() == "") mandatoryDetailItem = mandatoryDetailItem + "Inventory, ";
+        if ($("#plusminus").val() == "") mandatoryDetailItem = mandatoryDetailItem + "Sign, ";
+        if ($("#condition_cat").val() == "") mandatoryDetailItem = mandatoryDetailItem + "Condition Category, ";
+        if ($("#accrual").val() == "") mandatoryDetailItem = mandatoryDetailItem + "Accrual Flag, ";
+        if ($("#conditionrule").val() == "") mandatoryDetailItem = mandatoryDetailItem + "Condition Rule, ";
+
+        if (mandatoryDetailItem != "")
+            msg = msg + AssignVariable("@MasterMessages.mandatoryDetail", [mandatoryDetailItem.substr(0, mandatoryDetailItem.length - 2)]) + ". ";
+
+        if ($("#conditionrule").val() != "") {
+            if (($("#conditionrule").val()).length > 1) msg = msg + AssignVariable("@MasterMessages.lengthValidation", ["Condition Rule", "1"]);
+        }
+
+        return msg;
+    }
+
+    function getAddDetailParam(seqno) {
+        var status = "A";
+        if ($("#status").hasClass("inactive-item")) status = "I";
+
+        return {
+            SEQ_NO: seqno,
+            CALCULATION_SCHEME_CD: $("#calculationscheme").val(),
+            CALCULATION_SCHEME_DESC: $("#calculationdesc").val(),
+            ITEM_STATUS: status,
+            COMP_PRICE_CD: $("#compprice_cd").val(),
+            BASE_VALUE_FROM: $("#basevalue_from").val(),
+            BASE_VALUE_TO: $("#basevalue_to").val(),
+            QTY_PER_UOM: $("#qtyperuom").val(),
+            INVENTORY_FLAG: $("#inventory").val(),
+            PLUS_MINUS_FLAG: $("#plusminus").val(),
+            CALCULATION_TYPE: $("#calculation_type").val(),
+            CONDITION_CATEGORY: $("#condition_cat").val(),
+            ACCRUAL_FLAG_TYPE: $("#accrual").val(),
+            CONDITION_RULE: $("#conditionrule").val(),
+            PROCESS_ID: $("#procid").val()
+        }
+    }
+
+    function SaveDetail() {
+        var seqno = $("#no").html().length <= 0 ? "0" : $("#no").html();
+
+        var msg = validateDetail();
+        if (msg != "") {
+            $.messagebox.show(
+                "Save Detail Calculation Mapping",
+                msg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+            return false;
+        }
+
+        $.progressbox.show("Save Item", "Saving Item onprogress . . .");
+        var param = getAddDetailParam(seqno);
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._SaveDetailCalculationMapping)",
+		    data: JSON.stringify(param),
+		    contentType: "application/json; charset=utf-8",
+		    success: function (resultMessage) {
+		        if (resultMessage === 'SUCCESS') {
+		            $.ajax({
+		                type: $tdk.AjaxMethod,
+		                type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._GetSelectedCMData)",
+		                data: { isedit: $("#isedit").val(), CALCULATION_SCHEME_CD: null, PROCESS_ID: $("#procid").val() },
+		                success: function (data) {
+
+		                    if (data.PROCESS_STATUS === "ERR") {
+		                        var msg = "Data Successfully Saved " +
+                                          "Error While Get Data " + data.MESSAGE_CONTENT;
+
+		                        $.messagebox.show(
+                                    "Save Detail Calculation Mapping",
+                                    msg,
+                                    "ERR",
+                                    "SINGLE",
+                                    "",
+                                    ""
+                                )
+
+		                        $.progressbox.hide();
+		                        return;
+		                    }
+
+		                    $("#addrow").hide();
+		                    ClearEditor();
+
+		                    if ($("#hiddenrow").html().length > 0) {
+		                        $("#addrow").html($("#row-" + (seqno)).html());
+		                        $("#hiddenrow").empty();
+		                    }
+
+		                    $.Enable([".btnadddetail", ".btnsavehead", ".btncancelhead"]);
+		                    $.Disable([".btncanceldetail", ".btnsavedetail"]);
+
+		                    $('#detail-grid-creation').html(data);
+		                    $("[id^=editlink]").removeClass("_link-disabled");
+		                    $("[id^=dellink]").removeClass("_link-disabled");
+
+		                    $.progressbox.hide();
+		                },
+		                error: function (data) {
+		                    var e = data.responseText;
+		                    alert($(e).find("title").text());
+		                }
+		            });
+                }
+                else {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Save Detail Calculation Mapping",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+		    },
+		    error: function (resultMessage) {
+		        var e = resultMessage.responseText;
+		        alert($(e).find("title").text());
+		        $.progressbox.hide();
+		    }
+		});
+    }
+
+    function DeleteDetail(thisindex) {
+        $.messagebox.show(
+            "Info",
+            "Are You Sure You Want to Delete this Item ?",
+            "INF",
+            "CONFIRM",
+            "doDeleteSelectedDetail(" + thisindex + ")",
+            ""
+        )
+    }
+
+    function getDeleteDetailParam(index) {
+        return {
+            SEQ_NO: index || 0,
+            PROCESS_ID: $('#procid').val()
+        }
+    }
+
+    function doDeleteSelectedDetail(index) {
+        var param = getDeleteDetailParam(index);
+
+        $.progressbox.show("Delete Item", "Deleting Item . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._DeleteCalculationMappingTemp)",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (resultMessage) {
+                if (resultMessage == 'SUCCESS') {
+                    $.ajax({
+                        type: $tdk.AjaxMethod,
+                        type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._GetSelectedCMData)",
+                        data: { isedit: $("#isedit").val(), CALCULATION_SCHEME_CD: null, PROCESS_ID: $("#procid").val() },
+                        success: function (data) {
+                            if (data.PROCESS_STATUS === "ERR") {
+                                var msg = "Data Successfully Deleted " +
+                                            "Error While Get Data " + data.MESSAGE_CONTENT;
+
+                                $.messagebox.show(
+                                    "Delete Detail Calculation Mapping",
+                                    msg,
+                                    "ERR",
+                                    "SINGLE",
+                                    "",
+                                    ""
+                                )
+
+                                $.progressbox.hide();
+                                return;
+                            }
+
+                            $('#detail-grid-creation').html(data);
+
+                            if ($(".isrow").length <= 0) {
+                                $.Disable([".btnsavehead"]);
+                                $.Enable(["#aprtype"]);
+                            }
+                            $.progressbox.hide();
+                        },
+                        error: function (resultMessage) {
+                            var e = resultMessage.responseText;
+                            $.progressbox.hide();
+                            alert($(e).find("title").text());
+                        }
+                    });
+                }
+                else {
+                    $.messagebox.show(
+                        "Delete Detail Calculation Mapping",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    $.progressbox.hide();
+                }
+            },
+            error: function (resultMessage) {
+                var e = resultMessage.responseText;
+                alert($(e).find("title").text());
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function CancelDetail() {
+        var seqno = $("#no").html().length <= 0 ? "0" : $("#no").html();
+
+        $("#addrow").hide();
+        $.Enable([".btnadddetail", ".btnsavehead", ".btncancelhead"]);
+        $.Disable([".btncanceldetail", ".btnsavedetail"]);
+
+        if ($("#hiddenrow").html().length > 0) {
+            $("#addrow").html($("#row-" + (seqno)).html());
+            $("#row-" + (seqno)).empty();
+            $("#row-" + (seqno)).html($("#hiddenrow").html());
+            $("#hiddenrow").empty();
+            $("#row-" + (seqno)).removeAttr("style");
+            $("#row-" + (seqno)).show;
+            ClearEditor();
+        }
+
+        $("[id^=editlink]").removeClass("_link-disabled");
+        $("[id^=dellink]").removeClass("_link-disabled");
+
+        if ($('.isrow').length <= 0) {
+            $.Disable([".btnsavehead"]);
+        }
+        else {
+            $.Enable([".btnsavehead"]);
+        }
+    }
+
+    function GetSaveParam(flag) {
+        var status = "A";
+        if ($("#header_status").hasClass("inactive-header")) status = "I";
+
+        return {
+            CALCULATION_SCHEME_CD: $("#calculationscheme").val(),
+            CALCULATION_SCHEME_DESC: $("#calculationdesc").val(),
+            STATUS: status,
+            PROCESS_ID: $("#procid").val(),
+            isedit: flag
+        };
+    }
+
+    function SaveData() {
+        var flag = $("#isedit").val();
+        var error = SaveValidation(flag);
+        
+        if (error == "") {
+            var param = GetSaveParam(flag);
+
+            $.progressbox.show("Save Calculation Mapping Data", "Processing...");
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._SaveCalculationMapping)",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (resultMessage) {
+                    var message = resultMessage.split('|');
+                    if (message[0] === 'SUCCESS') {
+                        $.progressbox.hide();
+
+                        $.messagebox.show(
+                            "Save Calculation Mapping",
+                            AssignVariable("@MasterMessages.successSaveCalculationMapping", [message[1]]),
+                            "SUC",
+                            "SINGLE",
+                            "ShowLatestCreation('" + message[1] + "')",
+                            ""
+                        )
+                    }
+                    else if (message[0] === 'WARNING') {
+                        $.progressbox.hide();
+
+                        $.messagebox.show(
+                            "Save Calculation Mapping",
+                            "Success Saving data with Calculation Mapping " + message[1] + ", with WARNING " + message[2],
+                            "WRN",
+                            "SINGLE",
+                            "ShowLatestCreation('" + message[1] + "')",
+                            ""
+                        )
+                    }
+                    else {
+                        $.Enable([".btnsavehead", ".btncancelhead"]);
+                        //Messages(Error, "inherit", message[0]);
+
+                        $.messagebox.show(
+                            "Save Calculation Mapping",
+                            message[0],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+
+                        $.progressbox.hide();
+                    }
+                },
+                error: function (resultMessage) {
+                    $.progressbox.hide();
+                }
+            });
+        }
+        else {
+            $.messagebox.show(
+                "Save Calculation Mapping",
+                error,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+        }
+    }
+
+    function ShowLatestCreation(CALCULATION_SCHEME_CD) {
+        $("#addedit-popup-container").modal('hide');
+        $("#calculation_scheme").val(CALCULATION_SCHEME_CD);
+        SearchCalculationMapping(1, 1);
+    }
+
+    function SaveValidation(flag) {
+        var error = "";
+
+        if(flag == 0)
+        {       
+            if ($("#calculationscheme").val() == "") {
+                if ($("#calculationdesc").val() == "") {
+                    error = "Please choose one of Calculation Scheme Code or fill Calculation Scheme Description field";
+                }
+            }
+        }
+        return error
+    }
+</script>

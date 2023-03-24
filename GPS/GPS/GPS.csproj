@@ -1,0 +1,2450 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.NetFramework.Analyzers.2.9.8\build\Microsoft.NetFramework.Analyzers.props" Condition="Exists('..\packages\Microsoft.NetFramework.Analyzers.2.9.8\build\Microsoft.NetFramework.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.NetCore.Analyzers.2.9.8\build\Microsoft.NetCore.Analyzers.props" Condition="Exists('..\packages\Microsoft.NetCore.Analyzers.2.9.8\build\Microsoft.NetCore.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.8\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props" Condition="Exists('..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.8\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" />
+  <Import Project="..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\build\Microsoft.CodeQuality.Analyzers.props" Condition="Exists('..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\build\Microsoft.CodeQuality.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props" Condition="Exists('..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.3.3.0\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" />
+  <Import Project="..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props" Condition="Exists('..\packages\Microsoft.NetFramework.Analyzers.3.3.0\build\Microsoft.NetFramework.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props" Condition="Exists('..\packages\Microsoft.NetCore.Analyzers.3.3.0\build\Microsoft.NetCore.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props" Condition="Exists('..\packages\Microsoft.CodeQuality.Analyzers.3.3.0\build\Microsoft.CodeQuality.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props" Condition="Exists('..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.3.0\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2DC5FC0C-9911-47D7-883B-8744230B4D6C}</ProjectGuid>
+    <ProjectTypeGuids>{E53F8FEA-EAE0-44A6-8774-FFD645390401};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GPS</RootNamespace>
+    <AssemblyName>GPS</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <UseIISExpress>true</UseIISExpress>
+    <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>4.0</OldToolsVersion>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication>enabled</IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>disabled</IISExpressWindowsAuthentication>
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
+    <Use64BitIISExpress />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="itextsharp, Version=5.4.4.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Downloads\itextsharp\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp.pdfa">
+      <HintPath>Tdk-Lib\itextsharp.pdfa.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp.xtra">
+      <HintPath>Tdk-Lib\itextsharp.xtra.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WebForms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI">
+      <HintPath>Tdk-Lib\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OOXML">
+      <HintPath>Tdk-Lib\NPOI.OOXML.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net">
+      <HintPath>Tdk-Lib\NPOI.OpenXml4Net.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats">
+      <HintPath>Tdk-Lib\NPOI.OpenXmlFormats.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Text, Version=3.9.14.0, Culture=neutral, PublicKeyToken=1bf8b2f6523e7dbd, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Tdk-Lib\ServiceStack.Text.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.1.0.20105.408\lib\net40\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=3.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Tdk-Lib\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Razor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Razor.1.0.20105.408\lib\net40\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Web.WebPages, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.1.0.20105.408\lib\net40\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.1.0.20105.408\lib\net40\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.1.0.20105.408\lib\net40\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="Toyota.Common">
+      <HintPath>..\..\..\..\Download\Toyota.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Toyota.Common.Configuration, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Toyota.Common.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Toyota.Common.Credential, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Tdk-Lib\Toyota.Common.Credential.dll</HintPath>
+    </Reference>
+    <Reference Include="Toyota.Common.Credential.Provider">
+      <HintPath>Tdk-Lib\Toyota.Common.Credential.Provider.dll</HintPath>
+    </Reference>
+    <Reference Include="Toyota.Common.Database, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Toyota.Common.Database.dll</HintPath>
+    </Reference>
+    <Reference Include="Toyota.Common.Generalist, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+    <Reference Include="Toyota.Common.Lookup, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Toyota.Common.Lookup.dll</HintPath>
+    </Reference>
+    <Reference Include="Toyota.Common.Utilities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Tdk-Lib\Toyota.Common.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="Toyota.Common.Web.Platform, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Tdk-Lib\Toyota.Common.Web.Platform.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CommonFunc\CaseConverter.cs" />
+    <Compile Include="CommonFunc\DecimalModelBinder.cs" />
+    <Compile Include="CommonFunc\DummyDatabaseAgent.cs" />
+    <Compile Include="CommonFunc\FileManager.cs" />
+    <Compile Include="CommonFunc\PdfFileCreator.cs" />
+    <Compile Include="CommonFunc\StandardFormatter.cs" />
+    <Compile Include="CommonFunc\WebControl\GPSDateInput.cs" />
+    <Compile Include="CommonFunc\WebControl\GPSEmptyDropdownList.cs" />
+    <Compile Include="CommonFunc\WebControl\GPSLookup.cs" />
+    <Compile Include="CommonFunc\WebControl\GPSModal.cs" />
+    <Compile Include="CommonFunc\WebControl\RendererExtensions.cs" />
+    <Compile Include="Constants\EditMode.cs" />
+    <Compile Include="Constants\Master\MasterSqlFiles.cs" />
+    <Compile Include="Constants\Master\MasterControllerMethod.cs" />
+    <Compile Include="Constants\Master\MasterMessages.cs" />
+    <Compile Include="Constants\Master\MaterialPricePage.cs" />
+    <Compile Include="Constants\Master\RoutinePage.cs" />
+    <Compile Include="Constants\PO\POCreationType.cs" />
+    <Compile Include="Constants\PO\POCreationVendorType.cs" />
+    <Compile Include="Constants\PO\POItemClass.cs" />
+    <Compile Include="CommonFunc\ExcelExtensions.cs" />
+    <Compile Include="Constants\CommonDisplayMessage.cs" />
+    <Compile Include="Constants\CommonFormat.cs" />
+    <Compile Include="Constants\CommonPage.cs" />
+    <Compile Include="Constants\DisplayMessageId.cs" />
+    <Compile Include="Constants\FunctionId.cs" />
+    <Compile Include="Constants\ModuleId.cs" />
+    <Compile Include="Constants\MRP\MRPCommonPage.cs" />
+    <Compile Include="Constants\MRP\MRPPage.cs" />
+    <Compile Include="Constants\MRP\MRPProcessType.cs" />
+    <Compile Include="Constants\MRP\MRPSqlFile.cs" />
+    <Compile Include="Constants\PO\POItemConditionType.cs" />
+    <Compile Include="Constants\PO\POPdfFilenamePrefix.cs" />
+    <Compile Include="Constants\PO\POSaveMode.cs" />
+    <Compile Include="Constants\PO\POStatus.cs" />
+    <Compile Include="Constants\PRPOApproval\PRPOApprovalLabel.cs" />
+    <Compile Include="Constants\PRPOApproval\PRPOApprovalPage.cs" />
+    <Compile Include="Constants\PRPOApproval\PRPOApprovalType.cs" />
+    <Compile Include="Constants\PRPOApproval\UserType.cs" />
+    <Compile Include="Constants\PR\PurchaseRequisitionPage.cs" />
+    <Compile Include="Constants\PR\PurchaseRequisitionSqlFiles.cs" />
+    <Compile Include="Constants\PR\PurchasingRequisitionMessages.cs" />
+    <Compile Include="Constants\ReportPath.cs" />
+    <Compile Include="Constants\SystemCode.cs" />
+    <Compile Include="Constants\LookupPage.cs" />
+    <Compile Include="Constants\YesNoFlag.cs" />
+    <Compile Include="Controllers\Asset\AssetUploadController.cs" />
+    <Compile Include="Controllers\CommonController.cs" />
+    <Compile Include="Controllers\GR\GRCreationController.cs" />
+    <Compile Include="Controllers\Home\LogMonitoringController.cs" />
+    <Compile Include="Controllers\Home\LogMonitoringDetailController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
+    <Compile Include="Controllers\MasterGlAccount\MasterGLAccountController.cs" />
+    <Compile Include="Controllers\Master\BudgetControlController.cs" />
+    <Compile Include="Controllers\Master\CalculationMappingController.cs" />
+    <Compile Include="Controllers\Master\BudgetConfigController.cs" />
+    <Compile Include="Controllers\Master\PaymentController.cs" />
+    <Compile Include="Controllers\Master\CountryController.cs" />
+    <Compile Include="Controllers\Master\DeliveryAddrController.cs" />
+    <Compile Include="Controllers\Master\DivisionController.cs" />
+    <Compile Include="Controllers\Master\CostCenterController.cs" />
+    <Compile Include="Controllers\Master\CurrencyController.cs" />
+    <Compile Include="Controllers\Master\DocStatusController.cs" />
+    <Compile Include="Controllers\Master\GLAccountController.cs" />
+    <Compile Include="Controllers\Master\RoutineInquiryController.cs" />
+    <Compile Include="Controllers\Master\RoutineCreationController.cs" />
+    <Compile Include="Controllers\Master\SystemController.cs" />
+    <Compile Include="Controllers\Master\PRCheckerController.cs" />
+    <Compile Include="Controllers\Master\ProcurementChannelController.cs" />
+    <Compile Include="Controllers\Master\UnitOfMeasureController.cs" />
+    <Compile Include="Controllers\Master\VendorController.cs" />
+    <Compile Include="Controllers\Master\ExchangeRateController.cs" />
+    <Compile Include="Controllers\Master\MaterialController.cs" />
+    <Compile Include="Controllers\Master\DisplayMessageController.cs" />
+    <Compile Include="Controllers\Master\PlantController.cs" />
+    <Compile Include="Controllers\Master\PriceController.cs" />
+    <Compile Include="Controllers\Master\PurchasingGroupController.cs" />
+    <Compile Include="Controllers\Master\QuotaController.cs" />
+    <Compile Include="Controllers\Master\QuotaTransactionController.cs" />
+    <Compile Include="Controllers\Master\SLocController.cs" />
+    <Compile Include="Controllers\Master\SourceListController.cs" />
+    <Compile Include="Controllers\Master\ValuationClassController.cs" />
+    <Compile Include="Controllers\Monitoring\BudgetMonitoringController.cs" />
+    <Compile Include="Controllers\MRP\MRPGentaniHeaderController.cs" />
+    <Compile Include="Controllers\MRP\MRPGentaniTypeController.cs" />
+    <Compile Include="Controllers\MRP\MRPNonComponentController.cs" />
+    <Compile Include="Controllers\MRP\MRPParentController.cs" />
+    <Compile Include="Controllers\MRP\MRPParentHikiateController.cs" />
+    <Compile Include="Controllers\MRP\MRPProcUsageController.cs" />
+    <Compile Include="Controllers\PO\POApprovalController.cs" />
+    <Compile Include="Controllers\PO\POCommonController.cs" />
+    <Compile Include="Controllers\PO\POCreationController.cs" />
+    <Compile Include="Controllers\PO\POInquiryController.cs" />
+    <Compile Include="Controllers\PO\UrgentSPKCreationController.cs" />
+    <Compile Include="Controllers\PRPOTrackingController.cs" />
+    <Compile Include="Controllers\PRStatusMonitoring\PRStatusMonitoringController.cs" />
+    <Compile Include="Controllers\PR\PRApprovalController.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controllers\PR\PRCreationController.cs" />
+    <Compile Include="Controllers\PR\PRInquiryController.cs" />
+    <Compile Include="CommonFunc\Extensions.cs" />
+    <Compile Include="CommonFunc\PageControllerExtensions.cs" />
+    <Compile Include="Controllers\ReceivingList\ReceivingListController.cs" />
+    <Compile Include="Controllers\Report\ProcurementTrackingController.cs" />
+    <Compile Include="Controllers\Sample\BlankController.cs" />
+    <Compile Include="Controllers\Sample\ChangePasswordController.cs" />
+    <Compile Include="Controllers\Sample\ForgotPasswordController.cs" />
+    <Compile Include="Controllers\SAPImportMonitorController.cs" />
+    <Compile Include="Controllers\SA\SACreationController.cs" />
+    <Compile Include="Controllers\SimpleMasterController.cs" />
+    <Compile Include="Controllers\SOP\SOPFileInquiryController.cs" />
+    <Compile Include="Controllers\WallAnnouncement\WallAnnouncementController.cs" />
+    <Compile Include="Models\Asset\Asset.cs" />
+    <Compile Include="Models\Asset\AssetRepository.cs" />
+    <Compile Include="Models\Common\AttachmentFile.cs" />
+    <Compile Include="Models\Common\NotificationRepository.cs" />
+    <Compile Include="Models\Common\Notification.cs" />
+    <Compile Include="Models\Common\MessageRepository.cs" />
+    <Compile Include="Models\Common\MessageMaster.cs" />
+    <Compile Include="Models\GLACCOUNT\masterGLAccount.cs" />
+    <Compile Include="Models\GLACCOUNT\MasterGlAccountRepo.cs" />
+    <Compile Include="Models\Master\BudgetConfig.cs" />
+    <Compile Include="Models\PO\POMonitoring.cs" />
+    <Compile Include="Models\PRPOApproval\CommonApprovalVendorAssignment.cs" />
+    <Compile Include="Models\CommonDownload.cs" />
+    <Compile Include="Models\Common\PaymentRepository.cs" />
+    <Compile Include="Models\Common\Payment.cs" />
+    <Compile Include="Models\Common\Country.cs" />
+    <Compile Include="Models\Common\CountryRepository.cs" />
+    <Compile Include="Models\PRPOTracking.cs" />
+    <Compile Include="Models\LoginRepository.cs" />
+    <Compile Include="Models\Master\BudgetControlRepository.cs" />
+    <Compile Include="Models\Master\BudgetConfigRepository.cs" />
+    <Compile Include="Models\Master\PurchasingGroupUser.cs" />
+    <Compile Include="Models\Master\PurchasingGroupUserDivision.cs" />
+    <Compile Include="Models\PdfFileDownloadRepository.cs" />
+    <Compile Include="Models\CommonRepository.cs" />
+    <Compile Include="Models\CommonUploadRepository.cs" />
+    <Compile Include="Models\Common\Announcement.cs" />
+    <Compile Include="Models\Common\AnnouncementRepository.cs" />
+    <Compile Include="Models\Common\Attachment.cs" />
+    <Compile Include="Models\Common\AttachmentRepository.cs" />
+    <Compile Include="Models\Common\CarFamily.cs" />
+    <Compile Include="Models\Common\CarFamilyRepository.cs" />
+    <Compile Include="Models\Common\CommonFunction.cs" />
+    <Compile Include="Models\Common\ExecProcedureModel.cs" />
+    <Compile Include="Models\Common\ExecProcedureResultModel.cs" />
+    <Compile Include="Models\Common\InitialActionResult.cs" />
+    <Compile Include="Models\Common\ItemConsignment.cs" />
+    <Compile Include="Models\Common\ItemConsignmentRepository.cs" />
+    <Compile Include="Models\Common\MaterialGroup.cs" />
+    <Compile Include="Models\Common\MaterialGroupRepository.cs" />
+    <Compile Include="Models\Common\MaterialType.cs" />
+    <Compile Include="Models\Common\MaterialTypeRepository.cs" />
+    <Compile Include="Models\Common\NameValueItem.cs" />
+    <Compile Include="Models\Common\PagerOptions.cs" />
+    <Compile Include="Models\Common\Paging.cs" />
+    <Compile Include="Models\Common\PagingLookup.cs" />
+    <Compile Include="Models\Common\PagingModel.cs" />
+    <Compile Include="Models\Common\ProcessIdRepository.cs" />
+    <Compile Include="Models\Common\ProcurementUsage.cs" />
+    <Compile Include="Models\Common\ProcurementUsageRepository.cs" />
+    <Compile Include="Models\Common\SystemMaster.cs" />
+    <Compile Include="Models\Common\SystemRepository.cs" />
+    <Compile Include="Models\Common\UnitOfMeasure.cs" />
+    <Compile Include="Models\Common\UnitOfMeasureRepository.cs" />
+    <Compile Include="Models\Common\UploadValidationInfo.cs" />
+    <Compile Include="Models\Common\UserNameDescription.cs" />
+    <Compile Include="Models\Common\Worklist.cs" />
+    <Compile Include="Models\Common\WorklistRepository.cs" />
+    <Compile Include="Models\GR\GRCreation.cs" />
+    <Compile Include="Models\GR\GRCreationRepository.cs" />
+    <Compile Include="Models\Home\LogMonitoring.cs" />
+    <Compile Include="Models\Home\LogMonitoringDetail.cs" />
+    <Compile Include="Models\Home\LogMonitoringDetailRepository.cs" />
+    <Compile Include="Models\Home\LogMonitoringRepository.cs" />
+    <Compile Include="Models\Master\BudgetControl.cs" />
+    <Compile Include="Models\Master\CalculationMapping.cs" />
+    <Compile Include="Models\Master\CalculationMappingRepository.cs" />
+    <Compile Include="Models\Master\CostCenter.cs" />
+    <Compile Include="Models\Master\CostCenterRepository.cs" />
+    <Compile Include="Models\Master\Currency.cs" />
+    <Compile Include="Models\Master\CurrencyRepository.cs" />
+    <Compile Include="Models\Master\DeliveryAddr.cs" />
+    <Compile Include="Models\Master\DeliveryAddrRepository.cs" />
+    <Compile Include="Models\Master\DocStatus.cs" />
+    <Compile Include="Models\Master\DocStatusRepository.cs" />
+    <Compile Include="Models\Master\GLAccount.cs" />
+    <Compile Include="Models\Master\GLAccountRepository.cs" />
+    <Compile Include="Models\Master\Plant.cs" />
+    <Compile Include="Models\Master\PlantRepository.cs" />
+    <Compile Include="Models\Master\PRChecker.cs" />
+    <Compile Include="Models\Master\PRCheckerRepository.cs" />
+    <Compile Include="Models\Master\Routine.cs" />
+    <Compile Include="Models\Master\RoutineRepository.cs" />
+    <Compile Include="Models\Master\SLoc.cs" />
+    <Compile Include="Models\Master\SLocRepository.cs" />
+    <Compile Include="Models\Master\SystemConstant.cs" />
+    <Compile Include="Models\Master\Vendor.cs" />
+    <Compile Include="Models\Master\VendorRepository.cs" />
+    <Compile Include="Models\Master\CommonList.cs" />
+    <Compile Include="Models\Master\CommonListRepository.cs" />
+    <Compile Include="Models\Master\Division.cs" />
+    <Compile Include="Models\Master\DivisionRepository.cs" />
+    <Compile Include="Models\Master\ExchangeRate.cs" />
+    <Compile Include="Models\Master\ExchangeRateRepository.cs" />
+    <Compile Include="Models\Master\Material.cs" />
+    <Compile Include="Models\Master\MaterialRepository.cs" />
+    <Compile Include="Models\Master\DisplayMessage.cs" />
+    <Compile Include="Models\Master\DisplayMessageRepository.cs" />
+    <Compile Include="Models\Master\MaterialPrice.cs" />
+    <Compile Include="Models\Master\MaterialPriceRepository.cs" />
+    <Compile Include="Models\Master\ProcurementChannel.cs" />
+    <Compile Include="Models\Master\ProcurementChannelRepository.cs" />
+    <Compile Include="Models\Master\PurchasingGroup.cs" />
+    <Compile Include="Models\Master\PurchasingGroupRepository.cs" />
+    <Compile Include="Models\Master\Quota.cs" />
+    <Compile Include="Models\Master\QuotaDetail.cs" />
+    <Compile Include="Models\Master\QuotaDetailRepository.cs" />
+    <Compile Include="Models\Master\QuotaRepository.cs" />
+    <Compile Include="Models\Master\SourceList.cs" />
+    <Compile Include="Models\Master\SourceListRepository.cs" />
+    <Compile Include="Models\Master\StatusModel.cs" />
+    <Compile Include="Models\Master\StatusRepository.cs" />
+    <Compile Include="Models\Master\ValuationClass.cs" />
+    <Compile Include="Models\Master\ValuationClassRepository.cs" />
+    <Compile Include="Models\Master\WBSModel.cs" />
+    <Compile Include="Models\Master\WBSRepository.cs" />
+    <Compile Include="Models\MaterialType.cs" />
+    <Compile Include="Models\MaterialTypeRepository.cs" />
+    <Compile Include="Models\MRP\LastMRPInfo.cs" />
+    <Compile Include="Models\MRP\MaterialResourcePlanning.cs" />
+    <Compile Include="Models\MRP\MRPCommonRepository.cs" />
+    <Compile Include="Models\MRP\MRPCreation.cs" />
+    <Compile Include="Models\MRP\MRPCreationRepository.cs" />
+    <Compile Include="Models\MRP\MRPGentaniHeader.cs" />
+    <Compile Include="Models\MRP\MRPGentaniHeaderRepository.cs" />
+    <Compile Include="Models\MRP\MRPGentaniType.cs" />
+    <Compile Include="Models\MRP\MRPGentaniTypeRepository.cs" />
+    <Compile Include="Models\MRP\MRPItem.cs" />
+    <Compile Include="Models\MRP\MRPNonComponent.cs" />
+    <Compile Include="Models\MRP\MRPNonComponentRepository.cs" />
+    <Compile Include="Models\MRP\MRPParent.cs" />
+    <Compile Include="Models\MRP\MRPParentHikiate.cs" />
+    <Compile Include="Models\MRP\MRPParentHikiateRepository.cs" />
+    <Compile Include="Models\MRP\MRPParentRepository.cs" />
+    <Compile Include="Models\MRP\MRPProcUsage.cs" />
+    <Compile Include="Models\MRP\MRPProcUsageRepository.cs" />
+    <Compile Include="Models\MRP\ProcUsageGroup.cs" />
+    <Compile Include="Models\PO\ComponentPrice.cs" />
+    <Compile Include="Models\PO\ComponentPriceHistory.cs" />
+    <Compile Include="Models\PO\POCommonRepository.cs" />
+    <Compile Include="Models\PO\POCreationRepository.cs" />
+    <Compile Include="Models\PO\POInquiryRepository.cs" />
+    <Compile Include="Models\PO\POItemAdditionalInfo.cs" />
+    <Compile Include="Models\PO\POItemCondition.cs" />
+    <Compile Include="Models\PO\POItemConditionCategory.cs" />
+    <Compile Include="Models\PO\POItemInfo.cs" />
+    <Compile Include="Models\PO\POItemMaterial.cs" />
+    <Compile Include="Models\PO\POItemSearchResult.cs" />
+    <Compile Include="Models\PO\POSaveResult.cs" />
+    <Compile Include="Models\PO\PriceHistory.cs" />
+    <Compile Include="Models\PO\PRItemSearchResult.cs" />
+    <Compile Include="Models\PO\PRPOItem.cs" />
+    <Compile Include="Models\PO\PRPOSubItem.cs" />
+    <Compile Include="Models\PO\PurchaseOrder.cs" />
+    <Compile Include="Models\PO\PurchaseOrderItem.cs" />
+    <Compile Include="Models\PO\UrgentSPKRepository.cs" />
+    <Compile Include="Models\PO\UrgentSPKSaveResult.cs" />
+    <Compile Include="Models\PRPOTrackingRepository.cs" />
+    <Compile Include="Models\ProcurementChannel.cs" />
+    <Compile Include="Models\PRPOApproval\CommonApprovalRepository.cs" />
+    <Compile Include="Models\PRPOApproval\ExecPOApprovalModel.cs" />
+    <Compile Include="Models\PRPOApproval\ExecPOApprovalResultModel.cs" />
+    <Compile Include="Models\PRPOApproval\POApprovalRepository.cs" />
+    <Compile Include="Models\PRPOApproval\PRApprovalRepository.cs" />
+    <Compile Include="Models\PRPOApproval\PRPOApproval.cs" />
+    <Compile Include="Models\PRPOApproval\CommonApprovalHistory.cs" />
+    <Compile Include="Models\PRPOApproval\CommonApprovalNotice.cs" />
+    <Compile Include="Models\PR\PRStatusMonitoring\PRStatusMonitoringRepository.cs" />
+    <Compile Include="Models\PR\PRStatusMonitoring\PRStatusMonitoring.cs" />
+    <Compile Include="Models\PR\PRStatusMonitoring\PRStatusMonitoringParam.cs" />
+    <Compile Include="Models\PR\PRInquiry\PRInquiryExcel.cs" />
+    <Compile Include="Models\ReceivingList\CANCEL_GR_IN.cs" />
+    <Compile Include="Models\ReceivingList\CANCEL_GR_OUT.cs" />
+    <Compile Include="Models\ReceivingList\CANCEL_GR_TABLE.cs" />
+    <Compile Include="Models\ReceivingList\GR_IRRepository.cs" />
+    <Compile Include="Models\ReceivingList\GR_IR_DATA.cs" />
+    <Compile Include="Models\ReceivingList\GR_IR_DOC_DATE.cs" />
+    <Compile Include="Models\ReceivingList\GR_IR_DOC_NO.cs" />
+    <Compile Include="Models\ReceivingList\GR_IR_REF.cs" />
+    <Compile Include="Models\ReceivingList\GR_IR_RETURN.cs" />
+    <Compile Include="Models\ReceivingList\GR_IR_TABLE.cs" />
+    <Compile Include="Models\ReceivingList\ReceivingListDownloadExcel.cs" />
+    <Compile Include="Models\ReceivingList\ReceivingList.cs" />
+    <Compile Include="Models\ReceivingList\ReceivingListDetail.cs" />
+    <Compile Include="Models\ReceivingList\ReceivingListRepository.cs" />
+    <Compile Include="Models\ReceivingList\Supplier.cs" />
+    <Compile Include="Models\ReceivingList\SupplierRepository.cs" />
+    <Compile Include="Models\Report\ProcurementTracking.cs" />
+    <Compile Include="Models\Report\ProcurementTrackingParam.cs" />
+    <Compile Include="Models\Report\ProcurementTrackingRepository.cs" />
+    <Compile Include="Models\SAPImportMonitor\SAPImportMonitor.cs" />
+    <Compile Include="Models\SAPImportMonitor\SAPImportMonitorRepository.cs" />
+    <Compile Include="Models\SA\SACreation.cs" />
+    <Compile Include="Models\SA\SACreationRepository.cs" />
+    <Compile Include="Report\PO\POLetterDataSet.cs">
+      <DependentUpon>POLetterDataSet.xsd</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ViewModels\SOP\SOPFileViewModel.cs" />
+    <Content Include="bin\Content\sign\00212592.png" />
+    <Content Include="bin\Content\sign\00414860.png" />
+    <Content Include="bin\Content\sign\08700935.png" />
+    <Content Include="bin\Content\sign\09104924.png" />
+    <Content Include="bin\Content\sign\09205157.png" />
+    <Content Include="bin\Content\sign\09405738.JPG" />
+    <Content Include="bin\Content\sign\09708699.png" />
+    <Content Include="bin\Content\sign\91526887.png" />
+    <Content Include="bin\GPS.Core.dll" />
+    <Content Include="bin\GPS.Core.pdb" />
+    <Content Include="bin\GPS.dll" />
+    <Content Include="bin\GPS.pdb" />
+    <Content Include="bin\itextsharp.dll" />
+    <Content Include="bin\itextsharp.pdfa.dll" />
+    <Content Include="bin\itextsharp.xtra.dll" />
+    <Content Include="bin\Microsoft.ReportViewer.WebForms.dll" />
+    <Content Include="bin\NPOI.dll" />
+    <Content Include="bin\NPOI.OOXML.dll" />
+    <Content Include="bin\NPOI.OpenXml4Net.dll" />
+    <Content Include="bin\NPOI.OpenXmlFormats.dll" />
+    <Content Include="bin\ServiceStack.Text.dll" />
+    <Content Include="bin\Toyota.Common.Configuration.dll" />
+    <Content Include="bin\Toyota.Common.Credential.dll" />
+    <Content Include="bin\Toyota.Common.Credential.Provider.dll" />
+    <Content Include="bin\Toyota.Common.Database.dll" />
+    <Content Include="bin\Toyota.Common.Database.Petapoco.dll" />
+    <Content Include="bin\Toyota.Common.Generalist.dll" />
+    <Content Include="bin\Toyota.Common.Logging.dll" />
+    <Content Include="bin\Toyota.Common.Lookup.dll" />
+    <Content Include="bin\Toyota.Common.SSO.dll" />
+    <Content Include="bin\Toyota.Common.Utilities.dll" />
+    <Content Include="bin\Toyota.Common.Web.Platform.dll" />
+    <Content Include="bin\Toyota.Common.Web.Service.dll" />
+    <Content Include="Configurations\Menu-DEV.xml" />
+    <Content Include="Configurations\Menu-QA.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Content\bootstrap-accessibility\bootstrap-accessibility.css" />
+    <Content Include="Content\bootstrap-accessibility\bootstrap-accessibility.js" />
+    <Content Include="Content\bootstrap-accessibility\bootstrap-accessibility.min.js" />
+    <Content Include="Content\Bootstrap\js\lobibox\lobibox.css" />
+    <Content Include="Content\Bootstrap\js\lobibox\lobibox.js" />
+    <Content Include="Content\Common\tdk.lookup.css" />
+    <Content Include="Content\Common\tdk.lookup.js" />
+    <Content Include="Content\Images\Catalogue\not-found.gif" />
+    <Content Include="Content\Images\login\fortuner.jpg" />
+    <Content Include="Content\Images\login\krw-office.jpg" />
+    <Content Include="Content\Images\login\new-innova.jpg" />
+    <Content Include="Content\Images\login\sienta.jpg" />
+    <Content Include="Content\img\under_construction.gif" />
+    <Content Include="Content\js\list.min.js" />
+    <Content Include="Content\Konva\konva.min.js" />
+    <Content Include="Content\sign\00212592.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\sign\00414860.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\sign\08700935.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\sign\09104924.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\sign\09205157.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\sign\09405738.JPG">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\sign\09708699.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\sign\91526887.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="obj\Debug\GPS.csproj.FileListAbsolute.txt" />
+    <Content Include="SQL\Asset\cancel_saveAsset.sql" />
+    <Content Include="SQL\Asset\download_dataAsset.sql" />
+    <Content Include="SQL\Asset\count_searchList.sql" />
+    <Content Include="SQL\Asset\delete_dataAsset.sql" />
+    <Content Include="SQL\Asset\delete_selectedTemp.sql" />
+    <Content Include="SQL\Asset\delete_tempAsset.sql" />
+    <Content Include="SQL\Asset\get_searchList.sql" />
+    <Content Include="SQL\Asset\get_tempAsset.sql" />
+    <Content Include="SQL\Asset\save_dataAsset.sql" />
+    <Content Include="SQL\Asset\save_tempAsset.sql" />
+    <Content Include="SQL\Asset\validate_saveAsset.sql" />
+    <Content Include="SQL\Asset\validate_tempAsset.sql" />
+    <Content Include="SQL\CommonApproval\GetAllDelayedApproval.sql" />
+    <Content Include="SQL\CommonApproval\GetNoticeUserListPR.sql" />
+    <Content Include="SQL\CommonApproval\GetVendorAssignment.sql" />
+    <Content Include="SQL\Common\ChangePasswordSC.sql" />
+    <Content Include="SQL\Common\GetAllNotification.sql" />
+    <Content Include="SQL\Common\GetNewProcessId.sql" />
+    <Content Include="SQL\Country\GetDefault.sql" />
+    <Content Include="SQL\Country\GetList.sql" />
+    <Content Include="SQL\MasterGLAccount\countData.sql" />
+    <Content Include="SQL\MasterGLAccount\deleteData.sql" />
+    <Content Include="SQL\MasterGLAccount\GetListData.sql" />
+    <Content Include="SQL\MasterGLAccount\saveData.sql" />
+    <Content Include="SQL\Master\BudgetConfig\CountData.sql" />
+    <Content Include="SQL\Master\BudgetConfig\CountDataLookupWBS.sql" />
+    <Content Include="SQL\Master\BudgetConfig\GetAllWBSType.sql" />
+    <Content Include="SQL\Master\BudgetConfig\GetData.sql" />
+    <Content Include="SQL\Master\BudgetConfig\GetDataLookupWBS.sql" />
+    <Content Include="SQL\Master\BudgetConfig\GetSelectedData.sql" />
+    <Content Include="SQL\Master\BudgetConfig\SaveEditData.sql" />
+    <Content Include="SQL\Master\BudgetConfig\SaveUploadedData.sql" />
+    <Content Include="SQL\Master\BudgetControl\getFiscalYear.sql" />
+    <Content Include="SQL\Master\CostCenter\SaveUploadedData.sql" />
+    <Content Include="SQL\Master\GetAllDivisionCombo.sql" />
+    <Content Include="SQL\Master\GetAllPOStatus.sql" />
+    <Content Include="SQL\Master\GetAllPurchasingGroup.sql" />
+    <Content Include="SQL\Master\GetAllVendor.sql" />
+    <Content Include="SQL\Master\GetApprovalGroupCode.sql" />
+    <Content Include="SQL\Master\GetCostCenterCD.sql" />
+    <Content Include="SQL\Master\GetCostCenterGrpCD.sql" />
+    <Content Include="SQL\Master\GetDeletionStatus.sql" />
+    <Content Include="SQL\Master\GetProcChannelCD.sql" />
+    <Content Include="SQL\Master\GetProcChannelListByNoreg.sql" />
+    <Content Include="SQL\Master\GetPurchasingGroupCD.sql" />
+    <Content Include="SQL\Master\GetSystemConstant.sql" />
+    <Content Include="SQL\Master\GetVendor.sql" />
+    <Content Include="SQL\Master\get_ItemClass.sql" />
+    <Content Include="SQL\Master\get_MatGroup.sql" />
+    <Content Include="SQL\Master\get_PRCoordinator.sql" />
+    <Content Include="SQL\Master\Material\GetMaterialImageInfo.sql" />
+    <Content Include="SQL\Master\Message\GetById.sql" />
+    <Content Include="SQL\Master\Price\call_saveUpload.sql" />
+    <Content Include="SQL\Master\Vendor\GetDivisionCode.sql" />
+    <Content Include="SQL\Master\Vendor\GetAllPlantByDivison.sql" />
+    <Content Include="SQL\Master\Vendor\CheckPlantCodeByRegNo.sql" />
+    <Content Include="SQL\Master\Vendor\GetVendorEcatalogueLookupSearchList.sql" />
+    <Content Include="SQL\Master\Vendor\GetVendorEcatalogueLookupSearchListCount.sql" />
+    <Content Include="SQL\Master\Vendor\GetVendorLookupSearchListCountPO.sql" />
+    <Content Include="SQL\Master\Vendor\GetVendorLookupSearchListPO.sql" />
+    <Content Include="SQL\POInquiry\errorDetail.sql" />
+    <Content Include="SQL\PRApproval\GetListAccountingDocNoOnly.sql" />
+    <Content Include="SQL\PRApproval\GetListDocNoOnly.sql" />
+    <Content Include="SQL\PRApproval\GetPRHeader.sql" />
+    <Content Include="SQL\PRApproval\CountListAccounting.sql" />
+    <Content Include="SQL\PRApproval\GetListAccounting.sql" />
+    <Content Include="SQL\PRPOTracking\GetThirdList.sql" />
+    <Content Include="SQL\PRPOTracking\CountList.sql" />
+    <Content Include="SQL\PRPOTracking\GetList.sql" />
+    <Content Include="SQL\PRPOTracking\GetSecondList.sql" />
+    <Content Include="SQL\Master\ExchangeRate\SaveUploadedData.sql" />
+    <Content Include="SQL\GR\GetDataPObyREFF.sql" />
+    <Content Include="SQL\GR\GetDataRef.sql" />
+    <Content Include="SQL\GR\UpdateCancelGRSAP.sql" />
+    <Content Include="SQL\Master\BudgetConfig\update_nonSAPFlag.sql" />
+    <Content Include="SQL\Master\BudgetControl\countDataDetail.sql" />
+    <Content Include="SQL\Master\BudgetControl\countDataHeader.sql" />
+    <Content Include="SQL\Master\BudgetControl\downloadDataDetail.sql" />
+    <Content Include="SQL\Master\BudgetControl\downloadDataHeader.sql" />
+    <Content Include="SQL\Master\BudgetControl\getDataDetail.sql" />
+    <Content Include="SQL\Master\BudgetControl\getDataHeader.sql" />
+    <Content Include="SQL\Master\BudgetControl\getSingleDataWBS.sql" />
+    <Content Include="SQL\Master\BudgetConfig\get_budgetConfig.sql" />
+    <Content Include="SQL\Master\CostCenter\GetList.sql" />
+    <Content Include="SQL\Master\GetAllDeliveryAddr.sql" />
+    <Content Include="SQL\Master\Routine\call_savingProcessing.sql" />
+    <Content Include="SQL\Master\Routine\count_detailRoutineItem.sql" />
+    <Content Include="SQL\Master\Routine\count_inquiryList.sql" />
+    <Content Include="SQL\Master\Routine\count_picList.sql" />
+    <Content Include="SQL\Master\Routine\delete_tempbyUserID.sql" />
+    <Content Include="SQL\Master\Routine\editRoutine_validation.sql" />
+    <Content Include="SQL\Master\Routine\generate_routineNo.sql" />
+    <Content Include="SQL\Master\Routine\get_detailRoutineH.sql" />
+    <Content Include="SQL\Master\Routine\get_detailRoutineItem.sql" />
+    <Content Include="SQL\Master\Routine\get_detailRoutineSubitem.sql" />
+    <Content Include="SQL\Master\Routine\get_inquiryList.sql" />
+    <Content Include="SQL\Master\Routine\get_picList.sql" />
+    <Content Include="SQL\Master\Routine\get_routineheaderEditData.sql" />
+    <Content Include="SQL\Master\Routine\get_userDescription.sql" />
+    <Content Include="SQL\Master\Routine\routine_creationInit.sql" />
+    <Content Include="SQL\Master\System\SaveData.sql" />
+    <Content Include="SQL\Master\System\GetSingleData.sql" />
+    <Content Include="SQL\Master\System\GetData.sql" />
+    <Content Include="SQL\Master\System\DeleteData.sql" />
+    <Content Include="SQL\Master\System\CountData.sql" />
+    <Content Include="SQL\Master\ValuationClass\countValClass_freeParam.sql" />
+    <Content Include="SQL\Master\ValuationClass\getValClass_freeParam.sql" />
+    <Content Include="SQL\Master\Vendor\GetVendorLookupSearchList.sql" />
+    <Content Include="SQL\Master\Vendor\GetVendorLookupSearchListCount.sql" />
+    <Content Include="SQL\Master\Material\CountMaterialNumber.sql" />
+    <Content Include="SQL\Master\Material\CountTotalMaterial.sql" />
+    <Content Include="SQL\Master\Material\CreateUploadTempTable.sql" />
+    <Content Include="SQL\Master\Material\DeleteMaterial.sql" />
+    <Content Include="SQL\Master\Material\GetAllCarFamily.sql" />
+    <Content Include="SQL\Master\Material\GetAllItemConsignment.sql" />
+    <Content Include="SQL\Master\Material\GetAllMaterialGroup.sql" />
+    <Content Include="SQL\Master\Material\GetAllMaterialType.sql" />
+    <Content Include="SQL\Master\Material\GetAllUnitOfMeasure.sql" />
+    <Content Include="SQL\Master\Material\GetAllValuationClass.sql" />
+    <Content Include="SQL\Master\Material\GetSingleMaterial.sql" />
+    <Content Include="SQL\Master\Material\GetUploadTempList.sql" />
+    <Content Include="SQL\Master\Material\Initial.sql" />
+    <Compile Include="Models\SOPFileInquiry\SOPFileInquiryRepository.cs" />
+    <Compile Include="Models\WallAnnouncement\FileContentType.cs" />
+    <Compile Include="Models\WallAnnouncement\WallAnnouncementRepository.cs" />
+    <Compile Include="Report\PO\POLetterDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>POLetterDataSet.xsd</DependentUpon>
+    </Compile>
+    <Content Include="SQL\Master\Material\GetMaterialLookupList.sql" />
+    <Content Include="SQL\Master\Material\GetMaterialLookupListCount.sql" />
+    <Content Include="SQL\Master\Plant\CountData.sql" />
+    <Content Include="SQL\Master\Plant\DeleteData.sql" />
+    <Content Include="SQL\POApproval\CountDetailList.sql" />
+    <Content Include="SQL\POApproval\GetApproval.sql" />
+    <Content Include="SQL\POApproval\GetDetailList.sql" />
+    <Content Include="SQL\PR\Common\get_homeTracking.sql" />
+    <Content Include="SQL\PR\PRCreation\copy_tempData.sql" />
+    <Content Include="SQL\PR\PRCreation\CountData.sql" />
+    <Content Include="SQL\PR\PRCreation\CountDataAssetNo.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_costcenterListByGlAccount.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_costcenterListFamsDB.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_assetlocList.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_costcenterListByCoordinator.sql" />
+    <Content Include="SQL\PR\PRCreation\validate_itemdesc.sql" />
+    <Content Include="SQL\PR\PRCreation\GetData.sql" />
+    <Content Include="SQL\PR\PRCreation\GetDataAssetNo.sql" />
+    <Content Include="SQL\PR\PRCreation\insert_prhtempData.sql" />
+    <Content Include="SQL\PR\PRCreation\list_tempData.sql" />
+    <Content Include="SQL\PR\PRCreation\pr_checkLocking.sql" />
+    <Compile Include="Report\PO\POSPKDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>POSPKDataSet.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\DropdownListViewModel.cs" />
+    <Compile Include="ViewModels\GenericViewModel.cs" />
+    <Compile Include="ViewModels\GridPagingViewModel.cs" />
+    <Compile Include="ViewModels\GR\GRItemViewModel.cs" />
+    <Compile Include="ViewModels\GR\GRSubmitViewModel.cs" />
+    <Compile Include="ViewModels\Lookup\GLAccountLookupSearchViewModel.cs" />
+    <Compile Include="ViewModels\Lookup\LookupCustomSearchViewModel.cs" />
+    <Compile Include="ViewModels\Lookup\LookupSearchViewModel.cs" />
+    <Compile Include="ViewModels\Lookup\LookupViewModel.cs" />
+    <Compile Include="ViewModels\Lookup\VendorLookupSearchViewModel.cs" />
+    <Compile Include="ViewModels\Master\MaterialImageViewModel.cs" />
+    <Compile Include="ViewModels\Master\MaterialPriceSearchViewModel.cs" />
+    <Compile Include="ViewModels\PaginationViewModel.cs" />
+    <Compile Include="ViewModels\PO\AddItemConditionViewModel.cs" />
+    <Compile Include="ViewModels\PO\AddPOItemConditionViewModel.cs" />
+    <Compile Include="ViewModels\PO\DeletePOItemConditionViewModel.cs" />
+    <Compile Include="ViewModels\Lookup\MaterialLookupSearchViewModel.cs" />
+    <Compile Include="ViewModels\PO\OneTimeVendorViewModel.cs" />
+    <Compile Include="ViewModels\PO\POApprovalInfoViewModel.cs" />
+    <Compile Include="ViewModels\PO\POCreationViewModel.cs" />
+    <Compile Include="ViewModels\PO\PODetailViewModel.cs" />
+    <Compile Include="ViewModels\PO\POInquiryViewModel.cs" />
+    <Compile Include="ViewModels\PO\POItemAddViewModel.cs" />
+    <Compile Include="ViewModels\PO\POItemAdoptViewModel.cs" />
+    <Compile Include="ViewModels\PO\POItemConditionViewModel.cs" />
+    <Compile Include="ViewModels\PO\POItemDeleteViewModel.cs" />
+    <Compile Include="ViewModels\PO\POItemUpdateViewModel.cs" />
+    <Compile Include="ViewModels\PO\POSPKViewModel.cs" />
+    <Compile Include="ViewModels\PO\POSubItemAddViewModel.cs" />
+    <Compile Include="ViewModels\PO\POSubItemEditorShowViewModel.cs" />
+    <Compile Include="ViewModels\PO\POSubItemEditorViewModel.cs" />
+    <Compile Include="ViewModels\PO\POSubItemUpdateViewModel.cs" />
+    <Compile Include="ViewModels\PO\PRItemAdoptResultViewModel.cs" />
+    <Compile Include="ViewModels\PO\PRItemAdoptViewModel.cs" />
+    <Compile Include="ViewModels\PO\PRItemSearchViewModel.cs" />
+    <Compile Include="ViewModels\PO\PRPOSubItemSearchViewModel.cs" />
+    <Compile Include="ViewModels\PO\PurchaseOrderItemSaveViewModel.cs" />
+    <Compile Include="ViewModels\PO\PurchaseOrderItemSearchViewModel.cs" />
+    <Compile Include="ViewModels\PO\PurchaseOrderSaveViewModel.cs" />
+    <Compile Include="ViewModels\PO\PurchaseOrderSearchViewModel.cs" />
+    <Compile Include="ViewModels\Master\PurchasingGroupViewModel.cs" />
+    <Compile Include="ViewModels\Master\ReceivingListSearchViewModel.cs" />
+    <Compile Include="ViewModels\PO\SPKVendorViewModel.cs" />
+    <Compile Include="ViewModels\PO\UrgentSPKSaveViewModel.cs" />
+    <Compile Include="ViewModels\PO\UrgentSPKSearchViewModel.cs" />
+    <Compile Include="ViewModels\PO\UrgentSPKViewModel.cs" />
+    <Compile Include="ViewModels\PO\ValuationClassLookupViewModel.cs" />
+    <Compile Include="ViewModels\PO\ValuationClassLookupSearchViewModel.cs" />
+    <Compile Include="ViewModels\PO\CreationVendorLookupViewModel.cs" />
+    <Compile Include="ViewModels\PO\WBSLookupSearchViewModel.cs" />
+    <Compile Include="ViewModels\ReceivingList\CancelGRSAViewModel.cs" />
+    <Compile Include="ViewModels\SAPImportMonitor\SAPImportMonitorSearchViewModel.cs" />
+    <Compile Include="ViewModels\SAPImportMonitor\SAPImportMonitorViewModel.cs" />
+    <Compile Include="ViewModels\SA\SAItemViewModel.cs" />
+    <Compile Include="ViewModels\SA\SASubmitViewModel.cs" />
+    <Compile Include="ViewModels\SearchViewModel.cs" />
+    <Content Include="Content\afixedtable\afixedtable.css" />
+    <Content Include="Content\afixedtable\afixedtable.js" />
+    <Content Include="Content\Common\gps.js" />
+    <Content Include="Content\Common\tdk.disable_enable_button.js" />
+    <Content Include="Content\css\custom-theme.css" />
+    <Content Include="Content\css\images\ui-bg_diagonals-thick_18_b81900_40x40.png" />
+    <Content Include="Content\css\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
+    <Content Include="Content\css\images\ui-bg_flat_10_000000_40x100.png" />
+    <Content Include="Content\css\images\ui-bg_glass_100_f6f6f6_1x400.png" />
+    <Content Include="Content\css\images\ui-bg_glass_100_fdf5ce_1x400.png" />
+    <Content Include="Content\css\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="Content\css\images\ui-bg_gloss-wave_35_f6a828_500x100.png" />
+    <Content Include="Content\css\images\ui-bg_highlight-soft_100_eeeeee_1x100.png" />
+    <Content Include="Content\css\images\ui-bg_highlight-soft_75_ffe45c_1x100.png" />
+    <Content Include="Content\css\images\ui-icons_222222_256x240.png" />
+    <Content Include="Content\css\images\ui-icons_228ef1_256x240.png" />
+    <Content Include="Content\css\images\ui-icons_ef8c08_256x240.png" />
+    <Content Include="Content\css\images\ui-icons_ffd27a_256x240.png" />
+    <Content Include="Content\css\images\ui-icons_ffffff_256x240.png" />
+    <Content Include="Content\css\jquery-ui.css" />
+    <Content Include="Content\css\jquery.fileupload-ui-noscript.css" />
+    <Content Include="Content\css\jquery.fileupload-ui.css" />
+    <Content Include="Content\css\msgBoxLight.css" />
+    <Content Include="Content\css\tdk-theme.css" />
+    <Content Include="Content\css\tdk.css" />
+    <Content Include="Content\Images\login\etios.jpg" />
+    <Content Include="Content\Images\login\innova.jpg" />
+    <Content Include="Content\Images\login\vios.jpg" />
+    <Content Include="Content\Images\login\yaris.jpg" />
+    <Content Include="Content\img\alert.png" />
+    <Content Include="Content\img\alert_16.png" />
+    <Content Include="Content\img\anonymous.jpg" />
+    <Content Include="Content\img\app\pdf_icon.png" />
+    <Content Include="Content\img\blue-pattern.jpg" />
+    <Content Include="Content\img\check.png" />
+    <Content Include="Content\img\confirm.png" />
+    <Content Include="Content\img\cross.png" />
+    <Content Include="Content\img\error.png" />
+    <Content Include="Content\img\info.png" />
+    <Content Include="Content\img\LoadingImage.gif" />
+    <Content Include="Content\img\msgBoxBackGround.png" />
+    <Content Include="Content\img\pdf_icon.png" />
+    <Content Include="Content\img\skulls.png" />
+    <Content Include="Content\Common\gps.css" />
+    <Content Include="Content\Common\tdk.lookupgrid.js" />
+    <Content Include="Content\Common\tdk.messagebox.js" />
+    <Content Include="Content\Common\tdk.progressbox.js" />
+    <Content Include="Content\jquery.filedownload.js" />
+    <Content Include="Content\jquery.growl.js" />
+    <Content Include="Content\js\component\tdk.checkbox.js" />
+    <Content Include="Content\js\component\tdk.combobox.js" />
+    <Content Include="Content\js\component\tdk.datatable.js" />
+    <Content Include="Content\js\component\tdk.page-alert.js" />
+    <Content Include="Content\js\component\tdk.paginator.js" />
+    <Content Include="Content\js\component\tdk.radio.js" />
+    <Content Include="Content\js\component\tdk.summarylist.js" />
+    <Content Include="Content\js\custom-tdk.js" />
+    <Content Include="Content\js\jquery.filedownload.js" />
+    <Content Include="Content\js\tdk.js" />
+    <Content Include="Content\lib\bootstrap-validator\bootstrapValidator.min.css" />
+    <Content Include="Content\lib\bootstrap-validator\bootstrapValidator.min.js" />
+    <Content Include="Content\lib\bootstrap\css\bootstrap-theme.css" />
+    <Content Include="Content\lib\bootstrap\css\bootstrap-theme.min.css" />
+    <Content Include="Content\lib\bootstrap\css\bootstrap.css" />
+    <Content Include="Content\lib\bootstrap\css\bootstrap.min.css" />
+    <Content Include="Content\lib\bootstrap\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Content\lib\bootstrap\js\bootstrap.js" />
+    <Content Include="Content\lib\bootstrap\js\bootstrap.min.js" />
+    <Content Include="Content\lib\calendar\calendar.css" />
+    <Content Include="Content\lib\calendar\calendar.js" />
+    <Content Include="Content\lib\calendar\template\day.html" />
+    <Content Include="Content\lib\calendar\template\events-list.html" />
+    <Content Include="Content\lib\calendar\template\modal.html" />
+    <Content Include="Content\lib\calendar\template\month-day.html" />
+    <Content Include="Content\lib\calendar\template\month.html" />
+    <Content Include="Content\lib\calendar\template\week-days.html" />
+    <Content Include="Content\lib\calendar\template\week.html" />
+    <Content Include="Content\lib\calendar\template\year-month.html" />
+    <Content Include="Content\lib\calendar\template\year.html" />
+    <Content Include="Content\lib\datepicker\bootstrap-datepicker.js" />
+    <Content Include="Content\lib\datepicker\datepicker.css" />
+    <Content Include="Content\lib\font-awesome\css\font-awesome.css" />
+    <Content Include="Content\lib\font-awesome\css\font-awesome.min.css" />
+    <Content Include="Content\lib\font-awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Content\lib\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Content\lib\html5shiv.min.js" />
+    <Content Include="Content\lib\jquery-ui.js" />
+    <Content Include="Content\lib\jquery.fileupload-fp.js" />
+    <Content Include="Content\lib\jquery.fileupload-jui.js" />
+    <Content Include="Content\lib\jquery.fileupload-ui.js" />
+    <Content Include="Content\lib\jquery.fileupload.js" />
+    <Content Include="Content\lib\jquery.iframe-transport.js" />
+    <Content Include="Content\lib\jquery.inputmask.bundle.min.js" />
+    <Content Include="Content\lib\jquery.min.js" />
+    <Content Include="Content\lib\jquery.msgBox.js" />
+    <Content Include="Content\lib\jquery.ui.widget.js" />
+    <Content Include="Content\lib\main.js" />
+    <Content Include="Content\lib\respond.min.js" />
+    <Content Include="Content\lib\sbAdmin\css\metisMenu.css" />
+    <Content Include="Content\lib\sbAdmin\css\metisMenu.min.css" />
+    <Content Include="Content\lib\sbAdmin\css\sb-admin-2.css" />
+    <Content Include="Content\lib\sbAdmin\js\metisMenu.js" />
+    <Content Include="Content\lib\sbAdmin\js\metisMenu.min.js" />
+    <Content Include="Content\lib\sbAdmin\js\sb-admin-2.js" />
+    <Content Include="Content\temp\anonymous.jpg" />
+    <Content Include="Content\temp\desert.jpg" />
+    <Content Include="Content\temp\doe.john.png" />
+    <Content Include="Content\temp\favicon.ico" />
+    <Content Include="Content\temp\login.jpg" />
+    <Content Include="Content\temp\other-user.png" />
+    <Content Include="Content\temp\sample-email\images\date-bg.jpg" />
+    <Content Include="Content\temp\sample-email\images\header-bg.jpg" />
+    <Content Include="Content\temp\sample-email\images\img1.jpg" />
+    <Content Include="Content\temp\sample-email\images\img2.jpg" />
+    <Content Include="Content\temp\sample-email\images\img3.jpg" />
+    <Content Include="Content\temp\sample-email\images\img4.jpg" />
+    <Content Include="Content\temp\sample-email\images\img5.jpg" />
+    <Content Include="Content\temp\sample-email\images\img6.jpg" />
+    <Content Include="Content\temp\sample-email\images\img7.jpg" />
+    <Content Include="Content\temp\sample-email\images\img8.jpg" />
+    <Content Include="Content\temp\sample-email\images\img9.jpg" />
+    <Content Include="Content\temp\sample-email\images\line-break-2.jpg" />
+    <Content Include="Content\temp\sample-email\images\line-break-3.jpg" />
+    <Content Include="Content\temp\sample-email\images\line-break-4.jpg" />
+    <Content Include="Content\temp\sample-email\images\line-break-5.jpg" />
+    <Content Include="Content\temp\sample-email\images\line-break-6.jpg" />
+    <Content Include="Content\temp\sample-email\images\line-break.jpg" />
+    <Content Include="Content\temp\sample-email\images\ribbon.jpg" />
+    <Content Include="Content\temp\skulls.png" />
+    <Content Include="Content\temp\tmmin-factory.jpg" />
+    <Content Include="Content\temp\user.jpg" />
+    <Content Include="Content\temp\workflow-flow-diagram.png" />
+    <Content Include="SQL\Common\GetAllAnnouncement.sql" />
+    <Content Include="SQL\Common\GetAllAttachment.sql" />
+    <Content Include="SQL\Common\GetSystemValue.sql" />
+    <Content Include="SQL\Common\GetUserNameDescription.sql" />
+    <Content Include="SQL\Master\ExchangeRate\CheckData.sql" />
+    <Content Include="SQL\Master\ExchangeRate\CheckDay.sql" />
+    <Content Include="SQL\Master\ExchangeRate\CheckValidDtFrom.sql" />
+    <Content Include="SQL\Master\ExchangeRate\CountData.sql" />
+    <Content Include="SQL\Master\ExchangeRate\DeleteData.sql" />
+    <Content Include="SQL\Master\ExchangeRate\GetReleasedFlag.sql" />
+    <Content Include="SQL\Master\ExchangeRate\GetSingleData.sql" />
+    <Content Include="SQL\Master\ExchangeRate\InsertExchangeRate.sql" />
+    <Content Include="SQL\Master\ExchangeRate\ReadExchangeRate.sql" />
+    <Content Include="SQL\Master\ExchangeRate\UpdateExchangeRate.sql" />
+    <Content Include="SQL\Master\ExchangeRate\ValidationDelete.sql" />
+    <Content Include="SQL\GR\CheckPO.sql" />
+    <Content Include="SQL\GR\GetSubItem.sql" />
+    <Content Include="SQL\GR\GetPOItem.sql" />
+    <Content Include="SQL\GR\GetDetailPO.sql" />
+    <Content Include="SQL\GR\GetDataPO.sql" />
+    <Content Include="SQL\Home\LogMonitoringDetail\CountData.sql" />
+    <Content Include="SQL\Home\LogMonitoringDetail\GetData.sql" />
+    <Content Include="SQL\Home\LogMonitoringDetail\GetDownloadData.sql" />
+    <Content Include="SQL\Home\LogMonitoringDetail\GetHeaderData.sql" />
+    <Content Include="SQL\Home\LogMonitoring\CountData.sql" />
+    <Content Include="SQL\Home\LogMonitoring\GetData.sql" />
+    <Content Include="SQL\Home\LogMonitoring\LookupFunction.sql" />
+    <Content Include="SQL\Home\LogMonitoring\LookupStatus.sql" />
+    <Content Include="SQL\Home\LogMonitoring\LookupUserId.sql" />
+    <Content Include="SQL\Master\CalculationMapping\getplus_minusflag.sql" />
+    <Content Include="SQL\Master\CostCenter\CountData.sql" />
+    <Content Include="SQL\Master\CostCenter\GetData.sql" />
+    <Content Include="SQL\Master\GetProcChannelList.sql" />
+    <Content Include="SQL\Master\PRChecker\GetList.sql" />
+    <Content Include="SQL\Master\System\GetByCode.sql" />
+    <Content Include="SQL\Master\System\GetByFunctionId.sql" />
+    <Content Include="SQL\Master\Vendor\CountData.sql" />
+    <Content Include="SQL\Master\Vendor\DeleteData.sql" />
+    <Content Include="SQL\Master\Vendor\DeleteTemporary.sql" />
+    <Content Include="SQL\Master\Vendor\GetData.sql" />
+    <Content Include="SQL\Master\Vendor\GetDownloadData.sql" />
+    <Content Include="SQL\Master\Vendor\GetSelectedData.sql" />
+    <Content Include="SQL\Master\Vendor\InsertTemporary.sql" />
+    <Content Include="SQL\Master\Vendor\GetPaymentMethod.sql" />
+    <Content Include="SQL\Master\Vendor\GetPaymentTerm.sql" />
+    <Content Include="SQL\Master\Vendor\SaveData.sql" />
+    <Content Include="SQL\Master\Vendor\SaveUploadData.sql" />
+    <Content Include="SQL\Master\Vendor\UploadValidation.sql" />
+    <Content Include="SQL\Master\GetProcessId.sql" />
+    <Content Include="SQL\Master\InsertLog.sql" />
+    <Content Include="SQL\Master\ValuationClass\activeinactive_valuationclass.sql" />
+    <Content Include="SQL\Master\CalculationMapping\count_calculationmapping.sql" />
+    <Content Include="SQL\Master\CalculationMapping\delete_tempCMbyselected.sql" />
+    <Content Include="SQL\Master\CalculationMapping\delete_tempCMbyuserid.sql" />
+    <Content Include="SQL\Master\CalculationMapping\getcalculation_schemeAdd.sql" />
+    <Content Include="SQL\Master\CalculationMapping\getdetail_calculationmapping.sql" />
+    <Content Include="SQL\Master\CalculationMapping\getselected_calculationmapping.sql" />
+    <Content Include="SQL\Master\ValuationClass\getselected_valuationclass.sql" />
+    <Content Include="SQL\Master\CalculationMapping\gettemp_calculationmapping.sql" />
+    <Content Include="SQL\Master\CalculationMapping\get_calculationmapping.sql" />
+    <Content Include="SQL\Master\CostCenter\DeleteData.sql" />
+    <Content Include="SQL\Master\CostCenter\GetSelectedData.sql" />
+    <Content Include="SQL\Master\CostCenter\SaveData.sql" />
+    <Content Include="SQL\Master\get_calculationscheme.sql" />
+    <Content Include="SQL\Master\get_calculationtype.sql" />
+    <Content Include="SQL\Master\get_compprice.sql" />
+    <Content Include="SQL\Master\get_processid.sql" />
+    <Content Include="SQL\Master\get_purchasinggroup.sql" />
+    <Content Include="SQL\Master\GetAllCurrency.sql" />
+    <Content Include="SQL\Master\GetAllDetailStatus.sql" />
+    <Content Include="SQL\Master\GetAllDivision.sql" />
+    <Content Include="SQL\Master\GetAllDocStatusByType.sql" />
+    <Content Include="SQL\Master\GetAllDocumentStatus.sql" />
+    <Content Include="SQL\Master\GetAllPlant.sql" />
+    <Content Include="SQL\Master\GetAllSLoc.sql" />
+    <Content Include="SQL\Master\GetAllStatus.sql" />
+    <Content Include="SQL\Master\GetAllWBS.sql" />
+    <Content Include="SQL\Master\GetCurrency.sql" />
+    <Content Include="SQL\Master\GetDisplayMessage.sql" />
+    <Content Include="SQL\Master\GetDocStatus.sql" />
+    <Content Include="SQL\Master\GetMaterial.sql" />
+    <Content Include="SQL\Master\GetPaymentMethod.sql" />
+    <Content Include="SQL\Master\GetPaymentTerm.sql" />
+    <Content Include="SQL\Master\GetSLoc.sql" />
+    <Content Include="SQL\Master\GetVendorCD.sql" />
+    <Content Include="SQL\Master\get_fdcheck.sql" />
+    <Content Include="SQL\Master\get_procurementtype.sql" />
+    <Content Include="SQL\Master\ValuationClass\get_valuationclass.sql" />
+    <Content Include="SQL\Master\ValuationClass\count_valuationclass.sql" />
+    <Content Include="SQL\Master\CalculationMapping\savetemp_calculationMapping.sql" />
+    <Content Include="SQL\Master\CalculationMapping\save_calculationmapping.sql" />
+    <Content Include="SQL\Master\ValuationClass\save_valuationclass.sql" />
+    <Content Include="SQL\Master\ValuationClass\valuationclass_validation.sql" />
+    <Content Include="SQL\Master\Material\InsertMaterial.sql" />
+    <Content Include="SQL\Master\Material\InsertUploadTemp.sql" />
+    <Content Include="SQL\Master\Material\MoveUploadTemp.sql" />
+    <Content Include="SQL\Master\Material\ReadMaterial.sql" />
+    <Content Include="SQL\Master\Material\UpdateMaterial.sql" />
+    <Content Include="SQL\Master\Price\Delete.sql" />
+    <Content Include="SQL\Master\Price\GetListBySearch.sql" />
+    <Content Include="SQL\Master\Price\GetListBySearchCount.sql" />
+    <Content Include="SQL\MRP\Creation\CountData.sql" />
+    <Content Include="SQL\MRP\Creation\GetData.sql" />
+    <Content Include="SQL\MRP\Creation\MRPCommon_GetProcurementUsageGroup.sql" />
+    <Content Include="SQL\MRP\Creation\MRPCreation_GetLastMRPInfo.sql" />
+    <Content Include="SQL\MRP\Creation\MRPCreation_Initial.sql" />
+    <Content Include="SQL\MRP\Creation\MRPCreation_PutMRPProcessToQueue.sql" />
+    <Content Include="SQL\MRP\GentaniHeader\CountData.sql" />
+    <Content Include="SQL\MRP\GentaniHeader\DeleteData.sql" />
+    <Content Include="SQL\MRP\GentaniHeader\DELETE_TB_T.sql" />
+    <Content Include="SQL\MRP\GentaniHeader\DownloadData.sql" />
+    <Content Include="SQL\MRP\GentaniHeader\GetData.sql" />
+    <Content Include="SQL\MRP\GentaniHeader\GetSingleData.sql" />
+    <Content Include="SQL\MRP\GentaniHeader\INSERT_TB_T.sql" />
+    <Content Include="SQL\MRP\GentaniHeader\ListHeaderType.sql" />
+    <Content Include="SQL\MRP\GentaniHeader\ListProcUsage.sql" />
+    <Content Include="SQL\MRP\GentaniHeader\Log_H.sql" />
+    <Content Include="SQL\MRP\GentaniHeader\SaveData.sql" />
+    <Content Include="SQL\MRP\GentaniHeader\UploadData.sql" />
+    <Content Include="SQL\MRP\GentaniType\CountData.sql" />
+    <Content Include="SQL\MRP\GentaniType\DeleteData.sql" />
+    <Content Include="SQL\MRP\GentaniType\DELETE_TB_T.sql" />
+    <Content Include="SQL\MRP\GentaniType\DownloadData.sql" />
+    <Content Include="SQL\MRP\GentaniType\GetData.sql" />
+    <Content Include="SQL\MRP\GentaniType\GetSingleData.sql" />
+    <Content Include="SQL\MRP\GentaniType\INSERT_TB_T.sql" />
+    <Content Include="SQL\MRP\GentaniType\ListProcUsage.sql" />
+    <Content Include="SQL\MRP\GentaniType\Log_H.sql" />
+    <Content Include="SQL\MRP\GentaniType\SaveData.sql" />
+    <Content Include="SQL\MRP\GentaniType\UploadData.sql" />
+    <Compile Include="Models\PR\Common\PRCommonList.cs" />
+    <Compile Include="Models\PR\Common\PRCommonRepository.cs" />
+    <Compile Include="Models\PR\PRCreation\PRCreation.cs" />
+    <Compile Include="Models\PR\PRCreation\PRCreationRepository.cs" />
+    <Compile Include="Models\PR\PRInquiry\PRInquiry.cs" />
+    <Compile Include="Models\PR\PRInquiry\PRInquiryRepository.cs" />
+    <Compile Include="Controllers\BlankController.cs" />
+    <Compile Include="Controllers\ChangePasswordController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\Home\DashboardController.cs" />
+    <Compile Include="Controllers\LoginController.cs" />
+    <Compile Include="Controllers\MRP\MRPCreationController.cs" />
+    <Compile Include="Controllers\MRP\MRPInquiryController.cs" />
+    <Compile Include="Controllers\VisualizationController.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\GridColumn.cs" />
+    <Compile Include="ViewModels\MRP\MRPCreationViewModel.cs" />
+    <Compile Include="ViewModels\MRP\MRPGetViewModel.cs" />
+    <Compile Include="ViewModels\MRP\MRPInquiryViewModel.cs" />
+    <Compile Include="ViewModels\MRP\MRPProcessViewModel.cs" />
+    <Compile Include="ViewModels\MRP\MRPSearchViewModel.cs" />
+    <Compile Include="ViewModels\MRP\ProcUsageGroupCheckViewModel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\angular\angular-gridster.js" />
+    <Content Include="Content\angular\angular-gridster.min.css" />
+    <Content Include="Content\angular\angular-gridster.min.js" />
+    <Content Include="Content\angular\angular.js" />
+    <Content Include="Content\angular\script-dashboard.js" />
+    <Content Include="Content\angular\script-main.js" />
+    <Content Include="Content\angular\style-common.css" />
+    <Content Include="Content\angular\style-dashboard.css" />
+    <Content Include="Content\angular\style-main.css" />
+    <Content Include="Content\angular\ui-bootstrap-tpls.min.js" />
+    <Content Include="Content\Bootstrap\avatars\anonymous.jpg" />
+    <Content Include="Content\Bootstrap\avatars\avatar.png" />
+    <Content Include="Content\Bootstrap\avatars\avatar1.png" />
+    <Content Include="Content\Bootstrap\avatars\avatar2.png" />
+    <Content Include="Content\Bootstrap\avatars\avatar3.png" />
+    <Content Include="Content\Bootstrap\avatars\avatar4.png" />
+    <Content Include="Content\Bootstrap\avatars\avatar5.png" />
+    <Content Include="Content\Bootstrap\avatars\profile-pic.jpg" />
+    <Content Include="Content\Bootstrap\avatars\user.jpg" />
+    <Content Include="Content\Bootstrap\css\ace-fonts.css" />
+    <Content Include="Content\Bootstrap\css\ace-ie.css" />
+    <Content Include="Content\Bootstrap\css\ace-part2.css" />
+    <Content Include="Content\Bootstrap\css\ace-rtl.css" />
+    <Content Include="Content\Bootstrap\css\ace-skins.css" />
+    <Content Include="Content\Bootstrap\css\ace.css" />
+    <Content Include="Content\Bootstrap\css\ace.onpage-help.css" />
+    <Content Include="Content\Bootstrap\css\bootstrap-datetimepicker.css" />
+    <Content Include="Content\Bootstrap\css\bootstrap-duallistbox.css" />
+    <Content Include="Content\Bootstrap\css\bootstrap-editable.css" />
+    <Content Include="Content\Bootstrap\css\bootstrap-multiselect.css" />
+    <Content Include="Content\Bootstrap\css\bootstrap-timepicker.css" />
+    <Content Include="Content\Bootstrap\css\bootstrap.css" />
+    <Content Include="Content\Bootstrap\css\chosen-sprite%402x.png" />
+    <Content Include="Content\Bootstrap\css\chosen-sprite.png" />
+    <Content Include="Content\Bootstrap\css\chosen.css" />
+    <Content Include="Content\Bootstrap\css\colorbox.css" />
+    <Content Include="Content\Bootstrap\css\colorpicker.css" />
+    <Content Include="Content\Bootstrap\css\datepicker.css" />
+    <Content Include="Content\Bootstrap\css\daterangepicker.css" />
+    <Content Include="Content\Bootstrap\css\dropzone.css" />
+    <Content Include="Content\Bootstrap\css\font-awesome.css" />
+    <Content Include="Content\Bootstrap\css\fullcalendar.css" />
+    <Content Include="Content\Bootstrap\css\fullcalendar.print.css" />
+    <Content Include="Content\Bootstrap\css\images\border.png" />
+    <Content Include="Content\Bootstrap\css\images\border1.png" />
+    <Content Include="Content\Bootstrap\css\images\border2.png" />
+    <Content Include="Content\Bootstrap\css\images\controls.png" />
+    <Content Include="Content\Bootstrap\css\images\ie6\borderBottomCenter.png" />
+    <Content Include="Content\Bootstrap\css\images\ie6\borderBottomLeft.png" />
+    <Content Include="Content\Bootstrap\css\images\ie6\borderBottomRight.png" />
+    <Content Include="Content\Bootstrap\css\images\ie6\borderMiddleLeft.png" />
+    <Content Include="Content\Bootstrap\css\images\ie6\borderMiddleRight.png" />
+    <Content Include="Content\Bootstrap\css\images\ie6\borderTopCenter.png" />
+    <Content Include="Content\Bootstrap\css\images\ie6\borderTopLeft.png" />
+    <Content Include="Content\Bootstrap\css\images\ie6\borderTopRight.png" />
+    <Content Include="Content\Bootstrap\css\images\loading.gif" />
+    <Content Include="Content\Bootstrap\css\images\loading_background.png" />
+    <Content Include="Content\Bootstrap\css\images\meteorshower.jpg" />
+    <Content Include="Content\Bootstrap\css\images\meteorshower2.jpg" />
+    <Content Include="Content\Bootstrap\css\images\overlay.png" />
+    <Content Include="Content\Bootstrap\css\images\pattern-old.jpg" />
+    <Content Include="Content\Bootstrap\css\images\pattern-old.png" />
+    <Content Include="Content\Bootstrap\css\images\pattern.png" />
+    <Content Include="Content\Bootstrap\css\images\spritemap%402x.png" />
+    <Content Include="Content\Bootstrap\css\images\spritemap.png" />
+    <Content Include="Content\Bootstrap\css\img\alpha.png" />
+    <Content Include="Content\Bootstrap\css\img\hue.png" />
+    <Content Include="Content\Bootstrap\css\img\saturation.png" />
+    <Content Include="Content\Bootstrap\css\jquery-ui.css" />
+    <Content Include="Content\Bootstrap\css\jquery-ui.custom.css" />
+    <Content Include="Content\Bootstrap\css\jquery.gritter.css" />
+    <Content Include="Content\Bootstrap\css\pace.css" />
+    <Content Include="Content\Bootstrap\css\prettify.css" />
+    <Content Include="Content\Bootstrap\css\sb-admin-2.css" />
+    <Content Include="Content\Bootstrap\css\select2-spinner.gif" />
+    <Content Include="Content\Bootstrap\css\select2.css" />
+    <Content Include="Content\Bootstrap\css\select2.png" />
+    <Content Include="Content\Bootstrap\css\select2x2.png" />
+    <Content Include="Content\Bootstrap\css\sunburst.css" />
+    <Content Include="Content\Bootstrap\css\tdk.css" />
+    <Content Include="Content\Bootstrap\css\ui.jqgrid.css" />
+    <Content Include="Content\Bootstrap\fonts\fontawesome-webfont.svg" />
+    <Content Include="Content\Bootstrap\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Content\Bootstrap\fonts\leaguespartan-bold.svg" />
+    <Content Include="Content\Bootstrap\images\back_disabled.png" />
+    <Content Include="Content\Bootstrap\images\back_enabled.png" />
+    <Content Include="Content\Bootstrap\images\back_enabled_hover.png" />
+    <Content Include="Content\Bootstrap\images\email1.png" />
+    <Content Include="Content\Bootstrap\images\email2.png" />
+    <Content Include="Content\Bootstrap\images\email3.png" />
+    <Content Include="Content\Bootstrap\images\email4.png" />
+    <Content Include="Content\Bootstrap\images\forward_disabled.png" />
+    <Content Include="Content\Bootstrap\images\forward_enabled.png" />
+    <Content Include="Content\Bootstrap\images\forward_enabled_hover.png" />
+    <Content Include="Content\Bootstrap\images\gallery\image-1.jpg" />
+    <Content Include="Content\Bootstrap\images\gallery\image-2.jpg" />
+    <Content Include="Content\Bootstrap\images\gallery\image-3.jpg" />
+    <Content Include="Content\Bootstrap\images\gallery\image-4.jpg" />
+    <Content Include="Content\Bootstrap\images\gallery\image-5.jpg" />
+    <Content Include="Content\Bootstrap\images\gallery\image-6.jpg" />
+    <Content Include="Content\Bootstrap\images\gallery\thumb-1.jpg" />
+    <Content Include="Content\Bootstrap\images\gallery\thumb-2.jpg" />
+    <Content Include="Content\Bootstrap\images\gallery\thumb-3.jpg" />
+    <Content Include="Content\Bootstrap\images\gallery\thumb-4.jpg" />
+    <Content Include="Content\Bootstrap\images\gallery\thumb-5.jpg" />
+    <Content Include="Content\Bootstrap\images\gallery\thumb-6.jpg" />
+    <Content Include="Content\Bootstrap\images\sort_asc.png" />
+    <Content Include="Content\Bootstrap\images\sort_asc_disabled.png" />
+    <Content Include="Content\Bootstrap\images\sort_both.png" />
+    <Content Include="Content\Bootstrap\images\sort_desc.png" />
+    <Content Include="Content\Bootstrap\images\sort_desc_disabled.png" />
+    <Content Include="Content\Bootstrap\images\spritemap%402x.png" />
+    <Content Include="Content\Bootstrap\images\spritemap.png" />
+    <Content Include="Content\Bootstrap\img\app-logo.png" />
+    <Content Include="Content\Bootstrap\img\clear.png" />
+    <Content Include="Content\Bootstrap\img\Error.png" />
+    <Content Include="Content\Bootstrap\img\glyphicons-halflings-white.png" />
+    <Content Include="Content\Bootstrap\img\glyphicons-halflings.png" />
+    <Content Include="Content\Bootstrap\img\information.png" />
+    <Content Include="Content\Bootstrap\img\istd-nav-logo.png" />
+    <Content Include="Content\Bootstrap\img\istd-nav-logo1.png" />
+    <Content Include="Content\Bootstrap\img\loading.gif" />
+    <Content Include="Content\Bootstrap\img\question.png" />
+    <Content Include="Content\Bootstrap\img\Warning.png" />
+    <Content Include="Content\Bootstrap\js\ace-elements.js" />
+    <Content Include="Content\Bootstrap\js\ace-extra.js" />
+    <Content Include="Content\Bootstrap\js\ace.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.ajax-content.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.auto-container.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.auto-padding.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.onpage-help.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.searchbox-autocomplete.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.settings-rtl.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.settings-skin.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.settings.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.sidebar-scroll-1.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.sidebar-scroll-2.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.sidebar.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.submenu-hover.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.touch-drag.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.widget-box.js" />
+    <Content Include="Content\Bootstrap\js\ace\ace.widget-on-reload.js" />
+    <Content Include="Content\Bootstrap\js\ace\elements.aside.js" />
+    <Content Include="Content\Bootstrap\js\ace\elements.colorpicker.js" />
+    <Content Include="Content\Bootstrap\js\ace\elements.fileinput.js" />
+    <Content Include="Content\Bootstrap\js\ace\elements.onpage-help.js" />
+    <Content Include="Content\Bootstrap\js\ace\elements.scroller.js" />
+    <Content Include="Content\Bootstrap\js\ace\elements.spinner.js" />
+    <Content Include="Content\Bootstrap\js\ace\elements.treeview.js" />
+    <Content Include="Content\Bootstrap\js\ace\elements.typeahead.js" />
+    <Content Include="Content\Bootstrap\js\ace\elements.wizard.js" />
+    <Content Include="Content\Bootstrap\js\ace\elements.wysiwyg.js" />
+    <Content Include="Content\Bootstrap\js\additional-methods.js" />
+    <Content Include="Content\Bootstrap\js\bootbox.js" />
+    <Content Include="Content\Bootstrap\js\bootstrap-colorpicker.js" />
+    <Content Include="Content\Bootstrap\js\bootstrap-filestyle.min.js" />
+    <Content Include="Content\Bootstrap\js\bootstrap-multiselect.js" />
+    <Content Include="Content\Bootstrap\js\bootstrap-tag.js" />
+    <Content Include="Content\Bootstrap\js\bootstrap-wysiwyg.js" />
+    <Content Include="Content\Bootstrap\js\bootstrap.js" />
+    <Content Include="Content\Bootstrap\js\chosen.jquery.js" />
+    <Content Include="Content\Bootstrap\js\dataTables\extensions\ColVis\js\dataTables.colVis.js" />
+    <Content Include="Content\Bootstrap\js\dataTables\extensions\TableTools\js\dataTables.tableTools.js" />
+    <Content Include="Content\Bootstrap\js\dataTables\extensions\TableTools\swf\copy_csv_xls.swf" />
+    <Content Include="Content\Bootstrap\js\dataTables\extensions\TableTools\swf\copy_csv_xls_pdf.swf" />
+    <Content Include="Content\Bootstrap\js\dataTables\jquery.dataTables.bootstrap.js" />
+    <Content Include="Content\Bootstrap\js\dataTables\jquery.dataTables.js" />
+    <Content Include="Content\Bootstrap\js\date-time\bootstrap-datepicker.js" />
+    <Content Include="Content\Bootstrap\js\date-time\bootstrap-datetimepicker.js" />
+    <Content Include="Content\Bootstrap\js\date-time\bootstrap-timepicker.js" />
+    <Content Include="Content\Bootstrap\js\date-time\daterangepicker.js" />
+    <Content Include="Content\Bootstrap\js\date-time\moment.js" />
+    <Content Include="Content\Bootstrap\js\dropzone.js" />
+    <Content Include="Content\Bootstrap\js\excanvas.js" />
+    <Content Include="Content\Bootstrap\js\flot\jquery.flot.js" />
+    <Content Include="Content\Bootstrap\js\flot\jquery.flot.pie.js" />
+    <Content Include="Content\Bootstrap\js\flot\jquery.flot.resize.js" />
+    <Content Include="Content\Bootstrap\js\fuelux\fuelux.spinner.js" />
+    <Content Include="Content\Bootstrap\js\fuelux\fuelux.tree.js" />
+    <Content Include="Content\Bootstrap\js\fuelux\fuelux.wizard.js" />
+    <Content Include="Content\Bootstrap\js\fullcalendar.js" />
+    <Content Include="Content\Bootstrap\js\html5shiv.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-ar.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-bg.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-bg1251.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-cat.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-cn.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-cs.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-da.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-de.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-dk.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-el.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-en.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-es.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-fa.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-fi.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-fr.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-gl.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-he.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-hr.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-hr1250.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-hu.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-id.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-is.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-it.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-ja.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-kr.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-lt.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-mne.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-nl.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-no.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-pl.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-pt-br.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-pt.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-ro.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-ru.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-sk.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-sr-latin.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-sr.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-sv.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-th.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-tr.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-tw.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-ua.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\i18n\grid.locale-vi.js" />
+    <Content Include="Content\Bootstrap\js\jqGrid\jquery.jqGrid.src.js" />
+    <Content Include="Content\Bootstrap\js\jquery-ui.custom.js" />
+    <Content Include="Content\Bootstrap\js\jquery-ui.js" />
+    <Content Include="Content\Bootstrap\js\jquery.autosize.js" />
+    <Content Include="Content\Bootstrap\js\jquery.bootstrap-duallistbox.js" />
+    <Content Include="Content\Bootstrap\js\jquery.colorbox.js" />
+    <Content Include="Content\Bootstrap\js\jquery.easypiechart.js" />
+    <Content Include="Content\Bootstrap\js\jquery.gritter.js" />
+    <Content Include="Content\Bootstrap\js\jquery.hotkeys.js" />
+    <Content Include="Content\Bootstrap\js\jquery.inputlimiter.1.3.1.js" />
+    <Content Include="Content\Bootstrap\js\jquery.js" />
+    <Content Include="Content\Bootstrap\js\jquery.knob.js" />
+    <Content Include="Content\Bootstrap\js\jquery.maskedinput.js" />
+    <Content Include="Content\Bootstrap\js\jquery.min.js" />
+    <Content Include="Content\Bootstrap\js\jquery.mobile.custom.js" />
+    <Content Include="Content\Bootstrap\js\jquery.mousewheel.js" />
+    <Content Include="Content\Bootstrap\js\jquery.nestable.js" />
+    <Content Include="Content\Bootstrap\js\jquery.raty.js" />
+    <Content Include="Content\Bootstrap\js\jquery.slimscroll.js" />
+    <Content Include="Content\Bootstrap\js\jquery.sparkline.js" />
+    <Content Include="Content\Bootstrap\js\jquery.ui.touch-punch.js" />
+    <Content Include="Content\Bootstrap\js\jquery.validate.js" />
+    <Content Include="Content\Bootstrap\js\jquery1x.js" />
+    <Content Include="Content\Bootstrap\js\jquery_ui.custom.js" />
+    <Content Include="Content\Bootstrap\js\language\css.js" />
+    <Content Include="Content\Bootstrap\js\language\generic.js" />
+    <Content Include="Content\Bootstrap\js\language\html.js" />
+    <Content Include="Content\Bootstrap\js\language\javascript.js" />
+    <Content Include="Content\Bootstrap\js\language\php.js" />
+    <Content Include="Content\Bootstrap\js\markdown\bootstrap-markdown.js" />
+    <Content Include="Content\Bootstrap\js\markdown\markdown.js" />
+    <Content Include="Content\Bootstrap\js\markdown\to-markdown.js" />
+    <Content Include="Content\Bootstrap\js\pace.js" />
+    <Content Include="Content\Bootstrap\js\prettify.js" />
+    <Content Include="Content\Bootstrap\js\rainbow.js" />
+    <Content Include="Content\Bootstrap\js\rainbow.min.js" />
+    <Content Include="Content\Bootstrap\js\respond.js" />
+    <Content Include="Content\Bootstrap\js\select2.js" />
+    <Content Include="Content\Bootstrap\js\spin.js" />
+    <Content Include="Content\Bootstrap\js\themes\all-hallows-eve.css" />
+    <Content Include="Content\Bootstrap\js\themes\blackboard.css" />
+    <Content Include="Content\Bootstrap\js\themes\dreamweaver.css" />
+    <Content Include="Content\Bootstrap\js\themes\espresso-libre.css" />
+    <Content Include="Content\Bootstrap\js\themes\github.css" />
+    <Content Include="Content\Bootstrap\js\themes\kimbie-dark.css" />
+    <Content Include="Content\Bootstrap\js\themes\kimbie-light.css" />
+    <Content Include="Content\Bootstrap\js\themes\monokai.css" />
+    <Content Include="Content\Bootstrap\js\themes\obsidian.css" />
+    <Content Include="Content\Bootstrap\js\themes\paraiso-dark.css" />
+    <Content Include="Content\Bootstrap\js\themes\paraiso-light.css" />
+    <Content Include="Content\Bootstrap\js\themes\pastie.css" />
+    <Content Include="Content\Bootstrap\js\themes\solarized-dark.css" />
+    <Content Include="Content\Bootstrap\js\themes\solarized-light.css" />
+    <Content Include="Content\Bootstrap\js\themes\sunburst.css" />
+    <Content Include="Content\Bootstrap\js\themes\tomorrow-night.css" />
+    <Content Include="Content\Bootstrap\js\themes\tricolore.css" />
+    <Content Include="Content\Bootstrap\js\themes\twilight.css" />
+    <Content Include="Content\Bootstrap\js\themes\zenburnesque.css" />
+    <Content Include="Content\Bootstrap\js\typeahead.jquery.js" />
+    <Content Include="Content\Bootstrap\js\x-editable\ace-editable.js" />
+    <Content Include="Content\Bootstrap\js\x-editable\bootstrap-editable.js" />
+    <Content Include="Content\UI\angulerGridster\angular-gridster.js" />
+    <Content Include="Content\UI\angulerGridster\angular-gridster.min.css" />
+    <Content Include="Content\UI\angulerGridster\angular.js" />
+    <Content Include="Content\UI\angulerGridster\angular-gridster-script.js" />
+    <Content Include="Content\UI\chart.js" />
+    <Content Include="Content\UI\html5shiv.min.js" />
+    <Content Include="Content\UI\jquery.cookie.js" />
+    <Content Include="Content\UI\jquery.min.js" />
+    <Content Include="Content\UI\metisMenu.js" />
+    <Content Include="Content\UI\metisMenu.min.js" />
+    <Content Include="Content\UI\morris\morris-data.js" />
+    <Content Include="Content\UI\morris\morris.css" />
+    <Content Include="Content\UI\morris\morris.js" />
+    <Content Include="Content\UI\morris\morris.min.js" />
+    <Content Include="Content\UI\morris\raphael.min.js" />
+    <Content Include="Content\UI\respond.min.js" />
+    <Content Include="Content\UI\sb-admin-2.js" />
+    <Content Include="Content\UI\timeline\timeline.css" />
+    <Content Include="Content\UI\tourist\backbone-1.0.0.js" />
+    <Content Include="Content\UI\tourist\jquery.qtip.css" />
+    <Content Include="Content\UI\tourist\jquery.qtip.js" />
+    <Content Include="Content\UI\tourist\tourist.css" />
+    <Content Include="Content\UI\tourist\tourist.js" />
+    <Content Include="Content\UI\tourist\tourist.min.js" />
+    <Content Include="Content\UI\underscore-min.js" />
+    <Content Include="Content\UI\uses.js" />
+    <Content Include="Global.asax" />
+    <Content Include="SQL\MRP\NonComponent\CheckMatNo.sql" />
+    <Content Include="SQL\MRP\NonComponent\CountData.sql" />
+    <Content Include="SQL\MRP\NonComponent\CountDataMatNo.sql" />
+    <Content Include="SQL\MRP\NonComponent\DeleteData.sql" />
+    <Content Include="SQL\MRP\NonComponent\DELETE_TB_T.sql" />
+    <Content Include="SQL\MRP\NonComponent\DownloadData.sql" />
+    <Content Include="SQL\MRP\NonComponent\GetData.sql" />
+    <Content Include="SQL\MRP\NonComponent\GetDataMatNo.sql" />
+    <Content Include="SQL\MRP\NonComponent\GetSingleData.sql" />
+    <Content Include="SQL\MRP\NonComponent\INSERT_TB_T.sql" />
+    <Content Include="SQL\MRP\NonComponent\ListHeaderCode.sql" />
+    <Content Include="SQL\MRP\NonComponent\ListHeaderType.sql" />
+    <Content Include="SQL\MRP\NonComponent\ListPlantCode.sql" />
+    <Content Include="SQL\MRP\NonComponent\ListProcUsage.sql" />
+    <Content Include="SQL\MRP\NonComponent\ListStorageLoc.sql" />
+    <Content Include="SQL\MRP\NonComponent\Log_H.sql" />
+    <Content Include="SQL\MRP\NonComponent\SaveData.sql" />
+    <Content Include="SQL\MRP\NonComponent\UploadData.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\CountData.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\CountDataParentCd.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\DeleteData.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\DELETE_TB_T.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\DownloadData.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\GetData.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\GetDataParentCd.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\GetSingleData.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\INSERT_TB_T.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\ListHeaderCode.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\ListHeaderType.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\ListParentCd.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\ListProcUsage.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\Log_H.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\SaveData.sql" />
+    <Content Include="SQL\MRP\ParentHikiate\UploadData.sql" />
+    <Content Include="SQL\MRP\Parent\CountData.sql" />
+    <Content Include="SQL\MRP\Parent\DeleteData.sql" />
+    <Content Include="SQL\MRP\Parent\DELETE_TB_T.sql" />
+    <Content Include="SQL\MRP\Parent\DownloadData.sql" />
+    <Content Include="SQL\MRP\Parent\GetData.sql" />
+    <Content Include="SQL\MRP\Parent\GetSingleData.sql" />
+    <Content Include="SQL\MRP\Parent\INSERT_TB_T.sql" />
+    <Content Include="SQL\MRP\Parent\Log_H.sql" />
+    <Content Include="SQL\MRP\Parent\SaveData.sql" />
+    <Content Include="SQL\MRP\Parent\UploadData.sql" />
+    <Content Include="SQL\MRP\ProcUsage\CountData.sql" />
+    <Content Include="SQL\MRP\ProcUsage\DeleteData.sql" />
+    <Content Include="SQL\MRP\ProcUsage\DELETE_TB_T.sql" />
+    <Content Include="SQL\MRP\ProcUsage\DownloadData.sql" />
+    <Content Include="SQL\MRP\ProcUsage\GetData.sql" />
+    <Content Include="SQL\MRP\ProcUsage\GetSingleData.sql" />
+    <Content Include="SQL\MRP\ProcUsage\INSERT_TB_T.sql" />
+    <Content Include="SQL\MRP\ProcUsage\Log_H.sql" />
+    <Content Include="SQL\MRP\ProcUsage\SaveData.sql" />
+    <Content Include="SQL\MRP\ProcUsage\UploadData.sql" />
+    <Content Include="SQL\Master\Plant\getPlantData.sql" />
+    <Content Include="SQL\Master\Plant\GetSingleCurrentRowData.sql" />
+    <Content Include="SQL\Master\Plant\savingDataPlant.sql" />
+    <Content Include="SQL\POApproval\Approve.sql" />
+    <Content Include="SQL\POApproval\GetList.sql" />
+    <Content Include="SQL\POApproval\GetListCount.sql" />
+    <Content Include="SQL\POApproval\Reject.sql" />
+    <Content Include="SQL\PRApproval\RejectHeader.sql" />
+    <Content Include="SQL\PRApproval\RejectDetail.sql" />
+    <Content Include="SQL\PRApproval\ApproveHeader.sql" />
+    <Content Include="SQL\PRApproval\ApproveDetail.sql" />
+    <Content Include="SQL\POApproval\CountConditionList.sql" />
+    <Content Include="SQL\POApproval\GetConditionList.sql" />
+    <Content Include="SQL\POApproval\GetPOSubItemList.sql" />
+    <Content Include="SQL\PRApproval\CountDetailList.sql" />
+    <Content Include="SQL\PRApproval\CountList.sql" />
+    <Content Include="SQL\CommonApproval\CountHistoryList.sql" />
+    <Content Include="SQL\CommonApproval\DeleteNotice.sql" />
+    <Content Include="SQL\PRApproval\GetList.sql" />
+    <Content Include="SQL\CommonApproval\GetDelayedApproval.sql" />
+    <Content Include="SQL\PRApproval\GetDetailList.sql" />
+    <Content Include="SQL\CommonApproval\GetHistoryList.sql" />
+    <Content Include="SQL\CommonApproval\GetNoticeList.sql" />
+    <Content Include="SQL\CommonApproval\GetNoticeUnseenList.sql" />
+    <Content Include="SQL\CommonApproval\GetNoticeUserList.sql" />
+    <Content Include="SQL\PRApproval\GetSubItemList.sql" />
+    <Content Include="SQL\CommonApproval\PostNotice.sql" />
+    <Content Include="SQL\CommonApproval\ReplyNotice.sql" />
+    <Content Include="SQL\Master\Price\call_processingDelete.sql" />
+    <Content Include="SQL\Master\Price\call_processingSave.sql" />
+    <Content Include="SQL\Master\Price\call_validateSave.sql" />
+    <Content Include="SQL\Master\Price\count_matnoList.sql" />
+    <Content Include="SQL\Master\Price\count_price.sql" />
+    <Content Include="SQL\Master\Price\get_matnoList.sql" />
+    <Content Include="SQL\Master\Price\get_price.sql" />
+    <Content Include="SQL\ProcurementUsage\GetAllProcurementUsage.sql" />
+    <Content Include="SQL\PR\Common\call_getListDivision.sql" />
+    <Content Include="SQL\PR\Common\count_workFlow.sql" />
+    <Content Include="SQL\PR\Common\get_vendorList.sql" />
+    <Content Include="SQL\PR\Common\get_workFlow.sql" />
+    <Content Include="SQL\PR\PRCreation\call_budgetCalculation.sql" />
+    <Content Include="SQL\PR\PRCreation\call_quotaCalculation.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\count_wbsList.sql" />
+    <Content Include="SQL\PR\PRCreation\delete_itemtempData.sql" />
+    <Content Include="SQL\PR\PRCreation\generate_PRNo.sql" />
+    <Content Include="SQL\PR\PRCreation\pr_creationInit.sql" />
+    <Content Include="SQL\PR\PRCreation\get_userDescription.sql" />
+    <Content Include="SQL\PR\PRCreation\call_savingProcessing.sql" />
+    <Content Include="SQL\PR\PRCreation\validate_savePR.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_assetCatList.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_assetClassList.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_matnoList.sql" />
+    <Content Include="SQL\PR\PRCreation\delete_alltempData.sql" />
+    <Content Include="SQL\PR\PRCreation\get_subitemdetailEditData.sql" />
+    <Content Include="SQL\PR\PRCreation\insert_subitemtempData.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\count_glaccountList.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\count_matnoList.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\count_valclassList.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_costcenterList.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_glaccountList.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_prtype.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_valclassList.sql" />
+    <Content Include="SQL\PR\PRCreation\DataList\get_wbsList.sql" />
+    <Content Include="SQL\PR\PRCreation\deleteselected_subitemTemp.sql" />
+    <Content Include="SQL\PR\PRCreation\delete_tempbyUserID.sql" />
+    <Content Include="SQL\PR\PRCreation\delete_tempFile.sql" />
+    <Content Include="SQL\PR\PRCreation\get_deletedTempFiles.sql" />
+    <Content Include="SQL\PR\PRCreation\get_errorLog.sql" />
+    <Content Include="SQL\PR\PRCreation\get_lastprocessIDonTemp.sql" />
+    <Content Include="SQL\PR\PRCreation\get_lastsequenceOnSubItem.sql" />
+    <Content Include="SQL\PR\PRCreation\get_lastsequenceOnItem.sql" />
+    <Content Include="SQL\PR\PRCreation\get_prattachmentbyType.sql" />
+    <Content Include="SQL\PR\PRCreation\get_prattachmentEditData.sql" />
+    <Content Include="SQL\PR\PRCreation\get_itemdetailEditData.sql" />
+    <Content Include="SQL\PR\PRCreation\get_prheaderEditData.sql" />
+    <Content Include="SQL\PR\PRCreation\get_savedTempFiles.sql" />
+    <Content Include="SQL\PR\PRCreation\insert_attachedFile.sql" />
+    <Content Include="SQL\PR\PRCreation\insert_itemtempData.sql" />
+    <Content Include="SQL\PR\PRCreation\validate_editDetailPR.sql" />
+    <Content Include="SQL\PR\PRInquiry\AnotherPrItem.sql" />
+    <Content Include="SQL\PR\PRInquiry\call_validationeditPR.sql" />
+    <Content Include="SQL\PR\PRInquiry\cancel_budgetPR.sql" />
+    <Content Include="SQL\PR\PRInquiry\cancel_budgetPRrem.sql" />
+    <Content Include="SQL\PR\PRInquiry\cancel_quotaPR.sql" />
+    <Content Include="SQL\PR\PRInquiry\cancel_validationPR.sql" />
+    <Content Include="SQL\PR\PRInquiry\CheckPO.sql" />
+    <Content Include="SQL\PR\PRInquiry\CheckPrDetail.sql" />
+    <Content Include="SQL\PR\PRInquiry\CheckPRItemNo.sql" />
+    <Content Include="SQL\PR\PRInquiry\CheckRefDocNo.sql" />
+    <Content Include="SQL\PR\PRInquiry\CommitRemBudget.sql" />
+    <Content Include="SQL\PR\PRInquiry\count_worklisthistory_data.sql" />
+    <Content Include="SQL\PR\PRInquiry\do_cancelPR.sql" />
+    <Content Include="SQL\PR\PRInquiry\GetAllDocStatusByType.sql" />
+    <Content Include="SQL\PR\PRInquiry\get_approvalFinance.sql" />
+    <Content Include="SQL\PR\PRInquiry\get_approvalCoordinator.sql" />
+    <Content Include="SQL\PR\PRInquiry\count_approval.sql" />
+    <Content Include="SQL\PR\PRInquiry\count_prdetailItemList.sql" />
+    <Content Include="SQL\PR\PRInquiry\count_prheaderList.sql" />
+    <Content Include="SQL\PR\PRInquiry\get_approvalDivision.sql" />
+    <Content Include="SQL\PR\PRInquiry\get_detailPRAttachment.sql" />
+    <Content Include="SQL\PR\PRInquiry\get_detailPRItem.sql" />
+    <Content Include="SQL\PR\PRInquiry\get_detailPRH.sql" />
+    <Content Include="SQL\PR\PRInquiry\get_detailPRSubItem.sql" />
+    <Content Include="SQL\PR\PRInquiry\get_prcancelreason.sql" />
+    <Content Include="SQL\PR\PRInquiry\get_prdownloadexcelList.sql" />
+    <Content Include="SQL\PR\PRInquiry\get_prheaderList.sql" />
+    <Content Include="SQL\PR\PRInquiry\get_prstatusList.sql" />
+    <Content Include="SQL\PR\PRInquiry\get_worklisthistory_data.sql" />
+    <Content Include="SQL\PR\PRInquiry\init_cancelPR.sql" />
+    <Content Include="SQL\PR\PRInquiry\unlock_pr.sql" />
+    <Content Include="SQL\PR\PRInquiry\UpdateCancelRem.sql" />
+    <Content Include="SQL\PR\PRStatusMonitoring\CountList.sql" />
+    <Content Include="SQL\PR\PRStatusMonitoring\GetFilterDelayStatus.sql" />
+    <Content Include="SQL\PR\PRStatusMonitoring\GetList.sql" />
+    <Content Include="SQL\PR\PRStatusMonitoring\SummaryData.sql" />
+    <Content Include="SQL\PurchasingGroup\CreateUploadTempTable.sql" />
+    <Content Include="SQL\PurchasingGroup\GetUploadTempTable.sql" />
+    <Content Include="SQL\PurchasingGroup\InsertUploadTempTable.sql" />
+    <Content Include="SQL\PurchasingGroup\MoveUploadTempTableToRealTable.sql" />
+    <Content Include="SQL\Quota\ConfirmAdditional.sql" />
+    <Content Include="SQL\Quota\ConfirmAdditionalCancel.sql" />
+    <Content Include="SQL\Quota\GetDataConfirm.sql" />
+    <Content Include="SQL\Quota\GetListPeriode.sql" />
+    <Content Include="SQL\Quota\GetListSourceOrderType.sql" />
+    <Content Include="SQL\Quota\SubmitAdditional.sql" />
+    <Content Include="SQL\Quota\SubmitTolerance.sql" />
+    <Content Include="SQL\Quota\GetSingleQuotaTrans.sql" />
+    <Content Include="SQL\Quota\GenerateQuotaConfirm.sql" />
+    <Content Include="SQL\Quota\GenerateQuota.sql" />
+    <Content Include="SQL\Quota\DeleteData.sql" />
+    <Content Include="SQL\Quota\DELETE_TB_T.sql" />
+    <Content Include="SQL\Quota\GetSingleQuota.sql" />
+    <Content Include="SQL\Quota\DownloadData.sql" />
+    <Content Include="SQL\Quota\CountMaterial.sql" />
+    <Content Include="SQL\Quota\CountTotalQuotaList.sql" />
+    <Content Include="SQL\Quota\CountTotalQuotaMaster.sql" />
+    <Content Include="SQL\Quota\GetAllMatNo.sql" />
+    <Content Include="SQL\Quota\GetListValuationClass.sql" />
+    <Content Include="SQL\Quota\GetListWBSNo.sql" />
+    <Content Include="SQL\Quota\INSERT_TB_T.sql" />
+    <Content Include="SQL\Quota\GetListWBS.sql" />
+    <Content Include="SQL\Quota\ReadQuotaList.sql" />
+    <Content Include="SQL\Quota\ReadQuotaMaster.sql" />
+    <Content Include="SQL\Quota\SaveData.sql" />
+    <Content Include="SQL\Quota\UploadData.sql" />
+    <Content Include="SQL\ReceivingList\ApproveGR.sql" />
+    <Content Include="SQL\ReceivingList\CountReceivingListDetail.sql" />
+    <Content Include="SQL\ReceivingList\CountReceivingList.sql" />
+    <Content Include="SQL\ReceivingList\CountSupplier.sql" />
+    <Content Include="SQL\ReceivingList\errorPostingDetail.sql" />
+    <Content Include="SQL\ReceivingList\GetGR_IR_DATAExcel.sql" />
+    <Content Include="SQL\ReceivingList\GetInvoiceReceiving.sql" />
+    <Content Include="SQL\ReceivingList\GetDownloadExcel.sql" />
+    <Content Include="SQL\ReceivingList\GetReceivingList.sql" />
+    <Content Include="SQL\ReceivingList\GetReceivingListDetail.sql" />
+    <Content Include="SQL\ReceivingList\GetStatusGR.sql" />
+    <Content Include="SQL\ReceivingList\GetSupplier.sql" />
+    <Content Include="SQL\Report\GetStatusCd.sql" />
+    <Content Include="SQL\Report\countProcurementTracking.sql" />
+    <Content Include="SQL\Report\downloadDataHeader.sql" />
+    <Content Include="SQL\Report\GetAllDivision.sql" />
+    <Content Include="SQL\Report\GetAllProcurementTracking.sql" />
+    <Content Include="SQL\Report\GetUserMappingDiv.sql" />
+    <Content Include="SQL\SA\CheckPO.sql" />
+    <Content Include="SQL\SA\GetDataPO.sql" />
+    <Content Include="SQL\SA\GetDataPObyREFF.sql" />
+    <Content Include="SQL\SA\GetDetailPO.sql" />
+    <Content Include="SQL\SA\GetPOItem.sql" />
+    <Content Include="SQL\SA\GetSubItem.sql" />
+    <Content Include="SQL\Master\SourceList\CountData.sql" />
+    <Content Include="SQL\Master\SourceList\CreateUploadTempTable.sql" />
+    <Content Include="SQL\Master\SourceList\DeleteSourceList.sql" />
+    <Content Include="SQL\Master\SourceList\GetSingleData.sql" />
+    <Content Include="SQL\Master\SourceList\GetUploadTempTable.sql" />
+    <Content Include="SQL\Master\SourceList\InsertSourceList.sql" />
+    <Content Include="SQL\Master\SourceList\InsertUploadTempTable.sql" />
+    <Content Include="SQL\Master\SourceList\MoveUploadTempToRealTable.sql" />
+    <Content Include="SQL\Master\SourceList\ReadSourceList.sql" />
+    <Content Include="SQL\Master\SourceList\UpdateSourceList.sql" />
+    <Content Include="SQL\Master\SourceList\ValidationDeleteSourceList.sql" />
+    <Content Include="SQL\Master\SourceList\ValidationValidDate.sql" />
+    <Content Include="SQL\SOPFileInquiry\sp_SOPFileInquiry_DeleteSOP.sql" />
+    <Content Include="SQL\SOPFileInquiry\sp_SOPFileInquiry_SubmitSOP.sql" />
+    <Content Include="SQL\SOPFileInquiry\sp_SOPFileInquiry_GetModuleList.sql" />
+    <Content Include="SQL\SOPFileInquiry\sp_SOPFileInquiry_GetListCount.sql" />
+    <Content Include="SQL\SOPFileInquiry\sp_SOPFileInquiry_GetList.sql" />
+    <Content Include="SQL\SOPFileInquiry\sp_SOPFileInquiry_GetData.sql" />
+    <Content Include="SQL\WallAnnouncement\SubmitRecipient.sql" />
+    <Content Include="SQL\WallAnnouncement\GetLookupRecipientSupplier.sql" />
+    <Content Include="SQL\WallAnnouncement\GetLookupRecipientNonSupplier.sql" />
+    <Content Include="Tdk-Lib\itextsharp.dll" />
+    <Content Include="Tdk-Lib\itextsharp.pdfa.dll" />
+    <Content Include="Tdk-Lib\itextsharp.xtra.dll" />
+    <Content Include="Tdk-Lib\Microsoft.ReportViewer.WebForms.dll" />
+    <Content Include="Tdk-Lib\NPOI.dll" />
+    <Content Include="Tdk-Lib\NPOI.OOXML.dll" />
+    <Content Include="Tdk-Lib\NPOI.OpenXml4Net.dll" />
+    <Content Include="Tdk-Lib\NPOI.OpenXmlFormats.dll" />
+    <Content Include="Tdk-Lib\NPOI.xml" />
+    <Content Include="Tdk-Lib\RasterEdge.Imaging.Barcode.Scanner.dll" />
+    <Content Include="Tdk-Lib\RasterEdge.Imaging.Basic.Codec.dll" />
+    <Content Include="Tdk-Lib\RasterEdge.Imaging.Basic.dll" />
+    <Content Include="Tdk-Lib\RasterEdge.Imaging.Drawing.dll" />
+    <Content Include="Tdk-Lib\RasterEdge.XDoc.PDF.dll" />
+    <Content Include="Tdk-Lib\RasterEdge.XImage.Raster.Core.dll" />
+    <Content Include="Tdk-Lib\RasterEdge.XImage.Raster.dll" />
+    <Content Include="Tdk-Lib\ServiceStack.Text.dll" />
+    <Content Include="Tdk-Lib\System.Web.Mvc.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.Configuration.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.Credential.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.Credential.Provider.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.Database.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.Database.Petapoco.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.Generalist.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.Logging.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.Lookup.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.SSO.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.Utilities.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.Web.Platform.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.Web.Service.dll" />
+    <Content Include="Tdk-Lib\Toyota.Common.Web.UI.Layout.dll" />
+    <Content Include="Tdk-Lib\VisitorCounter.dll" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineItemGrid.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Web.config" />
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Views\Web.config" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Content\img\login\" />
+    <Folder Include="Content\PR\UPLOAD\TEMP\" />
+    <Folder Include="Content\UploadFile\" />
+    <Folder Include="obj\Debug\Package\" />
+    <Folder Include="obj\Debug\TempPE\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Configurations\Locale-US.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Configurations\System.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Configurations\Database-QA.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Configurations\SingleSignOn-QA.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Configurations\Database-DEV.config" />
+    <Content Include="Configurations\SingleSignOn-DEV.config" />
+    <None Include="Content\Bootstrap\css\less\ace-features.less" />
+    <None Include="Content\Bootstrap\css\less\ace-nav.less" />
+    <None Include="Content\Bootstrap\css\less\ace-responsive.less" />
+    <None Include="Content\Bootstrap\css\less\ace-rtl.less" />
+    <None Include="Content\Bootstrap\css\less\ace.less" />
+    <None Include="Content\Bootstrap\css\less\basic.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\alerts.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\badges.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\bootstrap.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\breadcrumbs.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\button-groups.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\buttons.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\carousel.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\close.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\code.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\component-animations.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\dropdowns.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\forms.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\glyphicons.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\grid.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\input-groups.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\jumbotron.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\labels.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\list-group.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\media.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\alerts.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\background-variant.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\border-radius.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\buttons.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\center-block.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\clearfix.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\forms.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\gradients.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\grid-framework.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\grid.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\hide-text.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\image.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\labels.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\list-group.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\nav-divider.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\nav-vertical-align.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\opacity.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\pagination.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\panels.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\progress-bar.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\reset-filter.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\resize.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\responsive-visibility.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\size.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\tab-focus.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\table-row.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\text-emphasis.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\text-overflow.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\mixins\vendor-prefixes.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\modals.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\navbar.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\navs.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\normalize.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\pager.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\pagination.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\panels.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\popovers.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\print.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\progress-bars.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\responsive-embed.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\responsive-utilities.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\scaffolding.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\tables.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\theme.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\thumbnails.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\tooltip.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\type.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\utilities.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\variables.less" />
+    <None Include="Content\Bootstrap\css\less\bootstrap\wells.less" />
+    <None Include="Content\Bootstrap\css\less\breadcrumbs.less" />
+    <None Include="Content\Bootstrap\css\less\bs3-reset.less" />
+    <None Include="Content\Bootstrap\css\less\buttons.less" />
+    <None Include="Content\Bootstrap\css\less\dropdown.less" />
+    <None Include="Content\Bootstrap\css\less\dropdown\colorpicker.less" />
+    <None Include="Content\Bootstrap\css\less\dropdown\navbar-dropdown.less" />
+    <None Include="Content\Bootstrap\css\less\dropdown\navbar-tabbed-dropdown.less" />
+    <None Include="Content\Bootstrap\css\less\ext\bootstrap-tag.less" />
+    <None Include="Content\Bootstrap\css\less\fonts-rel.less" />
+    <None Include="Content\Bootstrap\css\less\fonts.less" />
+    <None Include="Content\Bootstrap\css\less\footer.less" />
+    <None Include="Content\Bootstrap\css\less\form.less" />
+    <None Include="Content\Bootstrap\css\less\form\checkbox.less" />
+    <None Include="Content\Bootstrap\css\less\form\file.less" />
+    <None Include="Content\Bootstrap\css\less\gallery.less" />
+    <None Include="Content\Bootstrap\css\less\general.less" />
+    <None Include="Content\Bootstrap\css\less\icon-animated.less" />
+    <None Include="Content\Bootstrap\css\less\infobox.less" />
+    <None Include="Content\Bootstrap\css\less\items.less" />
+    <None Include="Content\Bootstrap\css\less\label-badge.less" />
+    <None Include="Content\Bootstrap\css\less\mixins.less" />
+    <None Include="Content\Bootstrap\css\less\modal.less" />
+    <None Include="Content\Bootstrap\css\less\navbar\collapsible.less" />
+    <None Include="Content\Bootstrap\css\less\navbar\navbar-menu-form.less" />
+    <None Include="Content\Bootstrap\css\less\navbar\toggle-button.less" />
+    <None Include="Content\Bootstrap\css\less\navbar\user-buttons-move-down.less" />
+    <None Include="Content\Bootstrap\css\less\navbar\user-buttons.less" />
+    <None Include="Content\Bootstrap\css\less\navbar\user-dropdown-position.less" />
+    <None Include="Content\Bootstrap\css\less\navbar\user-menu.less" />
+    <None Include="Content\Bootstrap\css\less\onpage-help.less" />
+    <None Include="Content\Bootstrap\css\less\other.less" />
+    <None Include="Content\Bootstrap\css\less\page.error.less" />
+    <None Include="Content\Bootstrap\css\less\page.inbox.less" />
+    <None Include="Content\Bootstrap\css\less\page.invoice.less" />
+    <None Include="Content\Bootstrap\css\less\page.login.less" />
+    <None Include="Content\Bootstrap\css\less\page.pricing.less" />
+    <None Include="Content\Bootstrap\css\less\page.profile.less" />
+    <None Include="Content\Bootstrap\css\less\page.timeline.less" />
+    <None Include="Content\Bootstrap\css\less\print.less" />
+    <None Include="Content\Bootstrap\css\less\progressbar.less" />
+    <None Include="Content\Bootstrap\css\less\scroll.less" />
+    <None Include="Content\Bootstrap\css\less\searchbox.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\active.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\compact.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\ff_fix.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\highlight.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\horizontal.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\hover.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\min.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\multiple.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\old-toggle-button.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\responsive-1.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\responsive-2.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\responsive-3.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\shortcuts-toggle.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\sidebar-fixed.less" />
+    <None Include="Content\Bootstrap\css\less\sidebar\sub-arrow.less" />
+    <None Include="Content\Bootstrap\css\less\skins\empty.less" />
+    <None Include="Content\Bootstrap\css\less\skins\no-skin.less" />
+    <None Include="Content\Bootstrap\css\less\skins\skin-1.less" />
+    <None Include="Content\Bootstrap\css\less\skins\skin-2.less" />
+    <None Include="Content\Bootstrap\css\less\skins\skin-3.less" />
+    <None Include="Content\Bootstrap\css\less\skins\skins.less" />
+    <None Include="Content\Bootstrap\css\less\tab-accordion.less" />
+    <None Include="Content\Bootstrap\css\less\tables.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-calendar.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-chosen.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-colorbox.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-dataTables.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-date.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-dropzone.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-duallist-multiselect.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-editable.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-fuelux.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-gritter.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-jqgrid.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-jquery-ui.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-nestable.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-raty.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-select2.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-slider.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-typeahead.less" />
+    <None Include="Content\Bootstrap\css\less\thirdparty-wysiwyg.less" />
+    <None Include="Content\Bootstrap\css\less\tooltip-popover.less" />
+    <None Include="Content\Bootstrap\css\less\utility.less" />
+    <None Include="Content\Bootstrap\css\less\variables.less" />
+    <None Include="Content\Bootstrap\css\less\widget.less" />
+    <Content Include="Content\Bootstrap\fonts\fontawesome-webfont.eot" />
+    <Content Include="Content\Bootstrap\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Content\Bootstrap\fonts\fontawesome-webfont.woff" />
+    <Content Include="Content\Bootstrap\fonts\FontAwesome.otf" />
+    <Content Include="Content\Bootstrap\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="Content\Bootstrap\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="Content\Bootstrap\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="Content\Bootstrap\fonts\leaguespartan-bold.eot" />
+    <Content Include="Content\Bootstrap\fonts\leaguespartan-bold.ttf" />
+    <Content Include="Content\Bootstrap\fonts\leaguespartan-bold.woff" />
+    <Content Include="Content\Bootstrap\fonts\leaguespartan-bold.woff2" />
+    <Content Include="Content\Bootstrap\fonts\OpenSans-300.woff" />
+    <Content Include="Content\Bootstrap\fonts\OpenSans-400.woff" />
+    <None Include="Content\Bootstrap\fonts\readme" />
+    <None Include="Content\Bootstrap\js\ace\readme" />
+    <None Include="Content\Bootstrap\js\ace\scripts.json" />
+    <Content Include="Content\Download\dummy_download.xlsx" />
+    <Content Include="Views\Home\Home.cshtml" />
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\HorizontalMenu.cshtml" />
+    <Content Include="Views\Shared\VerticalMenu.cshtml" />
+    <Content Include="Views\Blank\Blank.cshtml" />
+    <Content Include="Views\Login\Login.cshtml" />
+    <Content Include="Views\ChangePassword\ChangePassword.cshtml" />
+    <Content Include="Views\Login\_Carousel.cshtml" />
+    <Content Include="Views\Shared\_About.cshtml" />
+    <Content Include="Views\Shared\_TourPlugin.cshtml" />
+    <Content Include="Views\Visualization\Visualization.cshtml" />
+    <Content Include="Views\Visualization\_GridView.cshtml" />
+    <Content Include="Views\Visualization\_LegendView.cshtml" />
+    <Content Include="Views\Visualization\_SearchCriteria.cshtml" />
+    <Content Include="Views\Visualization\_WidgetSettings.cshtml" />
+    <Content Include="Views\Login\_Agreement.cshtml" />
+    <Content Include="Views\Dashboard\Dashboard.cshtml" />
+    <Content Include="Views\MRPInquiry\MRPInquiry.cshtml" />
+    <Content Include="Views\MRPCreation\MRPCreation.cshtml" />
+    <Content Include="Views\Shared\MRP\_procUsageGroupLookupGrid.cshtml" />
+    <Content Include="Views\MRPCreation\_mrpCheck.cshtml" />
+    <Content Include="Views\Shared\Common\_DropdownList.cshtml" />
+    <Compile Include="Models\MRP\MRPInquiryRepository.cs" />
+    <Content Include="Views\MRPInquiry\_inquiryGrid.cshtml" />
+    <Content Include="Views\MRPInquiry\_inquiryGet.cshtml" />
+    <Content Include="Views\MRPInquiry\_inquiryItemGrid.cshtml" />
+    <Content Include="Views\LogMonitoringDetail\LogMonitoringDetail.cshtml" />
+    <Content Include="Views\LogMonitoringDetail\_Grid.cshtml" />
+    <Content Include="Views\LogMonitoringDetail\_Paging.cshtml" />
+    <Content Include="Views\LogMonitoringDetail\_PartialScript.cshtml" />
+    <Content Include="Views\LogMonitoring\LogMonitoring.cshtml" />
+    <Content Include="Views\LogMonitoring\_Grid.cshtml" />
+    <Content Include="Views\LogMonitoring\_Paging.cshtml" />
+    <Content Include="Views\LogMonitoring\_PartialScript.cshtml" />
+    <Content Include="Views\Vendor\Vendor.cshtml" />
+    <Content Include="Views\Vendor\_AddEditPopUp.cshtml" />
+    <Content Include="Views\Vendor\_Grid.cshtml" />
+    <Content Include="Views\Vendor\_Paging.cshtml" />
+    <Content Include="Views\Vendor\_PartialScript.cshtml" />
+    <Content Include="Views\CostCenter\CostCenter.cshtml" />
+    <Content Include="Views\CostCenter\_AddEditPopUp.cshtml" />
+    <Content Include="Views\CostCenter\_Grid.cshtml" />
+    <Content Include="Views\CostCenter\_Paging.cshtml" />
+    <Content Include="Views\CostCenter\_PartialScript.cshtml" />
+    <Content Include="Views\MRPNonComponent\MRPNonComponent.cshtml" />
+    <Content Include="Views\MRPNonComponent\_AddEditPopUp.cshtml" />
+    <Content Include="Views\MRPNonComponent\_Grid.cshtml" />
+    <Content Include="Views\MRPNonComponent\_Message.cshtml" />
+    <Content Include="Views\MRPNonComponent\_Paging.cshtml" />
+    <Content Include="Views\MRPNonComponent\_PartialScript.cshtml" />
+    <Content Include="Views\MRPNonComponent\_SearchCriteria.cshtml" />
+    <Content Include="Content\Download\VendorMaster.xls" />
+    <Content Include="Views\PRCreation\PRCreation.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCostCenterDropdown.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationItemGrid.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationLookupGL.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationLookupGLGrid.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationLookupMaterial.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationLookupMaterialGrid.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationLookupValuationClass.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationLookupValuationClassGrid.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationScript.cshtml" />
+    <Content Include="Views\PRCreation\_UIPaging.cshtml" />
+    <Content Include="Views\PRInquiry\PRInquiry.cshtml" />
+    <Content Include="Views\PRInquiry\_PartialInquiryDetail.cshtml" />
+    <Content Include="Views\PRInquiry\_PartialInquiryDetailGrid.cshtml" />
+    <Content Include="Views\PRInquiry\_PartialInquiryGrid.cshtml" />
+    <Content Include="Views\PRInquiry\_PartialInquiryScript.cshtml" />
+    <Content Include="Views\PRInquiry\_PartialSlocDropdown.cshtml" />
+    <Content Include="Views\PRInquiry\_UIPaging.cshtml" />
+    <Content Include="Views\Worklist\_PartialPRWorklist.cshtml" />
+    <Content Include="Views\Worklist\_PartialPRWorklistGrid.cshtml" />
+    <Content Include="Views\PRApproval\PRApproval.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalAttachment.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalAttachmentGrid.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalDelayGrid.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalDetail.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalDetailGrid.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalDetailParam.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalGrid.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalHistory.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalHistoryGrid.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalNotice.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalNoticeMessage.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalParam.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalReadonlyNotice.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalResultDialog.cshtml" />
+    <Content Include="Content\lib\bootstrap\css\bootstrap-theme.css.map" />
+    <Content Include="Content\lib\bootstrap\css\bootstrap.css.map" />
+    <Content Include="Content\lib\bootstrap\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="Content\lib\bootstrap\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="Content\lib\bootstrap\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="Content\lib\font-awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Content\lib\font-awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Content\lib\font-awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Content\lib\font-awesome\fonts\FontAwesome.otf" />
+    <Content Include="Content\lib\font-awesome\less\bordered-pulled.less" />
+    <Content Include="Content\lib\font-awesome\less\core.less" />
+    <Content Include="Content\lib\font-awesome\less\fixed-width.less" />
+    <Content Include="Content\lib\font-awesome\less\font-awesome.less" />
+    <Content Include="Content\lib\font-awesome\less\icons.less" />
+    <Content Include="Content\lib\font-awesome\less\larger.less" />
+    <Content Include="Content\lib\font-awesome\less\list.less" />
+    <Content Include="Content\lib\font-awesome\less\mixins.less" />
+    <Content Include="Content\lib\font-awesome\less\path.less" />
+    <Content Include="Content\lib\font-awesome\less\rotated-flipped.less" />
+    <Content Include="Content\lib\font-awesome\less\spinning.less" />
+    <Content Include="Content\lib\font-awesome\less\stacked.less" />
+    <Content Include="Content\lib\font-awesome\less\variables.less" />
+    <Content Include="Content\lib\font-awesome\scss\font-awesome.scss" />
+    <Content Include="Content\lib\font-awesome\scss\_bordered-pulled.scss" />
+    <Content Include="Content\lib\font-awesome\scss\_core.scss" />
+    <Content Include="Content\lib\font-awesome\scss\_fixed-width.scss" />
+    <Content Include="Content\lib\font-awesome\scss\_icons.scss" />
+    <Content Include="Content\lib\font-awesome\scss\_larger.scss" />
+    <Content Include="Content\lib\font-awesome\scss\_list.scss" />
+    <Content Include="Content\lib\font-awesome\scss\_mixins.scss" />
+    <Content Include="Content\lib\font-awesome\scss\_path.scss" />
+    <Content Include="Content\lib\font-awesome\scss\_rotated-flipped.scss" />
+    <Content Include="Content\lib\font-awesome\scss\_spinning.scss" />
+    <Content Include="Content\lib\font-awesome\scss\_stacked.scss" />
+    <Content Include="Content\lib\font-awesome\scss\_variables.scss" />
+    <Content Include="Content\lib\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="Content\lib\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="Content\lib\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="Content\quotation\Q141104001.pdf" />
+    <Content Include="Content\upload\template\CostCenter.xls" />
+    <Content Include="Content\upload\template\CostCenterMapping.xls" />
+    <Content Include="Content\upload\template\Material.xls" />
+    <Content Include="Content\upload\template\Vendor.xls" />
+    <Content Include="Views\BudgetMonitoring\BudgetMonitoring.cshtml" />
+    <Content Include="Views\BudgetMonitoring\_MainGrid.cshtml" />
+    <Content Include="Views\ExchangeRate\ExchangeRate.cshtml" />
+    <Content Include="Views\ExchangeRate\_PopUpExchangeRate.cshtml" />
+    <Content Include="Views\ExchangeRate\_UIPaging.cshtml" />
+    <Content Include="Views\ExchangeRate\_ViewTable.cshtml" />
+    <Content Include="Views\Home\HomeAnnouncement.cshtml" />
+    <Content Include="Views\Home\HomeNotice.cshtml" />
+    <Content Include="Views\Home\HomeWorklist.cshtml" />
+    <Content Include="Views\MassRequest\MassRequest.cshtml" />
+    <Content Include="Views\MassRequest\_MainGrid.cshtml" />
+    <Content Include="Views\Material\Material.cshtml" />
+    <Content Include="Views\Material\_PopUpMaterial.cshtml" />
+    <Content Include="Views\Material\_ViewTable.cshtml" />
+    <Content Include="Views\Plant\Plant.cshtml" />
+    <Content Include="Views\Plant\_plantGrid.cshtml" />
+    <Content Include="Views\Price\Price.cshtml" />
+    <Content Include="Views\Price\_PartialPriceDraftPopup.cshtml" />
+    <Content Include="Views\Price\_PartialPriceGrid.cshtml" />
+    <Content Include="Views\Price\_PartialPriceItemPopup.cshtml" />
+    <Content Include="Views\Price\_PartialPriceLookupMaterial.cshtml" />
+    <Content Include="Views\Price\_PartialPriceLookupMaterialGrid.cshtml" />
+    <Content Include="Views\Price\_PartialPriceScript.cshtml" />
+    <Content Include="Views\Price\_UIPaging.cshtml" />
+    <Content Include="Views\MRPNonComponent\_LookupGrid_MatNo.cshtml" />
+    <Content Include="Views\MRPNonComponent\_PagingLookup.cshtml" />
+    <Content Include="Views\MRPParentHikiate\MRPParentHikiate.cshtml" />
+    <Content Include="Views\MRPParentHikiate\_AddEditPopUp.cshtml" />
+    <Content Include="Views\MRPParentHikiate\_Grid.cshtml" />
+    <Content Include="Views\MRPParentHikiate\_Message.cshtml" />
+    <Content Include="Views\MRPParentHikiate\_Paging.cshtml" />
+    <Content Include="Views\MRPParentHikiate\_PartialScript.cshtml" />
+    <Content Include="Views\MRPParentHikiate\_SearchCriteria.cshtml" />
+    <Content Include="Views\POCreation\POCreation.cshtml" />
+    <Content Include="Views\POInquiry\POInquiry.cshtml" />
+    <Content Include="Views\POInquiry\_inquiryGetPO.cshtml" />
+    <Content Include="Views\POInquiry\_inquiryGrid.cshtml" />
+    <Content Include="Views\POCreation\_creationPRItemSearch.cshtml" />
+    <Content Include="Views\MRPGentaniHeader\MRPGentaniHeader.cshtml" />
+    <Content Include="Views\MRPGentaniHeader\_AddEditPopUp.cshtml" />
+    <Content Include="Views\MRPGentaniHeader\_Grid.cshtml" />
+    <Content Include="Views\MRPGentaniHeader\_Message.cshtml" />
+    <Content Include="Views\MRPGentaniHeader\_Paging.cshtml" />
+    <Content Include="Views\MRPGentaniHeader\_PartialScript.cshtml" />
+    <Content Include="Views\MRPGentaniHeader\_SearchCriteria.cshtml" />
+    <Content Include="Views\MRPGentaniType\MRPGentaniType.cshtml" />
+    <Content Include="Views\MRPGentaniType\_AddEditPopUp.cshtml" />
+    <Content Include="Views\MRPGentaniType\_Grid.cshtml" />
+    <Content Include="Views\MRPGentaniType\_Message.cshtml" />
+    <Content Include="Views\MRPGentaniType\_Paging.cshtml" />
+    <Content Include="Views\MRPGentaniType\_PartialScript.cshtml" />
+    <Content Include="Views\MRPGentaniType\_SearchCriteria.cshtml" />
+    <Content Include="Content\Download\ParentHikiate.xls" />
+    <Content Include="Content\Download\Parent.xls" />
+    <Content Include="Content\Download\NonComponentPartList.xls" />
+    <Content Include="Content\Download\GentaniType.xls" />
+    <Content Include="Content\Download\GentaniHeader.xls" />
+    <Content Include="Views\CalculationMapping\CalculationMapping.cshtml" />
+    <Content Include="Views\CalculationMapping\_CalculationMappingDetailGrid.cshtml" />
+    <Content Include="Views\CalculationMapping\_CalculationMappingGrid.cshtml" />
+    <Content Include="Views\CalculationMapping\_CalculationMappingPopup.cshtml" />
+    <Content Include="Views\CalculationMapping\_CalculationMappingScript.cshtml" />
+    <Content Include="Views\CalculationMapping\_DetailCalculationMapping.cshtml" />
+    <Content Include="Views\CalculationMapping\_UIPaging.cshtml" />
+    <Content Include="Content\Download\ProcUsage.xls" />
+    <Content Include="Content\Download\Template\MRP_GENTANI_HEADER.xls" />
+    <Content Include="Content\Download\Template\MRP_GENTANI_TYPE.xls" />
+    <Content Include="Content\Download\Template\MRP_NON_COMPONENT.xls" />
+    <Content Include="Content\Download\Template\MRP_PARENT.xls" />
+    <Content Include="Content\Download\Template\MRP_PARENT_HAKIATE.xls" />
+    <Content Include="Content\Download\Template\MRP_PROC_USAGE.xls" />
+    <Content Include="Views\MRPParent\MRPParent.cshtml" />
+    <Content Include="Views\MRPParent\_AddEditPopUp.cshtml" />
+    <Content Include="Views\MRPParent\_Grid.cshtml" />
+    <Content Include="Views\MRPParent\_Message.cshtml" />
+    <Content Include="Views\MRPParent\_Paging.cshtml" />
+    <Content Include="Views\MRPParent\_PartialScript.cshtml" />
+    <Content Include="Views\MRPParent\_SearchCriteria.cshtml" />
+    <Content Include="Views\MRPProcUsage\MRPProcUsage.cshtml" />
+    <Content Include="Views\MRPProcUsage\_AddEditPopUp.cshtml" />
+    <Content Include="Views\MRPProcUsage\_Grid.cshtml" />
+    <Content Include="Views\MRPProcUsage\_Message.cshtml" />
+    <Content Include="Views\MRPProcUsage\_Paging.cshtml" />
+    <Content Include="Views\MRPProcUsage\_PartialScript.cshtml" />
+    <Content Include="Views\MRPProcUsage\_SearchCriteria.cshtml" />
+    <Content Include="Content\Download\Template\VENDOR.xls" />
+    <Content Include="Content\Download\Template\SOURCELIST.xls" />
+    <Content Include="Views\MRPParentHikiate\_LookupGrid_ParentCd_1.cshtml" />
+    <Content Include="Views\MRPParentHikiate\_PagingLookup.cshtml" />
+    <Content Include="Views\MRPParentHikiate\_LookupGrid_ParentCd_2.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationSubItem.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationSubItemGrid.cshtml" />
+    <Content Include="Views\Price\_priceGrid.cshtml" />
+    <Content Include="Views\Material\_Paging.cshtml" />
+    <Content Include="Content\Download\Template\PurchasingGroup.xls" />
+    <Content Include="Content\Download\Template\QUOTA.xls" />
+    <Content Include="Content\Download\Quota.xls" />
+    <Content Include="Views\PurchasingGroup\PurchasingGroup.cshtml" />
+    <Content Include="Views\PurchasingGroup\_purchasingGroupEdit.cshtml" />
+    <Content Include="Views\PurchasingGroup\_UIPaging.cshtml" />
+    <Content Include="Views\PurchasingGroup\_purchasingGroupGrid.cshtml" />
+    <Content Include="Views\QuotaTransaction\QuotaTransaction.cshtml" />
+    <Content Include="Views\QuotaTransaction\_QuotaTransactionGrid.cshtml" />
+    <Content Include="Views\QuotaTransaction\_QuotaTransactionList.cshtml" />
+    <Content Include="Views\QuotaTransaction\_QuotaTransactionMainGrid.cshtml" />
+    <Content Include="Views\QuotaTransaction\_QuotaTransactionPaging.cshtml" />
+    <Content Include="Views\QuotaTransaction\_TolerancePopUp.cshtml" />
+    <Content Include="Views\QuotaTransaction\_QuotaTransactionScript.cshtml" />
+    <Content Include="Views\Quota\Quota.cshtml" />
+    <Content Include="Views\Quota\_PopUpAddHeader.cshtml" />
+    <Content Include="Views\Quota\_QuotaGrid.cshtml" />
+    <Content Include="Views\Quota\_QuotaPaging.cshtml" />
+    <Content Include="Views\Quota\_QuotaScript.cshtml" />
+    <Content Include="Views\Sample\Blank\Blank.cshtml" />
+    <Content Include="Views\Sample\ChangePassword\ChangePassword.cshtml" />
+    <Content Include="Views\Sample\ForgotPassword\ForgotPassword.cshtml" />
+    <Content Include="Views\Shared\Common\_GridPagination.cshtml" />
+    <Content Include="Views\Shared\tdk\UIChatUserList.cshtml" />
+    <Content Include="Views\Shared\tdk\UICheckbox.cshtml" />
+    <Content Include="Views\Shared\tdk\UIComboBox.cshtml" />
+    <Content Include="Views\Shared\tdk\UIDataTable.cshtml" />
+    <Content Include="Views\Shared\tdk\UIHorizontalMenu.cshtml" />
+    <Content Include="Views\Shared\tdk\UIMetisMenu.cshtml" />
+    <Content Include="Views\Shared\tdk\UIPaginator.cshtml" />
+    <Content Include="Views\Shared\tdk\UIRadio.cshtml" />
+    <Content Include="Views\Shared\tdk\UISummaryList.cshtml" />
+    <Content Include="Views\Shared\tdk\UIUserNotification.cshtml" />
+    <Content Include="Views\Shared\tdk\UIVerticalMenu.cshtml" />
+    <Content Include="Views\Shared\_DropdownList.cshtml" />
+    <Content Include="Views\Shared\_GridPaging.cshtml" />
+    <Content Include="Views\Shared\_SearchAlert.cshtml" />
+    <Content Include="Views\SimpleMaster\SimpleMaster.cshtml" />
+    <Content Include="Views\SimpleMaster\_DeleteConfirm.cshtml" />
+    <Content Include="Views\SimpleMaster\_EditPopup.cshtml" />
+    <Content Include="Views\SimpleMaster\_SimpleGrid.cshtml" />
+    <Content Include="Views\SourceList\SourceList.cshtml" />
+    <Content Include="Views\SourceList\_PopUpSourceList.cshtml" />
+    <Content Include="Views\SourceList\_UIPaging.cshtml" />
+    <Content Include="Views\SourceList\_ViewTable.cshtml" />
+    <Content Include="Views\Shared\PO\_purchaseOrderCss.cshtml" />
+    <Content Include="Views\Shared\PO\_purchaseOrderItemConditionGrid.cshtml" />
+    <Content Include="Views\Shared\PO\_purchaseOrderItemGrid.cshtml" />
+    <Content Include="Views\ValuationClass\ValuationClass.cshtml" />
+    <Content Include="Views\ValuationClass\_ValuationClassGrid.cshtml" />
+    <Content Include="Views\ValuationClass\_UIPaging.cshtml" />
+    <Content Include="Views\ValuationClass\_ValuationClassScript.cshtml" />
+    <Content Include="Views\ValuationClass\_ValuationClassPopup.cshtml" />
+    <Content Include="Views\Shared\PO\_purchaseOrderSubItemGrid.cshtml" />
+    <Content Include="Content\Common\tdk.util.js" />
+    <Content Include="Content\Download\BudgetControlDetail.xls" />
+    <Content Include="Content\Download\BudgetControlHeader.xls" />
+    <None Include="Content\Download\LogMonitoring.xls" />
+    <Content Include="Content\Download\Material.xls" />
+    <Content Include="Content\Download\Template\EXCHANGE_RATE.xls" />
+    <Content Include="Content\Download\Template\DRAFT_PRICE.xls" />
+    <Content Include="Content\Download\Template\MASTER_PRICE.xls" />
+    <Content Include="Content\Download\Template\COST_CENTER.xls" />
+    <Content Include="Content\Download\Template\ASSET.xls" />
+    <None Include="Content\Download\ProcurementTrackingHeader.xls" />
+    <None Include="Content\Download\Template\Material.xls" />
+    <Content Include="Views\GRCreation\GRCreation.cshtml" />
+    <Content Include="Views\GRCreation\_POData.cshtml" />
+    <Content Include="Views\GRCreation\_PODetailData.cshtml" />
+    <Content Include="Views\GRCreation\_Paging.cshtml" />
+    <Content Include="Views\GRCreation\_Grid.cshtml" />
+    <Content Include="Views\GRCreation\_PartialScript.cshtml" />
+    <Content Include="Views\GRCreation\_PagingItem.cshtml" />
+    <Content Include="Views\GRCreation\_SubItem.cshtml" />
+    <Content Include="Views\SACreation\_Grid.cshtml" />
+    <Content Include="Views\SACreation\_Paging.cshtml" />
+    <Content Include="Views\SACreation\_PagingItem.cshtml" />
+    <Content Include="Views\SACreation\_PartialScript.cshtml" />
+    <Content Include="Views\SACreation\_POData.cshtml" />
+    <Content Include="Views\SACreation\_PODetailData.cshtml" />
+    <Content Include="Views\SACreation\_SubItem.cshtml" />
+    <Content Include="Views\SACreation\SACreation.cshtml" />
+    <Content Include="Views\SACreation\_purchaseOrderSubItemGrid.cshtml" />
+    <Content Include="Views\MRPParentHikiate\_PagingLookup2.cshtml" />
+    <Content Include="Views\MRPCreation\_MRPGrid.cshtml" />
+    <Content Include="Views\System\System.cshtml" />
+    <Content Include="Views\System\_SearchCriteria.cshtml" />
+    <Content Include="Views\System\_PartialScript.cshtml" />
+    <Content Include="Views\System\_Paging.cshtml" />
+    <Content Include="Views\System\_Grid.cshtml" />
+    <Content Include="Views\System\_EditPopUp.cshtml" />
+    <Content Include="Views\System\_AddPopUp.cshtml" />
+    <Content Include="Views\QuotaTransaction\_AdditionalPopUp.cshtml" />
+    <Content Include="Views\PRInquiry\_PartialInquiryDetailSubItemGrid.cshtml" />
+    <Content Include="Report\PO\POLetter.rdlc" />
+    <Content Include="Report\PO\POLetterDataSet.xsc">
+      <DependentUpon>POLetterDataSet.xsd</DependentUpon>
+    </Content>
+    <Content Include="Report\PO\POLetterDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>POLetterDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Report\PO\POLetterDataSet.xss">
+      <DependentUpon>POLetterDataSet.xsd</DependentUpon>
+    </Content>
+    <Content Include="Views\MRPCreation\_Grid.cshtml" />
+    <Content Include="Views\MRPCreation\_Paging.cshtml" />
+    <Content Include="Views\MRPCreation\_PartialScript.cshtml" />
+    <Content Include="Views\ReceivingList\ReceivingList.cshtml" />
+    <Content Include="Views\ReceivingList\_CancelPopUp.cshtml" />
+    <Content Include="Views\ReceivingList\_GridView.cshtml" />
+    <Content Include="Views\ReceivingList\_MatDocDetailPopUp.cshtml" />
+    <Content Include="Views\ReceivingList\_SearchCriteria.cshtml" />
+    <Content Include="Views\ReceivingList\_SearchMobile.cshtml" />
+    <Content Include="Views\QuotaTransaction\_AdditionalConfirmPopUp.cshtml" />
+    <Content Include="Views\MRPNonComponent\_DetailMaterial.cshtml" />
+    <Content Include="Content\Download\Template\PODownloadTemplete.xls" />
+    <Content Include="Content\Download\Template\PRDownloadTemplete.xls" />
+    <Content Include="Content\Download\Template\ReceivingListTemplete.xls" />
+    <None Include="Content\Download\Template\PRMonitoringTemplete.xls" />
+    <Content Include="obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
+    <None Include="packages.config" />
+    <None Include="Properties\PublishProfiles\bayu.pubxml" />
+    <None Include="Properties\PublishProfiles\Deploy DEV.pubxml" />
+    <None Include="Properties\PublishProfiles\DEPLOY SOURCE.pubxml" />
+    <None Include="Properties\PublishProfiles\fajri.pubxml" />
+    <None Include="Properties\PublishProfiles\Profile1.pubxml" />
+    <None Include="Properties\PublishProfiles\PUBPAS.pubxml" />
+    <None Include="Properties\PublishProfiles\XXX.pubxml" />
+    <Content Include="Views\PRCreation\_PartialCreationLookupWBS.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationLookupWBSGrid.cshtml" />
+    <Content Include="Views\PRInquiry\_PartialApprovalDivisionGrid.cshtml" />
+    <Content Include="Views\PRInquiry\_PartialApprovalCoordinatorGrid.cshtml" />
+    <Content Include="Views\PRInquiry\_PartialApprovalFinanceGrid.cshtml" />
+    <Content Include="Views\RoutineCreation\RoutineCreation.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialSlocDropdown.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineScript.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationLookupVendor.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationLookupVendorGrid.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineLookupPIC.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineLookupPICGrid.cshtml" />
+    <Content Include="Views\RoutineCreation\_UIPaging.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineLookupGL.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineLookupGLGrid.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineLookupMaterial.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineLookupMaterialGrid.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineLookupValuationClass.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineLookupValuationClassGrid.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineLookupVendor.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineLookupVendorGrid.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineLookupWBS.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineLookupWBSGrid.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialCostCenterDropdown.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineSubItem.cshtml" />
+    <Content Include="Views\RoutineCreation\_PartialRoutineSubItemGrid.cshtml" />
+    <Content Include="Views\POInquiry\_inquiryApproval.cshtml" />
+    <Content Include="Views\BudgetControl\BudgetControl.cshtml" />
+    <Content Include="Views\BudgetControl\_BudgetControlDetail.cshtml" />
+    <Content Include="Views\BudgetControl\_BudgetControlDetailGrid.cshtml" />
+    <Content Include="Views\BudgetControl\_BudgetControlDetailPaging.cshtml" />
+    <Content Include="Views\BudgetControl\_BudgetControlGrid.cshtml" />
+    <Content Include="Views\BudgetControl\_BudgetControlPaging.cshtml" />
+    <Content Include="Views\BudgetControl\_BudgetControlScript.cshtml" />
+    <Content Include="Views\PRApproval\_PartialSlocDropdown.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalSubitemGrid.cshtml" />
+    <Content Include="Views\POApproval\POApproval.cshtml" />
+    <Content Include="Views\POApproval\POApprovalAttachment.cshtml" />
+    <Content Include="Views\POApproval\POApprovalAttachmentGrid.cshtml" />
+    <Content Include="Views\POApproval\POApprovalConditionGrid.cshtml" />
+    <Content Include="Views\POApproval\POApprovalDelayGrid.cshtml" />
+    <Content Include="Views\POApproval\POApprovalDetail.cshtml" />
+    <Content Include="Views\POApproval\POApprovalDetailGrid.cshtml" />
+    <Content Include="Views\POApproval\POApprovalDetailParam.cshtml" />
+    <Content Include="Views\POApproval\POApprovalGrid.cshtml" />
+    <Content Include="Views\POApproval\POApprovalHistory.cshtml" />
+    <Content Include="Views\POApproval\POApprovalHistoryGrid.cshtml" />
+    <Content Include="Views\POApproval\POApprovalNotice.cshtml" />
+    <Content Include="Views\POApproval\POApprovalNoticeMessage.cshtml" />
+    <Content Include="Views\POApproval\POApprovalParam.cshtml" />
+    <Content Include="Views\POApproval\POApprovalReadonlyNotice.cshtml" />
+    <Content Include="Views\POApproval\POApprovalResultDialog.cshtml" />
+    <Content Include="Views\POApproval\POApprovalSubitemGrid.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationItemDropdown.cshtml" />
+    <Content Include="Views\GRCreation\_poReffGrid.cshtml" />
+    <Content Include="Views\SACreation\_poReffGrid.cshtml" />
+    <Content Include="Views\Shared\Lookup\_genericLookup.cshtml" />
+    <Content Include="Views\Shared\Lookup\_genericLookupGrid.cshtml" />
+    <Content Include="Views\Shared\Lookup\_materialLookup.cshtml" />
+    <Content Include="Views\Shared\Lookup\_materialLookupGrid.cshtml" />
+    <Content Include="Views\POCreation\_valuationClassLookup.cshtml" />
+    <Content Include="Views\POCreation\_valuationClassLookupGrid.cshtml" />
+    <Content Include="Views\Shared\PO\_purchaseOrderSubItemEditor.cshtml" />
+    <Content Include="Views\POCreation\_creationPRItemGrid.cshtml" />
+    <Content Include="Views\POCreation\_creationSubItemEditor.cshtml" />
+    <Content Include="Views\Shared\Lookup\_genericLookupPaging.cshtml" />
+    <Content Include="Views\POCreation\_vendorLookup.cshtml" />
+    <Content Include="Views\POCreation\_vendorLookupGrid.cshtml" />
+    <Content Include="Views\PRCreation\_TreeView.cshtml" />
+    <Content Include="Report\PO\POSPKDataSet.xsc">
+      <DependentUpon>POSPKDataSet.xsd</DependentUpon>
+    </Content>
+    <Content Include="Report\PO\POSPKDataSet.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>POSPKDataSet.Designer.cs</LastGenOutput>
+    </Content>
+    <Content Include="Report\PO\POSPKDataSet.xss">
+      <DependentUpon>POSPKDataSet.xsd</DependentUpon>
+    </Content>
+    <Content Include="Views\ReceivingList\_LookupTableSupplier.cshtml" />
+    <Content Include="Views\ReceivingList\_UIPagingLookup.cshtml" />
+    <Content Include="Views\ReceivingList\_UIPaging.cshtml" />
+    <Content Include="Views\Home\HomeTracking.cshtml" />
+    <Content Include="Views\POInquiry\_inquiryPopupCancel.cshtml" />
+    <Content Include="Views\UrgentSPKCreation\UrgentSPKCreation.cshtml" />
+    <Content Include="Views\UrgentSPKCreation\_creationSPKGrid.cshtml" />
+    <Content Include="Views\Shared\PO\_purchaseOrderSPKForm.cshtml" />
+    <Content Include="Views\RoutineInquiry\RoutineInquiry.cshtml" />
+    <Content Include="Views\RoutineInquiry\_RoutineInquiryDetail.cshtml" />
+    <Content Include="Views\RoutineInquiry\_RoutineInquiryDetailGrid.cshtml" />
+    <Content Include="Views\RoutineInquiry\_RoutineInquiryDetailSubItemGrid.cshtml" />
+    <Content Include="Views\RoutineInquiry\_RoutineInquiryGrid.cshtml" />
+    <Content Include="Views\RoutineInquiry\_RoutineInquiryScript.cshtml" />
+    <Content Include="Views\RoutineInquiry\_PartialSlocDropdown.cshtml" />
+    <Content Include="Views\RoutineInquiry\_UIPaging.cshtml" />
+    <Content Include="Views\AssetUpload\AssetUpload.cshtml" />
+    <Content Include="Views\AssetUpload\_PopupUploadAsset.cshtml" />
+    <Content Include="Views\AssetUpload\_GridAsset.cshtml" />
+    <Content Include="Views\AssetUpload\_UIPaging.cshtml" />
+    <Content Include="Views\AssetUpload\_AssetUploadScript.cshtml" />
+    <Content Include="Views\AssetUpload\_PopupValidationAsset.cshtml" />
+    <Content Include="Views\AssetUpload\_PopupValidationGrid.cshtml" />
+    <Content Include="Views\Login\_PopupForgotPassword.cshtml" />
+    <Content Include="Views\Material\_LookupValuationClassGrid.cshtml" />
+    <Content Include="Views\Material\_LookupValuationClass.cshtml" />
+    <Content Include="Views\Material\_LookupPaging.cshtml" />
+    <Content Include="Views\BudgetConfig\BudgetConfig.cshtml" />
+    <Content Include="Views\BudgetConfig\_PartialConfigGrid.cshtml" />
+    <Content Include="Views\BudgetConfig\_UIPaging.cshtml" />
+    <Content Include="Views\BudgetConfig\_PartialConfigScript.cshtml" />
+    <Content Include="Views\SAPImportMonitor\SAPImportMonitor.cshtml" />
+    <Content Include="Views\SAPImportMonitor\_monitorGrid.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\PurchasingGroup\_purchasingGroupUserMap.cshtml" />
+    <Content Include="Views\PurchasingGroup\_purchasingGroupUserMapGrid.cshtml" />
+    <Content Include="Views\PurchasingGroup\_usermapEdit.cshtml" />
+    <Content Include="Views\POApproval\POApprovalGridBody.cshtml" />
+    <Content Include="Views\POInquiry\_inquiryGridBody.cshtml" />
+    <Content Include="Views\Plant\_Paging.cshtml" />
+    <Content Include="Views\Plant\_AddEditPopUp.cshtml" />
+    <Content Include="Views\PRPOTracking\PRPOTracking.cshtml" />
+    <Content Include="Views\PRPOTracking\_PartialGrid.cshtml" />
+    <Content Include="Views\PRPOTracking\_UIPaging.cshtml" />
+    <Content Include="Views\PRPOTracking\_PartialScript.cshtml" />
+    <Content Include="Views\PRPOTracking\_PartialSecondRow.cshtml" />
+    <Content Include="Views\PRPOTracking\_PartialThirdRow.cshtml" />
+    <Content Include="Views\PRPOTracking\_PartialStatus.cshtml" />
+    <Content Include="Views\PRInquiry\_PartialInquiryGridBody.cshtml" />
+    <Content Include="Views\Price\_PartialUploadPricePopup.cshtml" />
+    <Content Include="Views\Material\_PopUpUpdateImage.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalGridAccounting.cshtml" />
+    <Content Include="Views\PRApproval\_PartialApprovalCoordinatorGrid.cshtml" />
+    <Content Include="Views\PRApproval\_PartialApprovalDivisionGrid.cshtml" />
+    <Content Include="Views\PRApproval\_PartialApprovalFinanceGrid.cshtml" />
+    <Content Include="Views\PRApproval\_UIPaging.cshtml" />
+    <Content Include="Views\Home\HomeAllDelayedApproval.cshtml" />
+    <Content Include="Views\Shared\ErrorDefault.cshtml" />
+    <Content Include="Views\PRApproval\PRApprovalVendorAssignment.cshtml" />
+    <Content Include="Views\POInquiry\_inquiryPopupTriggerPO.cshtml" />
+    <Content Include="Views\POInquiry\_inquiryPopupTriggerPOGrid_Outstanding.cshtml" />
+    <Content Include="Views\POInquiry\_inquiryPopupTriggerPOGrid_Monitoring.cshtml" />
+    <Content Include="Views\POInquiry\_inquiryPopupTriggerPO_UIPaging.cshtml" />
+    <Content Include="Views\PRStatusMonitoring\_PartialStatusMonitoringScript.cshtml" />
+    <Content Include="Views\PRStatusMonitoring\_UIPaging.cshtml" />
+    <Content Include="Views\PRStatusMonitoring\PRStatusMonitoring.cshtml" />
+    <Content Include="Views\PRStatusMonitoring\_PartialStatusMonitoringGrid.cshtml" />
+    <Content Include="Views\PRStatusMonitoring\_PartialStatusMonitoringGridBody.cshtml" />
+    <Content Include="Views\WallAnnouncement\WallAnnouncement.cshtml" />
+    <Content Include="Views\Home\HomeNotification.cshtml" />
+    <Content Include="sounds\sound1.ogg" />
+    <Content Include="sounds\sound2.ogg" />
+    <Content Include="sounds\sound3.ogg" />
+    <Content Include="sounds\sound4.ogg" />
+    <Content Include="sounds\sound5.ogg" />
+    <Content Include="sounds\sound6.ogg" />
+    <Content Include="Views\SOPFileInquiry\SOPFileInquiry.cshtml" />
+    <Content Include="Views\SOPFileInquiry\_inquiryGrid.cshtml" />
+    <Content Include="Views\SOPFileInquiry\_inquiryGridBody.cshtml" />
+    <Content Include="Views\SOPFileInquiry\_inquirySOPFileScript.cshtml" />
+    <Content Include="Views\ProcurementTracking\ProcurementTracking.cshtml" />
+    <Content Include="Views\ProcurementTracking\_ProcurementTrackingGrid.cshtml" />
+    <Content Include="Views\ProcurementTracking\_ProcurementTrackingPaging.cshtml" />
+    <Content Include="Views\ProcurementTracking\_ProcurementTrackingScript.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationLookupAssetNo.cshtml" />
+    <Content Include="Views\PRCreation\_PartialCreationLookupAssetNoGrid.cshtml" />
+    <Content Include="Views\BudgetConfig\_AddEditPopUp.cshtml" />
+    <Content Include="Views\BudgetConfig\_Grid.cshtml" />
+    <Content Include="Views\BudgetConfig\_LookupDataWBSGrid.cshtml" />
+    <Content Include="Views\BudgetConfig\_LookupDataWBSPage.cshtml" />
+    <Content Include="Views\BudgetConfig\_LookupPagingWBSGrid.cshtml" />
+    <Content Include="Views\BudgetConfig\_Paging.cshtml" />
+    <Content Include="Views\BudgetConfig\_PartialScript.cshtml" />
+    <Content Include="Views\MasterGLAccount\MasterGLAccount.cshtml" />
+    <Content Include="Views\MasterGLAccount\_GridView.cshtml" />
+    <Content Include="Views\MasterGLAccount\_SearchCriteria.cshtml" />
+    <Content Include="Views\MasterGLAccount\_Paging.cshtml" />
+    <Content Include="Views\MasterGLAccount\_AddEditPopUp.cshtml" />
+    <Content Include="Views\PRInquiry\_Notice.cshtml" />
+    <Content Include="Views\PRInquiry\_NoticeMessage.cshtml" />
+    <Content Include="Views\POInquiry\_Notice.cshtml" />
+    <Content Include="Views\POInquiry\_NoticeMessage.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Report\PO\UrgentSPK.rdlc" />
+    <Content Include="Report\PO\POSPK.rdlc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\GPS.Core\GPS.Core\GPS.Core.csproj">
+      <Project>{CBFCA838-A4D0-41F0-9258-F6DCDCA31DFA}</Project>
+      <Name>GPS.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.8\analyzers\dotnet\cs\Microsoft.CodeAnalysis.VersionCheckAnalyzer.resources.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.8\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\analyzers\dotnet\cs\Humanizer.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.CodeQuality.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.CodeQuality.CSharp.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetCore.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.NetCore.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetCore.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.NetCore.CSharp.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.NetFramework.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.NetFramework.CSharp.Analyzers.dll" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target> -->
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>25850</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:2040/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

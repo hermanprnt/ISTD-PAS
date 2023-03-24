@@ -1,0 +1,15 @@
+﻿DECLARE @@VALID INT
+
+SELECT @@VALID = COUNT(1)
+	FROM TB_M_SOURCE_LIST 
+	WHERE MAT_NO = @MAT_NO AND VENDOR_CD = @VENDOR_CD
+		  AND VALID_DT_TO = '9999-12-31'
+
+IF(@@VALID = 0)
+BEGIN
+	SELECT 'Only data with current valid date that can be deleted'
+END
+ELSE
+BEGIN
+	SELECT ''
+END

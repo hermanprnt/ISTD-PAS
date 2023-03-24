@@ -1,0 +1,157 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Css override -->
+<style type="text/css">
+
+.form-group {
+    margin-bottom: 5px;
+}
+
+.form-horizontal .control-label {
+    text-align: left;
+}
+
+.col-sm-2-col-1 {
+    width: 10%;
+}
+
+.col-sm-2-col-2 {
+    width: 8%;
+}
+
+.col-sm-2-col-3 {
+    width: 15%;
+}
+
+.col-sm-ctl {
+    width: 12.5%;
+}
+  
+.modal-content 
+{
+    width: 900px;
+}
+ 
+.col-xs-5 {
+    width: 42%;
+    padding-right: 0px;
+} 
+
+.full-border 
+{
+    padding: 10px;
+}
+
+</style>
+<!--- End css override -->
+@section BodyScript{
+    <script type="text/javascript">
+        var showDetail = 0;
+
+        $(document).ready(function () {
+
+            $("._datepicker").datepicker();
+
+            $(".btn-save").click(function () {
+                if ($("#MassRequest_New").is(":Visible")) {
+                    $("#MassRequest_New").hide();
+                }
+            });
+
+            $(".btn-cancel").click(function () {
+                if ($("#MassRequest_New").is(":Visible")) {
+                    $("#MassRequest_New").hide();
+                }
+            });
+
+            $(".btn-add").click(function () {
+                if (!$("#MassRequest_New").is(":Visible")) {
+                    $("#MassRequest_New").show();
+                }
+            });
+
+            $(".btn-show-detail").click(function () {
+
+                if (showDetail > 0) {
+                    // Keadaan hide
+                    $("#txtShowHideDetail").html('Show Detail');
+                    $(".initial-hide").hide();
+                    showDetail = 0;
+                } else {
+                    // Keadaan show
+                    $("#txtShowHideDetail").html('Hide Detail');
+                    $(".initial-hide").show();
+                    showDetail = 1;
+                }
+
+            });
+
+        });
+
+    </script>
+}
+
+<form role="form" class="form-horizontal" id="searchForm">
+    <div class="full-border">
+        <div class="row">
+            <div class="col-xs-12 col-md-12 form-main-group-box-search">
+                <!-- Row 1 -->
+                <div class="form-group form-group-sm form-group form-group-sm-box-search">
+                    <div class="form-group form-group-sm">
+                        <label class="col-sm-2 control-label text-muted">Division</label>
+                        <div class="col-sm-3">
+                            <select class="form-control">
+                                <option>&nbsp;</option>
+                                <option>ED</option>
+                                <option>FD</option>
+                                <option>GAD</option>
+                                <option>HRD</option>
+                                <option>ISTD</option>
+                                <option>PuD</option>
+                            </select>
+                        </div>
+                </div>
+                <!-- Row 1 -->
+                <div class="form-group form-group-sm form-group form-group-sm-box-search">
+                    <div class="form-group form-group-sm">
+                        <label class="col-sm-2 control-label text-muted">Upload Request</label>
+                        <div class="col-sm-3">
+                            <input id="txtModifyFile" type="file" class="form-control" />
+                        </div>
+                        <button type="button" class="btn btn-primary" style="padding: 3px 12px;">Upload</button>
+                </div>
+                <!-- End row -->
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="row">
+            <div class="col-xs-4 form-button-group-box-search" style="margin-left: 0px; margin-right: 125px">
+                <button type="button" class="btn btn-primary btn-save">Save</button>&nbsp;
+                <button type="button" class="btn btn-primary btn-cancel">Cancel</button>
+            </div>
+            <div class="col-xs-6 form-button-group-box-search text-right">
+                <button type="button" class="btn btn-primary btn-add">Add</button>&nbsp;
+                <button type="button" class="btn btn-primary btn-edit">Edit</button>&nbsp;
+                <button type="button" class="btn btn-primary btn-delete">Delete</button>
+            </div>
+            <div class="col-xs-12 col-md-12 form-main-group-box-search">
+                @Html.Partial("_MainGrid")
+            </div>
+        </div>
+
+    </div>
+</form>
+
+@*<div>&nbsp;</div>
+
+<div class="full-border">
+    <div class="row">
+        <div class="col-xs-12 col-md-12 form-main-group-box-search">
+            @Html.Partial("_MainGrid")
+        </div>
+    </div>
+</div>*@

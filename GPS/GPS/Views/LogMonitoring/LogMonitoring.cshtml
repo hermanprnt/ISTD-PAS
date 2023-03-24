@@ -1,0 +1,109 @@
+﻿@using GPS.Models.Home
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+	
+	List<LogMonitoring> ListFunction = ViewData["Function"] != null ? (List<LogMonitoring>)ViewData["Function"] : new List<LogMonitoring>();
+    List<LogMonitoring> ListUser = ViewData["CreatedBy"] != null ? (List<LogMonitoring>)ViewData["CreatedBy"] : new List<LogMonitoring>();
+    List<LogMonitoring> ListStatus = ViewData["Status"] != null ? (List<LogMonitoring>)ViewData["Status"] : new List<LogMonitoring>();
+}
+
+<link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/datepicker.css")" />
+<script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+
+<div class="hidden-xs">
+    @Html.Partial("_PartialScript")
+    
+	<form role="form" class="form-horizontal" id="searchForm" method="post" action="javascript: onGetData(1)">
+    <div class="row">    
+       <div class="col-xs-12 col-sm-6 col-md-6">
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-12 col-sm-5 col-md-3 control-label text-muted">
+                    Process Date</label>
+                <div class="col-xs-12 col-sm-3 col-md-4">
+                    <div class="input-group" style="cursor: pointer;">
+                        <input class="form-control date-picker" id="txtProcDateFrom" name="txtProcDateFrom" type="text" data-date-format="yyyy-mm-dd" 
+                          readonly="readonly"   />
+                        <span class="input-group-addon"><i class="fa fa-calendar bigger-110"></i></span> 
+                    </div>
+                </div>
+                <label class="col-xs-12 col-sm-1 col-md-1 control-label text-muted">To</label>
+                <div class="col-xs-12 col-sm-3 col-md-4">
+                    <div class="input-group" style="cursor: pointer;">
+                        <input class="form-control date-picker" id="txtProcDateTo" name="txtProcDateTo" type="text" data-date-format="yyyy-mm-dd" 
+                          readonly="readonly"   />
+                        <span class="input-group-addon"><i class="fa fa-calendar bigger-110"></i></span> 
+                    </div>
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-12 col-sm-6 col-md-3 control-label text-muted">
+                    Function Name</label>
+                <div class="col-xs-12 col-sm-6 col-md-9">
+                     <select id="txtFunctionName" class="form-control">
+                        <option value=""></option>
+                        @foreach(LogMonitoring func in ListFunction)
+                        {
+                            <option value="@func.FunctionId">@func.FunctionName</option>
+                        } 
+                    </select>
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-12 col-sm-6 col-md-3 control-label text-muted">Process ID</label>
+					<div class="col-xs-12 col-sm-6 col-md-9">
+						 <input type="text" id="txtProcessId" class="form-control" />
+					</div>
+				</div>
+			</div>
+			<div class="col-xs-12 col-sm-6 col-md-5">
+				<div class="form-group form-group-xs _criteria">
+					<label class="col-xs-12 col-sm-6 col-md-4 control-label text-muted">Status</label>
+					<div class="col-xs-12 col-sm-6 col-md-8">
+						<select id="txtStatus" class="form-control">
+							<option value=""></option>
+							@foreach(LogMonitoring status in ListStatus)
+							{
+								<option value="@status.ProcessStatus">@status.ProcessStatus : @status.StatusValue</option>
+							}
+						</select>
+					</div>
+			    </div>
+			    <div class="form-group form-group-xs _criteria">
+					<label class="col-xs-12 col-sm-6 col-md-4 control-label text-muted">User</label>
+					<div class="input-group input-group-xs col-xs-12 col-sm-6 col-md-8" style="padding-left: 11px;padding-right: 11px; height: 26px;"> 
+						<select id="txtUser" class="form-control">
+							<option value=""></option>
+							@foreach(LogMonitoring user in ListUser)
+							{
+								<option value="@user.CreatedBy">@user.CreatedBy</option>
+							} 
+						</select>           
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-6" style="margin-top: 5px;"></div>
+			<div class="col-xs-6 text-right">
+				<div class="form-group-xs" style="margin-bottom: 4px;">        
+					<button type="submit" class="btn btn-primary btn-xs" onclick="">
+						Search</button>        
+					<button type="button" class="btn btn-default btn-xs" onclick="onClear()">
+						Clear</button>
+				</div>
+			</div>
+		</div>
+	</form>
+	
+    <div class="text-center" style="margin-bottom: 3px;">
+        <hr id="hrsrc" style="margin: 0; padding: 0;" />       
+    </div>
+    <div id="divtable">
+        @Html.Partial("_Grid")
+    </div>
+</div>
+
+<div class="visible-xs">
+</div>          
+
+           

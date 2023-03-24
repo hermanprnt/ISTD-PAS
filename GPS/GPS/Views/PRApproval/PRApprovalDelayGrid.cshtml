@@ -1,0 +1,44 @@
+﻿@using GPS.Constants
+@using GPS.Models.PRApproval
+@{
+    List<PRApprovalDelay> prApprovalDelayList = (List<PRApprovalDelay>)ViewData["PRApprovalDelay"];
+}
+
+<style>
+    .table > tr > td, 
+    .table > thead > tr > th {
+        vertical-align : middle;    
+    }
+</style>
+<div style="width:100%;">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr style="width:100%;">
+                <th style="width:10em;">Doc. No</th>
+                <th style="width:10em;">Mat. Desc</th>
+                <th style="width:17em;">Last Status</th>
+                <th style="width:10em;">Delay</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (prApprovalDelayList.Count > 0)
+        {
+            foreach (PRApprovalDelay item in prApprovalDelayList)
+            {
+                <tr>
+                    <td class="text-center">@item.DOC_NO</td>
+                    <td class="text-center">@item.MAT_DESC</td>
+                    <td class="text-center">@item.LAST_APPROVAL_DESC</td>
+                    <td class="text-center">@item.DELAY day(s)</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">@CommonDisplayMessage.NoData</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

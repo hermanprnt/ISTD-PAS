@@ -1,0 +1,119 @@
+﻿@using GPS.Models
+@using GPS.Models.Common
+@{
+    Paging pg = (Paging)ViewData["Paging"];
+    string function = ViewData["FUNC"] != null ? ViewData["FUNC"].ToString() : "";
+
+    string mycommon = function + "(1)";
+    double PageCount = 0;
+    double DataCount = 0;
+    double PageIndex = 0;
+
+    if (pg != null)
+    {
+        PageCount = pg.CountPage;
+        DataCount = pg.CountData;
+        PageIndex = pg.PositionPage;
+    }
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        var pageCount = Number("@PageCount");
+        var dataCount = Number("@DataCount");
+        var pageIndex = Number("@PageIndex");
+
+        if (dataCount === 0) { $("#page-@function").addClass("_pagination-disabled"); }
+        else
+        {
+            if (pageIndex === 1) {
+                $("#page-First-@function").addClass("_pagination-disabled");
+                $("#page-Prev-@function").addClass("_pagination-disabled");
+            }
+
+            if (pageIndex >= pageCount) {
+                $("#page-Next-@function").addClass("_pagination-disabled");
+                $("#page-Last-@function").addClass("_pagination-disabled");
+            }
+        }
+    })
+</script>
+
+
+<style>
+    ._pagination-disabled {
+        pointer-events: none;
+        cursor: default;
+        color: lightgray;
+    }
+</style>
+
+
+<div class="col-md-12">
+    <div class="row">
+        <div class="col-md-8">
+            <ul class="pagination pagination-sm hidden-xs" style="margin-top:0;">
+                <li>
+                    @if (pg != null)
+                    {
+                        if (@pg.CountData == 1 || @pg.CountData == 0)
+                        {
+                            <span class="_pagination-label">Page @pg.PositionPage of @pg.CountPage (@pg.CountData item)</span>
+                        }
+                        else
+                        {
+                            <span class="_pagination-label">Page @pg.PositionPage of @pg.CountPage (@pg.CountData items)</span>
+                        }
+                    }
+                </li>
+                @if (pg != null)
+                {
+
+                    string myFirst = function + "(" + pg.First + ")";
+                    string myPrev = function + "(" + pg.Prev + ")";
+                    string myNext = function + "(" + pg.Next + ")";
+                    string myLast = function + "(" + pg.Last + ")";
+
+                    
+
+                    <li><span><a id="page-First-@function" href="javascript: @myFirst">First</a> </span></li>
+                    <li><span><a id="page-Prev-@function" href="javascript: @myPrev)">Prev</a> </span></li>
+                    int minpage = pg.PositionPage - 2;
+                    int maxpage = pg.PositionPage + 2;
+                    for (int k = 1; k <= @pg.CountPage; k++)
+                    {
+                        if ((k >= minpage) && (k <= maxpage))
+                        {
+                            string myPage = function + "(" + k + ")";
+
+                            if (@k == pg.PositionPage)
+                            {
+                                <li class="active">
+                                    <a id="page-@function" href="javascript: @myPage">@k</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li>
+                                    <a id="page-@function" href="javascript: @myPage">@k</a>
+                                </li>
+                            }
+                        }
+                    }
+                    <li><span><a id="page-Next-@function" href="javascript: @myNext">Next</a></span></li>
+                    <li><span><a id="page-Last-@function" href="javascript: @myLast">Last</a></span></li>
+                }
+
+            </ul>
+        </div>
+        <div class="col-md-4 text-right" style="height: 30px; padding-top: 3px;">
+            <span>Size</span>&nbsp;
+            <select class="input-xs page-size" id="cbolookupdisplay" onchange="getLookupWbsClassGrid(1)">
+                <option>10</option>
+                <option>25</option>
+                <option>50</option>
+                <option>100</option>
+            </select>
+        </div>
+    </div>
+</div>
+

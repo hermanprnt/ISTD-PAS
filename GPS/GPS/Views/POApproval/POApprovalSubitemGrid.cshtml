@@ -1,0 +1,29 @@
+﻿@using GPS.CommonFunc
+@using GPS.Models.PRPOApproval
+@{
+    var data = ViewData["POApprovalSubItem"] == null
+        ? new List<POApprovalSubItem>()
+        : (List<POApprovalSubItem>) ViewData["POApprovalSubItem"];
+}
+
+@if(data.Count > 0)
+{
+    int i = 1;
+    foreach(POApprovalSubItem item in data)
+    {
+        <tr class="subitemgrid-@item.ITEM_NO">
+            @if(i == 1) {
+                <td colspan="4" rowspan="@data.Count"></td>
+            }
+            <td class="text-left" colspan="2">@item.MAT_DESC</td>
+            <td class="text-right">@item.QTY.ToStandardFormat()</td>
+            <td class="text-center">@item.UOM</td>
+            <td class="text-right">@item.PRICE_PER_UOM.ToStandardFormat()</td>
+            <td class="text-right">@item.AMOUNT.ToStandardFormat()</td>
+            <td class="text-center">@item.WBS_NO</td>
+            <td class="text-center">@item.COST_CENTER</td>
+            <td class="text-center">@item.GL_ACCOUNT</td>
+            @{i++;}
+        </tr>
+    }
+}

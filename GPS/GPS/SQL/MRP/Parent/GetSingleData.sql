@@ -1,0 +1,5 @@
+﻿Select  A.PARENT_CD,
+		A.PARENT_TYPE
+FROM TB_M_PARENT A
+WHERE A.PARENT_CD = @ParentCode AND
+      A.PARENT_TYPE = @ParentType

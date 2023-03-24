@@ -1,0 +1,82 @@
+﻿@using System
+@using System.Linq
+@using GPS.Constants
+@using GPS.ViewModels.PO
+@model GPS.ViewModels.GenericViewModel<POApprovalInfoViewModel>
+
+<div style="overflow: auto;">
+    <table class="table table-striped table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th colspan="2" class="text-center">Registered</th>
+                <th colspan="5" class="text-center">Approved By SH</th>
+                <th colspan="5" class="text-center">Approved By DpH</th>
+                <th colspan="5" class="text-center">Approved By DH</th>
+            </tr>
+            <tr>
+                <th class="text-center" width="140px">PIC</th>
+                <th class="text-center" width="65px">Actual</th>
+                <th class="text-center" width="140px">PIC</th>
+                <th class="text-center" width="65px">Plan</th>
+                <th class="text-center" width="65px">Actual</th>
+                <th class="text-center" width="35px">Pln L/T</th>
+                <th class="text-center" width="35px">Act L/T</th>
+                <th class="text-center" width="140px">PIC</th>
+                <th class="text-center" width="65px">Plan</th>
+                <th class="text-center" width="65px">Actual</th>
+                <th class="text-center" width="35px">Pln L/T</th>
+                <th class="text-center" width="35px">Act L/T</th>
+                <th class="text-center" width="140px">PIC</th>
+                <th class="text-center" width="65px">Plan</th>
+                <th class="text-center" width="65px">Actual</th>
+                <th class="text-center" width="35px">Pln L/T</th>
+                <th class="text-center" width="35px">Act L/T</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.DataList.Any())
+            {
+                foreach (POApprovalInfoViewModel item in Model.DataList)
+                {
+                    String shApprovalIndicator = String.IsNullOrEmpty(item.SHActual) ? String.Empty : item.IsActualSHLate ? "late-approve" : "ontime-approve";
+                    String dpHApprovalIndicator = String.IsNullOrEmpty(item.DpHActual) ? String.Empty : item.IsActualDpHLate ? "late-approve" : "ontime-approve";
+                    String dhApprovalIndicator = String.IsNullOrEmpty(item.DHActual) ? String.Empty : item.IsActualDHLate ? "late-approve" : "ontime-approve";
+
+                    String shPlanLitime = String.IsNullOrEmpty(item.SHApprover) ? String.Empty : item.SHPlanLitime;
+                    String dphPlanLitime = String.IsNullOrEmpty(item.DpHApprover) ? String.Empty : item.DpHPlanLitime;
+                    String dhPlanLitime = String.IsNullOrEmpty(item.DHApprover) ? String.Empty : item.DHPlanLitime;
+                    
+                    String shActualLitime = String.IsNullOrEmpty(item.SHActual) ? String.Empty : item.SHActualLitime;
+                    String dphActualLitime = String.IsNullOrEmpty(item.DpHActual) ? String.Empty : item.DpHActualLitime;
+                    String dhActualLitime = String.IsNullOrEmpty(item.DHActual) ? String.Empty : item.DHActualLitime;
+                    
+                    <tr>
+                        <td class="text-left">@item.Creator</td>
+                        <td class="text-center">@item.Created</td>
+                        <td class="text-left">@item.SHApprover</td>
+                        <td class="text-center">@item.SHPlan</td>
+                        <td class="text-center">@item.SHActual</td>
+                        <td class="text-center">@shPlanLitime</td>
+                        <td class="text-center @shApprovalIndicator">@shActualLitime</td>
+                        <td class="text-left">@item.DpHApprover</td>
+                        <td class="text-center">@item.DpHPlan</td>
+                        <td class="text-center">@item.DpHActual</td>
+                        <td class="text-center">@dphPlanLitime</td>
+                        <td class="text-center @dpHApprovalIndicator">@dphActualLitime</td>
+                        <td class="text-left">@item.DHApprover</td>
+                        <td class="text-center">@item.DHPlan</td>
+                        <td class="text-center">@item.DHActual</td>
+                        <td class="text-center">@dhPlanLitime</td>
+                        <td class="text-center @dhApprovalIndicator">@dhActualLitime</td>
+                    </tr>
+                }
+            }
+            else
+            { 
+                <tr>
+                    <td colspan="17" class="text-center">@CommonDisplayMessage.NoData</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

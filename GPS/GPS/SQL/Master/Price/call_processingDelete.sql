@@ -1,0 +1,11 @@
+﻿EXEC sp_price_processingDelete 
+			@USER_ID, 
+			@PRICE_TYPE, 
+			@MAT_NO,  
+			@VENDOR_CD, 
+			@PRODUCTION_PURPOSE,
+			@VALID_DT_FROM,
+			@WARP_BUYER_CD,
+			@PACKING_TYPE,
+			@PART_COLOR_SFX,
+			@SOURCE_TYPE

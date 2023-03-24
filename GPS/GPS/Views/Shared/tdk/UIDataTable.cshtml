@@ -1,0 +1,214 @@
+﻿@using System.Collections
+@using System.Reflection
+@using Toyota.Common.Utilities
+@model UIDataTableSettings  
+@{
+    IList<UIDataTableColumn> columns = Model.Columns;
+    int numColumn = columns.IsNullOrEmpty() ? 2 : columns.Count + 2;
+    string heightStyle = string.Empty;
+    bool hasKey = !Model.KeyFieldName.IsNullOrEmpty();
+}           
+                    
+<div id="@Model.Id" class="_datatable @Model.PrintCssClass())">
+    <table class="table table-bordered table-striped table-hover">
+        <thead>
+            <tr>
+                <th colspan="@numColumn">  
+                    @{ 
+                        string headRowClass = "col-xs-12";
+                    }                  
+                    @if (Model.EnablePaging)
+                    {
+                        headRowClass = "col-xs-6";
+                        <div class="col-xs-6 text-left">
+                            <form role="form" action="#" class="form-inline">
+                                <div class="form-group">
+                                    @Html.Toyota().UI.ComboBox(
+                                        settings =>
+                                        {
+                                            settings.Id = "cboxPageSize-" + Model.Id;
+                                            foreach (long pn in Model.PageSizes)
+                                            {
+                                                settings.AddItem(new { Text = Convert.ToString(pn), Value = pn });
+                                            }
+                                            settings.SelectedValue = Model.PageSize;
+                                            settings.CssClass.Add("page-size");
+                                            settings.NullText = "Page Size";
+                                            settings.IsSelectedItemPrefixed = true;
+                                        }
+                                    ).GetHtml()
+                                </div>
+                            </form>
+                        </div>
+                    }                                            
+                    <div class="@headRowClass">
+                        <div class="btn-group pull-right">
+                            <button type="button" class="btn btn-primary btn-block dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-columns text-right"></i>Menu<i class="fa fa-caret-down text-left"></i>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">                               
+                                <li><a href="#"><i class="fa fa-upload text-right"></i>Upload</a></li>
+                                <li><a href="#"><i class="fa fa-download text-right"></i>Download</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#"><i class="fa fa-plus text-right"></i>Add</a></li>
+                                <li><a href="#"><i class="fa fa-minus text-right"></i>Delete</a></li>
+                            </ul>
+                        </div>                                                          
+                    </div>
+                </th>
+            </tr>
+            <tr class="captions">
+                <th data-name="_selection" class="select-column">
+                    <i class="fa fa-lg fa-square-o clickable"></i>
+                </th>
+                <th class="command-column hidden-xs">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-columns text-right"></i><span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">                               
+                            <li>
+                                <a href="#" data-name="_selection">
+                                    <i class="fa fa-lg fa-check-square-o text-right"></i>Selection
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            @foreach (UIDataTableColumn col in Model.Columns)
+                            {
+                                <li>
+                                    <a href="#" data-name="@col.Name">
+                                       <i class="fa fa-lg fa-check-square-o text-right"></i>@col.Caption
+                                    </a>
+                                </li>   
+                            }
+                        </ul>
+                    </div>   
+                </th>
+                @{ 
+                    string colClass;
+                    int colCounter = 0;
+                }
+                @foreach (UIDataTableColumn col in Model.Columns)
+                {
+                    colClass = string.Empty;
+                    if (hasKey)
+                    {
+                        if (!col.FieldName.Equals(Model.KeyFieldName))
+                        {
+                            colClass = "hidden-xs";
+                        }
+                    }
+                    else if(colCounter > 0)
+                    {
+                        colClass = "hidden-xs";
+                    }
+                    colCounter++;
+                    <th data-name="@col.Name" class="@colClass">@col.Caption</th>
+                }
+            </tr>    
+        </thead>
+        <tbody>
+            @if (!Model.DataSource.IsNull() && !columns.IsNullOrEmpty())
+            {
+                IEnumerator enumerator = Model.DataSource.GetEnumerator();
+                if (!enumerator.IsNull())
+                {
+                    object data;
+                    object value;
+                    Type type;
+                    PropertyInfo prop;
+                    int counter = -1;
+                    string rowKey;
+                    bool hasKeyField = !Model.KeyFieldName.IsNullOrEmpty();
+                    while (enumerator.MoveNext())
+                    {
+                        data = enumerator.Current;
+                        type = data.GetType();
+                        if (hasKeyField)
+                        {
+                            rowKey = Model.KeyFieldName;
+                        }
+                        else
+                        {
+                            rowKey = Convert.ToString(++counter);
+                        }
+                        <tr>
+                            <td data-column="_selection" class="select-column">
+                                <i data-key="@rowKey" class="fa fa-lg fa-square-o clickable"></i>
+                            </td>
+                            <td class="command-column hidden-xs">
+                                <a href="#"><i class="fa fa-edit"></i></a>
+                                <a href="#"><i class="fa fa-minus"></i></a>
+                            </td>    
+                            @{                       
+                                string rowAlignmentStyle;      
+                                colCounter = 0;   
+                                foreach (UIDataTableColumn col in columns)
+                                {
+                                    prop = type.GetProperty(col.FieldName);
+                                    if (!prop.IsNull())
+                                    {
+                                        rowAlignmentStyle = "text-align: left;";
+                                        if(col.HorizontalAlignment == UIHorizontalAlignment.Center) 
+                                        {
+                                            rowAlignmentStyle = "text-align: center;";
+                                        }
+                                        else if (col.HorizontalAlignment == UIHorizontalAlignment.Right)
+                                        {
+                                            rowAlignmentStyle = "text-align: right;";
+                                        }
+                                         
+                                        value = prop.GetValue(data, null);
+
+                                        colClass = string.Empty;
+                                        if (hasKey)
+                                        {
+                                            if (!col.FieldName.Equals(Model.KeyFieldName))
+                                            {
+                                                colClass = "hidden-xs";
+                                            }
+                                        }
+                                        else if (colCounter > 0)
+                                        {
+                                            colClass = "hidden-xs";
+                                        }
+                                        colCounter++;
+                                        if (col.DataItemTemplate.IsNull())
+                                        {
+                                            <td data-column="@col.Name" style="@rowAlignmentStyle" class="@colClass">@Convert.ToString(value).ToMvcHtmlString()</td>
+                                        }
+                                        else
+                                        {
+                                            <td data-column="@col.Name" style="@rowAlignmentStyle" class="@colClass">@col.DataItemTemplate.Invoke(value).ToMvcHtmlString()</td>
+                                        }
+                                    }
+                                }
+                            }                                                
+                        </tr>
+                    }
+                }
+            }
+        </tbody>  
+        @if (Model.EnablePaging)
+        {
+            <tfoot>
+                <tr>
+                    <td colspan="@numColumn">
+                        <div class="col-xs-12 text-center">
+                            @Html.Toyota().UI.Paginator(settings => {
+                                settings.Id = "pgPage_" + Model.Id;
+                                settings.PageCount = Model.DataSource.Count();
+                                settings.PageOptionCount = 10;
+                            }).GetHtml()
+                        </div>                                  
+                    </td>
+                </tr>
+            </tfoot>
+        }
+    </table>
+</div>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#@Model.Id").tdkDataTable(@Model.PrintJsProperties());
+    });    
+</script>

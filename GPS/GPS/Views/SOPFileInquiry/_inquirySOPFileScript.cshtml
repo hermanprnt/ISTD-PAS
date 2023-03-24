@@ -1,0 +1,219 @@
+﻿@using GPS.Controllers.SOP;
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btn-Upload-File").click(function () {
+            onUploadFile();
+        });
+
+        checkAuthorizedFeature();
+
+    });
+
+    function checkAuthorizedFeature()
+    {
+        if (!DataView.authorized_delete) {
+            $(".authorized_delete").remove();
+        }
+    }
+
+    function onDeleteFile(fileId) {
+        $.messagebox.show(
+            "Confirmation",
+            "Are You Sure You Want to Delete this Item ?",
+            "INF",
+            "CONFIRM",
+            "onYesDelete(" + fileId + ")",
+            ""
+        );
+    }
+
+    function onYesDelete(fileId) {
+        $.progressbox.show("Delete File", "Please wait...");
+        $.ajax({
+            type: "POST",
+            url: "@SOPFileInquiryController._DeleteSPODocument",
+            data: {DOC_ID: fileId},
+            success: function (resultMessage) {
+                if (resultMessage.ResponseType === "S") {
+                    Search_Data(1, 10);
+                }
+                else {
+                    $.messagebox.show(
+                        "Upload File",
+                        resultMessage.Message,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+                }
+
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                console.log(resultMessage);
+                responseFailedAjax(resultMessage);
+            }
+        });
+    }
+
+    function responseFailedAjax(resultMessage)
+    {
+        if (resultMessage.statusText) {
+            var responseText = resultMessage.responseText;
+            if (resultMessage.responseText.length <= 0) {
+                responseText = "Maximum file size has exceed.";
+            }
+
+            $.messagebox.show(
+                "Upload File",
+                resultMessage.statusText + " : " + responseText,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            );
+        } else {
+            $.messagebox.show(
+                "Upload File",
+                resultMessage,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            );
+        };
+
+        $.progressbox.hide();
+    }
+
+    function onDownloadFile(fileId) {
+        $.fileDownload("@SOPFileInquiryController._DownloadSOPDocument",
+        {
+            data: {
+                DOC_ID: fileId
+            }
+        });
+    }
+
+    function onShowUploadScreen() {
+        $("#uploadFileScreen").modal("show");
+    }
+
+    function onUploadFile() {
+        var file = $("#fileSPO").get(0).files[0];
+
+        var isValid = $.ValidateMandatory(["#fileDesc"]);
+
+        if (file === undefined) {
+            $.messagebox.show(
+                            "Upload File",
+                            "Invalid file : Please choose file to upload.",
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+
+            return;
+        }
+        else {
+            if (!isValid) {
+                $.messagebox.show(
+                            "Upload File",
+                            "Mandatory Entry : File Description cannot be blank.",
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+            }
+        }
+
+        if (isValid) {
+            $.progressbox.show("Upload File", "Please wait...");
+            var filedata = new FormData();
+
+            filedata.append("file", file);
+            filedata.append("docType", $("#cboModuleId").val());
+            filedata.append("fileDesc", $("#fileDesc").val());
+
+            $.ajax({
+                type: "POST",
+                url: "@SOPFileInquiryController._UploadSPODocument",
+                data: filedata,
+                contentType: false, // NOTE: disable header to include content-type
+                processData: false, // NOTE: disabe jquery to convert data to string
+                success: function (resultMessage) {
+                    if (resultMessage.ResponseType === "S") {
+                        $("#uploadFileScreen").modal("hide");
+                        $("#frmUploadSOP").get(0).reset();
+
+                        Search_Data(1, 10);
+                    }
+                    else {
+                        $.messagebox.show(
+                            "Upload File",
+                            resultMessage.Message,
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                    }
+
+                    $.progressbox.hide();
+                },
+                error: function (resultMessage) {
+                    console.log(resultMessage);
+                    responseFailedAjax(resultMessage);
+                }
+            });
+        }
+    }
+
+    function Search_Data(pageIndex, pageSize, SearchResponseCallback) {
+        $.progressbox.show("Search Data", "Please wait...");
+        $.ajax({
+            type: "POST",
+            url: "@SOPFileInquiryController._Search",
+            data: {
+                moduleId: $("#cboModuleId").val(),
+                pageIndex,
+                pageSize
+            },
+            success: function (resultMessage) {
+                if (!resultMessage.ResponseType) {
+                    $("#grid-spoinquiry").html(resultMessage);
+                    checkAuthorizedFeature();
+                }
+                else {
+                    $.messagebox.show(
+                    "Search Data",
+                    resultMessage.Message,
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                );
+                }
+
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                console.log(resultMessage);
+                $.messagebox.show(
+                    "Search Data",
+                    resultMessage,
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                );
+
+                $.progressbox.hide();
+            }
+        });
+    }
+</script>

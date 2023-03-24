@@ -1,0 +1,103 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section BodyScript{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $(".btn-add").click(function () {
+                $("#modify-popup").modal();
+                document.getElementById('Headpopup').innerHTML = 'Add';
+            });
+
+            $(".btn-edit").click(function () {
+                $("#modify-popup").modal();
+                document.getElementById('Headpopup').innerHTML = 'Edit';
+            });
+
+            $("._datePicker").datepicker();
+
+        });
+        
+    </script>
+}
+
+<div class="col-xs-12 col-md-12 col-lg-12 seacrch-box font-small">
+    <div class="col-xs-12 col-md-12 col-lg-12 container">
+      <div class="col-xs-12 col-md-12 col-lg-12 row">
+        <form role="form" class="form-horizontal" id="searchForm">
+            <div class="row">
+                <div class="col-xs-12 col-md-12 col-lg-12">
+                    <!-- Row 1 -->
+                    <div class="form-group form-group-sm form-group">
+                        <label class="col-xs-12 col-sm-2 text-muted">Quotation Number</label>
+                        <div class="col-xs-12 col-sm-2 col-sm-ctl object-loss-left">
+                            <input id="txtQuotationNo" type="text" class="form-control" />
+                        </div>
+
+                        <label class="col-xs-12 col-sm-2 text-muted">Quotation Date From</label>
+                        <div class="col-xs-12 col-sm-2 object-loss-left">
+                            <input id="txtQuotationDateFrom" type="text" class="form-control _datePicker" />
+                        </div>
+
+                        <label class="col-xs-12 col-sm-2 text-muted">To</label>
+                        <div class="col-xs-12 col-sm-2 object-loss-left">
+                            <input id="txtQuotationDateTo" type="text" class="form-control _datePicker" />
+                        </div>
+                    </div>
+                    <!-- Row 2 -->
+                    <div class="form-group form-group-sm form-group form-group-sm-box-search">
+                        <label class="col-xs-12 col-sm-2 text-muted">Quotation Desc.</label>
+                        <div class="col-xs-12 col-sm-2 col-sm-ctl object-loss-left">
+                            <input id="txtQuotationName" type="text" class="form-control" />
+                        </div>
+
+                        <label class="col-xs-12 col-sm-2 text-muted">Value</label>
+                        <div class="col-xs-12 col-sm-2 object-loss-left">
+                            <input id="txtValue" type="text" class="form-control" style="text-align: right;" onkeypress="return event.charCode >= 48 && event.charCode <= 57" />
+                        </div>
+                    </div>
+                    <!-- Row 2 -->
+                    <div class="form-group form-group-sm form-group form-group-sm-box-search">
+                        <label class="col-xs-12 col-sm-2 text-muted">Supplier</label>
+                        <div class="col-xs-12 col-sm-2 col-sm-ctl object-loss-left">
+                            <input id="txtSupplierCode" type="text" class="form-control" />
+                        </div>
+                    </div>
+                    <!-- Row End -->
+                </div>
+            </div>
+
+            <br />
+            <!-- Button -->
+            <div class="row">
+                <div class="col-xs-12 col-sm-5 form-button-group-box-search">
+                    <button type="button" class="btn btn-primary btn-add btn-standard">Add</button>
+                    <button type="button" class="btn btn-primary btn-edit btn-standard">Edit</button>
+                    <button type="button" class="btn btn-primary btn-delete btn-standard">Delete</button>
+                </div>
+                <div class="col-xs-12 col-sm-2">&nbsp;</div>
+                <div class="col-xs-12 col-sm-5 form-button-group-box-search" align="right">
+                    <button type="button" class="btn btn-primary btn-standard">Search</button>
+                    <button type="button" class="btn btn-danger btn-standard">Clear</button>
+                </div>
+            </div>
+            <!-- End button -->
+
+        </form>
+      </div>
+    </div>
+</div>
+
+<div>&nbsp;</div>
+
+<div class="full-border">
+    <div class="row">
+        <div class="col-xs-12 col-md-12 form-main-group-box-search">
+            @Html.Partial("_MainGrid")
+        </div>
+    </div>
+</div>
+
+@Html.Partial("_ModifyPopup")

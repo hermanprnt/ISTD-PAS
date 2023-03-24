@@ -1,0 +1,44 @@
+﻿@using GPS.Models.PR.PRCreation
+@{
+    List<PRCreation> lpr = ViewData["WBS"] != "" ? (List<PRCreation>)ViewData["WBS"] : new List<PRCreation>();
+    string msg = ViewData["msg"] != "" ? (string)ViewData["msg"] : "";
+}
+<div class="table-responsive">
+    <table id="LookUpTable-glclass" class="table table-striped table-bordered table-condensed gl-lookup-table" width="100%">
+        <thead>
+            <tr>
+                <th class="text-center control-label text-muted" style="width:100%" colspan="3">WBS</th>
+            </tr>
+            <tr>
+                <th class="text-center control-label text-muted" style="width:30%">Code</th>
+                <th class="text-center control-label text-muted" style="width:70%" colspan="2">Name</th>
+            </tr>
+        </thead>
+        <tbody id="bodylookup-glclass">
+            @if (lpr.Count > 0)
+            {
+                foreach (PRCreation pr in lpr)
+                {
+                    <tr ondblclick="javascript:MoveWBSKey('@pr.WBS_NO', '@pr.WBS_NAME')" style="cursor:pointer">
+                        <td>@pr.WBS_NO</td>
+                        <td colspan="2">@pr.WBS_NAME</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center"><h5>@msg</h5></td>
+                </tr>
+
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    @Html.Partial("_UIPaging")
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

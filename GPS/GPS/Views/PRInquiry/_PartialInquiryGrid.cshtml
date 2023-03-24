@@ -1,0 +1,70 @@
+﻿@using GPS.Constants.PR
+
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <div style="border: 1pt solid #ccc;">
+        <div id="tScrollHead" style="width: 98.65%; overflow: hidden;">
+            <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1588px;">
+                <thead id="header-row">
+                    <tr>
+                        <th width="20px"></th>
+                        <th width="31px">Lock</th>
+                        <th width="30px" class="hidden">No</th>
+                        <th width="100px" class="sorting" data-field="TYPE" data-sort="none">Type</th>
+                        <th width="80px" class="sorting" data-field="NO" data-sort="none">PR No.</th>
+                        <th width="30px" >Notice</th>
+                        <th width="200px" class="sorting" data-field="DESC" data-sort="none">Description</th>
+                        <th width="70px" class="sorting" data-field="DATE" data-sort="none">Doc Date</th>
+                        <th width="70px" class="sorting" data-field="STATUS" data-sort="none">Status</th>
+                        <th width="130px" class="sorting" data-field="COORDINATOR" data-sort="none">Coordinator</th>
+                        <th width="50px" class="sorting" data-field="PLANT" data-sort="none">Plant</th>
+                        <th width="57px" class="sorting" data-field="STORAGE" data-sort="none">Storage</th>
+                        <th width="150px" class="sorting" data-field="DIVISION" data-sort="none">Division</th>
+                        <th class="_toggle-detail" width="90px">Project No.</th>
+                        <th class="_toggle-detail" width="90px;">Cancel By</th>
+                        <th class="_toggle-detail" width="80px;">Cancel Date</th>
+                        <th class="_toggle-detail" width="90px;">Created By</th>
+                        <th class="_toggle-detail" width="80px;">Created Date</th>
+                        <th class="_toggle-detail" width="90px;">Changed By</th>
+                        <th class="_toggle-detail" width="80px;">Changed Date</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div id="tScrollBody" style="overflow: scroll; height: 270px;">
+            @Html.Partial(PurchaseRequisitionPage._InquiryGridBody)
+        </div>
+        <div>
+            <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                <tfoot>
+                    <tr>
+                        <td colspan="13">
+                            <div class="col-xs-8" style="margin-bottom: 20px;">
+                                @Html.Partial("_UIPaging")
+                            </div>
+                            <div class="col-sm-4">
+                                <div id="prc-pagesize" class="form-inline text-right">
+                                    <label>
+                                        Page Size
+                                        <select class="cursor-1 page" onchange="javascript: SearchPRHeader(1)" style="height:25px;">
+                                            <option>10</option>
+                                            <option>25</option>
+                                            <option>50</option>
+                                            <option>100</option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+    
+<script type="text/javascript">
+    $("#tScrollBody").scroll(function () {
+        $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+    });
+</script>

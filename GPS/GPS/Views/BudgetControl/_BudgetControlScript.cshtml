@@ -1,0 +1,150 @@
+﻿@model GPS.Models.Master.Division
+@using GPS.Controllers.Master
+@using GPS.Models.Master
+
+<script type="text/javascript">
+    var CurrentPage = 1;
+    var CurrentActionType = "";
+    $(document).ready(function () {
+        
+        $('.date-pickerYear').datepicker({
+            autoclose: true,
+            format: "yyyy",
+            viewMode: "years", 
+            minViewMode: "years"
+        })
+        //show datepicker when clicking on the icon
+        .next().on(ace.click_event, function () {
+            $(this).prev().focus();
+        });
+    });
+
+    function toggleSearch() {
+        $("._criteria").toggle(200, "linear");
+
+        if ($("#toogle-search").hasClass("fa-angle-double-up")) {
+            $("#toogle-search").removeClass("fa-angle-double-up");
+            $("#toogle-search").addClass("fa-angle-double-down");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            $("#toogle-search").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-search").removeClass("fa-angle-double-down");
+            $("#toogle-search").addClass("fa-angle-double-up");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            $("#toogle-search").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+
+    function onClear()
+    {
+        $("#txtWBSNo").val("");
+        onGetData(1,'Y');
+    }
+
+    function onGetData(page,clear)
+    {
+        $.progressbox.show($tdk.PageTitle, "Search");
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("onGetData")",
+            data: {
+                clear : clear,
+                Display: $("#cbodisplay").val(),
+                Page:page,
+                division : $("#hiddenDivision").val(),
+                wbs_no : $("#txtWBSNo").val(),
+                year : $("#txtYear").val()
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+                CurrentPage = page;
+                $.progressbox.hide();
+            },
+            error:function (xhr, ajaxOptions, thrownError,data){
+                alert(xhr.status);
+            }
+        });
+    }
+
+    //on get data detail pop up
+    function onGetDetailWBS(value,action_type)
+    {
+        $.ajax({
+	        type: "POST",
+	        url: "@Html.Toyota().Page.GetActionUrl("onGetDetail")",
+	        data: {
+		        wbs_no : value
+	        },
+	        success: function(data){
+                ex = data;
+                $("#txtWBSNoDetail").val(data.Result.WBS_NO);
+                $("#txtDivisionDetail").val(data.Result.SHORT_NAME);
+                $("#txtAction").val(action_type);
+                $("#txtCommitmentDetail").val(data.Result.COMMITMENT.toLocaleString());
+                $("#txtConsumeDetail").val(data.Result.BUDGET_CONSUME_GR_SA.toLocaleString());
+                $("#txtRemainingDetail").val(data.Result.REMAINING_BUDGET_ACTUAL.toLocaleString());
+                onListDetail(1,action_type);
+                $("#basicModal").modal();
+		    }
+        });
+    } 
+
+    function myFunction() {
+        var x = document.getElementById("txtAction").value;
+        //alert(x);
+        onListDetail(1,x);
+        //document.getElementById("demo").innerHTML = "You selected: " + x;
+    }
+
+    function onListDetail(page,action_type)
+    {
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchWBSDetail")",
+            data: {
+                Display: $("#cbodisplaydetail").val(),
+                Page:page,
+                wbs_no : $("#txtWBSNoDetail").val(),
+                action_type : action_type
+            },
+            success: function (data) {
+                $("#divReportDetailGrid").html(data);
+                CurrentActionType = action_type;
+                CurrentPage = page;
+                $("#basicModal").modal();
+            },
+            error:function (xhr, ajaxOptions, thrownError,data){
+                    alert(xhr.status);
+            }
+        });
+    }     
+       
+    function onDownloadHeader()
+    {
+        $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadHeader")", 
+        {
+            data: {
+                division : $("#hiddenDivision").val(),
+                wbs_no : $("#txtWBSNo").val(),
+                year : $("#txtYear").val()
+            }
+        })
+    }
+
+    function onDownloadDetail()
+    {
+        $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadDetail")", 
+        {
+            data: {
+                wbs_no : $("#txtWBSNoDetail").val(),
+                action_type : $("#txtAction").val()
+            }
+        })
+    }
+</script>

@@ -1,0 +1,353 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadScript{
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>    
+}
+
+@section BodyScript{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            onGetData(1);
+
+            /** Commented By : FID) Intan Puspitasari
+                Commented Dt : 29/06/2016
+                Note : Add/Edit operation using popup (not inline editor). 
+                       Uncomment this code (and buttons below) to change add/edit operation into inline **/
+            @* 
+            $(".btn-add").click(function () {
+                $("#ModifyRow").show();
+                $("#txtModifyPlantCd").val('');
+                $("#txtModifyPlantName").val('');
+                $(".btn-add").prop('disabled', true);
+                $(".btn-edit").prop('disabled', true);
+                $(".btn-delete").prop('disabled', true);
+                $(".btn-save").prop('disabled', false);
+                $(".btn-cancel").prop('disabled', false);
+            });
+
+            $(".btn-edit").click(function () {
+                if (getChecked('plant').split(',').length > 1) {
+                    alert('Please select single data!');
+                } else if (getChecked('plant').split(',').length == 0) {
+                    alert('No data selected!');
+                } else {
+                    //$("#ModifyRow").show();
+                    clearInline();
+                    //---=== Get current data
+                    $.ajax({
+                        type : "POST",
+                        url : "@Html.Toyota().Page.GetActionUrl("GetCurrentRowData")",
+                        data : {
+                            PlantCd : getChecked('plant')
+                        },
+                        success : function(data) {
+//                            $("#txtModifyPlantCd").val(data.plantCd);
+//                            $("#txtModifyPlantName").val(data.plantName);
+//                            $("#row-entry-3").html(data.createdBy);
+//                            $("#row-entry-4").html(data.createdDate);
+//                            $("#row-entry-5").html(data.changedBy);
+//                            $("#row-entry-6").html(data.changedDate);
+                              
+                        }
+                    });
+                    //---=== End get current data
+                    $("#txtModifyPlantCd").prop('disabled', true);
+                    $(".btn-add").prop('disabled', true);
+                    $(".btn-edit").prop('disabled', true);
+                    $(".btn-delete").prop('disabled', true);
+                    $(".btn-save").prop('disabled', false);
+                    $(".btn-cancel").prop('disabled', false);
+                }
+            });
+
+            $(".btn-save").click(function () {
+                $("#ModifyRow").hide();
+
+                if (($("#txtModifyPlantCd").val() != '') && ($("#txtModifyPlantName").val() != '')) {
+                    $.ajax({
+                        type: "POST",
+                        url : "@Html.Toyota().Page.GetActionUrl("SavingData")",
+                        data : {
+                            PLANT_METHOD : "1",
+                            PLANT_CD : $("#txtModifyPlantCd").val(),
+                            PLANT_NAME : $("#txtModifyPlantName").val()
+                        },
+                        success : function(data) {
+                            alert(data);
+                        }
+                    });
+                } else {
+                    alert('Please fill all entry field!');
+                }
+                $("#txtModifyPlantCd").prop('disabled', false);
+                $(".btn-add").prop('disabled', false);
+                $(".btn-edit").prop('disabled', false);
+                $(".btn-delete").prop('disabled', false);
+                $(".btn-save").prop('disabled', true);
+                $(".btn-cancel").prop('disabled', true);
+            });
+
+            $(".btn-cancel").click(function () {
+                $("#ModifyRow").hide();
+                $("#txtModifyPlantCd").prop('disabled', false);
+                $(".btn-add").prop('disabled', false);
+                $(".btn-edit").prop('disabled', false);
+                $(".btn-delete").prop('disabled', false);
+                $(".btn-save").prop('disabled', true);
+                $(".btn-cancel").prop('disabled', true);
+            });
+        
+            function clearInline() {
+                $("#txtModifyPlantCd").val('');
+                $("#txtModifyPlantName").val('');
+                $("#row-entry-3").html('');
+                $("#row-entry-4").html('');
+                $("#row-entry-5").html('');
+                $("#row-entry-6").html('');
+            }*@
+        });
+
+        function onGetData(page) {
+            $.disable_enable_button.disable();
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+                data: {
+                    Display: $("#cbodisplay").val(),
+                    Page: page,
+                    PlantCd: $("#txt-plantcd").val(),
+                    PlantName: $("#txt-plantname").val()
+                },
+                success: function (data) {
+                    $("#divtable").html(data);
+                    $.disable_enable_button.enable();
+                }
+            });
+        }
+
+        function onClear() {
+            $.Clear(["#txt-plantcd", "#txt-plantname"]);
+            onGetData(1);
+        }
+
+        function GetSelectedGrid() {
+            var ids = [];
+            $("input[id^=cb-]").each(function (i, a) {
+                if (a.id != null && a.id.length > 0 && a.checked) {
+                    ids.push($('#' + a.id).data('plant'));
+                }
+            }
+            );
+            var h = ids.length;
+            var w = ids.join();
+            return [h, w];
+        }
+
+        function onAddEdit(isNew) {
+            var selectedKey = null;
+
+            if (isNew == 'N') {
+                if ($(".grid-checkbox-body:checked").length == 0) {
+                    $.messagebox.show(
+                        "Warning",
+                        "Please Select at Least One Record to be edit",
+                        "WRN",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    return;
+                }
+                else if ($(".grid-checkbox-body:checked").length > 1) {
+                    $.messagebox.show(
+                        "Warning",
+                        "Please Select only One Record to be edit",
+                        "WRN",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    return;
+                }
+                else {
+                    var numKey = GetSelectedGrid();
+                    selectedKey = numKey[Object.getOwnPropertyNames(numKey)[1]];
+                }
+            }
+
+            $.ajax({
+                type: "post",
+                url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+                data: {
+                    isNew: isNew,
+                    PlantCd: selectedKey
+                },
+                success: function (data) {
+                    $("#basicModal").html(data);
+                    $("#basicModal").modal();
+                }
+            });
+        }
+
+        function onSaveData() {
+            var isValid = $.ValidateMandatory(["#txt-code", "#txt-name"]);
+            if (!isValid) return;
+
+            $.ajax({
+                type: "post",
+                url: "@Html.Toyota().Page.GetActionUrl("SavingData")",
+                data: {
+                    PLANT_CD: $("#txt-code").val(),
+                    PLANT_NAME: $("#txt-name").val(),
+                    editFlag: $("#hidden-isedit").val()
+                },
+                success: function (res) {
+                    if (res == "") {
+                        var type = $("#hidden-isedit").val() == "Y" ? "Edited" : "Inserted";
+
+                        $("#basicModal").modal("hide");
+                        onGetData(1);
+
+                        $.messagebox.show(
+                            "Saving Data",
+                            "Data Successfully " + type,
+                            "SUC",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                    else {
+                        $.messagebox.show(
+                            "Error Saving Data",
+                            res,
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                }
+            });
+        }
+
+        function onDelete() {
+            if ($(".grid-checkbox-body:checked").length == 0) {
+                $.messagebox.show(
+                    "Warning",
+                    "Please Select at Least One Record to be edit",
+                    "WRN",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+                return;
+            }
+
+            var numKey = GetSelectedGrid();
+            var selectedKey = numKey[Object.getOwnPropertyNames(numKey)[1]];
+
+            $.ajax({
+                type: "post",
+                url: "@Html.Toyota().Page.GetActionUrl("DeleteData")",
+                data: {
+                    PlantCd: selectedKey
+                },
+                success: function (res) {
+                    if (res == "") {
+                        onGetData(1);
+
+                        $.messagebox.show(
+                            "Delete Data",
+                            "Data Successfully Deleted",
+                            "SUC",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                    else {
+                        $.messagebox.show(
+                            "Error Delete Data",
+                            res,
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                }
+            });
+        }
+    </script>
+}
+
+<form role="form" class="form-horizontal" id="searchForm" method="post" action="javascript: onGetData(1)">
+    <div class="row">
+        <div class="col-xs-12 col-sm-3 col-md-3">
+            <div class="form-group form-group-xs">
+                <div class="col-xs-4 col-sm-4 text-right">
+                    <label class="control-label text-muted">Code</label>
+                </div>
+                <div class="col-xs-8 col-sm-8">
+                    <input type="text" id="txt-plantcd" class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-4">
+            <div class="form-group form-group-xs"> 
+                <div class="col-xs-6 col-sm-6 text-right">
+                    <label class="control-label text-muted">Name</label>
+                </div>
+                <div class="col-xs-6 col-sm-6">
+                    <input type="text" id="txt-plantname" class="form-control"/>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xs-12 col-sm-5 col-md-5"> </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div class="col-sm-6">
+        </div>
+        <div class="col-xs-12 col-sm-6 text-right" style="margin-bottom:3px;">
+            <button type="submit" class="btn btn-primary btn-xs btn-std btndisable" onclick="onGetData(1)">Search</button>
+            <button type="button" class="btn btn-default btn-xs btn-std btndisable" onclick="onClear()">Clear</button>
+        </div>
+    </div>
+</form>
+
+<div class="text-center" style="margin-bottom: 3px;">
+    <hr id="hrsrc" style="margin: 0; padding: 0;" />       
+</div>
+
+<div id="divtable">
+    @Html.Partial("_plantGrid")
+</div>
+
+<div class="modal fade" id="basicModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true"></div>
+
+@*<div class="col-xs-12 col-md-12 col-lg-12 container seacrch-box">
+    <div class="col-xs-12 col-md-12 col-lg-12 row">
+        <!-- Button -->
+        <div class="row">
+            <div class="col-xs-12 col-sm-6 form-button-group-box-search">
+                <button type="button" class="btn btn-primary btn-save btn-standard" disabled>Save</button>&nbsp;
+                <button type="button" class="btn btn-danger btn-cancel btn-standard" disabled>Cancel</button>
+            </div>
+            <div class="col-xs-12 col-sm-6 form-button-group-box-search text-right">
+                <button type="button" class="btn btn-primary btn-add btn-standard">Add</button>&nbsp;
+                <button type="button" class="btn btn-primary btn-edit btn-standard">Edit</button>&nbsp;
+                <button type="button" class="btn btn-primary btn-delete btn-standard">Delete</button>
+            </div>
+            <div class="col-xs-12 col-sm-12"><hr /></div>
+            <div class="col-xs-12 col-md-12 form-main-group-box-search">
+                @*Html.Partial("_MainGrid", ViewData["ListPlant"])
+            </div>
+        </div>
+        <!-- End button -->
+    </div>
+</div>*@

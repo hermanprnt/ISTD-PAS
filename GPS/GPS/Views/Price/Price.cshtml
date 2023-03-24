@@ -1,0 +1,1068 @@
+﻿@using GPS.CommonFunc.WebControl
+@using GPS.Constants
+@using GPS.Constants.Master
+@using GPS.Controllers.Master
+@using GPS.Core.ViewModel
+@using GPS.ViewModels
+@model GenericViewModel<GPS.Models.Master.MaterialPrice>
+@{
+    Layout = CommonPage.MainLayout;
+}
+
+@section HeadScript{
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+
+    <!-- NOTE: moment.js is referenced by daterangepicker -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/tdk.lookup.js")"></script>
+}
+
+
+@section BodyScript {
+    <script type="text/javascript">
+    $(document).ready(function () {
+
+        /* ============================== Init: begin ============================== */
+
+        function DisableAllFeatures() {
+            $("#txt-materialno").prop("readonly", true);
+            $("#cmb-vendor").prop("disabled", true);
+            $("#cmb-sourcetype").prop("disabled", true);
+            $("#cmb-pricestatus").prop("disabled", true);
+            $("#txt-pricetype").prop("readonly", true);
+            $("#txt-prodpurpose").prop("readonly", true);
+            $("#txt-partcolor").prop("readonly", true);
+            $("#txt-packingtype").prop("readonly", true);
+
+            $("#btn-detail").prop("disabled", true);
+            $("#btn-search").prop("disabled", true);
+            $("#btn-clearsearch").prop("disabled", true);
+
+            $("#btn-newdraftprice").prop("disabled", true);
+            $("#btn-newitemprice").prop("disabled", true);
+            $("#btn-delete").prop("disabled", true);
+            $("#btn-upload").prop("disabled", true);
+
+            $("[id^=lnk-page-" + "@Model.GridPaging.DataName" + "-]").addClass("_pagination-disabled");
+            $("#cmb-perpage-" + "@Model.GridPaging.DataName").prop("disabled", true);
+        }
+
+        function EnableAllFeatures() {
+            $("#txt-materialno").prop("readonly", false);
+            $("#cmb-vendor").prop("disabled", false);
+            $("#cmb-sourcetype").prop("disabled", false);
+            $("#cmb-pricestatus").prop("disabled", false);
+            $("#txt-pricetype").prop("readonly", false);
+            $("#txt-prodpurpose").prop("readonly", false);
+            $("#txt-partcolor").prop("readonly", false);
+            $("#txt-packingtype").prop("readonly", false);
+
+            $("#btn-detail").prop("disabled", false);
+            $("#btn-search").prop("disabled", false);
+            $("#btn-clearsearch").prop("disabled", false);
+
+            $("#btn-newdraftprice").prop("disabled", false);
+            $("#btn-newitemprice").prop("disabled", false);
+            $("#btn-delete").prop("disabled", false);
+            $("#btn-upload").prop("disabled", false);
+
+            $("[id^=lnk-page-" + "@Model.GridPaging.DataName" + "-]").removeClass("_pagination-disabled");
+            $("#cmb-perpage-" + "@Model.GridPaging.DataName").prop("disabled", false);
+        }
+
+        function ResetCheckbox() {
+            $("[id^=chkall-]:checked").each(function (e) {
+                $(this).prop("checked", false);
+            });
+            $("[id^=chk-]:checked").each(function (e) {
+                $(this).prop("checked", false);
+            });
+        }
+
+        function ResetForm() {
+            $("#txt-materialno").val("");
+            $("#cmb-vendor").val(undefined);
+            $("#cmb-sourcetype").val(undefined);
+            $("#cmb-pricestatus").val(undefined);
+            $("#txt-pricetype").val("");
+            $("#txt-prodpurpose").val("");
+            $("#txt-partcolor").val("");
+            $("#txt-packingtype").val("");
+
+            ResetCheckbox();
+        }
+
+        function Init() {
+            $("#txt-validdate").todaterangepicker();
+            
+            ResetForm();
+            EnableAllFeatures();
+        }
+
+        Init();
+
+        /* =============================== Init: end =============================== */
+
+        /* ============================= Search: begin ============================= */
+
+        function GetSearchCriteria(page, pageSize) {
+
+            page = page || 1;
+            pageSize = pageSize || $("#cmb-perpage-" + "@Model.GridPaging.DataName").GetPageSize();
+            var splittedValidDate = ($("#txt-validdate").valOrDefault() === "" ? " - " : $("#txt-validdate").valOrDefault()).split(" - ");
+            return {
+                MaterialNo: $("#txt-materialno").valOrDefault(),
+                Vendor: $("#cmb-vendor").valOrDefault(),
+                SourceType: $("#cmb-sourcetype").valOrDefault(),
+                PriceStatus: $("#cmb-pricestatus").valOrDefault(),
+                PriceType: $("#cmb-pricetype").valOrDefault(),
+                ProdPurpose: $("#cmb-prodpurpose").valOrDefault(),
+                PartColorSfx: $("#cmb-partcolor").valOrDefault(),
+                PackingType: $("#cmb-packingtype").valOrDefault(),
+                DateFrom: splittedValidDate[0],
+                DateTo: splittedValidDate[1],
+
+                CurrentPage: page,
+                PageSize: pageSize
+            };
+        }
+
+        function MaterialPriceSearchCriteriaIsValid(page) {
+            var criteria = GetSearchCriteria(page);
+            if (criteria.MaterialNo === "" && criteria.Vendor === "" &&
+                criteria.SourceType === "" && criteria.PriceStatus === "" &&
+                criteria.PriceType === "" && criteria.ProdPurpose === "" &&
+                criteria.PartColorSfx === "" && criteria.PackingType === "" &&
+                criteria.DateFrom === "" && criteria.DateTo === "") {
+                return false;
+            }
+
+            return true;
+        }
+
+        // NOTE: this method is used in Paging
+        var Search = window["Search" + "@Model.GridPaging.DataName"] = function (page, pageSize, responseCallback) {
+            //$.progressbox.show($tdk.PageTitle, "Search");
+            $.disable_enable_button.disable();
+            DisableAllFeatures();
+            $.ajax({
+                type: "POST",
+                url: "@PriceController.SearchAction",
+                data: JSON.stringify(GetSearchCriteria(page, pageSize)),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: responseCallback,
+                complete: function () {
+                    EnableAllFeatures();
+                    //$.progressbox.hide();
+                    $.disable_enable_button.enable();
+                },
+                error: function (data) {
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                    //$.progressbox.hide();
+                    $.disable_enable_button.enable();
+                }
+            });
+        };
+
+        var SearchResponseCallback = window["Search" + "@Model.GridPaging.DataName" + "ResponseCallback"] = function (data) {
+            if (!data.ResponseType) {
+                $("#grid-" + "@Model.GridPaging.DataName").html(data);
+            }
+            else {
+                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+            }
+        };
+
+        $("#btn-search").click(function (e) {
+            //$.progressbox.show($tdk.PageTitle, "Search");
+            DisableAllFeatures();
+            if (MaterialPriceSearchCriteriaIsValid(undefined)) {
+                Search(undefined, undefined, SearchResponseCallback);
+            }
+            else {
+                $.displaymessagebox.show("@DisplayMessageId.SelectOneCriteria");
+                EnableAllFeatures();
+                //$.progressbox.hide();
+            }
+        });
+
+        $("#btn-clearsearch").click(function (e) {
+            $.progressbox.show($tdk.PageTitle, "Clear Search");
+            DisableAllFeatures();
+            ResetForm();
+
+            $.ajax({
+                type: "POST",
+                url: "@PriceController.ClearSearchAction",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#grid-" + "@Model.GridPaging.DataName").html(data);
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: function () {
+                    EnableAllFeatures();
+                    $.progressbox.hide();
+                },
+                error: function (data) {
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                }
+            });
+        });
+
+        /* ============================== Search: end ============================== */
+
+        /* ============================== CRUD: begin ============================== */
+
+        $("#btn-detail").click(function (e) {
+            $.progressbox.show($tdk.PageTitle, "Show Detail");
+            DisableAllFeatures();
+
+            var eventSource = $(this);
+            $("#grid-" + "@Model.GridPaging.DataName")
+                .toggledetail(
+                    function (datarow) {
+                        eventSource.text("Show Detail");
+
+                        $("#dynamic-table").css("width", "100%");
+                        $("#tblScroll").css("width", "100%");
+
+                        if (datarow.html() === "@CommonDisplayMessage.NoData")
+                            $(datarow[0]).attr("colspan", 13);
+                    },
+                    function (datarow) {
+                        eventSource.text("Hide Detail");
+                        
+                        $("#dynamic-table").css("width", "2145px");
+                        $("#tblScroll").css("width", "2145px");
+
+                        if (datarow.html() === "@CommonDisplayMessage.NoData")
+                            $(datarow[0]).attr("colspan", 21);
+                    });
+
+            EnableAllFeatures();
+            $.progressbox.hide();
+        });
+
+        $("#btn-delete").click(function (e) {
+            $.progressbox.show($tdk.PageTitle, "Delete Material Price");
+            DisableAllFeatures();
+            var selectedDataList = $("[id^=chk-" + "@Model.GridPaging.DataName" + "-]:checked");
+            if (selectedDataList.length === 0) {
+                $.displaymessagebox.show("@DisplayMessageId.DeleteAtLeastOne");
+                EnableAllFeatures();
+                $.progressbox.hide();
+            }
+            else {
+                var selectedPKList = [];
+                selectedDataList.each(function () {
+                    var pkArray = [
+                        $(this).data("matno"), $(this).data("vendor"), $(this).data("warpbuyer"),
+                        $(this).data("sourcetype"), $(this).data("prodpurpose"), $(this).data("partcolor"),
+                        $(this).data("packingtype"), $(this).data("validfrom")
+                    ];
+                    selectedPKList.push(pkArray.join("@CommonFormat.ItemDelimiter"));
+                });
+                $.ajax({
+                    type: "POST",
+                    url: "@PriceController.DeleteAction",
+                    data: {
+                        primaryKeyList: selectedPKList.join("@CommonFormat.ListDelimiter")
+                    },
+                    success: function (data) {
+                        if (data.ResponseType) {
+                            $.messagebox.show(data.ResponseType, data.Message, data.ResponseType, "SINGLE", "(function () { location.href = '/Price'; })()");
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data, "@ActionResponseViewModel.Error");
+                        }
+                    },
+                    complete: function () {
+                        EnableAllFeatures();
+                        $.progressbox.hide();
+                    },
+                    error: function (data) {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                    }
+                });
+            }
+        });
+
+        function ClearDraftPriceForm() {
+            $.Clear([
+                "#price-draft-matno",
+                "#price-draft-matdesc",
+                "#price-draft-vendor",
+                "#price-draft-prod",
+                "#price-draft-curr",
+                "#price-draft-amount",
+                "#price-draft-validfrom",
+                "#price-draft-sfx",
+                "#price-draft-warpbuyer",
+                "#price-draft-sourcetype",
+                "#price-draft-pricests",
+                "#price-draft-packingtype"
+            ]);
+        }
+
+        function ClearItemPriceForm() {
+            $.Clear([
+                "#price-item-matno",
+                "#price-item-matdesc",
+                "#price-item-vendor",
+                "#price-item-prod",
+                "#price-item-curr",
+                "#price-item-amount",
+                "#price-item-validfrom"
+            ]);
+        }
+
+        $("#lookup-draftvendor").lookup({
+            IsSingleSelection: true,
+            LookupOpenUrl: "@PriceController.Action.OpenDraftVendorLookup",
+            LookupSearchUrl: "@PriceController.Action.SearchDraftVendorLookup",
+            OnBeginCallback: function () { /*OnAjaxBegin("Search Vendor");*/ },
+            OnEndCallback: function () { /*OnAjaxComplete*/ },
+            OnSearchButtonClick: function () { $.ClearLookup(["#lookup-draftvendor"]); },
+            OnRowSelected: function (selected) {
+                $("#popuplookup-draftvendor").modal("hide");
+            },
+            OnOkButtonClick: function () { },
+            OnOkButtonClicked: function () {
+                $("#popuplookup-draftvendor").modal("hide");
+            }
+        });
+
+        $("#lookup-itemvendor").lookup({
+            IsSingleSelection: true,
+            LookupOpenUrl: "@PriceController.Action.OpenItemVendorLookup",
+            LookupSearchUrl: "@PriceController.Action.SearchItemVendorLookup",
+            OnBeginCallback: function () { /*OnAjaxBegin("Search Vendor");*/ },
+            OnEndCallback: function () { /*OnAjaxComplete*/ },
+            OnSearchButtonClick: function () { $.ClearLookup(["#lookup-itemvendor"]); },
+            OnRowSelected: function (selected) {
+                $("#popuplookup-itemvendor").modal("hide");
+            },
+            OnOkButtonClick: function () { },
+            OnOkButtonClicked: function () {
+                $("#popuplookup-itemvendor").modal("hide");
+            }
+        });
+
+        $("#btn-newdraftprice").click(function (e) {
+            ClearDraftPriceForm();
+            $("#draft-popup-container").modal();
+        });
+
+        $("#btn-newitemprice").click(function (e) {
+            ClearItemPriceForm();
+            $("#item-popup-container").modal();
+        });
+
+        /* =============================== CRUD: end =============================== */
+    });
+
+    function cancelUpload() {
+        $.progressbox.show("Upload Material Price", "Cancelling Upload Material Price...");
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@PriceController.Cancel",
+            data: { PROCESS_ID: $("#procid").val() },
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                $.progressbox.hide();
+                $("#upload-popup-container").modal('hide');
+            },
+            error: function (data) {
+                $.progressbox.hide();
+                alert(data);
+            }
+        });
+    }
+
+    function openUploadPopup() {
+        $.progressbox.show("Upload Material Price", "Initializing Upload Material Price...");
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@PriceController.UploadInit",
+            data: {},
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                $("#upload-popup-container").html(data);
+                $.progressbox.hide();
+                $("#upload-popup-container").modal('show');
+            },
+            error: function (data) {
+                $.progressbox.hide();
+                alert(data);
+            }
+        });
+    }
+
+    function validateFile() {
+        var file = $("#txt-upfile").get(0).files[0];
+
+        if ((file === null) || (file === "")) {
+            $.messagebox.show(
+                "Upload Price",
+                "File is NULL, please Upload Another File",
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+            $.Disable(["#btnupload-file"]);
+            return
+        }
+
+        var filecounter = 0;
+        var filemaxsize = 0;
+        var filemax = 0;
+        var filetypeori = "";
+        var filevalidextension = null;
+
+        filecounter = File.PRICE.count;
+        filecounter++;
+        filemaxsize = File.PRICE.size;
+        filemax = File.PRICE.max;
+        filevalidextension = File.PRICE.validext.split(',');
+
+        if (filecounter > filemax) {
+            $.messagebox.show(
+                "Upload Material Price",
+                "maximum file for material price is " + filemax + ", Upload Failed",
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+            $.Disable(["#btnupload-file"]);
+            return;
+        }
+
+        var oriextension = file.name.split('.');
+        if ($.inArray("." + oriextension[oriextension.length - 1], filevalidextension) === -1) {
+            var strmsg = "Invalid File Extension for material price, Allowed file extension for material price are : " + filevalidextension.join(',');
+
+            $.messagebox.show(
+                "Upload Material Price",
+                strmsg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+            $.Disable(["#btnupload-file"]);
+            return;
+        }
+
+        if (file.size > filemaxsize) {
+            var strmsg = "File " + file.name + " size (" + (file.size / 1000000) +
+                            "MB) is Reaching Limit, Maximum File Size for material price is " + (filemaxsize / 1000000);
+
+            $.messagebox.show(
+                "Upload Material Price",
+                strmsg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+            $.Disable(["#btnupload-file"]);
+            return;
+        }
+
+        var filedata = new FormData();
+        filedata.append("file", file);
+        filedata.append("PROCESS_ID", $("#procid").val());
+
+        $.progressbox.show("Upload Material Price", "Uploading . . .");
+        var html = "";
+        $.ajax({
+            type: "POST",
+            url: "@PriceController.SaveFileTemp",
+            data: filedata,
+            contentType: false, // NOTE: disable header to include content-type
+            processData: false, // NOTE: disabe jquery to convert data to string
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] != "SUCCESS") {
+                    $.messagebox.show(
+                        "Upload Material Price",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    $.Disable(["#btnupload-file"]);
+                    $.progressbox.hide();
+                    return;
+                }
+                $('.remove-list-price').remove();
+                html = html + "<span class='remove-list-price' id='isrow-price'>" +
+                                "<a href='#' id='a-files' onclick='deleteFiles(\"" + resultMessage.split('|')[1] + "\")'>" +
+                                    "<img width='15' height='15' src='@Url.Content("../Content/img/error.png")' title='Delete " + file.name + "'>" +
+                                "</a>";
+                html = html + (file.name.length > 20 ? file.name.substring(0, 20) + ". . ." : file.name) + "</span>";
+
+                if (filecounter === File.PRICE.max)
+                    $("#txt-upfile").hide();
+                File.PRICE.count = filecounter;
+
+                $('.appended-file-price').append(html);
+                $('.appended-file-price').show();
+                $.Enable(["#btnupload-file"]);
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.messagebox.show(
+                    "Upload Material Price",
+                    "Cannot Upload File. Cannot connect to server",
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+                $.Disable(["#btnupload-file"]);
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function uploadFile() {
+        $.progressbox.show("Upload Material Price", "Uploading data from given file...");
+
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@PriceController.SaveUploadedData",
+            data: {
+                PROCESS_ID: $("#procid").val(),
+                type: $("#cmbupload-pricetype").val()
+            },
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] == "SUCCESS") {
+                    window.location = "Price/DownloadUploadedResult?path=" + resultMessage.split('|')[1];
+                    $.progressbox.hide();
+                }
+                else {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Upload Material Price",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                alert(resultMessage);
+            },
+            complete: function (resultMessage) {
+                File.PRICE.count--;
+                $("#txt-upfile").show();
+                $('.appended-file-price').hide();
+                $("#txt-upfile").val("");
+                $.Disable(["#btnupload-file"]);
+                $("#isrow-price").css("display", "none");
+            }
+        });
+    }
+
+    function deleteFiles(path) {
+        $.progressbox.show("Delete File", "Deleting file...");
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@PriceController.DeleteFile",
+            data: {
+                PROCESS_ID: $("#procid").val(),
+                FILE_PATH: path
+            },
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] == "SUCCESS") {
+                    File.PRICE.count--;
+                    $("#txt-upfile").show();
+                    $('.appended-file-price').hide();
+                    $("#txt-upfile").val("");
+
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Delete File",
+                        "File Has Been Removed",
+                        "SUC",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+
+                    $.Disable(["#btnupload-file"]);
+                    $("#isrow-price").css("display", "none");
+                }
+                else {
+                    $.progressbox.hide();
+                    $.Enable(["#btnupload-file"]);
+                    $.messagebox.show(
+                        "Delete File",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                alert(resultMessage);
+            }
+        });
+    }
+
+    function getMaterial(page) {
+        $.ajax({
+            type: "POST", url: "@Url.Content("~/Price/getMaterial")",
+            data: {
+                pageSize: 10,
+                page: page,
+                matno: $('#matnolook').val(),
+                matdesc: $('#matdesclook').val()
+            },
+            success: function (data) {
+                $("#material-container").html(data);
+                $("#material-container").modal();
+            },
+            error: function (data) { }
+        });
+    }
+
+    function getMaterialGrid(page) {
+        var reservation = $("#aprtype").val() == "1" ? 'Y' : '';
+        $.ajax({
+            type: "POST", url: "@Url.Content("~/Price/getMaterialGrid")",
+            data: {
+                pageSize: 10,
+                page: page,
+                matno: $('#matnolook').val(),
+                matdesc: $('#matdesclook').val()
+            },
+            success: function (data) { $("#material-grid-container").html(data); },
+            error: function (data) { }
+        });
+    }
+
+    function moveMatno(MAT_NO, MAT_DESC) {
+        $("#matnolook").val("");
+        $("#matdesclook").val("");
+
+        $('#price-item-matno').val(MAT_NO);
+        $('#price-item-matdesc').val(MAT_DESC);
+        $('#price-draft-matno').val(MAT_NO);
+        $('#price-draft-matdesc').val(MAT_DESC);
+
+        $("#material-container").modal("hide");
+    }
+
+    function clearfield() {
+        $("#matnolook").val("");
+        $("#matdesclook").val("");
+        getMaterialGrid(1);
+        //ClearVal(["#matnolook", "#matdesclook"]);
+    }
+
+    function clearValueLookup(_column) {
+        $("#matnolook").val("");
+        $("#matdesclook").val("");
+        $("#price-item-matno").val("");
+        $("#price-item-matdesc").val("");
+        $('#price-draft-matno').val("");
+        $('#price-draft-matdesc').val("");
+        //ClearVal(["#matnolook", "#matdesclook"]);
+    }
+
+    function GetValidDate(date) {
+        if (date != "") {
+            date = date.split('.');
+            var date = date[1] + '-' + date[0] + '-' + date[2];
+        }
+        return date;
+    }
+
+    function savePriceDraft(type, dismiss) {
+        var msg = "";
+        var fields = [];
+        var i = 0;
+        var reg = new RegExp(/^\d+(?:\.\d{1,18})?$/);
+
+        $("#success-search").hide();
+        $("#alert-search").hide();
+        $("#price-draft-alert").hide();
+        $("#price-draft-success").hide();
+        $("#price-draft-loading-image").html("<img style=\"margin-top:25px;\" width=\"30\" height=\"30\" src=\"/Content/img/LoadingImage.gif\" />");
+        $(".price-draft-loading-save").show();
+
+        if ($("#price-draft-matno").val() == "") { fields[i] = "Mat. No"; i++; }
+        if ($("#price-draft-matdesc").val() == "") { fields[i] = "Mat. Desc"; i++; }
+        if ($("#price-draft-vendor").val() == "") { fields[i] = "Vendor"; i++; }
+        if ($("#price-draft-prod").val() == "") { fields[i] = "Production Purpose"; i++; }
+        if ($("#price-draft-curr").val() == "") { fields[i] = "Currency"; i++; }
+        if ($("#price-draft-amount").val() == "") { fields[i] = "Price Amount"; i++; }
+        if ($("#price-draft-validfrom").val() == "") { fields[i] = "Valid Date From"; i++; }
+        if ($("#price-draft-sfx").val() == "") { fields[i] = "Part Color SFX"; i++; }
+        if ($("#price-draft-warpbuyer").val() == "") { fields[i] = "Warp Buyer CD"; i++; }
+        if ($("#price-draft-sourcetype").val() == "") { fields[i] = "Source Type"; i++; }
+        if ($("#price-draft-pricests").val() == "") { fields[i] = "Price Status"; i++; }
+        if ($("#price-draft-packingtype").val() == "") { fields[i] = "Packing Type"; i++; }
+
+        for (i = 0; i < fields.length; i++) {
+            msg = msg + "<p>" + fields[i] + " is mandatory</p>";
+        }
+
+        if (reg.test($("#price-draft-amount").val()) == false) {
+            msg = msg + "<p>Amount Must Be A Number</p>";
+        }
+
+        if (parseFloat($("#price-draft-amount").val()) <= 0) {
+            msg = msg + "<p>Amount Cannot Less Than or Equal Zero</p>";
+        }
+
+        if (msg != "") {
+            $.messagebox.show(
+                "Draft Price Validation",
+                msg,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+            $("#price-draft-loading-image").html("");
+            $(".price-draft-loading-save").hide();
+            return;
+        }
+
+        var date = GetValidDate($("#price-draft-validfrom").val());
+        $.ajax({
+            type: "POST", url: "@Url.Content("~/Price/SavePrice")",
+            data: {
+                PRICE_TYPE: type,
+                MAT_NO: $("#price-draft-matno").val(),
+                MAT_DESC: $("#price-draft-matdesc").val(),
+                VENDOR_CD: $("#txtlookup-draftvendor").val().substring(0, $("#txtlookup-draftvendor").val().indexOf(' -')),
+                PRODUCTION_PURPOSE: $("#price-draft-prod").val(),
+                CURR_CD: $("#cmbdraft-currency").val(),
+                PRICE_AMT: $("#price-draft-amount").val(),
+                VALID_DT_FROM: date,
+                PART_COLOR_SFX: $("#price-draft-sfx").val(),
+                WARP_BUYER_CD: $("#price-draft-warpbuyer").val(),
+                SOURCE_TYPE: $("#price-draft-sourcetype").val(),
+                PRICE_STS: $("#price-draft-pricests").val(),
+                PACKING_TYPE: $("#price-draft-packingtype").val(),
+                MAT_NO_DRAFT: $("#price-draft-matno").val(),
+                MAT_DESC_DRAFT: $("#price-draft-matdesc").val()
+            },
+            async: false,
+            success: function (data) {
+                $("#price-draft-loading-image").html("");
+                $(".price-draft-loading-save").hide();
+                var msg = data.split('|');
+                if (msg[0] != "ERR") {
+                    $("#price-draft-matno").val("");
+                    $("#price-draft-matdesc").val("");
+                    $("#price-draft-vendor").val("");
+                    $("#price-draft-prod").val("");
+                    $("#price-draft-curr").val("");
+                    $("#price-draft-amount").val("");
+                    $("#price-draft-validfrom").val("");
+                    $("#price-draft-sfx").val("");
+                    $("#price-draft-warpbuyer").val("");
+                    $("#price-draft-sourcetype").val("");
+                    $("#price-draft-pricests").val("");
+                    $("#price-draft-packingtype").val("");
+                    if (dismiss == 'Y') {
+                        $("#draft-popup-container").modal("hide");
+                        SearchPrice(1);
+                        $("#success-search").html(msg[1]);
+                        $("#success-search").show();
+                    }
+                    else {
+                        $("#price-draft-success").show();
+                        $("#price-draft-success").html(msg[1]);
+                        SearchPrice(1);
+                    }
+                }
+                else {
+                    $("#price-draft-alert").show();
+                    $("#price-draft-alert").html(msg[1]);
+                }
+            },
+            error: function (data) {
+                $("#price-draft-loading-image").html("");
+                $(".price-draft-loading-save").hide();
+            }
+        });
+    }
+
+    function DownloadTemplate() {
+        $.fileDownload("Price/DownloadTemplate?type=" + $("#cmbupload-pricetype").val());
+    }
+
+    function savePrice(type, dismiss) {
+        var msg = "";
+        var fields = [];
+        var i = 0;
+
+        var reg = new RegExp(/^\d+(?:\.\d{1,18})?$/);
+
+        $("#success-search").hide();
+        $("#alert-search").hide();
+        $("#price-item-alert").hide();
+        $("#price-item-success").hide();
+        $("#price-item-loading-image").html("<img style=\"margin-top:25px;\" width=\"30\" height=\"30\" src=\"/Content/img/LoadingImage.gif\" />");
+        $(".price-item-loading-save").show();
+
+        if ($("#price-item-matno").val() == "") { fields[i] = "Mat. No"; i++; }
+        if ($("#price-item-matdesc").val() == "") { fields[i] = "Mat. Desc"; i++; }
+        if ($("#price-item-vendor").val() == "") { fields[i] = "Vendor"; i++; }
+        if ($("#price-item-prod").val() == "") { fields[i] = "Production Purpose"; i++; }
+        if ($("#price-item-curr").val() == "") { fields[i] = "Currency"; i++; }
+        if ($("#price-item-amount").val() == "") { fields[i] = "Price Amount"; i++; }
+        if ($("#price-item-validfrom").val() == "") { fields[i] = "Valid Date From"; i++; }
+
+        for (i = 0; i < fields.length; i++) {
+            msg = msg + "<p>" + fields[i] + " is mandatory</p>";
+        }
+
+        if (reg.test($("#price-item-amount").val()) == false) {
+            msg = msg + "<p>Amount Must Be A Number</p>";
+        }
+
+        if (parseFloat($("#price-item-amount").val()) <= 0) {
+            msg = msg + "<p>Amount Cannot Less Than or Equal Zero</p>";
+        }
+
+        if (msg != "") {
+            $.messagebox.show(
+                "Item Price Validation",
+                msg,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+            $("#price-item-loading-image").html("");
+            $(".price-item-loading-save").hide();
+            return;
+        }
+
+        var date = GetValidDate($("#price-item-validfrom").val());
+        $.ajax({
+            type: "POST", url: "@Url.Content("~/Price/SavePrice")",
+            data: {
+                PRICE_TYPE: type,
+                MAT_NO: $("#price-item-matno").val(),
+                MAT_DESC: $("#price-item-matdesc").val(),
+                VENDOR_CD: $("#txtlookup-itemvendor").val().substring(0, $("#txtlookup-itemvendor").val().indexOf(' -')),
+                PRODUCTION_PURPOSE: $("#price-item-prod").val(),
+                CURR_CD: $("#cmbitem-currency").val(),
+                PRICE_AMT: $("#price-item-amount").val(),
+                VALID_DT_FROM: date,
+            },
+            async: false,
+            success: function (data) {
+                $("#price-item-loading-image").html("");
+                $(".price-item-loading-save").hide();
+                var msg = data.split('|');
+                if (msg[0] != "ERR") {
+                    $("#price-item-matno").val("");
+                    $("#price-item-matdesc").val("");
+                    $("#price-item-vendor").val("");
+                    $("#price-item-prod").val("");
+                    $("#price-item-curr").val("");
+                    $("#price-item-amount").val("");
+                    $("#price-item-validfrom").val("");
+                    if (dismiss == 'Y') {
+                        $("#item-popup-container").modal("hide");
+                        SearchPrice(1);
+                        $("#success-search").html(msg[1]);
+                        $("#success-search").show();
+                    }
+                    else {
+                        $("#price-item-success").show();
+                        $("#price-item-success").html(msg[1]);
+                        SearchPrice(1);
+                    }
+                }
+                else {
+                    $("#price-item-alert").show();
+                    $("#price-item-alert").html(msg[1]);
+                }
+            },
+            error: function (data) {
+                $("#price-item-loading-image").html("");
+                $(".price-item-loading-save").hide();
+            }
+        });
+    }
+</script>
+}
+
+<div class="form-horizontal">
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs">
+                <div class="col-xs-5 col-sm-4">
+                    <label for="txt-materialno" class="control-label text-muted">Material No.</label>
+                </div>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-materialno" class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs">
+                <div class="col-xs-5 col-sm-4">
+                    <label for="cmb-vendor" class="control-label text-muted">Vendor</label>
+                </div>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-vendor", VendorController.VendorSelectList, new {@class = "form-control"})
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs">
+                <div class="col-xs-5 col-sm-4">
+                    <label for="cmb-sourcetype" class="control-label text-muted">Source Type</label>
+                </div>
+                <div class="col-xs-7 col-sm-8">
+                    <select id="cmb-sourcetype" class="form-control" disabled>
+                        <option value=""></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs">
+                <div class="col-xs-5 col-sm-4">
+                    <label for="cmb-pricestatus" class="control-label text-muted">Price Status</label>
+                </div>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-pricestatus", PriceController.PriceStatusSelectList, new {@class = "form-control"})
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs">
+                <div class="col-xs-5 col-sm-4">
+                    <label for="cmb-pricetype" class="control-label text-muted">Price Type</label>
+                </div>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-pricetype", PriceController.PriceTypeSelectList, new {@class = "form-control"})
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs">
+                <div class="col-xs-5 col-sm-4">
+                    <label for="cmb-prodpurpose" class="control-label text-muted">Prod. Purpose</label>
+                </div>
+                <div class="col-xs-7 col-sm-8">
+                    <select id="cmb-prodpurpose" class="form-control" disabled>
+                        <option value=""></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs">
+                <div class="col-xs-5 col-sm-4">
+                    <label for="cmb-partcolor" class="control-label text-muted">Part Color SFX</label>
+                </div>
+                <div class="col-xs-7 col-sm-8">
+                    <select id="cmb-partcolor" class="form-control" disabled>
+                        <option value=""></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs">
+                <div class="col-xs-5 col-sm-4">
+                    <label for="cmb-packingtype" class="control-label text-muted">Packing Type</label>
+                </div>
+                <div class="col-xs-7 col-sm-8">
+                    <select id="cmb-packingtype" class="form-control" disabled>
+                        <option value=""></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs">
+                <div class="col-xs-5 col-sm-4">
+                    <label for="txt-validdate" class="control-label text-muted">Valid Date</label>
+                </div>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-validdate" class="form-control" placeholder="@CommonDisplayMessage.DateRangePlaceholder" autocomplete="off" readonly />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div class="col-sm-6 hidden-xs"></div>
+        <div class="col-xs-12 col-sm-6 text-right">
+            <button id="btn-detail" class="btn btn-xs btn-primary btn-std btndisable">Show Detail</button>
+            <button id="btn-search" class="btn btn-xs btn-primary btn-std btndisable">Search</button>
+            <button id="btn-clearsearch" class="btn btn-xs btn-default btn-std btndisable">Clear</button>
+        </div>
+    </div>
+</div>
+<div class="v-space"></div>
+<div class="line-br"></div>
+<div class="row">
+    <div class="col-xs-12 col-sm-6">
+        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("Price", "btn-newdraftprice"))
+        {
+            <button id="btn-newdraftprice" class="btn btn-xs btn-primary btn-std btndisable">New Draft Price</button>
+        }
+        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("Price", "btn-newitemprice"))
+        {
+            <button id="btn-newitemprice" class="btn btn-xs btn-primary btn-std btndisable">New Item Price</button>
+        }
+        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("Price", "btn-delete"))
+        {
+            <button id="btn-delete" class="btn btn-xs btn-danger btn-std btndisable">Delete</button>
+        }
+    </div>
+    <div class="col-xs-12 col-sm-6 text-right">
+        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("Price", "btn-upload"))
+        {
+            <button id="btn-upload" class="fa fa-upload btn btn-warning btn-xs btn-std btndisable" style="padding: 6px;" onclick="javascript:openUploadPopup()">
+                <span style="font-family: Open Sans; font-size: 12px">Upload</span>
+            </button>
+        }
+    </div>
+</div>
+<div class="v-space"></div>
+<div class="row">
+    <div id="grid-@Model.GridPaging.DataName">
+        @Html.Partial(MaterialPricePage.GridPartial, Model)
+    </div>
+</div>
+
+<div id="upload-popup-container" class="modal fade" style="padding-left: 0px !important; width:100%"; data-backdrop="static" data-keyboard="false"></div>
+@Html.Partial("_PartialPriceDraftPopup", new GPS.Models.Master.MaterialPrice())
+@Html.Partial("_PartialPriceItemPopup", new GPS.Models.Master.MaterialPrice())
+
+<div id="material-container" class="modal fade bs-example-modal-lg" width="100%" data-backdrop="static" data-keyboard="false"></div>
+@Html.LookupContainer("draftvendor")
+@Html.LookupContainer("itemvendor")

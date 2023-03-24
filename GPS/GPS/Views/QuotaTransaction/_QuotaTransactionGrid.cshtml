@@ -1,0 +1,109 @@
+﻿    <style>
+    .table > tr > td {
+        vertical-align : middle;    
+    }
+
+    .table > thead > tr > th {
+        vertical-align : middle;    
+    }
+      .fa {
+        font-size : 14pt;
+        color:turquoise;
+    }
+
+        .fa:hover {
+            color:yellow;
+        }
+</style>
+<div class="row" style="margin-top: 10px">
+    <div class="full-border">
+        <div class="col-xs-12 col-md-12 form-main-group-box-search TableAdd">
+            <div class="table-responsive">
+                <table width="100%">
+                    <tr>
+                        <td>
+                            @* <div class="col-xs-12 col-sm-4 text-right" style="margin-right:50px;">*@
+                            <div class="form-group form-group-xs text-right">
+                                <button type="button" id="btnAddDetail" class="btn btn-primary"
+                                    onclick="javascript:AddDetail()">
+                                    Add</button>
+                                <button type="button" id="btnDeleteDetail" class="btn btn-danger"
+                                    onclick="DeleteDetail()">
+                                    Delete</button>
+                            </div>
+                            @*</div>*@
+                        </td>
+                    </tr>
+                </table>
+                <div class="grid-overflow" style="overflow: scroll">
+                    <table id="addTable" class="table table-striped table-bordered appended-table" width="100%" >
+                        <thead>
+                            <tr>
+                                <th colspan="2" class="text-center" style="width:200px">
+                                    Source
+                                </th>
+                                <th colspan="2" class="text-center" style="width:200px">
+                                    Destination
+                                </th>
+                                <th rowspan="2" class="text-center" style="width:30px">
+                                    Qty
+                                </th>
+                                <th rowspan="2" class="text-center" style="width:60px">
+                                    Price
+                                </th>
+                                <th rowspan="2" class="text-center" style=" width:60px">
+                                    Amount
+                                </th>
+                                  <th rowspan="2" class="text-center" style=" width:40px">
+                                    Action
+                                </th>
+                                
+                            </tr>
+                            <tr>
+                                <th class="text-center" style="width:50px">
+                                    Month
+                                </th>
+                                <th class="text-center" style="width:150px">
+                                    Material No
+                                </th>
+                                <th class=" text-center" style="width:50px">Month</th>
+                                <th class=" text-center" style="width:150px">Material No</th>
+                            </tr>
+                            <tr id="addrow" class="form-group form-group-xs">
+        
+                                <td id="row_col_1" style="width:50px" >
+                                    <input id="txtMonthSource" class="form-control blank text-right" type="text" style="width:100%" maxlength="2" />
+                                </td>
+                                <td id="row_col_2" style="width:150px">
+                                <select id="txtMatNoSource" class="form-control" style="width:100%"></select>
+                                </td>
+                                <td id="row_col_3" style="width:50px" >
+                                    <input type="text"  class="form-control addinput text-center" id="txtMonthDestination" style="width:100%" readonly />
+                                </td>
+                                <td id="row_col_4" style="width:150px">
+                                   <input type="text"  class="form-control addinput" id="txtMatNoDestination" style="width:100%" readonly />
+                                </td>
+                                <td id="row_col_5" style="width:30px">
+                                    <input id="txtQty" type="text" style="width:100%" class="form-control addinput text-right" onkeyup="getAmount()" onkeydown="javascript:Key(event)"/>
+                                </td>
+                                <td id="row_col_6" style="width:60px">
+                                   <input type="text"  class="form-control addinput" style="width:100%" id="txtPrice" value="200" readonly onkeydown="javascript:Key(event)" />
+                                </td>
+                                <td id="row_col_7" style="width:60px">
+                                <input id="txtAmount" type="text" style="width:100%" class="form-control addinput text-right" onkeyup="getAmount()" readonly onkeydown="javascript:Key(event)"/>
+                                </td>
+                                  <td id="row_col_8" style="width:40px">
+                                    <i class="fa fa-save" onclick="javascript:SaveDetail()"></i>
+                                    <i class="fa fa-remove" onclick="javascript:CancelDetail()"></i>
+                                </td>
+                            </tr>
+                        </thead>
+                     @*   @Html.Partial("_QuotaDetailList")*@
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+</div>
+

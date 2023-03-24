@@ -1,0 +1,78 @@
+﻿@using GPS.Constants
+@using GPS.Controllers.PO
+@using GPS.Core.ViewModel
+<div class="modal fade" id="rejectpo">
+    <div class="modal-dialog modal-md" style="width: 500px;">
+        <div class="modal-content" style="background-color:#3a87ad;color:white;">
+            <div class="modal-header" style="border-bottom: 0px !important">
+                <h4 class="modal-title dettitle popup-title" style="font-size:13px">Reject Purchase Order</h4>
+            </div>
+            <div class="modal-body" style="padding:10px !important;background-color:white;color:black;margin:2px !important">
+                <input type="text" class="hidden" id="hidden-pono-reject">
+                <p style="font-size:13px;">Are you sure you want to Reject Purchase Order <label id="lbl-pono" style="font-size:inherit"></label>?</p>
+                <p style="font-size:11px;">
+                    If you're sure to Reject this purchase order, please fill
+                    <strong>Reject Reason<span style="color:red">*</span></strong> in text field below :
+                </p>
+                <textarea id="txt-reject-reason" style="width:100%;resize:none;font-size:11px" rows="3" maxlength="100"></textarea>
+                <p style="font-size:10px;font-style:italic"><span style="color:red">*</span>Mandatory, Minimum 10 Character, Maximum 100 Character</p>
+                <label id="errormsg" style="color:red;"></label>
+                <div class="btn-group-xs text-right">
+                    <button id="btnget-submit-reject" type="button" class="btn btn-primary btn-xs">Submit</button>
+                    <button id="btnget-close-reject" type="button" class="btn btn-danger btn-xs" data-dismiss="modal" onclick="doCancelAbort()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.Disable(["#btnget-submit-reject"]);
+
+        $(document).on("keyup", "#txt-reject-reason", function (e) {
+            var capttext = $("#txt-reject-reason").val().trim();
+            $("#errormsg").html("");
+
+            if (capttext.length < 10)
+                $.Disable(["#btnget-submit-reject"]);
+            else
+                $.Enable(["#btnget-submit-reject"]);
+
+        });
+
+        $(document).on("click", "#btnget-submit-reject", function (e) {
+            var capttext = $("#txt-reject-reason").val().trim();
+            var msg = "";
+
+            if ((capttext == "") || (capttext == null) || (capttext == undefined)) {
+                $.messagebox.show(
+                            "Reject PO",
+                            "Reject Reason is Mandatory!",
+                            "WRN",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                return;
+            }
+
+            if ((capttext.length < 10) || (capttext.length > 100)) {
+                $.messagebox.show(
+                            "Reject PO",
+                            "Reject Reason Minimum length is 10 character and Maximum length is 100 character",
+                            "WRN",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                return;
+            }
+
+            doRejectSelectedPO($("#hidden-pono-reject").val(), capttext);
+            $("#rejectpo").modal('hide');
+            $("#txt-reject-reason").val("");
+            $("#hidden-pono-reject").val("");
+        });
+    });
+</script>

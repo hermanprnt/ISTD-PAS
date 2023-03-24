@@ -1,0 +1,1 @@
+EXEC sp_prcreation_datalist_getCostCenterListByGlAccount @PR_COORDINATOR,@DIVISION_ID, @REG_NO,@GL_ACCOUNT_PARAM

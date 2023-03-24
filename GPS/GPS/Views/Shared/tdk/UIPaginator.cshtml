@@ -1,0 +1,22 @@
+﻿@model UIPaginatorSettings
+@if (Model.PageCount > 0)
+{   
+    <div id="@Model.Id" class="_paginator text-center @Model.PrintCssClass()">
+        <ul class="pagination">
+            <li><a href="#" class="first">&laquo;</a></li>
+            <li><a href="#" class="prev">&lsaquo;</a></li>
+            @{ int pageOptCount = Model.PageOptionCount; }
+            @for (int i = 1; i <= pageOptCount; i++)
+            {
+                <li><a href="#" class="page" data-page="@i">@i</a></li>    
+            }
+            <li><a href="#" class="next">&rsaquo;</a></li>
+            <li><a href="#" class="last">&raquo;</a></li>
+        </ul>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#@Model.Id").tdkPaginator(@Model.PrintJsProperties());
+        });    
+    </script>
+}

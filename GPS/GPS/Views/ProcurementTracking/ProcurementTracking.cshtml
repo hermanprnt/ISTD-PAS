@@ -1,0 +1,336 @@
+﻿@model GPS.Models.Report.ProcurementTrackingParam
+@using GPS.Controllers.Master
+@using GPS.Controllers.Report
+@using GPS.Models.Report
+@using GPS.Models.Master
+@using GPS.Models.MRP
+@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Constants.PO
+@using GPS.CommonFunc.WebControl
+
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int division = ViewData["Division"] == null ? 0 : (int)ViewData["Division"];
+    //string WBS_YEAR = ViewData["WBSYear"] == null ? "" : ViewData["WBSYear"].ToString();
+
+}
+@section HeadScript{
+    <!-- Bootstrap Datepicker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/datepicker.css")" />
+    <!-- Daterange picker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+
+    <style>
+        .initial-hide,
+        .moreinquiry {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .cancel {
+            background-color: #ababab !important;
+            color: #fff !important;
+        }
+
+            .cancel a {
+                color: #fff !important;
+            }
+    </style>
+}
+@section BodyScript{
+    <!-- Bootstrap Datepicker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+    <!-- Daterange picker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+    <!-- Dropzone file js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/dropzone.js")"></script>
+
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/typeahead.jquery.js")"></script>
+
+}
+
+@Html.Partial("_ProcurementTrackingScript")
+
+<div class="form-horizontal" id="searchForm">
+    <form>
+        <div class="row">
+            <div class="col-xs-12 col-sm-4 col-md-3">
+                <div class="form-group form-group-xs">
+                    <div class="form-group form-group-xs _criteria">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">PR No.</label>
+                        <div class="col-xs-8 col-sm-5 col-md-8">
+                            <div class="input-group pos-rel" style="width: 100%;">
+                                @Html.TextBoxFor(m => m.PR_NO, new { id = "prno", @style = "width:100%", @class = "input_keyup" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group form-group-xs _criteria">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">PR Date.</label>
+                        <div class="col-xs-8 col-sm-5 col-md-8">
+                            <div class="input-group pos-rel" style="width: 100%;">
+                              
+
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                   
+                                    <input style="width:100%" " type="text" name="date-range-picker" id="prdtfrom" data-date-format="MM/DD/YYYY"  tabindex="6" autocomplete="off" class="form-control" readonly="readonly" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group form-group-xs _criteria">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Vendor Code</label>
+                        <div class="col-xs-8 col-sm-5 col-md-8">
+                            <div class="input-group pos-rel" style="width: 100%;">
+                                @Html.TextBoxFor(m => m.VENDOR, new { id = "vendor", @style = "width:100%", @class = "input_keyup" })
+                            </div>
+                        </div>
+
+                    </div>
+
+                    @*<button data-rel="tooltip" title="Hide filter" onclick="javascript:toggleSearch()" type="button" class="ace-icon fa fa-angle-double-right btn btn-default btn-xs btn-tiny-down" id="toogle-search"></button>*@
+
+                    <div class="form-group form-group-xs _criteria">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Created By</label>
+                        <div class="col-xs-8 col-sm-5 col-md-8">
+                            <div class="input-group pos-rel" style="width: 100%;">
+                                @Html.TextBoxFor(m => m.CREATED_BY, new { id = "createdby", @style = "width:100%", @class = "input_keyup" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-12 col-sm-4 col-md-3">
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">PO No.</label>
+                    <div class="col-xs-8 col-sm-5 col-md-8">
+                        <div class="input-group pos-rel" style="width: 100%;">
+                            @Html.TextBoxFor(m => m.PO_NO, new { id = "pono", @style = "width:100%", @class = "input_keyup" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">PO Date</label>
+                    <div class="col-xs-8 col-sm-5 col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                           
+                            <input style="width:100%" " type="text" name="date-range-picker" id="podt" data-date-format="MM/DD/YYYY"  tabindex="6" autocomplete="off" class="form-control" readonly="readonly" />
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">WBS No.</label>
+                    <div class="col-xs-8 col-sm-5 col-md-8">
+                        <div class="input-group pos-rel" style="width: 100%;">
+                            @Html.TextBoxFor(m => m.WBS_NO, new { id = "wbs_no", @style = "width:100%", @class = "input_keyup" })
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Clearing No.</label>
+                    <div class="col-xs-8 col-sm-5 col-md-8">
+                        <div class="input-group pos-rel" style="width: 100%;">
+                            @Html.TextBoxFor(m => m.CLEARING_NO, new { id = "clno", @style = "width:100%", @class = "input_keyup" }) @*, @disabled = "disabled"*@
+                        </div>
+                    </div>
+                </div>
+
+             </div>
+
+            <div class="col-xs-12 col-sm-4 col-md-3">
+
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">GR/SA No.</label>
+                    <div class="col-xs-8 col-sm-5 col-md-8">
+                        <div class="input-group pos-rel" style="width: 100%;">
+                            @Html.TextBoxFor(m => m.GR_NO, new { id = "grno", @style = "width:100%", @class = "input_keyup" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">GR Date</label>
+                    <div class="col-xs-8 col-sm-5 col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            
+                            <input style="width:100%" " type="text" name="date-range-picker" id="grdt" data-date-format="MM/DD/YYYY"  tabindex="6" autocomplete="off" class="form-control" readonly="readonly"/>
+                        </div>
+                       
+                    </div>
+                </div>
+
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">PR.Div</label>
+                    <div class="col-xs-8 col-sm-5 col-md-8">
+                        <div class="input-group pos-rel" style="width: calc(100% - 30px);">
+                            @*@Html.DropDownListFor(m => m.DIVISION_ID, DivisionController.GetDivisionList(), new { id = "division", @class = "cursor-1", onchange = "javascript:populateComboBox('division')", @style = "width:100%;", @disabled = "disabled" })*@
+                            @Html.DropDownListFor(m => m.DIVISION_ID,
+                                                        DivisionController.GetDivisionList(),
+                                        new
+                                        {
+                                            id = "division",
+                                            @class = "cursor-1",
+                                            //onchange = "javascript:populateComboBox('division')",
+                                            @style = "width:100%;"
+                                        }
+                                        )
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Clearing Date</label>
+                    <div class="col-xs-8 col-sm-5 col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+
+                            <input style="width:100%" " type="text" name="date-range-picker" id="cldt" data-date-format="MM/DD/YYYY" tabindex="6" autocomplete="off" class="form-control"  /> @*readonly="readonly"*@
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-xs-12 col-sm-4 col-md-3">
+                    <div class="form-group form-group-xs _criteria">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Invoice No.</label>
+                        <div class="col-xs-8 col-sm-5 col-md-8">
+                            <div class="input-group pos-rel" style="width: 100%;">
+                                @Html.TextBoxFor(m => m.PO_NO, new { id = "invno", @style = "width:100%", @class = "input_keyup" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group form-group-xs _criteria">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Invoice Date</label>
+                        <div class="col-xs-8 col-sm-5 col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+
+                                <input style="width:100%" " type="text" name="date-range-picker" id="invdt" data-date-format="MM/DD/YYYY" readonly="readonly" tabindex="6" autocomplete="off" class="form-control" />
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="form-group form-group-xs _criteria">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Purchase Grp</label>
+                        <div class="col-xs-8 col-sm-5 col-md-8">
+                            <div class="input-group pos-rel" style="width: 100%;">
+                                @Html.TextBoxFor(m => m.WBS_NO, new { id = "pcsgrp", @style = "width:100%", @class = "input_keyup" })
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @*FID.Ridwan:20220708*@
+                    <div class="form-group form-group-xs _criteria">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Status</label>
+                        <div class="col-xs-8 col-sm-5 col-md-8">
+                            <div class="input-group pos-rel" style="width: calc(100% - 30px);">
+                            @Html.DropDownListFor(m => m.Status_ID,
+                                                        ProcurementTrackingController.GetStatus(),
+                                        new
+                                        {
+                                            id = "status",
+                                            @class = "cursor-1",
+                                            @style = "width:100%;"
+                                        }
+                                        )
+                        </div>
+                        </div>
+                    </div>
+           </div>
+        </div>
+        @*<input type="text" hidden="hidden" id="userdiv" value="@userdiv"/>*@
+
+
+        <div class="form-group form-group-xs _criteria text-right">
+            <button type="button" class="btn btn-primary btn-xs" style="margin-right: 12px;width: 80px;" onclick="javascript:onGetData(1,'N')">Search</button>
+            <button type="button" class="btn btn-default btn-xs" style="margin-right: 12px;width: 80px;" onclick="javascript:ClearSearch(1)">Clear</button>
+            <button type="button" class="btn btn-success btn-xs" style="margin-right: 12px;width: 80px;" onclick="javascript:Download()">Download</button>
+
+        </div>
+    </form>
+</div>
+
+<div class="row" id="divtable">
+    @Html.Partial("_ProcurementTrackingGrid")
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var curdate = new Date();
+        curdate.getDate();
+        curdate.setMonth(curdate.getMonth() - 2);
+
+        $('input[name=date-range-picker]').daterangepicker({
+            format: 'MM/DD/YYYY',
+            'applyClass': 'btn-sm btn-success',
+            'cancelClass': 'btn-sm btn-default',
+            startDate: curdate,
+            "dateLimit": {
+                "month": 3
+            },
+            locale: {
+                applyLabel: 'Apply',
+                cancelLabel: 'Cancel',
+            }
+        })
+        .prev().on(ace.click_event, function () {
+            $(this).next().focus();
+        });
+
+        var dateFrom = document.getElementsByName("daterangepicker_start");
+        for (i = 0; i < dateFrom.length; i++)
+        {
+            dateFrom[i].disabled = true;
+        }
+
+        var dateEnd = document.getElementsByName("daterangepicker_end");
+        for (i = 0; i < dateEnd.length; i++) {
+            dateEnd[i].disabled = true;
+        }
+
+        var dt = new Date();
+        dt.getDate();
+        $("#prdtfrom").val(("0" + (curdate.getUTCMonth() + 1).toString()).slice(-2) + '/' + ("0" + curdate.getUTCDate()).slice(-2) + '/' + curdate.getUTCFullYear() + " - " + ("0" + (dt.getUTCMonth() + 1).toString()).slice(-2) + '/' + ("0" + dt.getUTCDate()).slice(-2) + '/' + dt.getUTCFullYear());
+        $("#podt").val(" - ");
+        $("#grdt").val(" - ");
+        $("#cldt").val(" - ");
+        $("#invdt").val(" - ");
+//         $("#podt").val(("0" + (curdate.getUTCMonth() + 1).toString()).slice(-2) + '/' + ("0" + curdate.getUTCDate()).slice(-2) + '/' + curdate.getUTCFullYear() + " - " + ("0" + (dt.getUTCMonth() + 1).toString()).slice(-2) + '/' + ("0" + dt.getUTCDate()).slice(-2) + '/' + dt.getUTCFullYear());
+//        $("#grdt").val(("0" + (curdate.getUTCMonth() + 1).toString()).slice(-2) + '/' + ("0" + curdate.getUTCDate()).slice(-2) + '/' + curdate.getUTCFullYear() + " - " + ("0" + (dt.getUTCMonth() + 1).toString()).slice(-2) + '/' + ("0" + dt.getUTCDate()).slice(-2) + '/' + dt.getUTCFullYear());
+//        $("#cldt").val(("0" + (curdate.getUTCMonth() + 1).toString()).slice(-2) + '/' + ("0" + curdate.getUTCDate()).slice(-2) + '/' + curdate.getUTCFullYear() + " - " + ("0" + (dt.getUTCMonth() + 1).toString()).slice(-2) + '/' + ("0" + dt.getUTCDate()).slice(-2) + '/' + dt.getUTCFullYear());
+//        $("#invdt").val(("0" + (curdate.getUTCMonth() + 1).toString()).slice(-2) + '/' + ("0" + curdate.getUTCDate()).slice(-2) + '/' + curdate.getUTCFullYear() + " - " + ("0" + (dt.getUTCMonth() + 1).toString()).slice(-2) + '/' + ("0" + dt.getUTCDate()).slice(-2) + '/' + dt.getUTCFullYear());
+
+    });
+    @*$("#division option[value='']").remove();
+
+    $("#division").val("@division");
+
+
+    if ($("#userdiv").val() <= 0) {
+        $.Disable(["#division"]);
+    }
+    else {
+
+    }*@
+   
+</script>

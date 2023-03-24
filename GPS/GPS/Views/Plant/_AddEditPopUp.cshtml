@@ -1,0 +1,69 @@
+﻿@using GPS.Models.Master
+@using GPS.Controllers.Master
+@model GPS.Models.Master.Plant
+@{
+    Plant PlantData = ViewData["PlantData"] != null ? (Plant)ViewData["PlantData"] : new Plant();
+}
+
+<script>
+    $(document).ready(function () {
+        var isedit = "N";
+        $.Enable(["#txt-code"]);
+
+        if ("@PlantData.PLANT_CD" !== null && "@PlantData.PLANT_CD" !== "") {
+            $("#txt-code").val("@PlantData.PLANT_CD");
+            $("#txt-name").val("@PlantData.PLANT_NAME");
+
+            $.Disable(["#txt-code"]);
+            isedit = "Y";
+        }
+
+        $("#hidden-isedit").val(isedit);
+    });
+</script>
+
+<div class="modal-dialog" style="width: 500px">
+    <form  method="post" action="javascript: onSaveData();" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>Plant Master</div>
+                <input type="hidden" id="hidden-isedit"/>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12">
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-3 col-sm-2 col-md-3 control-label text-muted">Code</label>
+                                <div class="col-xs-9 col-sm-10 col-md-9">
+                                    <div class="input-group pos-rel" >
+                                        @Html.TextBoxFor(m => m.PLANT_CD, new {id = "txt-code", @style = "width:100%", @class="mandatory", @tabindex="1"})
+					                </div>
+                                </div>
+                            </div>
+                            <div class="form-group form-group-xs _criteria">
+                                <label class="col-xs-3 col-sm-2 col-md-3 control-label text-muted">Name</label>
+                                <div class="col-xs-9 col-sm-10 col-md-9">
+                                    <div class="input-group pos-rel" style="width: 80%;">
+                                        @Html.TextBoxFor(m => m.PLANT_NAME, new {id = "txt-name", @style = "width:100%", @class="mandatory", @tabindex="2"})
+					                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="modal-footer">
+                        <div class="col-xs-6"> </div>
+                        <div class="col-xs-6 text-right">
+                            <div class="form-group-xs">
+                                <button type="submit" class="btn btn-primary btn-xs" tabindex="3" onclick="onSaveData(); return false;">Save</button>  
+                                <button type="button" class="btn btn-danger btn-xs" id="btnCancel" data-dismiss="modal" tabindex="17">Close</button>                     
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,267 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadScript {
+    <!-- Daterange picker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+
+    <link rel="stylesheet" href="@Url.Content("~/Content/angular/angular-gridster.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/angular/style-common.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/angular/style-dashboard.css")" />
+
+    <style type="text/css">
+        h3, .h3
+        {
+            margin-top: 3px !important;
+            margin-bottom: 3px;    
+            font-size: 12pt;
+        }
+    </style>
+}
+
+<div ng-controller="RootCtrl" id="RootCtrl">
+    <div class="row">
+        <div class="col-xs-12 col-sm-9">
+            @Html.Partial("_SearchCriteria")
+        </div>
+        <div class="col-xs-12 col-sm-3">
+            @Html.Partial("_LegendView")
+        </div>
+    </div>
+
+    <div class="line-br"></div>
+
+    <div gridster="gridsterOptions">
+	    <ul>
+		    <li gridster-item="widget" ng-repeat="widget in dashboard.widgets">
+			    <div class="box" ng-controller="CustomWidgetCtrl">
+				    <div class="box-header">
+					    <h3>{{ widget.name }}</h3>
+					    <div class="box-header-btns pull-right">
+						    <a title="settings" ng-click="openSettings(widget)"><i class="glyphicon glyphicon-cog"></i></a>
+						    <a title="Remove widget" ng-click="remove(widget)"><i class="glyphicon glyphicon-trash"></i></a>
+					    </div>
+				    </div>
+				    <div class="box-content">
+                        <div id="datagrid"> 
+                            @Html.Partial("_GridView")
+                        </div>
+				    </div>
+			    </div>
+		    </li>
+        </ul>
+    </div>
+</div>
+
+@*<div id="datagrid"> 
+    @Html.Partial("_GridView")
+</div>*@
+
+@section BodyScript{
+    <!-- Daterange picker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+    
+    <script src="@Url.Content("~/Content/angular/angular.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/angular/ui-bootstrap-tpls.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/angular/angular-gridster.js")" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        (function () {
+            angular.module('app', ['gridster', 'ui.bootstrap'])
+                .config(['gridsterConfig',
+        			function (gridsterConfig) {
+        			    var margin = gridsterConfig.margins[0] + gridsterConfig.margins[1] + 20 + 75 + 90;
+        			    //        			    gridsterConfig.rowHeight = (($(window).height() - margin) / 2);
+        			    gridsterConfig.rowHeight = 220;
+        			}
+        		])
+        		.controller('RootCtrl', function ($scope) {
+        		    $scope.gridsterOptions = {
+        		        margins: [5, 5],
+        		        columns: 4,
+        		        draggable: {
+        		            handle: 'h3'
+        		        }
+        		    };
+
+        		    $scope.widget1 = { name: "Visualization", col: 0, row: 0, sizeY: 2, sizeX: 4 };
+
+        		    $scope.dashboards = {
+        		        '1': {
+        		            id: '1',
+        		            name: 'Default',
+        		            widgets: [$scope.widget1]
+        		        }
+        		    };
+
+        		    $scope.widgetOpt = {
+        		        '1': {
+        		            id: '1',
+        		            name: 'Visualization'
+        		        }
+        		    };
+
+        		    $scope.clear = function () {
+        		        $scope.dashboard.widgets = [];
+        		    };
+
+        		    $scope.addWidget = function () {
+
+        		        switch ($("#cbWidget").val()) {
+        		            case '0': $scope.dashboard.widgets.push({
+        		                name: "Visualization",
+        		                sizeX: 4,
+        		                sizeY: 2
+        		            }); break;
+        		            default: $("#selected-warning").modal(); break;
+        		        }
+        		    };
+
+        		    $scope.$watch('selectedDashboardId', function (newVal, oldVal) {
+        		        if (newVal !== oldVal) {
+        		            $scope.dashboard = $scope.dashboards[newVal];
+        		        } else {
+        		            $scope.dashboard = $scope.dashboards[1];
+        		        }
+        		    });
+
+        		    // init dashboard (first display layout)
+        		    $scope.selectedDashboardId = '1';
+        		})
+
+                .controller('CustomWidgetCtrl', ['$scope', '$modal',
+	                function ($scope, $modal) {
+
+	                    $scope.remove = function (widget) {
+	                        $scope.dashboard.widgets.splice($scope.dashboard.widgets.indexOf(widget), 1);
+	                    };
+
+	                    $scope.openSettings = function (widget) {
+	                        $modal.open({
+	                            scope: $scope,
+	                            templateUrl: 'Visualization/WidgetSettings',
+	                            controller: 'WidgetSettingsCtrl',
+	                            resolve: {
+	                                widget: function () {
+	                                    return widget;
+	                                }
+	                            }
+	                        });
+	                    };
+
+	                }
+                ])
+
+                .controller('WidgetSettingsCtrl', ['$scope', '$timeout', '$rootScope', '$modalInstance', 'widget',
+	                function ($scope, $timeout, $rootScope, $modalInstance, widget) {
+	                    $scope.widget = widget;
+
+	                    $scope.form = {
+	                        name: widget.name,
+	                        sizeX: widget.sizeX,
+	                        sizeY: widget.sizeY,
+	                        col: widget.col,
+	                        row: widget.row
+	                    };
+
+	                    $scope.sizeOptions = [{
+	                        id: '1',
+	                        name: '1'
+	                    }, {
+	                        id: '2',
+	                        name: '2'
+	                    }, {
+	                        id: '3',
+	                        name: '3'
+	                    }, {
+	                        id: '4',
+	                        name: '4'
+	                    }];
+
+	                    $scope.dismiss = function () {
+	                        $modalInstance.dismiss();
+	                    };
+
+	                    $scope.remove = function () {
+	                        $scope.dashboard.widgets.splice($scope.dashboard.widgets.indexOf(widget), 1);
+	                        $modalInstance.close();
+	                    };
+
+	                    $scope.submit = function () {
+	                        angular.extend(widget, $scope.form);
+
+	                        $modalInstance.close(widget);
+	                    };
+
+	                }
+                ])
+
+                .filter('object2Array', function () {
+                    return function (input) {
+                        var out = [];
+                        for (i in input) {
+                            out.push(input[i]);
+                        }
+                        return out;
+                    }
+                });
+        })();
+    </script>
+
+    <script type="text/javascript">
+        //to minimize menu
+        $('#sidebar').addClass('menu-min');
+
+        //to translate the daterange picker, please copy the "examples/daterange-fr.js" contents here before initialization
+		$('input[name=date-range-picker]').daterangepicker({
+            format: 'DD.MM.YYYY',
+		    'applyClass': 'btn-sm btn-success',
+		    'cancelClass': 'btn-sm btn-default',
+		    locale: {
+		        applyLabel: 'Apply',
+		        cancelLabel: 'Cancel',
+		    }
+		})
+		.prev().on(ace.click_event, function () {
+			$(this).next().focus();
+		});
+
+
+        //refresh datagrid
+        setInterval(refreshGrid, 3000);
+        function refreshGrid(){
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+                data: { },
+                success: function(data){
+                    $("#datagrid").html(data);
+                }
+            });
+        }
+    </script>
+}
+
+<div id="selected-warning" class="modal fade"> 
+    <div class="modal-dialog modal-md" style="width: 300px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="close" style="opacity: 1 !important; margin-top: -7px;">
+                    <span aria-hidden="true"><img src="@Url.Content("~/Content/Bootstrap/img/Warning.png")" class="modal-icon" /></span>
+                    <span class="sr-only">Close</span>
+                </div>
+                <h4 class="modal-title" id="popup-title">Warning</div>
+
+            <div class="modal-body">
+                <div class="row" style="padding-left: 10px;">
+                    Please select widget type.
+                </div>
+                <div class="row" style="text-align: right;padding-right: 10px; padding-top: 5px;">
+                    <button type="button" class="btn btn-primary btn-xs" data-dismiss="modal" style="width: 60px;">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,1075 @@
+﻿@using Toyota.Common.Credential
+@{
+   User user = Html.Toyota().Page.User;
+}
+<script type="text/javascript"> 
+var flag;
+$(document).ready(function () {   
+    onClear();     
+        
+    $('.date-picker').datepicker({
+        autoclose: true,
+        todayHighlight: true
+    })
+    //show datepicker when clicking on the icon
+	.next().on(ace.click_event, function () {
+		$(this).prev().focus();
+	});            
+}); 
+
+$.fn.addOption = function (optText, optValue) {
+    var option = new Option(optText, optValue);
+    return this.append(option);
+};
+
+function validateMatNo()
+{
+    var val="";
+        
+            return val;
+}
+
+function toggleSearch() {
+        $("._criteria").toggle(300, "linear");
+        //toogle('moreinquiry', 'Search Criteria');
+        if ($("#toogle-search").hasClass("fa-angle-double-up")) {
+            $("#toogle-search").removeClass("fa-angle-double-up");
+            $("#toogle-search").addClass("fa-angle-double-down");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            $("#tScrollBody").height(355);
+            $("#toogle-search").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-search").removeClass("fa-angle-double-down");
+            $("#toogle-search").addClass("fa-angle-double-up");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            $("#tScrollBody").height(280);
+            $("#toogle-search").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+
+function onGetData(page) {  
+    var procusage = $("#txtProcUsage").val();
+    var val="";
+    if(procusage == '') procusage = 'x';    
+    var err=SearchValidation();
+    if(err==0)
+    {
+            $.progressbox.show("Waiting Process", "Loading Data...");
+            $.ajax({
+                    type: "POST",
+                    url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+                    data: {
+                        Display: $("#cbodisplay").val() ,
+                        Page:page,
+                        USER_NAME :  '@user.Name',
+                        ProcUsage : procusage,
+                        HeaderType : $("#txtHdrType").val(),
+			            HeaderCd : $("#txtHdrCD").val(),
+                        MatNo : $("#txtMatNo").val(),
+                        ValidDt : $("#txtValidDate").val()  ,
+                        Model : $("#txtModel").val(),
+                        Trans: $("#txtTransmission").val(),
+                        Engine :$("#txtEngine").val(),
+                        DE : $("#txtDE").val(),
+                        ProdSfx : $("#txtProdSfx").val(),
+                        Color : $("#txtColor").val()
+                    },
+                    success: function (data) {
+                    var str =data.split("+");
+                    var message=str[1];
+                    var a=str[0];
+                    if(a=="err")
+                    {
+                         $.messagebox.show(
+                        "Error",
+                        "Material <b>"+$("#txtMatNo").val()+"-"+$("#txtMatDesc").val()+"</b> was removed or inactive",
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                        ) ;
+                        ClearGrid(1); 
+                    }
+                    else
+                    {
+                        $("#divtable").html(data);
+                    }
+                        $.progressbox.hide();
+                    }        
+                });
+        
+    }
+}
+
+/*Checkbox all*/   
+function onCekAll() { 
+    if ($("#checkall").is(":checked")) {
+            $(".grid-checkbox-body").prop('checked', true);
+        } else {
+            $(".grid-checkbox-body").prop('checked', false);
+        }
+}
+
+function GetSelectedGrid() {
+    var ids = [];
+    $("input[id^=cb-]").each(function (i, a) {
+        if (a.id != null && a.id.length > 0 && a.checked) {
+            ids.push($('#' + a.id).data('pc_cd'));
+        }
+    }
+    );
+    var h = ids.length;
+    var w = ids.join();
+    return [h, w];
+}
+
+function onClear() {
+    $("#txtProcUsage").val('');
+    $("#txtHdrType").val('');
+	$("#txtHdrCD").val('');
+    $("#txtMatNo").val('');
+    $("#txtValidDate").val('');
+    $(".btnDownload").attr('disabled',true);
+      
+    $("input[id^=cb-]").each(function(i,a){
+        a.checked = false;          
+    }); 
+          
+    ClearGrid(1);    
+}
+
+function ClearGrid(page) { 
+    $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val() ,
+                Page:page,
+                USER_NAME :  '@user.Name',
+                ProcUsage : '',
+                HeaderType : '',
+			    HeaderCd : '',
+                MatNo : '',
+                ValidDt : ''           
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+            }        
+        });
+}
+
+function isNumber(evt) {
+    evt = (evt) ? evt : window.event;
+    var charCode = (evt.which) ? evt.which : evt.keyCode;   
+    if ((charCode >= 48 && charCode <= 57) || charCode == 46 || charCode == 8 || (charCode >= 35 && charCode <= 40)) {
+        return true;
+    }
+    return false;
+}
+function SearchLookup(page) { 
+        $.progressbox.show("Waiting Process", "Loading Data...");
+   $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchLookup")",
+            data: {
+                Display: 5,
+                Page:page,                
+                MatNo : $("#txtlookupMatNo").val()                        
+            },
+            datatype: "json",
+            traditional: true,
+            success: function (data) {                   
+                var items = $.parseJSON(data);
+                var item = [];
+                var i = 0;
+                var grid = ""
+                $("#bodylookup-listemp").empty();
+                $.each(items, function () {
+                    grid = grid + "<tr>";
+                    grid = grid + "<td onclick=\"javascript:onLookupSelected('" + items[i].MAT_NO + "','"+items[i].MAT_DESC+"')\" class='cursor-link' style=text-align:center>" + items[i].MAT_NO + "</td>";
+                    grid = grid + "<td onclick=\"javascript:onLookupSelected('" + items[i].MAT_NO + "','"+items[i].MAT_DESC+"')\" class='cursor-link' style=text-align:left>" + items[i].MAT_DESC + "</td>";                    
+                    grid = grid + "</tr>";
+                    i++;
+                });
+                $("#bodylookup-listemp").append(grid);  
+                $(".paging-index-selected").html(page);
+                _getPagingindex(5, page);  
+                $.progressbox.hide();           
+            }        
+        });
+}
+function onLookupSelected(value,val) {
+    if(flag==1)
+    {
+    $("#txtMatNo").val(value);
+    $("#txtMatDesc").val(val);
+    $("#gridlookupMatNo").modal('hide'); 
+                $("#bodylookup-listemp").empty();
+    }
+    else{
+    $("#txtMatNoPU").val(value);  
+    $("#txtMatNoPU").css("background-color", "#FFFFFF");
+    $("#gridlookupMatNo").modal('hide'); 
+                $("#bodylookup-listemp").empty();
+    }  
+}
+function LookupMatNo(ad) { 
+    $("#gridlookupMatNo").modal();  
+    flag=ad; 
+}
+function LookupClearMatNo() { 
+    $("#txtlookupMatNo").val('');
+}
+function CloseLookupMatNo() { 
+    $("#gridlookupMatNo").modal('hide');   
+}
+function ProcUsagePU() { 
+    $("#txtProcUsagePU").css("background-color", "#FFFFFF");
+}
+function HdrCDPU() { 
+    $("#txtHdrCDPU").css("background-color", "#FFFFFF");
+}
+function MatNoPU() { 
+    $("#txtMatNoPU").css("background-color", "#FFFFFF");
+}
+function ValidFrom() { 
+    $("#txtValidFrom").css("background-color", "#FFFFFF");
+}
+
+function onSaveData() { 
+   if ($("#txtProcUsagePU").val() == '' && $("#txtHdrTypePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtMatNoPU").val() == '' && $("#txtValidFrom").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");
+        return;
+    }
+    else if ($("#txtProcUsagePU").val() == '' && $("#txtHdrTypePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtMatNoPU").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");      
+        return;
+    }
+    else if ($("#txtProcUsagePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtMatNoPU").val() == '' && $("#txtValidFrom").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");       
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");      
+        return;
+    }
+    else if ($("#txtHdrTypePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtMatNoPU").val() == '' && $("#txtValidFrom").val() == ''){       
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");
+        return;
+    }
+       
+    else if ($("#txtProcUsagePU").val() == '' && $("#txtHdrTypePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '')){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");           
+        return;
+    }
+    else if ($("#txtProcUsagePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtMatNoPU").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");           
+        return;
+    }
+    else if ($("#txtProcUsagePU").val() == '' && $("#txtMatNoPU").val() == '' && $("#txtValidFrom").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");           
+        return;
+    }
+    else if ($("#txtHdrTypePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtMatNoPU").val() == ''){
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");           
+        return;
+    }
+    else if ($("#txtHdrTypePU").val() == '' && $("#txtMatNoPU").val() == '' && $("#txtValidFrom").val() == ''){
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");           
+        return;
+    }
+    else if (($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtMatNoPU").val() == '' && $("#txtValidFrom").val() == ''){
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");           
+        return;
+    }    
+    else if ($("#txtProcUsagePU").val() == '' && $("#txtHdrTypePU").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");                
+        return;
+    }
+    else if ($("#txtProcUsagePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '')){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");                
+        return;
+    }
+    else if ($("#txtProcUsagePU").val() == '' && $("#txtMatNoPU").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");                
+        return;
+    }
+    else if ($("#txtProcUsagePU").val() == '' && $("#txtValidFrom").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");                
+        return;
+    }
+    else if ($("#txtHdrTypePU").val() == '' && ($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '')){
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");                
+        return;
+    }
+    else if ($("#txtHdrTypePU").val() == '' && $("#txtMatNoPU").val() == ''){
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");                
+        return;
+    }
+    else if ($("#txtHdrTypePU").val() == '' && $("#txtValidFrom").val() == ''){
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");                
+        return;
+    }
+    else if (($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtMatNoPU").val() == ''){
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");                
+        return;
+    }
+    else if (($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '') && $("#txtValidFrom").val() == ''){
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");                
+        return;
+    }
+    else if ($("#txtMatNoPU").val() == '' && $("#txtValidFrom").val() == ''){
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");
+        $("#txtValidFrom").css("background-color", "#F2BCD5");                
+        return;
+    }    
+    else if ($("#txtProcUsagePU").val() == ''){
+        $("#txtProcUsagePU").css("background-color", "#F2BCD5");                      
+        return;
+    }
+    else if ($("#txtHdrTypePU").val() == ''){
+        $("#txtHdrTypePU").css("background-color", "#F2BCD5");                      
+        return;
+    }
+    else if (($("#txtHdrCDPU").val() == null || $("#txtHdrCDPU").val() == '')){
+        $("#txtHdrCDPU").css("background-color", "#F2BCD5");                      
+        return;
+    }
+    else if ($("#txtMatNoPU").val() == ''){
+        $("#txtMatNoPU").css("background-color", "#F2BCD5");                      
+        return;
+    }
+    else if ($("#txtValidFrom").val() == ''){
+        $("#txtValidFrom").css("background-color", "#F2BCD5");                      
+        return;
+    }   
+    
+
+   if($("#txtValidTo").val() <= $("#txtValidFrom").val()) {
+        //$("#confirm-save").modal();
+        //$("#ConfirmModal").html('Valid From must be earlier than Valid To');
+        $.messagebox.show(
+            "Error",
+            "Valid From must be earlier than Valid To",
+            "ERR",
+            "SINGLE",
+            "",
+            ""
+        ) 
+   }  
+   else{
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
+            data: {
+                flag : $("#txtEdit").val(),
+                USER_NAME :  '@user.Name',
+                PROC_USAGE_CD : $("#txtProcUsagePU").val(),
+                GENTANI_HEADER_TYPE : $("#txtHdrTypePU").val(),
+			    GENTANI_HEADER_CD : $("#txtHdrCDPU").val(),
+                MAT_NO : $("#txtMatNoPU").val(),
+                USAGE_QTY : $("#txtUsageQty").val(),
+                UOM : $("#txtUOM").val(),
+                PLANT_CD : $("#txtPlantCd").val(),
+                STORAGE_LOCATION : $("#txtStorage").val(),
+                VALID_DT_FR : $("#txtValidFrom").val(),
+                VALID_DT_TO : $("#txtValidTo").val()                                
+            },                
+            success: function (data) { 
+                var result = data.message.split('|');
+                if(result[0] == 'True') {
+                     //$("#info-save").modal();
+                     //$("#infoSave").html(data.message);
+                     $.messagebox.show(
+                        "Info",
+                        result[1],
+                        "SUC",
+                        "SINGLE",
+                        "OkInfoSave()",
+                        ""
+                    )   
+                     onGetData(1);
+                }              
+                else {
+                    //$("#confirm-save").modal();
+                    //$("#ConfirmModal").html(data.message); 
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )                     
+                }                            
+            }
+        });  
+   }    
+}
+
+function OkWarningSave() {
+    $("#confirm-save").modal('hide');
+}
+
+function OkInfoSave() {
+    //$("#info-save").modal('hide');
+    $("#basicModal").modal('hide');
+}
+function SearchValidation() {
+        var error = 0;
+
+        if ($("#txtProcUsage").val() == "") {
+            $("#txtProcUsage").css("background-color", "#F2BCD5");
+            error++;
+        }
+        if ($("#txtMatNo").val() == "") {
+            $("#txtMatNo").css("background-color", "#F2BCD5");
+            error++;
+        }
+        
+
+        return error;
+    }
+function onAddData() { 
+    $.ajax({
+        type: "post",
+        url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+        data: {
+            flag: '0'                                
+        },                
+        success: function (data) {  
+             $("#basicModal").html(data);
+             $("#myModalLabel").html('<h4>Non Component Part List (Add)</h4>');    
+             $("#basicModal").modal();                            
+        }
+    });   
+}
+
+function onEditData() {      
+    if ($(".grid-checkbox-body:checked").length == 0){
+        //$("#selected-0-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select at Least One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else if ($(".grid-checkbox-body:checked").length > 1){
+        //$("#selected-more-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select only One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else {
+        var value = GetSelectedGrid();
+        var key = value[Object.getOwnPropertyNames(value)[1]];       
+        var col;
+        var mat;
+        var PROCUSAGE = "";
+        var HEADERTYPE = "";
+        var HEADERCODE = "";
+        var MATNO = "";
+        var VALIDFOR = "";
+        var flag;
+              
+        col = key.split(';');
+        PROCUSAGE = col[0];        
+        HEADERTYPE = col[1];       
+        HEADERCODE = col[2];      
+        MATNO = col[3];      
+        VALIDFOR = col[4];  
+        MODEL=col[5];   
+        mat=MATNO;  
+        if(MATNO=="")
+        {flag='2';}else{flag='1';}   
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+            data: {
+                flag: flag                                 
+            },                
+            success: function (data) {  
+                              
+                    if(MATNO=="")
+                    {
+                            $("#basicModal").html(data);   
+                            $("#txtEdit").val(0);
+                            $("#txtProcUsagePU").val(PROCUSAGE);
+                            $("#txtHdrTypePU").val(HEADERTYPE);
+	                        //$("#txtHdrCDPU").val(data.GENTANI_HEADER_CD); 
+                            $('#txtHdrCDPU').addOption(HEADERCODE , HEADERCODE);                           
+                            $("#txtMatNoPU").val();
+                            $("#txtUsageQty").val(1);                           
+                            //$('#txtStorage').addOption(data.STORAGE_LOCATION , data.SLOC_NAME); 
+                            GetListStorageLoc_Copy(data.STORAGE_LOCATION);
+                            $("#myModalLabel").html('<h4>Non Component Part List (Edit)</h4>');
+                            $("#basicModal").modal();  
+                    }
+                    else{   
+                    
+                    $("#basicModal").html(data);   
+                    $("#myModalLabel").html('<h4>Non Component Part List (Edit)</h4>');
+                    $("#basicModal").modal(); 
+                    $.ajax({
+                        type: "post",
+                        url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+                        data: {
+                            ProcUsage : PROCUSAGE,
+                            HeaderType : HEADERTYPE,
+			                HeaderCd : HEADERCODE,
+                            MatNo : MATNO,
+                            Model : MODEL,
+                            ValidDt : VALIDFOR                                
+                        },                
+                        success: function (data) {  
+                            $("#txtProcUsagePU").val(data.PROC_USAGE_CD);
+                            $("#txtHdrTypePU").val(data.GENTANI_HEADER_TYPE);
+	                        //$("#txtHdrCDPU").val(data.GENTANI_HEADER_CD); 
+                            $('#txtHdrCDPU').addOption(data.GENTANI_HEADER_CD , data.GENTANI_HEADER_CD);                           
+                            $("#txtMatNoPU").val(data.MAT_NO);
+                            $("#txtUsageQty").val(data.USAGE_QTY);
+                            $("#txtUOM").val(data.UOM)
+	                        $("#txtPlantCd").val(data.PLANT_CD);                            
+                            //$('#txtStorage').addOption(data.STORAGE_LOCATION , data.SLOC_NAME); 
+                            $("#txtValidFrom").val(data.VALID_DT_FR);
+                            $("#txtValidTo").val(data.VALID_DT_TO);
+                            
+                            GetListStorageLoc_Copy(data.STORAGE_LOCATION);                                                            
+                        }
+                    });   
+                    //                          
+            }
+            }
+        });  
+        
+    }        
+}
+
+function onCopyData() {      
+    if ($(".grid-checkbox-body:checked").length == 0){
+        //$("#selected-0-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select at Least One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else if ($(".grid-checkbox-body:checked").length > 1){
+        //$("#selected-more-confirm").modal();
+        $.messagebox.show(
+            "Warning",
+            "Please Select only One Record to be edit",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )
+    }
+    else {
+        var value = GetSelectedGrid();
+        var key = value[Object.getOwnPropertyNames(value)[1]];       
+        var col;
+
+        var PROCUSAGE = "";
+        var HEADERTYPE = "";
+        var HEADERCODE = "";
+        var MATNO = "";
+        var VALIDFOR = "";
+              
+        col = key.split(';');
+        PROCUSAGE = col[0];        
+        HEADERTYPE = col[1];       
+        HEADERCODE = col[2];      
+        MATNO = col[3];      
+        VALIDFOR = col[4];          
+          
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagAddEditCopy")",
+            data: {
+                flag: '0'                                
+            },                
+            success: function (data) {                     
+                    $("#basicModal").html(data);   
+                    $("#myModalLabel").html('<h4>Non Component Part List (Copy)</h4>');
+                    $("#basicModal").modal(); 
+                    
+                    $.ajax({
+                        type: "post",
+                        url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+                        data: {
+                            ProcUsage : PROCUSAGE,
+                            HeaderType : HEADERTYPE,
+			                HeaderCd : HEADERCODE,
+                            MatNo : MATNO,
+                            ValidDt : VALIDFOR                                
+                        },                
+                        success: function (data) {                             
+                            $("#txtProcUsagePU").val(data.PROC_USAGE_CD);
+                            $("#txtHdrTypePU").val(data.GENTANI_HEADER_TYPE);
+	                        //$("#txtHdrCDPU").val(data.GENTANI_HEADER_CD);                            
+                            $("#txtMatNoPU").val(data.MAT_NO);
+                            $("#txtUsageQty").val(data.USAGE_QTY);
+	                        $("#txtPlantCd").val(data.PLANT_CD);
+                            //$("#txtStorage").val(data.STORAGE_LOCATION);
+                            $("#txtValidFrom").val(data.VALID_DT_FR);
+                            $("#txtValidTo").val(data.VALID_DT_TO);
+                            
+                            GetListHeaderCode_Copy(data.GENTANI_HEADER_CD);
+                            GetListStorageLoc_Copy(data.STORAGE_LOCATION);                                 
+                        }
+                    });   
+                    //                          
+            }
+        });  
+    }        
+}
+
+function onDeleteData() {
+    if ($(".grid-checkbox-body:checked").length == 0)
+        //$("#selected-0-confirm").modal(); 
+        $.messagebox.show(
+            "Warning",
+            "Please Select at Least One Record to be deleted",
+            "WRN",
+            "SINGLE",
+            "",
+            ""
+        )        
+    else 
+        //$("#delete-confirm").modal(); 
+        $.messagebox.show(
+            "Confirmation",
+            "Are You Sure You Want to Delete this Item ?",
+            "INF",
+            "CONFIRM",
+            "onYesDelete()",
+            ""
+        )      
+}
+
+function onYesDelete() {
+    var value = GetSelectedGrid();
+    var key = value[Object.getOwnPropertyNames(value)[1]];
+    var koma;
+    var field;
+    var col;
+
+    var PROCUSAGE = "";
+    var HEADERTYPE = "";
+    var HEADERCODE = "";
+    var MATNO = "";
+    var VALIDFOR = "";
+        
+    for(var i = 0; i < $(".grid-checkbox-body:checked").length; i++)
+    {
+        koma = key.split(',');
+        field = koma[i];
+        col = field.split(';');
+        PROCUSAGE += col[0];
+        PROCUSAGE += ';';
+        HEADERTYPE += col[1];
+        HEADERTYPE += ';';
+        HEADERCODE += col[2];
+        HEADERCODE += ';';
+        MATNO += col[3];
+        MATNO += ';';
+        VALIDFOR += col[4];
+        VALIDFOR += ';';
+    } 
+    PROCUSAGE = PROCUSAGE.substring(0,PROCUSAGE.length - 1);
+    HEADERTYPE = HEADERTYPE.substring(0,HEADERTYPE.length - 1);
+    HEADERCODE = HEADERCODE.substring(0,HEADERCODE.length - 1);
+    MATNO = MATNO.substring(0,MATNO.length - 1);
+    VALIDFOR = VALIDFOR.substring(0,VALIDFOR.length - 1); 
+
+    $.ajax({
+        type: "POST",
+        url: "@Html.Toyota().Page.GetActionUrl("DeleteData")",
+        data: {  
+            Key : key,          
+            ProcUsage : PROCUSAGE,
+            HeaderType : HEADERTYPE,
+			HeaderCd : HEADERCODE,
+            MatNo : MATNO,
+            ValidDt : VALIDFOR          
+        },
+        success: function (data) {
+            //$("#selected-info").modal();
+            //$("#infoModal").html(data); 
+             $.messagebox.show(
+                "Info",
+                data,
+                "SUC",
+                "SINGLE",
+                "",
+                ""
+            ) 
+            onGetData(1);
+        }        
+     });
+}
+
+function OnDownloadTemplate() {     
+      $.ajax({
+        type: "POST",
+        url: "@Html.Toyota().Page.GetActionUrl("CekTemplate")",        
+        success: function (data) {
+         if(data == 'False'){
+            //$("#selected-info").modal();
+            //$("#infoModal").html('Template not found');
+             $.messagebox.show(
+                "Error",
+                "Template Not Found",
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            ) 
+         }
+         else{
+             $.fileDownload("MRPNonComponent/DownloadTemplate/"); 
+         }
+            
+        }        
+     });
+} 
+
+function onDownloadData() {
+    var procusage = $("#txtProcUsage").val();
+    if(procusage == '') procusage = 'x';   
+    
+    $.ajax({
+        type: "POST",
+        url: '@Url.Content("MRPNonComponent/ValidateDownloadData/")',
+        data: { 
+                ProcUsage : procusage,
+                HeaderType : $("#txtHdrType").val(),
+			    HeaderCd : $("#txtHdrCD").val(),
+                MatNo : $("#txtMatNo").val(),
+                ValidDt : $("#txtValidDate").val()                            
+        },
+        success: function (data) {
+            if(data == 0) {
+                 $("#selected-info").modal();
+                 $("#infoModal").html('No data found. Disable for download'); 
+            } 
+            else{
+                var procusages = $("#txtProcUsage").val();
+                if(procusages == '') procusages = 'x'; 
+
+                var param = '?ProcUsage=' +  procusages;       
+                param += '&HeaderType=' + $("#txtHdrType").val();
+                param += '&HeaderCd=' + $("#txtHdrCD").val();
+                param += '&MatNo=' + $("#txtMatNo").val();
+                param += '&ValidDt=' + $("#txtValidDate").val();  
+
+                var link = '@Url.Content("MRPNonComponent/DownloadData/")' + param;        
+                window.location = link; 
+            }                      
+        }        
+     });      
+}    
+
+function GetListHeaderCode() {
+    $("#txtHdrTypePU").css("background-color", "#FFFFFF");
+    $("#txtHdrCDPU").css("background-color", "#FFFFFF");
+    $.ajax({
+        type: "POST",
+        url: "@Url.Content("~/MRPNonComponent/GetListHeaderCode")",
+        data: { HeaderType : $("#txtHdrTypePU").val() != "" ? $("#txtHdrTypePU").val() : 0 },
+        success: function (resultMessage) {
+            $('#txtHdrCDPU').empty();
+            if (resultMessage != "") {
+                var rows = resultMessage.split('|');
+                var cols = "";
+                //$('#txtHdrCDPU').addOption("", "");
+                for (i = 0; i < rows.length; i++) {
+                    if (rows[i] != '') 
+                    {
+                        cols = rows[i].split(';');
+                        $('#txtHdrCDPU').addOption(cols[0] , cols[0]);
+                    }
+                }                
+            }
+            else {
+                $('#txtHdrCDPU').addOption("", "");
+            }                              
+        }
+    });
+}
+
+function GetListHeaderCode_Copy(GENTANI_HEADER_CD) {
+    $("#txtHdrTypePU").css("background-color", "#FFFFFF");
+    $.ajax({
+        type: "POST",
+        url: "@Url.Content("~/MRPNonComponent/GetListHeaderCode")",
+        data: { HeaderType : $("#txtHdrTypePU").val() != "" ? $("#txtHdrTypePU").val() : 0 },
+        success: function (resultMessage) {
+            $('#txtHdrCDPU').empty();
+            if (resultMessage != "") {
+                var rows = resultMessage.split('|');
+                var cols = "";               
+                for (i = 0; i < rows.length; i++) {
+                    if (rows[i] != '') 
+                    {
+                        cols = rows[i].split(';');
+                        $('#txtHdrCDPU').addOption(cols[0] , cols[0]);
+                    }
+                }               
+                $("#txtHdrCDPU").val(GENTANI_HEADER_CD);
+            }
+            else {
+                $('#txtHdrCDPU').addOption("", "");
+            }                              
+        }
+    });
+}
+
+function GetListStorageLoc() {   
+    $.ajax({
+        type: "POST",
+        url: "@Url.Content("~/MRPNonComponent/GetListStorageLoc")",
+        data: { PlantCd : $("#txtPlantCd").val() != "" ? $("#txtPlantCd").val() : 0 },
+        success: function (resultMessage) {
+            $('#txtStorage').empty();
+            if (resultMessage != "") {
+                var rows = resultMessage.split('|');
+                var cols = "";
+                //$('#txtStorage').addOption("", "");
+                for (i = 0; i < rows.length; i++) {
+                    if (rows[i] != '') 
+                    {
+                        cols = rows[i].split(';');  //TEXT                  , Value
+                        $('#txtStorage').addOption(cols[0] + " - " + cols[1], cols[0]);
+                    }
+                }                
+            }
+            else {
+                $('#txtStorage').addOption("", "");
+            }                              
+        }
+    });
+}
+
+function GetListStorageLoc_Copy(STORAGE_LOCATION) {   
+    $.ajax({
+        type: "POST",
+        url: "@Url.Content("~/MRPNonComponent/GetListStorageLoc")",
+        data: { PlantCd : $("#txtPlantCd").val() != "" ? $("#txtPlantCd").val() : 0 },
+        success: function (resultMessage) {
+            $('#txtStorage').empty();
+            if (resultMessage != "") {
+                var rows = resultMessage.split('|');
+                var cols = "";
+                //$('#txtStorage').addOption("", "");
+                for (i = 0; i < rows.length; i++) {
+                    if (rows[i] != '') 
+                    {
+                        cols = rows[i].split(';');  //TEXT                  , Value
+                        $('#txtStorage').addOption(cols[0] + " - " + cols[1], cols[0]);
+                    }
+                } 
+                $("#txtStorage").val(STORAGE_LOCATION);               
+            }
+            else {
+                $('#txtStorage').addOption("", "");
+            }                              
+        }
+    });
+}
+
+//paging popup
+        var dataName = 'listEmployee'
+
+        function _getPagingindex(_maxRowperPage, page) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Content("~/MRPNonComponent/LookupPaging")",
+            data: {
+                pageSize: _maxRowperPage,
+                MatNo: $("#txtlookupMatNo").val()
+            },
+            datatype: "json",
+            traditional: true,
+            success: function (data) {
+                var items = JSON.parse(data);
+                var i = 0;
+                var paging = "";
+                var _function = "";
+                var _id = "";
+                $(".lookupremove").remove();
+                _function = "SearchLookup";
+                _id = "#mat-paging";                
+                
+                var pageIndex = page;
+                var pageSize = _maxRowperPage;
+                var pageCount = items.IndexList.length;
+                var countData = items.CountData;
+
+                var pageRange = 1;
+                var firstPageRange = (pageRange * 2) + 1;
+                var prevPageRange = pageIndex - pageRange;
+                var nextPageRange = pageIndex + pageRange;
+                var lastPageRange = pageCount - (pageRange * 2);
+
+                var index = 0;
+                var firstIndex = 0;
+                var lastIndex = 0;
+
+                paging = paging + "<li class='lookupremove'><a  id='lnk-page-" + dataName + "-first' href='#' onclick='javascript:" + _function + "(" +
+                         1 + ")'>First</a></li>";
+                paging = paging + "<li class='lookupremove'><a id='lnk-page-" + dataName + "-prev' href='#' onclick='javascript:" + _function + "(" +
+                         (pageIndex - 1) + ")'>Prev</a></li>";
+
+                //// First index logic.
+                // Start pagination logic.
+                if (prevPageRange <= 1)
+                {
+                    firstIndex = 1;
+                }
+                // End pagination logic.
+                else if (prevPageRange >= lastPageRange && prevPageRange <= pageCount)
+                {
+                    firstIndex = lastPageRange;
+                }
+                // Middle pagination logic.
+                else
+                {
+                    firstIndex = prevPageRange;
+                }
+
+                //// Last index logic.
+                // Start pagination logic.
+                if (nextPageRange <= firstPageRange)
+                {
+                    lastIndex = firstPageRange;
+                }
+                // End pagination logic.
+                else if (nextPageRange >= pageCount)
+                {
+                    lastIndex = pageCount;
+                }
+                // Middle pagination logic.
+                else
+                {
+                    lastIndex = nextPageRange;
+                }
+                var col="";
+                index = (firstIndex <= 0) ? 1 : firstIndex;
+                while (index <= lastIndex && index <= pageCount)
+                {
+                col="";
+                    if(index==pageIndex)
+                    {
+                        col="background-color:#29A6FF;color:white;";
+                    }
+                    paging = paging + "<li class='lookupremove'><a href='#' style='"+col+"' onclick='javascript:" + _function + "(" +
+                             index + ")'>" + index + "</a></li>";
+                    index++;
+                }
+
+                paging = paging + "<li class='lookupremove'><a id='lnk-page-" + dataName + "-next' href='#' onclick='javascript:" + _function + "(" +
+                         (pageIndex + 1) + ")'>Next</a></li>";
+                paging = paging + "<li class='lookupremove'><a id='lnk-page-" + dataName + "-last' href='#' onclick='javascript:" + _function + "(" +
+                         pageCount + ")'>Last</a></li>";
+
+                // NOTE: converting razor var to js var to avoid js intellisense's "syntax error"
+                if (pageIndex === 1)
+                {
+                    $("#lnk-page-" + dataName + "-first").addClass("pagination-disabled");
+                    $("#lnk-page-" + dataName + "-prev").addClass("pagination-disabled");
+                }
+                if (pageIndex >= pageCount)
+                {
+                    $("#lnk-page-" + dataName + "-next").addClass("pagination-disabled");
+                    $("#lnk-page-" + dataName + "-last").addClass("pagination-disabled");
+                }
+                if (pageIndex === 1 && pageIndex === pageCount)
+                {
+                    $("[id^=lnk-page-" + dataName + "]").addClass("pagination-disabled");
+                }
+                $(_id).append(paging);
+                $(".page-no").html($(".paging-index-selected").html());
+                $(".page-total").html(items.IndexList.length);
+                $(".total-data").html(countData);
+                $(".paging-label").show();
+            },
+            error: function (data) {
+            }
+        });
+    }
+
+    function validateFloatKeyPress(el, evt) {
+        var charCode = (evt.which) ? evt.which : event.keyCode;
+        var number = el.value.split('.');
+        if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57)) {
+            return false;
+        }
+        //just one dot
+        if(number.length>1 && charCode == 46){
+             return false;
+        }
+        //get the carat position
+        var caratPos = getSelectionStart(el);
+        var dotPos = el.value.indexOf(".");
+        return true;
+    }
+
+
+    function getSelectionStart(o) {
+	    if (o.createTextRange) {
+		    var r = document.selection.createRange().duplicate()
+		    r.moveEnd('character', o.value.length)
+		    if (r.text == '') return o.value.length
+		    return o.value.lastIndexOf(r.text)
+	    } else return o.selectionStart
+    }
+</script>

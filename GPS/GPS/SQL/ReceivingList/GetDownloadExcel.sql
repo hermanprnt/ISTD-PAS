@@ -1,0 +1,1 @@
+EXEC sp_ReceivingList_GetListDownloadExcel @ReceivingNo, @ReceivingDateFrom, @ReceivingDateTo, @Vendor, @PONo, @Status,@User, @HeaderText, @SAPDocNo

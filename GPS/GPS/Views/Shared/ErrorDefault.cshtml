@@ -1,0 +1,55 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+<style>
+    .error-container{
+        text-align: center;
+    }
+
+    .list-sfs-holder{
+        margin-top: 20px;
+    }
+
+    .like-textarea {
+        -moz-appearance: textfield-multiline;
+        -webkit-appearance: textarea;
+        border: 1px solid gray;
+        font: medium -moz-fixed;
+        font: -webkit-small-control;
+        height: 200px;
+        color: #751f1f;
+        resize: both;
+        background-color: ghostwhite;
+        text-align: left;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        padding: 2px;
+        width: 400px;
+        position:fixed;
+        left: calc(50% - 200px);
+    }
+
+    .error-header{
+        font-weight: bold;
+        font-size: 14px;
+        color: #4a1703;
+        margin-top: -2px;
+    }
+</style>
+
+<div class="list-sfs-holder">
+    <h1 align="center"style="font-size: 16px;">
+        We are Sorry for the inconvenience, an error occurred while processing your request.
+    </h1>
+
+
+    <div align="center">
+        <img src="@Url.Content("~/Content/img/under_construction.gif")" align="center" style="margin-top:0px; margin-right:30px;width: 200px;" />
+    </div>
+
+
+    <h1 align="center" style="font-size: 18px;">
+        Please Contact PAS Administrator.
+    </h1>
+    <div class="error-container">
+        <div class="form-control like-textarea"><p class="error-header">@Model.Exception.Message : @Model.Exception.InnerException</p>&#13;&#10; @Model.Exception.StackTrace.ToString()</div>
+    </div>
+</div>

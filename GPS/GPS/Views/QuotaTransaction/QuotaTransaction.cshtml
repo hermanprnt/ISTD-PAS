@@ -1,0 +1,85 @@
+﻿@using GPS.Models.Master
+@using GPS.Controllers.Master
+@model GPS.Models.Master.Quota
+@{
+    ViewBag.Title = "QuotaTransaction";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    List<QuotaDetail> ListDivision = (List<QuotaDetail>)ViewData["ListDivision"]; 
+}
+
+@Html.Partial("_QuotaTransactionScript")
+<form role="form" class="form-horizontal" id="searchForm" enctype="multipart/form-data" action="javascript: onGetData(1)">
+    <div class="row">
+        <div class="col-xs-12 col-sm-3 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-3 col-md-5 control-label text-muted">
+                    Division</label>
+                <div class="col-xs-8 col-sm-9 col-md-7">
+                   @Html.DropDownListFor(
+                                m => m.DIVISION_ID, 
+                                DivisionController.GetDivisionList(), 
+                                new {
+                                    id = "txtDivision", 
+                                    @class = "cursor-1 custom-combo",
+                                    @style = "width:100%"
+                                })     
+                </div>
+            </div>   
+        </div>
+        <div class="col-xs-12 col-sm-3 col-md-3">
+             <div class="form-group form-group-xs">
+                 <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                    WBS No</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                   <input type="text" id="txtWBS" class="form-control" style="width:100%"/>              
+                </div>
+            </div>
+        </div> 
+        <div class="col-xs-12 col-sm-3 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                    Order Type</label>
+               <div class="col-xs-8 col-sm-9 col-md-8">
+                    <input type="text" id="txtType"  class="form-control " style="width:100%" />                
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-3 col-md-3">
+             <div class="form-group form-group-xs">
+                 <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                    Coordinator</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                   <input type="text" id="txtOrdCoord" class="form-control" style="width:100%"/>               
+                </div>
+            </div>
+        </div> 
+    </div>
+    <div class="row">
+        <div class="col-xs-6" style="margin-top: 5px;"></div>
+        <div class="col-xs-6 text-right">
+            <div class="form-group-xs">        
+                 <button type="submit" id="btnSearch" class="btn btn-primary btn-xs btndisable">
+                    Search</button>        
+                <button type="button" id="btnClear" class="btn btn-default btn-xs btndisable" onclick="onClear()">
+                    Clear</button>
+            </div>
+        </div>       
+    </div>
+</form>
+<div class="text-center" style="margin-bottom: 3px;">
+    <hr id="hrsrc" style="margin: 0; padding: 0;" />
+</div>    
+<div>
+    <div id="detailgrid">
+        @Html.Partial("_QuotaTransactionMainGrid")
+    </div>   
+</div>
+ 
+@Html.Partial("_TolerancePopUp")
+@Html.Partial("_AdditionalPopUp")
+<div id="detailgridConfirm">
+    @Html.Partial("_AdditionalConfirmPopUp")
+</div>  
+
+
+        

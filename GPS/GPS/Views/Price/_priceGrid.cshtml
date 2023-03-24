@@ -1,0 +1,220 @@
+﻿@using System.Linq
+@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Models.Master
+@model GPS.ViewModels.GenericViewModel<MaterialPrice>
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <div style="border: 1pt solid #ccc;">
+        <div id="tScrollHead" style="width: 98.65%; overflow: hidden;">
+            <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 2145px;">
+                <thead>
+                    <tr>
+                        <th style="width:40px;" rowspan="2">
+                            <input type="checkbox" id="chkall-price"/>
+                        </th>
+                        <th style="width:100px;" class="text-center" rowspan="2">Material</th>
+                        <th style="width:235px;" class="text-center" colspan="2">Vendor</th>
+                        <th style="width:80px;" class="text-center" rowspan="2">Source Type</th>
+                        <th style="width:80px;" class="text-center" rowspan="2">Prod. Purpose</th>
+                        <th style="width:80px;" class="text-center" rowspan="2">Part Color SFX</th>
+                        <th style="width:100px;" class="text-center" rowspan="2">Packing Type</th>
+                        <th style="width:140px;" class="text-center" colspan="2">Valid</th>
+                        <th style="width:80px;" class="text-center" rowspan="2">Price Status</th>
+                        <th style="width:100px;" class="text-center" rowspan="2">Price Type</th>
+                        <th style="width:120px;" class="text-center" rowspan="2">Amount</th>
+                        <th style="width:200px;" class="text-center col-hidden hidden" rowspan="2">PC Number</th>
+                        <th style="width:150px;" class="text-center col-hidden hidden" rowspan="2">Currency</th>
+                        <th style="width:100px;" class="text-center col-hidden hidden" rowspan="2">Warp Ref No.</th>
+                        <th style="width:100px;" class="text-center col-hidden hidden" rowspan="2">Warp Buyer</th>
+                        <th style="width:220px;" class="text-center col-hidden hidden" colspan="2">Created</th>
+                        <th style="width:220px;" class="text-center col-hidden hidden" colspan="2">Changed</th>
+                    </tr>
+                    <tr>
+                        <th style="width:70px" class="text-center">Code</th>
+                        <th style="width:165px" class="text-center">Name</th>
+                        <th style="width:70px" class="text-center">From</th>
+                        <th style="width:70px" class="text-center">To</th>
+                        <th style="width:150px" class="col-hidden hidden">By</th>
+                        <th style="width:70px" class="text-center col-hidden hidden">Date</th>
+                        <th style="width:150px" class="col-hidden hidden">By</th>
+                        <th style="width:70px" class="text-center col-hidden hidden">Date</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div id="tScrollBody" style="overflow: scroll; height: 270px;">
+            <table id="tblScroll" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 2145px;">
+                <tbody>
+                @if (Model.DataList.Any())
+                {
+                    foreach (MaterialPrice item in Model.DataList)
+                    {
+                        <tr>
+                            <td style="width:40px" class="text-center">
+                                <input type="checkbox" id="chk-price-@item.DataNo" data-matno="@item.MaterialNo" data-vendor="@item.VendorCode"
+                                    data-warpbuyer="@item.WarpBuyerCode" data-sourcetype="@item.SourceType" data-prodpurpose="@item.ProdPurpose"
+                                    data-partcolor="@item.PartColorSfx" data-packingtype="@item.PackingType" data-validfrom="@item.ValidDateFrom.ToStandardFormat()" />
+                            </td>
+                            <td style="width:100px" class="text-center">@item.MaterialNo</td>
+                            <td style="width:70px" class="text-center">@item.VendorCode</td>
+                            <td style="width:165px" class="text-left">@item.VendorName</td>
+                            <td style="width:80px" class="text-center">@item.SourceType</td>
+                            <td style="width:80px" class="text-center">@item.ProdPurpose</td>
+                            <td style="width:80px" class="text-center">@item.PartColorSfx</td>
+                            <td style="width:100px" class="text-center">@item.PackingType</td>
+                            <td style="width:70px" class="text-center">@item.ValidDateFrom.ToStandardFormat()</td>
+                            <td style="width:70px" class="text-center">@item.ValidDateTo.ToStandardFormat()</td>
+                            <td style="width:80px" class="text-center">@item.PriceStatus</td>
+                            <td style="width:100px" class="text-center">@*@item.PriceType*@</td>
+                            <td style="width:120px" class="text-right">@item.Amount</td>
+                            <td style="width:200px" class="text-center col-hidden hidden">@item.PCNo</td>
+                            <td style="width:150px" class="text-center col-hidden hidden">@item.CurrCode</td>
+                            <td style="width:100px" class="text-center col-hidden hidden">@item.WarpReffNo</td>
+                            <td style="width:100px" class="text-center col-hidden hidden">@item.WarpBuyerCode</td>
+                            <td style="width:150px" class="text-center col-hidden hidden">@item.CreatedBy</td>
+                            <td style="width:70px" class="text-center col-hidden hidden">@item.CreatedDate.ToStandardFormat()</td>
+                            <td style="width:150px" class="text-center col-hidden hidden">@item.ChangedBy</td>
+                            <td style="width:70px" class="text-center col-hidden hidden">@item.ChangedDate.ToStandardFormat()</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="21" class="text-center">@CommonDisplayMessage.NoData</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        @*<div>
+            <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                <tfoot>
+                    <tr>
+                        <td colspan="13">
+                            @Html.Partial(CommonPage.GridPagination, Model.GridPaging)
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>*@
+    </div>
+</div>
+
+<script>
+    $("#tScrollBody").scroll(function () {
+        $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+    });
+</script>
+
+@*@using GPS.Constants
+@using GPS.Models.Master
+@{
+    List<Price> PriceList = (List<Price>)ViewData["Price"] != null ?
+                             (List<Price>)ViewData["Price"] : new List<Price>();
+    int Total = ViewData["RowData"] == null ? 0 : Convert.ToInt32(ViewData["RowData"]);
+    int First = ViewData["page"] == null ? 0 : Convert.ToInt32(ViewData["page"]);
+    }
+
+<div class="row">
+    <div class="col-xs-12 col-sm-12 text-right">
+        <div class="form-group form-group-xs">
+            <a href="#" class="btn btn-danger btndelete" onclick="javascript:Delete()">Delete</a>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <div class="grid-overflow" style="overflow-x:scroll">
+    <table id="mainTable" class="table table-striped table-bordered" width="100%">
+        <thead>
+            <tr>
+                <th class="text-center" style="width:50px" rowspan="2"></th>
+                <th class="text-center" style="width:100px" rowspan="2">Material</th>
+                <th class="text-center" style="width:350px" colspan="2">Vendor</th>
+                <th class="text-center" style="width:80px" rowspan="2">Source Type</th>
+                <th class="text-center" style="width:80px" rowspan="2">Prod. Purpose</th>
+                <th class="text-center" style="width:80px" rowspan="2">Part Color SFX</th>
+                <th class="text-center" style="width:100px" rowspan="2">Packing Type</th>
+                <th class="text-center" style="width:200px" colspan="2">Valid</th>
+                <th class="text-center" style="width:80px" rowspan="2">Price Status</th>
+                <th class="text-center" style="width:100px" rowspan="2">Price Type</th>
+                <th class="text-center" style="width:120px" rowspan="2">Amount</th>
+                <th class="initial-hide text-center" style="width:200px" rowspan="2">PC Number</th>
+                <th class="initial-hide text-center" style="width:150px" rowspan="2">Currency</th>
+                <th class="initial-hide text-center" style="width:100px" rowspan="2">Warp Ref No.</th>
+                <th class="initial-hide text-center" style="width:100px" rowspan="2">Warp Buyer</th>
+                <th class="initial-hide  text-center" style="width:200px" colspan="2">Created</th>
+                <th class="initial-hide  text-center" style="width:200px" colspan="2">Changed</th>
+            </tr>
+            <tr>
+                <th class="text-center" style="width:100px">Code</th>
+                <th class="text-center" style="width:250px">Name</th>
+                <th class="text-center" style="width:100px">From</th>
+                <th class="text-center" style="width:100px">To</th>
+                <th class="initial-hide  text-center">By</th>
+                <th class="initial-hide  text-center">Date</th>
+                <th class="initial-hide  text-center">By</th>
+                <th class="initial-hide  text-center">Date</th>
+            </tr>
+        </thead>
+           @if (PriceList.Count > 0)
+           {
+               int i = 1;
+               foreach (Price price in PriceList)
+               { 
+                    <tr>
+                        <td class="text-center">
+                            <input type="checkbox" class="check" name="check[]" value="@i"/>
+                        </td>
+                        <td class="text-center price-matno-@i">@price.MAT_NO</td>
+                        <td class="text-center price-vendorcd-@i">@price.VENDOR_CD</td>
+                        <td class="text-center price-vendorname-@i">@price.VENDOR_NAME</td>
+                        <td class="text-center price-sourcetype-@i">@price.SOURCE_TYPE</td>
+                        <td class="text-center price-prodpurpose-@i">@price.PRODUCTION_PURPOSE</td>
+                        <td class="text-center price-partcolor-@i">@price.PART_COLOR_SFX</td>
+                        <td class="text-center price-packingtype-@i">@price.PACKING_TYPE</td>
+                        <td class="text-center price-validfrom-@i">@price.VALID_DT_FROM</td>
+                        <td class="text-center price-validto-@i">@price.VALID_DT_TO</td>
+                        <td class="text-center price-pricests-@i">@price.PRICE_STATUS</td>
+                        <td class="text-center price-pricetype-@i">@price.PRICE_TYPE</td>
+                        <td class="text-center price-priceamt-@i">@price.PRICE_AMT</td>
+                        <td class="initial-hide text-center price-pcno-@i">@price.PC_NO</td>
+                        <td class="initial-hide text-center price-currcd-@i">@price.CURR_CD</td>
+                        <td class="initial-hide text-center price-warpreff-@i">@price.WARP_REFF_NO</td>
+                        <td class="initial-hide text-center price-warpbuyer-@i">@price.WARP_BUYER_CD</td>
+                        <td class="initial-hide text-center price-createdby-@i">@price.CREATED_BY</td>
+                        <td class="initial-hide text-center price-createddt-@i">@price.CREATED_DT</td>
+                        <td class="initial-hide text-center price-changedby-@i">@price.CHANGED_BY</td>
+                        <td class="initial-hide text-center price-changeddt-@i">@price.CHANGED_DT</td>
+                    </tr>
+                   i++;
+               }
+           }
+           else { 
+            <tr>
+                <td class="text-center" colspan="20">@CommonDisplayMessage.NoData</td>
+            </tr>
+           }
+    </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-8" style="margin-bottom: 20px;">
+        @Html.Partial("_UIPaging")
+    </div>
+    <div class="col-xs-8 col-sm-4">
+        <div class="form-inline text-right">
+            <label>
+                Show per page
+                <select class="form-control input-xs page" onchange="javascript: SearchPrice(1)">
+                    <option>10</option>
+                    <option>25</option>
+                    <option>50</option>
+                    <option>100</option>
+                </select>
+            </label>
+        </div>
+    </div>
+</div>*@

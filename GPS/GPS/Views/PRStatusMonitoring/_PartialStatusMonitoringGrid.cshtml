@@ -1,0 +1,88 @@
+﻿@using GPS.Constants.PR
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <div style="border: 1pt solid #ccc;">
+        <div id="tScrollHead" style="width: 98.65%; overflow: hidden;width: calc(100% - 16px);">
+            <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 1950px; /*max-width: 1388px;*/">
+                <thead id="header-row">
+                    <tr>
+                        <th width="50px" rowspan="2" style="min-width:50px;"></th>
+                        <th width="70px" class="xorting" data-field="NO" data-sort="none" rowspan="2" style="min-width:70px;">PR No.</th>
+                        <th width="50px" class="xorting" data-field="ITEM" data-sort="none" rowspan="2" style="min-width:50px;">Item</th>
+                        <th width="200px" class="xorting" data-field="DESC" data-sort="none" rowspan="2" style="min-width:200px;">Desc</th>
+                        <th width="160px" class="xorting" data-field="WBS" data-sort="none" rowspan="2" style="min-width:160px;">WBS No.</th>
+                        <th width="100px" class="xorting border5" data-field="STATUS" data-sort="none" rowspan="2" style="min-width:100px;">PR Status</th>
+                        @*<th width="50px" class="xorting" data-field="PR_QTY_REMAIN" data-sort="none" rowspan="2" style="min-width:50px;">PR Qty Remain</th>*@
+                        <th width="175px" colspan="2" style="min-width:175px;">Created</th>
+                        <th width="135px" colspan="3" style="min-width:135px;">Section</th>
+                        <th width="135px" colspan="3" style="min-width:135px;">Coordinator</th>
+                        <th width="45px"  class="xorting" data-field="FD" data-sort="none" rowspan="2" style="min-width:45px;">FD</th>
+                        <th width="70px" class="xorting border5" data-field="PONO" data-sort="none" rowspan="2" style="min-width:70px;">PO No.</th>
+                        <th width="100px" class="xorting" data-field="POSTATUS" data-sort="none" rowspan="2" style="min-width:100px;">PO Status</th>
+                        @*<th width="50px" class="xorting" data-field="PO_QTY_REMAIN" data-sort="none" rowspan="2" style="min-width:50px;">PO Qty Remain</th>*@
+                        <th width="175px" colspan="2" style="min-width:175px;">Created</th>
+                        <th width="135px" colspan="3" style="min-width:135px;">Division</th>
+
+                        <th width="200px" class="xorting" data-field="VENDOR" data-sort="none" rowspan="2" style="min-width:200px;">Vendor</th>
+                        <th width="120px" class="xorting border5" data-field="GR" data-sort="none" rowspan="2" style="min-width:120px;">GR No.</th>
+                        <th width="170px" colspan="4" style="min-width:170px;">Created</th>
+                         <th width="70px" class="border5" style="min-width:70px;" rowspan="2">Total Delay</th>
+                    </tr>
+                    <tr>
+                        <th width="130px" class="xorting" data-field="CREATED_BY" data-sort="none" style="min-width:130px;">By</th>
+                        <th width="45px" class="xorting" data-field="CREATED_DATE" data-sort="none" style="min-width:45px;">Date</th>
+                        <th width="45px" class="xorting" data-field="SH_S" data-sort="none" style="min-width:45px;">SH</th>
+                        <th width="45px" class="xorting" data-field="DPH_S" data-sort="none" style="min-width:45px;">DPH</th>
+                        <th width="45px" class="xorting" data-field="DH_S" data-sort="none" style="min-width:45px;">DH</th>
+                        <th width="45px" class="xorting" data-field="STAFF" data-sort="none" style="min-width:45px;">Staff</th>
+                        <th width="45px" class="xorting" data-field="SH_C" data-sort="none" style="min-width:45px;">SH</th>
+                        <th width="45px" class="xorting" data-field="DPH_C" data-sort="none" style="min-width:45px;">DPH</th>
+                        <th width="130px" class="xorting" data-field="PO_CREATED_BY" data-sort="none" style="min-width:130px;">By</th>
+                        <th width="45px" class="xorting" data-field="PO_CREATED_DATE" data-sort="none" style="min-width:45px;">Date</th>
+                        <th width="45px" class="xorting" data-field="PO_SH" data-sort="none" style="min-width:45px;">SH</th>
+                        <th width="45px" class="xorting" data-field="PO_DPH" data-sort="none" style="min-width:45px;">DPH</th>
+                        <th width="45px" class="xorting" data-field="PO_DH" data-sort="none" style="min-width:45px;">DH</th>
+                        <th width="130px" class="xorting" data-field="GR_CREATED_BY" data-sort="none" style="min-width:130px;">By</th>
+                        <th width="45px" class="xorting" data-field="GR_CREATED_DATE" data-sort="none" style="min-width:45px;">Date</th>
+                                               
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div id="tScrollBody" style="overflow: scroll; height: 270px;">
+            @Html.Partial("_PartialStatusMonitoringGridBody")
+        </div>
+        <div>
+            <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                <tfoot>
+                    <tr>
+                        <td colspan="13">
+                            <div class="col-xs-8" style="margin-bottom: 20px;">
+                                @Html.Partial("_UIPaging")
+                            </div>
+                            <div class="col-sm-4">
+                                <div id="prc-pagesize" class="form-inline text-right">
+                                    <label>
+                                        Page Size
+                                        <select class="cursor-1 page" onchange="javascript: SearchPRDetail(1)" style="height:25px;">
+                                            <option>10</option>
+                                            <option selected>25</option>
+                                            <option>50</option>
+                                            <option>100</option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+    
+<script type="text/javascript">
+    $("#tScrollBody").scroll(function () {
+        $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+    });
+</script>

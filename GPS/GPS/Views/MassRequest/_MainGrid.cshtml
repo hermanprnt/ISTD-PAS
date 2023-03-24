@@ -1,0 +1,201 @@
+﻿@*<div class="row">
+    <div class="col-xs-12 col-sm-8">
+        <div class="form-inline">
+            <label>
+                Show per page
+                <select class="form-control">
+                    <option>10</option>
+                    <option>25</option>
+                    <option>50</option>
+                    <option>100</option>
+                </select>
+            </label>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-4 text-right">
+        <div class="form-group">
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary">Action</button>
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">Edit</a></li>
+                    <li><a href="#">Delete</a></li>
+                    <li><a href="#">Download</a></li>
+                    <li><a href="#">Upload</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>*@
+<div class="table-responsive">
+    <div style="overflow: scroll; font-size: 8pt; width: 100%;">
+        <table class="table table-striped table-bordered" style="width: 3000px;">
+            <thead>
+                <tr style="font-weight: bold">
+                    <td align="center" class="text-center" width="35px;">
+                        &nbsp;
+                    </td>
+                    <td align="center" style="width: 120px;">
+                        PR Type
+                    </td>
+                    <td align="center" style="width: 90px;">
+                        Cost Center
+                    </td>
+                    <td align="center" style="width: 200px;">
+                        WBS No.
+                    </td>
+                    <td align="center" style="width: 60px;">
+                        Plant
+                    </td>
+                    <td align="center" style="width: 80px;">
+                        Sloc
+                    </td>
+                    <td align="center" style="width: 180px;">
+                        Vendor Code
+                    </td>
+                    <td align="center" style="width: 80px;">
+                        Procurement Channel
+                    </td>
+                    <td align="center" style="width: 80px;">
+                        Purchasing Group
+                    </td>
+                    <td align="center" style="width: 150px;">
+                        Quotation No.
+                    </td>
+                    <td align="center" style="width: 150px;">
+                        Material Category
+                    </td>
+                    <td align="center" style="width: 120px;">
+                        Material Number
+                    </td>
+                    <td align="center" style="width: 180px;">
+                        Material Description
+                    </td>
+                    <td align="center" style="width: 80px;">
+                        UoM
+                    </td>
+                    <td align="center" style="width: 80px;">
+                        Quantity
+                    </td>
+                    <td align="center" style="width: 80px;">
+                        Currency
+                    </td>
+                    <td align="center" style="width: 80px;">
+                        Price / UoM
+                    </td>
+                    <td align="center" style="width: 80px;">
+                        Amount
+                    </td>
+                </tr>
+            </thead>
+            @for (int i = 1; i <= 1; i++)
+            {
+                <tr id="MassRequest_New" style="display: none;">
+                    <td class="text-center">
+                        <input type="checkbox" class="check" />
+                    </td>
+                    <td align="center">
+                        <select class="form-control" style="height: 28px; width: 120px; font-size: 8pt;">
+                            <option>&nbsp;</option>
+                            <option>Consumable</option>
+                            <option>MRP</option>
+                            <option>Service</option>
+                        </select>
+                    </td>
+                    <td align="center">
+                        <select class="form-control" style="height: 28px; width: 90px; font-size: 8pt;">
+                            <option>&nbsp;</option>
+                            <option>ADN200</option>
+                            <option>ADN211</option>
+                            <option>ADN212</option>
+                        </select>
+                    </td>
+                    <td align="center">
+                        &nbsp;
+                    </td>
+                    <td align="center">
+                        <select class="form-control" style="height: 28px; width: 60px; font-size: 8pt;">
+                            <option>&nbsp;</option>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                        </select>
+                    </td>
+                    <td align="center">
+                        <select class="form-control" style="height: 28px; width: 80px; font-size: 8pt;">
+                            <option>&nbsp;</option>
+                            <option>1200</option>
+                            <option>1600</option>
+                            <option>1800</option>
+                            <option>2000</option>
+                        </select>
+                    </td>
+                    <td align="center">
+                        &nbsp;
+                    </td>
+                    <td align="center">
+                        <select class="form-control" style="height: 28px; width: 80px; font-size: 8pt;">
+                            <option>&nbsp;</option>
+                        </select>
+                    </td>
+                    <td align="center">
+                        <select class="form-control" style="height: 28px; width: 80px; font-size: 8pt;">
+                            <option>&nbsp;</option>
+                        </select>
+                    </td>
+                    <td align="center">
+                        <select class="form-control" style="height: 28px; width: 150px; font-size: 8pt;">
+                            <option>&nbsp;</option>
+                        </select>
+                    </td>
+                    <td align="center">
+                        <select class="form-control" style="height: 28px; width: 150px; font-size: 8pt;">
+                            <option>&nbsp;</option>
+                        </select>
+                    </td>
+                    <td align="center">
+                        &nbsp;
+                    </td>
+                    <td align="center">
+                        &nbsp;
+                    </td>
+                    <td align="center">
+                        &nbsp;
+                    </td>
+                    <td align="center">
+                        &nbsp;
+                    </td>
+                    <td align="center">
+                        <select class="form-control" style="height: 28px; width: 80px; font-size: 8pt;">
+                            <option>&nbsp;</option>
+                            <option>EURO</option>
+                            <option>IDR</option>
+                            <option>JPY</option>
+                            <option>THB</option>
+                            <option>USD</option>
+                        </select>
+                    </td>
+                    <td align="center">
+                        &nbsp;
+                    </td>
+                    <td align="center">
+                        &nbsp;
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+    <ul class="pagination">
+        <li><a href="#"><<</a></li>
+        @for (int i = 1; i <= 5; i++)
+        {
+            <li><a href="j#">@i</a></li>
+        }
+        <li><a href="#">>></a></li>
+    </ul>
+</div>

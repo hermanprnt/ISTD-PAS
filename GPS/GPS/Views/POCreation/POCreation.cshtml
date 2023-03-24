@@ -1,0 +1,2980 @@
+﻿@*@using System*@
+@using GPS.CommonFunc
+@using GPS.CommonFunc.WebControl
+@using GPS.Constants
+@using GPS.Constants.PO
+@using GPS.Controllers.Master
+@using GPS.Controllers.PO
+@using GPS.Core.ViewModel
+@using GPS.ViewModels
+@using GPS.ViewModels.PO
+@model POCreationViewModel
+@{
+    Layout = CommonPage.MainLayout;
+
+}
+
+
+@section HeadScript {
+    <link rel="stylesheet" href="@Url.Content("~/Content/Common/tdk.lookup.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/datepicker.css")" />
+
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/tdk.lookup.js")"></script>
+}
+@Html.Partial(POCommonController.Partial.CommonCss)
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        //start : 20190617 : isid.rgl
+        var mydataname ="";
+        var mydatano = "";
+        var myExpanderRow = "";
+		var vendoredit = "";
+        //end : 20190617 : isid.rgl
+
+        /* ============================== Init: begin ============================== */
+
+        var processId = "@Model.ProcessId",
+            poNo = "@Model.Header.PONo",
+            prItemDataName = "@Model.PRItemDataName",
+            itemDataName = "@Model.POItemDataName",
+            subItemDataName = "@Model.SubItemDataName",
+            isFromGPS = !!(Number("@(Model.Header.IsFromGPS ? 1 : 0)")),
+            isFromECatalogue = !!(Number("@(Model.Header.IsFromECatalogue ? 1 : 0)"));
+
+        //Note : Remove empty option in dropdown
+        $("#cmb-poitem-creationtype option[value='']").remove();
+        $("#cmbedit-purchasinggroup option[value='']").remove();
+        $("#cmbedit-deliveryaddr option[value='']").remove();
+        $("#cmbedit-currency option[value='']").remove();
+
+        ViewData.Clear();
+        ViewData.Add("ProcessId", processId);
+        ViewData.Add("PONo", poNo);
+		//ViewData.Add("PRNo", prNo);
+        ViewData.Add("IsCreation", true);
+        ViewData.Add("PRItemDataName", prItemDataName);
+        ViewData.Add("ItemDataName", itemDataName);
+        ViewData.Add("SubItemDataName", subItemDataName);
+        ViewData.Add("IsFromGPS", isFromGPS);
+        ViewData.Add("ShowInlineItemEditor", ShowInlineItemEditor);
+        ViewData.Add("RefreshSLoc", RefreshSLoc);
+        ViewData.Add("RefreshPOItemMat", RefreshPOItemMat);
+        ViewData.Add("RefreshSPKAmount", RefreshSPKAmount);
+        ViewData.Add("OnAjaxBegin", OnAjaxBegin);
+        ViewData.Add("OnAjaxComplete", OnAjaxComplete);
+        ViewData.Add("OnAjaxError", OnAjaxError);
+        ViewData.Add("RefreshAttachment", RefreshAttachment);
+
+        function GetDisableList() {
+            return [
+                "#cmb-poitem-creationtype",
+                "#btn-save",
+                "#btn-adoptpr",
+                "#btn-backtoinquiry",
+                "#btnsave-draft",
+                "#btnsave-ok",
+                "#btnsave-cancel",
+                "#txtedit-poheadertext",
+                "#txtedit-ponote",
+                "#cmbedit-currency",
+                "#cmbedit-purchasinggroup",
+                "#upledit-bidingdoc",
+                "#upledit-quotation",
+                "#cmbedit-deliveryaddr",
+                "#btn-itemedit-save",
+                "#btn-itemedit-cancel",
+                "[id^=btn-" + itemDataName + "-edit-]",
+                "[id^=btn-" + itemDataName + "-delete-]",
+                "[id^=expchildrow-" + itemDataName + "] button[id*=-edit-]",
+                "[id^=expchildrow-" + itemDataName + "] button[id*=-delete-]",
+                "#btn-condition-addcond",
+                "#cmb-perpage-pritem",
+                "#txt-itemadd-qty",
+                "#cmb-itemadd-uom",
+                "#txt-itemadd-price",
+                "#cmb-itemadd-plantcode",
+                "#cmb-itemadd-sloccode",
+                "#cmb-poitemadditional-plant",          ///added : 20190517 : isd.rgl
+                "#cmb-poitemadditional-sloc",           ///added : 20190517 : isd.rgl
+                "#txt-itemedit-qty",					///added : 20190618 : isd.rgl
+                "#txt-itemedit-price",					///added : 20190518 : isd.rgl
+				"#cmb-subitemedit-uom",
+                "#cmb-subitemedit-costcenter"
+            ];
+        }
+		function GetDisableList2() {
+            return [
+                "#txt-itemedit-qty",
+                "#txt-itemedit-price"
+            ];
+        }
+        function GetLookupDisableList() {
+            return [
+                "#lookup-vendor",
+                "#lookup-itemadd-category",
+                "#lookup-itemadd-matno",
+                "#lookup-itemadd-wbsno",
+                "#lookup-itemadd-glaccount",
+                "#lookup-subitemedit-wbsno",               ///added : 20190517 : isd.rgl
+                "#lookup-subitemedit-glaccount"            ///added : 20190517 : isd.rgl
+            ];
+        }
+
+        function DisableAllFeatures() {
+
+            $.Disable(GetDisableList());
+            $.DisableLookup(GetLookupDisableList());
+
+            if (isFromECatalogue)
+                $.EnableLookup(["#lookup-vendor"]);
+
+            $("[id^=lnk-pritem-edit-]").addClass("disabled");
+            $("[id^=lnk-pritem-delete-]").addClass("disabled");
+            $("[id^=btn-condition-edit-]").addClass("disabled");
+            $("[id^=btn-condition-delete-]").addClass("disabled");
+            $("#btn-codedit-save").addClass("disabled");
+            $("#btn-codedit-cancel").addClass("disabled");
+            $("[id^=lnk-page-pritem-]").addClass("_pagination-disabled");
+        }
+
+        function EnableAllFeatures() {
+            if (!isFromGPS && poNo !== "") {
+                $.Enable([
+                    "#txtedit-poheadertext",
+                    "#txtedit-ponote",
+                    "#upledit-bidingdoc",
+                    "#upledit-quotation",
+                    "#btn-save",
+                    "#btn-backtoinquiry",
+                    //"#btnsave-draft",
+                    "#btnsave-ok",
+                    "#btnsave-cancel"
+                ]);
+                $.Disable(["#txtedit-createddate"]);
+            }
+            else {
+                $.Enable(GetDisableList());
+                $.EnableLookup(GetLookupDisableList());
+
+                $("[id^=lnk-pritem-edit-]").removeClass("disabled");
+                $("[id^=lnk-pritem-delete-]").removeClass("disabled");
+                $("[id^=btn-condition-edit-]").removeClass("disabled");
+                $("[id^=btn-condition-delete-]").removeClass("disabled");
+                $("#btn-codedit-save").removeClass("disabled");
+                $("#btn-codedit-cancel").removeClass("disabled");
+                $("[id^=lnk-page-pritem-]").removeClass("_pagination-disabled");
+
+                if ("@Model.Header.POStatusCode" !== null && "@Model.Header.POStatusCode" !== "" && "@Model.Header.POStatusCode" !== "47")
+                {
+                    $.Disable(["#btnsave-draft"]);
+                }
+                if ("@Model.Header.POStatusCode" !== null && "@Model.Header.POStatusCode" !== "" && "@Model.Header.POStatusCode" == "44")
+                {
+                    $.Disable([
+                        "#cmb-poitem-creationtype",
+                        "#cmbedit-purchasinggroup",
+                        "#cmbedit-currency",
+                        "#cmbedit-deliveryaddr"
+                    ]);
+                    $.DisableLookup(["#lookup-vendor"]);
+                }
+            }
+        }
+
+        function ResetForm() {
+            var resetList = [
+                "#txtedit-poheadertext",
+                "#txtlookup-vendor",
+                //"#cmbedit-currency",
+                "#txtedit-exchangerate",
+                "#cmbedit-purchasinggroup",
+                //"#cmbedit-deliveryaddr",
+                "#cmb-poitemadditional-plant",
+                "#cmb-poitemadditional-sloc",
+                "#txt-poitemadditional-deliverydate",
+                "#txtedit-ponote"
+            ];
+
+            $.Clear(resetList);
+
+            var uploadList = [
+                "#upledit-bidingdoc",
+                "#upledit-quotation"
+            ];
+
+            uploadList.forEach(function (id) {
+                var upload = $(id);
+                upload.wrap("<form>").closest("form").get(0).reset();
+                upload.unwrap();
+            });
+        }
+        function RefreshCurrency(a, b) {
+            console.log(a)
+            console.log(b)
+        }
+        @*function RefreshCurrency(currency, successCallback) {
+            OnAjaxBegin("Currency changed");
+
+            ViewData.Add("Currency", currency);
+            debugger
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.GetExchangeRate",
+                data: {
+                    currency: currency
+                },
+                success: function (exchdata) {
+                    debugger
+                    if (exchdata.ResponseType !== "@ActionResponseViewModel.Error") {
+                        $("#txtedit-exchangerate").val(Number(exchdata.Message));
+
+                        $.ajax({
+                            type: "POST",
+                            url: "@POCreationController.Action.RefreshCurrency",
+                            data: {
+                                processId: processId,
+                                currency: currency
+                            },
+                            success: function (refreshdata) {
+                                debugger
+                                if (refreshdata.ResponseType !== "@ActionResponseViewModel.Error") {
+                                    $("#grid-poitem").html(refreshdata);
+                                    $("#grid-poitem table #chk-all-pritem").addClass("hidden");
+                                    $("#grid-poitem table .itemedit-col-action").removeClass("hidden");
+                                }
+                                else {
+                                    $.messagebox.show("@ActionResponseViewModel.Error", refreshdata.Message, refreshdata.ResponseType);
+                                }
+                            },
+                            complete: OnAjaxComplete,
+                            error: OnAjaxError
+                        });
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", exchdata.Message, exchdata.ResponseType);
+                    }
+                },
+                error: OnAjaxError
+            });
+        }*@
+
+        $(document).on("click", "[id^=lnk-delfile-]", function (e) {
+            var path = $(this).data("path");
+            var type = $(this).data("type");
+            var id = $(this).data("spanid");
+
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.DeleteFile",
+                //contentType: false, // NOTE: disable header to include content-type
+                //processData: false, // NOTE: disabe jquery to convert data to string
+                data: { poNo:poNo,processId: processId, path: path, type : type },
+                success: function (data) {
+                    if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                        var countAttached = data.Message.split('|')[2];
+                        console.log("id yng di delete "+id+" count attachment "+countAttached+ " data message  "+data.Message + " poNo "+poNo);
+                        SetAttachmentState(type, countAttached, id);
+
+                        $.messagebox.show(data.ResponseType, data.Message.split('|')[1], data.ResponseType);
+
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        function SetAttachmentState(type, countAttached, id)
+        {
+            if(type == "bid") {
+                if(countAttached<1)
+                {
+                    $("#upledit-bidingdoc").show();
+                    $('.appended-file-bid').hide();
+                    $("#upledit-bidingdoc").val("");
+                    $("#"+id).css("display", "none");
+                }
+                else
+                {
+                    if(countAttached<5)
+                    {
+                        $("#upledit-bidingdoc").show();
+                    }
+                    $("#"+id).remove();
+                }
+            }
+            else {
+                if(countAttached<1)
+                {
+                    $("#upledit-quotation").show();
+                    $('.appended-file-quot').hide();
+                    $("#upledit-quotation").val("");
+                    $("#"+id).css("display", "none");
+                }
+                else
+                {
+                    if(countAttached<5)
+                    {
+                        $("#upledit-quotation").show();
+                    }
+                    $("#"+id).remove();
+                }
+            }
+        }
+
+        function InitExistingData() {
+            $("#txtedit-poheadertext").val($("<div />").html("@Model.Header.POHeaderText").text());
+            $("#txtlookup-vendor").val("@(String.IsNullOrEmpty(Model.Header.VendorCode) ? String.Empty : Model.Header.VendorCode + " - " + Model.Header.VendorName)");
+            $("#txtedit-exchangerate").val(Number("@Model.Header.ExchangeRate"));
+            $("#cmbedit-currency").val("@Model.Header.Currency");
+            $("#cmbedit-purchasinggroup").val("@Model.Header.PurchasingGroup");
+            $("#cmb-poitem-creationtype").val("@POCreationType.Standard");
+            $("textarea#txtedit-ponote").html("@Model.Header.Note1\n" + "@Model.Header.Note2\n" + "@Model.Header.Note3\n" + "@Model.Header.Note4\n" + "@Model.Header.Note5\n" + "@Model.Header.Note6\n" + "@Model.Header.Note7\n" + "@Model.Header.Note8\n" + "@Model.Header.Note9\n" + "@Model.Header.Note10").text();
+
+            RefreshCurrency("@Model.Header.Currency");
+
+            if("@Model.Header.POStatusCode" !== null && "@Model.Header.POStatusCode" !== "" && "@Model.Header.POStatusCode" !== "47") { $.Disable(["#btnsave-draft"]); }
+
+            if("@Model.Header.BidFilePath" != "" && "@Model.Header.BidFilePath" != null )
+            {
+                var html = "";
+
+                $('.remove-list-bid').remove();
+                @if( Model.Header.BidFileList != null)
+                {
+                    foreach (var attachment in Model.Header.BidFileList)
+                    {
+                        <text>
+                            html = html + "<span class='remove-list-bid' id='isrow-@attachment.SEQ_NO'>" +
+                                    "<a href='#' id='lnk-delfile-bid' data-spanid = 'isrow-@attachment.SEQ_NO' data-path='" + "@attachment.FILE_PATH" + "' data-type='bid'>" +
+                                        "<img width='15' height='15' src='@Url.Content("../Content/img/error.png")' title='Delete " + "@attachment.FILE_PATH"  + "'>" +
+                                         "</a>";
+                            html = html + "<a href = '#' onclick = \"javascript:downloadFile('"+ processId + "', '@attachment.FILE_PATH')\"> @(attachment.FILE_NAME_ORI.Length > 20 ? attachment.FILE_NAME_ORI.Substring(0, 20) + ". . ." : attachment.FILE_NAME_ORI)</a></span>";
+						</text>
+
+                    }
+
+                    if (Model.Header.BidFileList.Count() >= 5)
+                    {
+                        <text>
+                            $("#upledit-bidingdoc").hide();
+                        </text>
+                    }
+
+                    <text>
+                        $('.appended-file-bid').append(html);
+                        $('.appended-file-bid').show();
+                    </text>
+                }
+            }
+
+            if("@Model.Header.QuotFilePath" !== "" && "@Model.Header.QuotFilePath" !== null)
+            {
+                var html = "";
+                $('.remove-list-quot').remove();
+                @if( Model.Header.BidFileList != null)
+                {
+                    foreach (var attachment in Model.Header.QuotFileList)
+                    {
+                        <text>
+                            html = html + "<span class='remove-list-quot' id='isrow-@attachment.SEQ_NO'>" +
+                                    "<a href='#' id='lnk-delfile-quot' data-spanid = 'isrow-@attachment.SEQ_NO' data-path='" + "@attachment.FILE_PATH" + "' data-type='quot'>" +
+                                        "<img width='15' height='15' src='@Url.Content("../Content/img/error.png")' title='Delete " + "@attachment.FILE_PATH"  + "'>" +
+                                         "</a>";
+                            html = html + "<a href = '#' onclick = \"javascript:downloadFile('"+ processId + "', '@attachment.FILE_PATH')\"> @(attachment.FILE_NAME_ORI.Length > 20 ? attachment.FILE_NAME_ORI.Substring(0, 20) + ". . ." : attachment.FILE_NAME_ORI)</a></span>";
+						</text>
+
+                    }
+
+                    if (Model.Header.QuotFileList.Count() >= 5)
+                    {
+                        <text>
+                            $("#upledit-quotation").hide();
+                        </text>
+                    }
+
+                    <text>
+                        $('.appended-file-quot').append(html);
+                        $('.appended-file-quot').show();
+                    </text>
+                }
+
+
+            }
+
+            var vendor = {
+                IsOneTimeVendor: !!Number("@(Model.Header.IsOneTimeVendor ? 1 : 0)"),
+                Code: "@Model.Header.VendorCode",
+                Name: "@Model.Header.VendorName",
+                Address: "@Model.Header.VendorAddress",
+                Country: "@Model.Header.VendorCountry",
+                City: "@Model.Header.VendorCity",
+                PostalCode: "@Model.Header.VendorPostalCode",
+                Phone: "@Model.Header.VendorPhone",
+                Fax: "@Model.Header.VendorFax"
+            };
+            ViewData.Add("VendorInfo", vendor);
+            if (vendor.IsOneTimeVendor) {
+                $("#txtotv-vendor-name").val(vendor.Name);
+                $("#txtotv-vendor-address").val(vendor.Address);
+                $("#cmbotv-vendor-country").val(vendor.Country);
+                $("#txtotv-vendor-city").val(vendor.City);
+                $("#txtotv-vendor-postalcode").val(vendor.PostalCode);
+                $("#txtotv-vendor-phone").val(vendor.Phone);
+                $("#txtotv-vendor-fax").val(vendor.Fax);
+            }
+
+            var retentionStr = "@Model.Header.SPKInfo.Retention.ToString()";
+            if(retentionStr == "0") retentionStr = "-";
+            var OpeningCek = "@Model.Header.SPKInfo.Opening";
+            if (OpeningCek == "") OpeningCek = "Sehubungan dengan surat pengumuman hasil tender No. [Nomor] tanggal [Tanggal], dengan ini kami beritahukan bahwa pada prinsipnya penawaran tersebut kami terima dengan ketentuan berikut:";
+            var spk = {
+                IsSPKCreated: false,
+                SPKNo: "@Model.Header.SPKInfo.SPKNo",
+                BiddingDateString: "@Model.Header.SPKInfo.BiddingDateString",
+                Opening: OpeningCek,
+                Work: "@Model.Header.SPKInfo.Work",
+                Amount: "@Model.Header.SPKInfo.Amount",
+                Location: "@Model.Header.SPKInfo.Location",
+                PeriodStartString: "@Model.Header.SPKInfo.PeriodStartString",
+                PeriodEndString: "@Model.Header.SPKInfo.PeriodEndString",
+                Retention: retentionStr,
+                TerminI: "@Model.Header.SPKInfo.TerminI",
+                TerminIDesc: "@Model.Header.SPKInfo.TerminIDesc",
+                TerminII: "@Model.Header.SPKInfo.TerminII",
+                TerminIIDesc: "@Model.Header.SPKInfo.TerminIIDesc",
+                TerminIII: "@Model.Header.SPKInfo.TerminIII",
+                TerminIIIDesc: "@Model.Header.SPKInfo.TerminIIIDesc",
+                TerminIV: "@Model.Header.SPKInfo.TerminIV",
+                TerminIVDesc: "@Model.Header.SPKInfo.TerminIVDesc",
+                TerminV: "@Model.Header.SPKInfo.TerminV",
+                TerminVDesc: "@Model.Header.SPKInfo.TerminVDesc"
+            };
+            ViewData.Add("OriginalSPKInfo", spk);
+            ViewData.Add("SPKInfo", spk);
+            // NOTE: this timer will wait until FillSPKInfo function is added to ViewData
+            // which is in _purchaseOrderSPKForm.cshtml and run later in execution order
+            var fillSPKTimer = setInterval(function () {
+                InitSPKForm = ViewData.Get("InitSPKForm");
+                FillSPKInfo = ViewData.Get("FillSPKInfo");
+                if (InitSPKForm !== undefined && FillSPKInfo !== undefined) {
+                    InitSPKForm();
+                    FillSPKInfo(spk);
+                    clearInterval(fillSPKTimer);
+                }
+            }, 30);
+        }
+
+        function OnAjaxBegin(title) {
+            $.progressbox.show($tdk.PageTitle, title);
+            DisableAllFeatures();
+        }
+
+        function OnAjaxComplete() {
+            EnableAllFeatures();
+
+	    $.Disable(GetDisableList2());	//added : 20190619 : isid.rgl
+
+	    $.progressbox.hide();
+        }
+
+        function OnAjaxError(data) {
+            var result = $.ValidateASPError(data.responseText);
+            $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+        }
+
+        function RefreshSLoc(dataName, plantCode, successCallback) {
+            $.progressbox.show($tdk.PageTitle, "Refresh SLoc");
+
+            $.ajax({
+                type: "POST",
+                url: "@CommonPage.RefreshSLocAction",
+                data: {
+                    dropdownId: dataName + "additional-sloc",
+                    plantCode: plantCode
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        var container = $("#" + dataName + "additional-sloc-container");
+                        container.html(data);
+                        if (!$("#cmb-" + dataName + "-additional").prop("disabled"))
+                            container.find("select").prop("disabled", true);
+                        successCallback();
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: function () {
+                    $.progressbox.hide();
+                },
+                error: OnAjaxError
+            });
+        }
+
+        function GetSubItemRowList() {
+            return $("[id^=subrowadd]");
+        }
+
+        function GetPONoteValue(poNote) {
+            var splittedValue = poNote.split("\n");
+            var splittedLength = splittedValue.length;
+            var poNoteArray = [];
+            for (var idx=0; idx < splittedLength; idx++)
+                poNoteArray.push(splittedValue[idx]);
+
+            if (splittedLength < 10)
+                for (var idx=0; idx < (10-splittedLength); idx++)
+                    poNoteArray.push("");
+
+            return poNoteArray;
+        }
+
+        if(isFromECatalogue)
+        {
+            $("#lookup-vendor").lookup({
+                IsSingleSelection: true,
+                LookupOpenUrl: "@POCreationController.Action.OpenCreationVendorEcatalogueLookup?PO_No="+poNo+"",
+                LookupSearchUrl: "@POCreationController.Action.SearchCreationVendorEcatalogueLookup?PO_No="+poNo+"",
+                OnBeginCallback: function () { OnAjaxBegin("Search Vendor"); },
+                OnEndCallback: OnAjaxComplete,
+                OnSearchButtonClick: function () { $.ClearLookup(["#lookup-vendor"]); },
+                OnRowSelected: function (selected) {
+                    ViewData.Add("VendorInfo", {
+                        IsOneTimeVendor: false,
+                        Code: selected.Value,
+                        Name: selected.Name,
+                        Address: "",
+                        Country: $("#cmbotv-vendor-country").valOrDefault(),
+                        City: "",
+                        PostalCode: "",
+                        Phone: "",
+                        Fax: ""
+                    });
+                    SilentSavePOHeader();
+
+                    $("#popuplookup-vendor").modal("hide");
+                },
+                OnOkButtonClick: function () { },
+                OnOkButtonClicked: function () {
+                    var isValid = $.ValidateMandatory(["#txtotv-vendor-name","#txtotv-vendor-address","#cmbotv-vendor-country","#txtotv-vendor-city","#txtotv-vendor-postalcode","#txtotv-vendor-phone","#txtotv-vendor-fax"]);
+                    if (isValid) {
+                        var vendor = {
+                            IsOneTimeVendor: true,
+                            Code: $("#txtotv-vendor-code").valOrDefault(),
+                            Name: $("#txtotv-vendor-name").valOrDefault(),
+                            Address: $("#txtotv-vendor-address").valOrDefault(),
+                            Country: $("#cmbotv-vendor-country").valOrDefault(),
+                            City: $("#txtotv-vendor-city").valOrDefault(),
+                            PostalCode: $("#txtotv-vendor-postalcode").valOrDefault(),
+                            Phone: $("#txtotv-vendor-phone").valOrDefault(),
+                            Fax: $("#txtotv-vendor-fax").valOrDefault()
+                        };
+
+                        $("#lookup-vendor").LookupVal(vendor.Code + " - " + vendor.Name);
+                        ViewData.Add("VendorInfo", vendor);
+                        SilentSavePOHeader();
+
+                        $("#popuplookup-vendor").modal("hide");
+                    }
+                }
+            });
+        }
+        else{
+            $("#lookup-vendor").lookup({
+                IsSingleSelection: true,
+                LookupOpenUrl: "@POCreationController.Action.OpenCreationVendorLookup?PurchGroup="+$("#cmbedit-purchasinggroup").val()+"", // add 20200123
+                LookupSearchUrl: "@POCreationController.Action.SearchCreationVendorLookup?PurchGroup="+$("#cmbedit-purchasinggroup").val()+"", // add 20200123
+                OnBeginCallback: function () { OnAjaxBegin("Search Vendor"); },
+                OnEndCallback: OnAjaxComplete,
+                OnSearchButtonClick: function () { $.ClearLookup(["#lookup-vendor"]); },
+                OnRowSelected: function (selected) {
+                    ViewData.Add("VendorInfo", {
+                        IsOneTimeVendor: false,
+                        Code: selected.Value,
+                        Name: selected.Name,
+                        Address: "",
+                        Country: $("#cmbotv-vendor-country").valOrDefault(),
+                        City: "",
+                        PostalCode: "",
+                        Phone: "",
+                        Fax: ""
+                    });
+                    SilentSavePOHeader();
+
+                    $("#popuplookup-vendor").modal("hide");
+                },
+                OnOkButtonClick: function () { },
+                OnOkButtonClicked: function () {
+                    var isValid = $.ValidateMandatory(["#txtotv-vendor-name","#txtotv-vendor-address","#cmbotv-vendor-country","#txtotv-vendor-city","#txtotv-vendor-postalcode","#txtotv-vendor-phone","#txtotv-vendor-fax"]);
+                    if (isValid) {
+                        var vendor = {
+                            IsOneTimeVendor: true,
+                            Code: $("#txtotv-vendor-code").valOrDefault(),
+                            Name: $("#txtotv-vendor-name").valOrDefault(),
+                            Address: $("#txtotv-vendor-address").valOrDefault(),
+                            Country: $("#cmbotv-vendor-country").valOrDefault(),
+                            City: $("#txtotv-vendor-city").valOrDefault(),
+                            PostalCode: $("#txtotv-vendor-postalcode").valOrDefault(),
+                            Phone: $("#txtotv-vendor-phone").valOrDefault(),
+                            Fax: $("#txtotv-vendor-fax").valOrDefault()
+                        };
+
+                        $("#lookup-vendor").LookupVal(vendor.Code + " - " + vendor.Name);
+                        ViewData.Add("VendorInfo", vendor);
+                        SilentSavePOHeader();
+
+                        $("#popuplookup-vendor").modal("hide");
+                    }
+                }
+            });
+        }
+
+        ResetForm();
+        ResetEditor();
+        ShowInlineItemEditor("@POCreationType.Standard");
+        if (!isFromGPS && poNo !== "")
+            DisableAllFeatures();
+        EnableAllFeatures();
+
+        $("#grid-poitem table .itemedit-row-action").removeClass("hidden");
+        $("#grid-poitem table .itemedit-col-action").removeClass("hidden");
+        $("#grid-poitem table #chk-all-pritem").addClass("hidden");
+
+        // NOTE: these function is initialized in InitExistingData function
+        var InitSPKForm, FillSPKInfo;
+        InitExistingData();
+        RefreshPOItemMat(processId, poNo);
+        RefreshSPKAmount();
+
+        /* =============================== Init: end =============================== */
+
+        /* ============================= Search: begin ============================= */
+
+        function GetSearchCriteria(page, pageSize) {
+
+            page = page || 1;
+            pageSize = pageSize || $("#cmb-perpage-poitem").GetPageSize();
+            return {
+                Currency: $("#cmbedit-currency").valOrDefault(),
+
+                CurrentPage: page,
+                PageSize: pageSize
+            };
+        }
+
+        window.Searchpoitem = function (page, pageSize, responseCallback) {
+            OnAjaxBegin("Search PR Item");
+            $.ajax({
+                type: "POST",
+                url: "@POInquiryController.Action.Search",
+                data: JSON.stringify(GetSearchCriteria(page, pageSize)),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: responseCallback,
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        }
+
+        window.SearchpoitemResponseCallback = function (data) {
+            if (!data.ResponseType) {
+                $("#grid-poitem").html(data);
+            }
+            else {
+                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+            }
+        };
+
+        function OnSubItemCollapsing(dataName, dataNo, embedded, expanderRow, onSubItemCollapsed) {
+            $("[id^=expchildrow-" + dataName + dataNo + "]").remove();
+            OnAjaxComplete();
+        }
+
+        function OnSubItemExpanding(dataName, dataNo, embedded, expanderRow, onSubItemExpanded) {
+            //start : 20190617 : isid.rgl
+			mydataname = dataName;
+            mydatano =dataNo;
+			//end : 20190617 : isid.rgl
+
+            OnAjaxBegin("Open Sub Item");
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.SearchPOSubItem",
+                data: JSON.stringify({
+                    ProcessId: processId,
+                    PONo: embedded.PONo,
+                    POItemNo: embedded.POItemNo,
+                    SeqItemNo: embedded.SeqItemNo,
+                    DataName: dataName + dataNo,
+                    CurrentPage: 1,
+                    PageSize: Number("@PaginationViewModel.DefaultPageSize")
+                }),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("[id^=expchildrow-" + dataName + dataNo + "]").remove();
+                        expanderRow.after(data);
+                        NotInPOManualToggle();
+
+                        // NOTE: this method only passed when subitem expanded using edit button, otherwise it's void(0)
+                        if (onSubItemExpanded)
+                            onSubItemExpanded(dataName, dataNo, undefined, expanderRow);
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: function () {
+                    if (!onSubItemExpanded)
+                        OnAjaxComplete();
+                },
+                error: OnAjaxError
+            });
+        }
+
+        function OnSubItemExpanded(dataName, dataNo, embedded, expanderRow) {
+            expanderRow.nextAll().find(".subitemedit-col-action > button").removeClass("hidden");
+            var isEditorMoved = MoveEmptySubItemEditorAfterItemRow(embedded, expanderRow);
+            if (isEditorMoved) {
+                expanderRow.removeClass("hidden");
+                InitSubItemLookup();
+                InitSubItemPrice();
+
+                $(document).onOnce("click", "[id^=btn-" + dataName + dataNo + "-edit-]", function (e) {
+					//start : 20190617 : isid.rgl
+					mydataname = dataName;
+		            mydatano =dataNo;
+					//end : 20190617 : isid.rgl
+
+                    DisableAllFeatures();
+                    var $this = $(this);
+                    var currentRow = $this.closest("[id^=expchildrow-]");
+                    var subItemEmbedded = $this.data("embedded");
+                    ResetSubItemEditor();
+                    FillSubItemEditor(subItemEmbedded);
+                    currentRow.addClass("hidden");
+                    //currentRow.find(".subitemedit-col-action > button").addClass("hidden");
+                    $("#btn-subitemedit-save, #btn-subitemedit-cancel").data("embedded", subItemEmbedded);
+
+                    $.Enable(["#btn-subitemedit-save", "#btn-subitemedit-cancel"]);
+                });
+            }
+        }
+
+        // NOTE: this is the only works way to rebind event after ajax load partialview
+        // another way is to make it inline event eg. <input type="checkbox" onchange="eventname()" />
+        $(document).onOnce("click", "[id^=exp-" + itemDataName + "-]", function (e) {
+            var $this = $(this);
+            var embedded = $this.data("embedded");
+            $this.ToggleSubItem(OnSubItemExpanding, void(0), OnSubItemCollapsing, void(0), embedded);
+        });
+
+        /* ============================== Search: end ============================== */
+
+        /* ============================= Changed: begin ============================= */
+
+        $("#cmbedit-currency").change(function (e) {
+            RefreshCurrency($(this).valOrDefault());
+        });
+
+        function ResetPOItem(el) {
+            var $this = $(el);
+            if (ValidatePOItem() && ViewData.Get("LastValue").Value !== "")
+                $("#pop-changecreationtypeconfirm").modal();
+            else {
+                ViewData.Add("LastValue", {
+                    Selector: "#" + $this.attr("id"),
+                    Value: $this.val()
+                });
+
+                var type = $("#cmb-poitem-creationtype").valOrDefault();
+                ShowInlineItemEditor(type);
+            }
+        }
+
+        function SaveLastValue(e) {
+            var $this = $(this);
+
+            if(ViewData.Get("LastValue") == "undefined" || ViewData.Get("LastValue") == null
+                || ViewData.Get("LastValue").Value == "" || ViewData.Get("LastValue").Value == $this.val()
+                || ViewData.Get("LastValue").Selector != "#" + $this.attr("id"))
+            {
+                ViewData.Add("LastValue", {
+                    Selector: "#" + $this.attr("id"),
+                    Value: $this.val()
+                });
+            }
+        }
+
+        $("#cmbedit-purchasinggroup, #cmb-poitem-creationtype").change(function () {
+            ResetPOItem(this);
+            SilentSavePOHeader();
+        });
+        //$("#cmbedit-currency").change(ResetPOItem);
+
+        $("#cmbedit-purchasinggroup, #cmb-poitem-creationtype").click(SaveLastValue);
+        //$("#cmbedit-currency").click(SaveLastValue);
+
+        $("#btnchangecreationtype-ok").click(function (e) {
+            OnAjaxBegin("PO Creation type changed");
+
+            var type = $("#cmb-poitem-creationtype").valOrDefault();
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.CreationTypeChange",
+                data: JSON.stringify({
+                    processId: processId,
+                    creationType: type
+                }),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: function (data) {
+                    $("#pop-changecreationtypeconfirm").modal("hide");
+                    if (!data.ResponseType) {
+                        //Save Latest Modify PO Type / Purch Group
+                        $("#cmbedit-purchasinggroup").trigger("click");
+                        $("#cmb-poitem-creationtype").trigger("click");
+
+                        $("#grid-poitem").html(data);
+                        $("#grid-poitem table #chk-all-pritem").addClass("hidden");
+                        $("#grid-poitem table .itemedit-col-action").removeClass("hidden");
+                        ShowInlineItemEditor(type);
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: function (data) {
+                    $("#pop-changecreationtypeconfirm").modal("hide");
+
+                    OnAjaxError(data);
+                }
+            });
+
+            OnAjaxComplete();
+        });
+
+        $("#btnchangecreationtype-cancel").click(function (e) {
+            var data = ViewData.Get("LastValue");
+            $(data.Selector).val(data.Value);
+
+            $("#pop-changecreationtypeconfirm").modal("hide");
+        });
+
+        /* ============================== Changed: end ============================== */
+
+        /* ====================== PO Header silent save: begin ====================== */
+
+        function SilentSavePOHeader() {
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.POHeaderSilentSave",
+                data: JSON.stringify(GetEditedData(false)),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: function (data) {
+                    if (data.ResponseType === "@ActionResponseViewModel.Error")
+                    {
+                        $("#pop-createspkconfirm").modal("hide");
+                        $("#pop-saveconfirm").modal("hide");
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                    else
+                    {
+                        console.log("Silent save PO Header success.");
+                    }
+                       
+                },
+                error: OnAjaxError
+            });
+        }
+
+        /* ======================= PO Header silent save: end ======================= */
+
+        /* ============================== CRUD: begin ============================== */
+
+        $("#btn-adoptpr").click(function (e) {
+            SilentSavePOHeader();
+            OnAjaxBegin("Add Item");
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.PRItemAdd",
+                data: {
+                    processId: ViewData.Get("ProcessId"),
+                    currency: $("#cmbedit-currency").valOrDefault(),
+                    purchasingGroup: $("#cmbedit-purchasinggroup").valOrDefault()
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#pop-pritem").html(data);
+                        $("#pop-pritem").modal();
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        $(document).on("click", "[id^=btn-" + itemDataName + "-copy-]", function (e) {
+            OnAjaxBegin("Copy Item");
+            var currentRow = $(this);
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.ItemCopy",
+                data: {
+                    processId: processId,
+                    poNo: currentRow.data("pono"),
+                    poItemNo: currentRow.data("poitemno"),
+                    seqItemNo: currentRow.data("seqitemno")
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#grid-poitem").html(data);
+                        $("#grid-poitem table #chk-all-pritem").addClass("hidden");
+                        $("#grid-poitem table .itemedit-col-action").removeClass("hidden");
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        $(document).on("click", "[id^=btn-" + itemDataName + "-edit-]", function (e) {
+            OnAjaxBegin("");
+			//start : 20190716 : isid.rgl
+			if($('#txtlookup-vendor').val() != "")
+            {
+                vendoredit = $('#txtlookup-vendor').val().trim();
+            }
+			//end : 20190716 : isid.rgl
+            var embedded = $(this).data("embedded");
+            ResetEditor();
+			
+			//start : 20190716 : isid.rgl
+			$('#txtlookup-vendor').val(vendoredit);
+			//end : 20190716 : isid.rgl
+            InitEditedRow(embedded.DataNo);
+            DisableAddedRowForm();
+            if (embedded.MatNo === "" || embedded.MatNo === null) {
+                $.Enable(["#txt-itemedit-matdesc", "#cmb-itemedit-uom"]);
+            }
+            if (embedded.IsService){
+                $.Disable(["#cmb-itemedit-uom", "#txt-itemedit-matdesc",
+                    "#cmb-poitemadditional-plant",
+                    "#cmb-poitemadditional-sloc",
+                    "#txt-poitemadditional-deliverydate"]);
+                $("[id^=expchildrow-" + subItemDataName + embedded.DataNo + "]").remove();
+                var expanderRow = $("[id^=exprow-" + itemDataName + "-" + embedded.DataNo + "]");
+				//start : 20190617 : isid.rgl
+				myExpanderRow =  $("[id^=exprow-" + itemDataName + "-" + embedded.DataNo + "]");
+				//end : 20190617 : isid.rgl
+                OnSubItemExpanding(itemDataName, embedded.DataNo, embedded, expanderRow, OnSubItemExpanded);
+            }
+			else
+            {
+                //material : 20190624 : isid.rgl : enabled input material for editing
+                $.Enable(["#txt-itemedit-matdesc", "#txt-itemedit-qty",
+                          "#txt-itemedit-price"]);
+                $.Disable(["#cmb-itemedit-uom"]);
+
+            }
+
+            if(isFromECatalogue)
+            {
+                $.Disable(["#txt-itemedit-price"]);
+            }
+
+            $.Enable(["#btn-itemedit-save", "#btn-itemedit-cancel"]);
+            $.Disable(["#btn-subitemedit-save","[id^=btn-"+itemDataName+"-edit-]", "[id^=btn-"+itemDataName+"-delete-]"]);
+        });
+
+        $(document).on("click", "[id^=btn-" + itemDataName + "-delete-]", function (e) {
+            OnAjaxBegin("Delete Item");
+            var currentRow = $(this);
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.ItemDelete",
+                data: JSON.stringify({
+                    ProcessId: processId,
+                    PONo: currentRow.data("pono"),
+                    POItemNo: currentRow.data("poitemno"),
+                    SeqItemNo: currentRow.data("seqitemno")
+                }),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#grid-poitem").html(data);
+                        $("#grid-poitem table #chk-all-pritem").addClass("hidden");
+                        $("#grid-poitem table .itemedit-col-action").removeClass("hidden");
+                        RefreshAttachment();
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        $(document).on("click", "#btn-itemedit-save", function (e) {
+            var currentRow = $(this);
+            var isAdd = currentRow.closest("#rowadded").length === 1;
+            if (isAdd) {
+                if (ValidateAddItem()) {
+                    var subItemList = [];
+                    $("[id*=subrowadd-]").each(function (idx, el) {
+                        var $this = $(this);
+                        var $thisElInfo = $this.GetElementInfo();
+                        subItemList.push({
+                            SubItemDataNo: $thisElInfo.DataNo,
+                            SubItemMatDesc: $this.find("[id^=txt-subitemedit-matdesc]").valOrDefault(),
+                            //SubItemQty: $.FromPrice($this.find("[id^=txt-subitemedit-qty]").valOrDefault()).toFixed(2),
+                            SubItemQtyStr: $this.find("[id^=txt-subitemedit-qty]").valOrDefault(),//).toFixed(2),
+                            SubItemUOM: $this.find("[id^=cmb-subitemedit-uom]").valOrDefault(),
+                            //SubItemPrice: $.FromPrice($this.find("[id^=txt-subitemedit-price]").valOrDefault()).toFixed(2),
+                            SubItemPriceStr: $this.find("[id^=txt-subitemedit-price]").valOrDefault(),//).toFixed(2),
+                            SubItemWBSNo: $this.find("[id^=lookup-subitemedit-wbsno]").LookupVal(),
+                            SubItemCostCenter: $this.find("[id^=cmb-subitemedit-costcenter]").valOrDefault(),
+                            SubItemGLAccount: $this.find("[id^=lookup-subitemedit-glaccount]").LookupVal()
+                        });
+                    });
+
+                    var vendor = ViewData.Get("VendorInfo");
+                    OnAjaxBegin("Save Item and Sub Item");
+                    $.ajax({
+                        type: "POST",
+                        url: "@POCreationController.Action.ItemAdd",
+                        data: JSON.stringify({
+                            ProcessId: processId,
+                            PONo: poNo,
+                            Vendor: vendor.Code,
+                            VendorName: vendor.Name,
+                            PurchasingGroup: $("#cmbedit-purchasinggroup").valOrDefault(),
+                            ValuationClass: $("#lookup-itemedit-category").LookupVal(),
+                            MatNo: subItemList.length > 0 ? "X" : $("#lookup-itemedit-matno").LookupVal(),
+                            MatDesc: $("#txt-itemedit-matdesc").valOrDefault(),
+                            //Qty: $.FromPrice($("#txt-itemedit-qty").valOrDefault()).toFixed(2),
+                            QtyStr : $("#txt-itemedit-qty").valOrDefault(),
+                            UOM: $("#cmb-itemedit-uom").valOrDefault(),
+                            //Price: $.FromPrice($("#txt-itemedit-price").valOrDefault()).toFixed(2), // NOTE: if you must send decimal to ASP, send it as decimal string. because default js will convert to integer then make asp confuse.
+                            PriceStr : $("#txt-itemedit-price").valOrDefault(),
+                            WBSNo: subItemList.length > 0 ? "X" : $("#lookup-itemedit-wbsno").LookupVal(),
+                            CostCenter: subItemList.length > 0 ? "X" : $("#cmb-itemedit-costcenter").valOrDefault(),
+                            GLAccount: subItemList.length > 0 ? "X" : $("#lookup-itemedit-glaccount").LookupVal(),
+                            DeliveryDateString: $("#txt-poitemadditional-deliverydate").valOrDefault(),
+                            Plant: $("#cmb-poitemadditional-plant").valOrDefault(),
+                            SLoc: $("#cmb-poitemadditional-sloc").valOrDefault(),
+                            Currency: $("#cmbedit-currency").valOrDefault(),
+                            SubItemList: subItemList
+                        }),
+                        contentType: "@CommonFormat.JsonMimeType",
+                        success: function (data) {
+                            if (!data.ResponseType) {
+                                $("#grid-poitem").html(data);
+                                $("#grid-poitem table #chk-all-pritem").addClass("hidden");
+                                $("#grid-poitem table .itemedit-col-action").removeClass("hidden");
+                                $("#grid-poitem table .subitemedit-col-action").removeClass("hidden");
+
+                                $("#grid-poitem table [id^=btn-poitem-copy]").removeClass("hidden");
+
+								//start : 20190617 : isid.rgl
+                                myExpanderRow.remove();
+								//end : 20190617 : isid.rgl
+
+                                var type = $("#cmb-poitem-creationtype").valOrDefault();
+                                ShowInlineItemEditor(type);
+
+                                RefreshSPKAmount();
+                            }
+                            else {
+                                $.Enable(["#btn-itemedit-save", "#btn-itemedit-cancel"]);
+                                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                            }
+                        },
+                        complete: OnAjaxComplete,
+                        error: OnAjaxError
+                    });
+                }
+            }
+            else {
+                var embedded = currentRow.data("embedded");
+                @*if (!$.ValidateMandatory(["#txt-itemedit-qty"], function ($thisValue) { return $.FromPrice($thisValue) <= embedded.Qty })) {
+                    $.messagebox.show("@ActionResponseViewModel.Warning", "Only decreasing quantity is allowed.", "@ActionResponseViewModel.Warning");
+                    $.progressbox.hide();
+                    return;
+                }*@
+                OnAjaxBegin("Update Item and Sub Item");
+
+                $.ajax({
+                    type: "POST",
+                    url: "@POCreationController.Action.ItemUpdate",
+                    data: JSON.stringify({
+                        //viewModel
+                        ProcessId: processId,
+                        PONo: embedded.PONo,
+                        POItemNo: embedded.POItemNo,
+                        SeqItemNo: embedded.SeqItemNo,
+                        MatDesc: $("#txt-itemedit-matdesc").val(),
+                        Plant: $("#cmb-poitemadditional-plant").valOrDefault(),
+                        SLoc: $("#cmb-poitemadditional-sloc").valOrDefault(),
+                        UOM:  $("#cmb-itemedit-uom").valOrDefault(),
+                        DeliveryDateString: $("#txt-poitemadditional-deliverydate").valOrDefault(),
+                        //Qty: $.FromPrice($("#txt-itemedit-qty").valOrDefault()).toFixed(2), //comment by WOT.Fajri
+                        QtyStr : $("#txt-itemedit-qty").valOrDefault(), //add by WOT.Fajri
+                        UOM: $("#cmb-itemedit-uom").valOrDefault(),
+                        //PricePerUOM: $.FromPrice($("#txt-itemedit-price").valOrDefault()).toFixed(2), //comment by WOT.Fajri
+                        PriceStr : $("#txt-itemedit-price").valOrDefault(), //add by WOT.Fajri
+                        Currency: $("#cmbedit-currency").valOrDefault()
+                    }),
+                    contentType: "@CommonFormat.JsonMimeType",
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            $("#grid-poitem").html(data);
+                            $("#grid-poitem table #chk-all-pritem").addClass("hidden");
+                            $("#grid-poitem table .itemedit-col-action").removeClass("hidden");
+                            $("#grid-poitem table .subitemedit-col-action").removeClass("hidden");
+
+                            NotInPOManualToggle();
+                            RefreshSPKAmount();
+                        }
+                        else {
+                            $.Enable(["#btn-itemedit-save", "#btn-itemedit-cancel"]);
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            }
+
+            OnAjaxComplete();
+        });
+
+        $(document).on("click", "[id^=btn-subitemedit-addnew-]", function (e) {
+            var currentRow = $(this);
+            var isAdd = currentRow.closest("[id^=subrowadd-]").length === 1;
+            if (isAdd) {
+                if (ValidateAddItem()) {
+                    var subItemList = [];
+                    $("[id*=subrowadd-]").each(function (idx, el) {
+                        var $this = $(this);
+                        var $thisElInfo = $this.GetElementInfo();
+                        subItemList.push({
+                            SubItemDataNo: $thisElInfo.DataNo,
+                            SubItemMatDesc: $this.find("[id^=txt-subitemedit-matdesc]").valOrDefault(),
+                            //SubItemQty: $.FromPrice($this.find("[id^=txt-subitemedit-qty]").valOrDefault()).toFixed(2),
+                            SubItemQtyStr: $this.find("[id^=txt-subitemedit-qty]").valOrDefault(),
+                            SubItemUOM: $this.find("[id^=cmb-subitemedit-uom]").valOrDefault(),
+                            //SubItemPrice: $.FromPrice($this.find("[id^=txt-subitemedit-price]").valOrDefault()).toFixed(2),
+                            SubItemPriceStr: $this.find("[id^=txt-subitemedit-price]").valOrDefault(),
+                            SubItemWBSNo: $this.find("[id^=lookup-subitemedit-wbsno]").LookupVal(),
+                            SubItemCostCenter: $this.find("[id^=cmb-subitemedit-costcenter]").valOrDefault(),
+                            SubItemGLAccount: $this.find("[id^=lookup-subitemedit-glaccount]").LookupVal()
+                        });
+                    });
+
+                    console.log(subItemList);
+
+                    var vendor = ViewData.Get("VendorInfo");
+                    OnAjaxBegin("Save Sub Item");
+                    $.ajax({
+                        type: "POST",
+                        url: "@POCreationController.Action.SubItemAdd",
+                        data: JSON.stringify({
+                            ProcessId: processId,
+                            PONo: poNo,
+                            Vendor: vendor.Code,
+                            VendorName: vendor.Name,
+                            PurchasingGroup: $("#cmbedit-purchasinggroup").valOrDefault(),
+                            ValuationClass: $("#lookup-itemedit-category").LookupVal(),
+                            MatNo: subItemList.length > 0 ? "X" : $("#lookup-itemedit-matno").LookupVal(),
+                            MatDesc: $("#txt-itemedit-matdesc").valOrDefault(),
+                            //Qty: $.FromPrice($("#txt-itemedit-qty").valOrDefault()).toFixed(2),
+                            QtyStr : $("#txt-itemedit-qty").valOrDefault(),
+                            UOM: $("#cmb-itemedit-uom").valOrDefault(),
+                            //Price: $.FromPrice($("#txt-itemedit-price").valOrDefault()).toFixed(2), // NOTE: if you must send decimal to ASP, send it as decimal string. because default js will convert to integer then make asp confuse.
+                            PriceStr : $("#txt-itemedit-price").valOrDefault(),
+                            WBSNo: subItemList.length > 0 ? "X" : $("#lookup-itemedit-wbsno").LookupVal(),
+                            CostCenter: subItemList.length > 0 ? "X" : $("#cmb-itemedit-costcenter").valOrDefault(),
+                            GLAccount: subItemList.length > 0 ? "X" : $("#lookup-itemedit-glaccount").LookupVal(),
+                            DeliveryDateString: $("#txt-poitemadditional-deliverydate").valOrDefault(),
+                            Plant: $("#cmb-poitemadditional-plant").valOrDefault(),
+                            SLoc: $("#cmb-poitemadditional-sloc").valOrDefault(),
+                            Currency: $("#cmbedit-currency").valOrDefault(),
+                            SubItemList: subItemList
+                        }),
+                        contentType: "@CommonFormat.JsonMimeType",
+                        success: function (data) {
+                            if (!data.ResponseType) {
+                                /*@*$("#grid-poitem").html(data);
+                                $("#grid-poitem table #chk-all-pritem").addClass("hidden");
+                                $("#grid-poitem table .itemedit-col-action").removeClass("hidden");
+                                $("#grid-poitem table .subitemedit-col-action").removeClass("hidden");
+
+                                $("#grid-poitem table [id^=btn-poitem-copy]").removeClass("hidden");
+                                var type = $("#cmb-poitem-creationtype").valOrDefault();
+                                ShowInlineItemEditor(type);*@*/
+
+                                currentRow.closest("[id^=subrowadd-]").after(data);
+                                NotInPOManualToggle();
+                                ResetSubItemEditor();
+
+                                RefreshSPKAmount();
+                            }
+                            else {
+                                $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                            }
+                        },
+                        complete: OnAjaxComplete,
+                        error: OnAjaxError
+                    });
+                }
+            }
+        });
+
+        $(document).on("click", "#btn-itemedit-cancel", function (e) {
+
+			//start : 20190617 : isid.rgl
+	        $("[id^=expchildrow-" + mydataname + "-" + mydatano + "]").remove();
+			//end : 20190617 : isid.rgl
+
+            DisableAllFeatures();
+            var currentRow = $(this);
+            var isAdd = currentRow.closest("#rowadded").length === 1;
+            if (!isAdd)
+                ResetEditedRowValue(currentRow.data("no"));
+            else if ($("#lookup-itemedit-category").LookupVal() === "")
+                DisableAddedRowForm();
+
+            currentRow
+                .closest("[id^=exprow-poitem-]")
+                .find("[id^=exp-poitem-]")
+                .removeClass("fa-minus-square-o fa-plus-square-o")
+                .addClass("fa-plus-square-o");
+            ResetEditor();
+            EnableAllFeatures();
+        });
+
+        $(document).on("click", "#btn-subitemedit-save", function (e) {
+            var currentRow = $(this);
+            var embedded = currentRow.data("embedded");
+            if (!$.ValidateMandatory(["#txt-subitemedit-qty"], function ($thisValue) { return $.FromPrice($thisValue) <= embedded.Qty })) {
+                $.messagebox.show("@ActionResponseViewModel.Warning", "Only decreasing quantity is allowed.", "@ActionResponseViewModel.Warning");
+                $.progressbox.hide();
+                return;
+            }
+            OnAjaxBegin("Update Sub Item");
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.SubItemUpdate",
+                data: JSON.stringify({
+                    ProcessId: processId,
+                    PONo: embedded.PONo,
+                    POItemNo: embedded.POItemNo,
+                    SeqItemNo: embedded.SeqItemNo,
+                    SeqNo: embedded.SeqNo,
+                    MatDesc: $("#txt-subitemedit-matdesc").valOrDefault(),
+                    //Qty: $.FromPrice($("#txt-subitemedit-qty").valOrDefault()).toFixed(2),
+                    QtyStr : $("#txt-subitemedit-qty").valOrDefault(),
+                    UOM: $("#cmb-subitemedit-uom").valOrDefault(),
+                    //PricePerUOM: $.FromPrice($("#txt-subitemedit-price").valOrDefault()).toFixed(2),
+                    PriceStr : $("#txt-subitemedit-price").valOrDefault(),
+                    Currency: $("#cmbedit-currency").valOrDefault(),
+                    WBS: $("#lookup-subitemedit-wbsno").LookupVal(),
+                    CostCenter: $("#cmb-subitemedit-costcenter").valOrDefault(),
+                    GLAccount: $("#lookup-subitemedit-glaccount").LookupVal()
+                }),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        ResetSubItemEditor();
+
+                        //closed : isid.rgl : 20190617
+                        //$("[id^=expchildrow-" + dataName + dataNo + "]").remove();
+                        //expanderRow.after(data);
+
+                        //modded : isid.rgl : 20190617
+                        expanderRow = $("[id^=exprow-" + mydataname + "-" + mydatano + "]");
+                        $("[id^=expchildrow-" + mydataname + mydatano + "]").remove();          //20190715
+                        $("[id^=expchildrow-" + mydataname + "-" + mydatano + "]").remove();
+                        $("[id^=subrowedited]").addClass("hidden")
+                        expanderRow.after(data);
+                        //end modded : isid.rgl : 20190617
+
+                        $(".subitemedit-col-action").removeClass("hidden");
+                        NotInPOManualToggle();
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        $(document).on("click", "#btn-subitemedit-cancel", function (e) {
+            DisableAllFeatures();
+            ResetSubItemEditedRowValue();
+            EnableAllFeatures();
+            $.Disable(["#btn-subitemedit-save"]);
+            $("#btn-subitemedit-save, #btn-subitemedit-cancel").data("embedded", undefined);
+        });
+
+        function GetEditedData(isSavedAsDraft) {
+            var vendor = ViewData.Get("VendorInfo");
+            /*added : 20190628 : isid.rgl*/
+            var lookup,vendcode, vendname;
+            if($('#txtlookup-vendor').val() !="")
+            {
+                lookup = $('#txtlookup-vendor').val().split('-');
+            
+                if(lookup != "")
+                {
+                    vendcode = lookup[0].trim();
+                    vendname = lookup[1].trim();
+                }
+            }
+            else
+            {
+                vendcode = "";
+                vendname = "";
+            }
+            /*ended : 20190628 : isid.rgl*/
+            return {
+                ProcessId: processId,
+                PONo: poNo,
+                PODesc: $("#txtedit-poheadertext").valOrDefault(),
+                PONote: GetPONoteValue($("#txtedit-ponote").valOrDefault()),
+                //Vendor: vendor.Code,          closed : 20190628 : isid.rgl
+                //VendorName: vendor.Name,      closed : 20190628 : isid.rgl
+                Vendor: vendcode,               
+                VendorName: vendname,
+                VendorAddress: vendor.Address,
+                VendorCountry: vendor.Country,
+                VendorCity: vendor.City,
+                VendorPostalCode: vendor.PostalCode,
+                VendorPhone: vendor.Phone,
+                VendorFax: vendor.Fax,
+                PurchasingGroup: $("#cmbedit-purchasinggroup").valOrDefault(),
+                Currency: $("#cmbedit-currency").valOrDefault(),
+                DeliveryAddress: $("#cmbedit-deliveryaddr").valOrDefault(),
+                SPKInfo: ViewData.Get("SPKInfo"),
+                OtherMail : $("#hiddenmail").val(),
+                SaveAsDraft: isSavedAsDraft
+            };
+        }
+
+        function ValidatePOSave() {
+            var isValid = $.ValidateMandatory([
+                "#txtedit-poheadertext",
+                "#txtlookup-vendor",
+                "#cmbedit-purchasinggroup",
+                "#cmbedit-currency",
+                "#cmbedit-deliveryaddr"
+            ]);
+
+            if (isValid) {
+                var txtPONote = $("#txtedit-ponote");
+                if (txtPONote.valOrDefault() !== "") {
+                    var poNote = GetPONoteValue(txtPONote.valOrDefault());
+                    var poNoteLength = poNote.length;
+                    if (poNoteLength > 10) {
+                        $.messagebox.show("@ActionResponseViewModel.Error", "PO Note max line is 10, yours are " + poNoteLength + " lines", "@ActionResponseViewModel.Error");
+                        return false;
+                    }
+
+                    for (var idx=0; idx < poNoteLength; idx++) {
+                        var poNoteCharLength = poNote[idx].length;
+                        if (poNoteCharLength > 132) {
+                            $.messagebox.show("@ActionResponseViewModel.Error", "PO Note line " + idx + " is exceeded 132 characters, yours are " + poNoteCharLength + " characters", "@ActionResponseViewModel.Error");
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return isValid;
+        }
+
+        function ValidatePOItem() {
+            return $("#grid-poitem table > tbody > tr:not([id=rowadded], [id^=subrowadd-]) > td").html() !== "@CommonDisplayMessage.NoData";
+        }
+
+        function SaveAsDraft() {
+            OnAjaxBegin("Save Purchase Order as Draft");
+            var paramData = GetEditedData(true);
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.Save",
+                data: JSON.stringify(paramData),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: function (data) {
+                    if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                        $.messagebox.show("@ActionResponseViewModel.Success", data.Message, "@ActionResponseViewModel.Success");
+                        ResetForm();
+                        window.location.href = "@POInquiryController.Action.Index";
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        }
+
+        $("#btnsave-draft").click(function (e) {
+            SilentSavePOHeader();
+            var isPOManual = $("#cmb-poitem-creationtype").valOrDefault() === "@POCreationType.Manual";
+            if (!ValidatePOItem())
+                $.messagebox.show("@ActionResponseViewModel.Error", isPOManual ? "Please add or save item first." : "PR isn't adopted yet.", "@ActionResponseViewModel.Error");
+            else
+                SaveAsDraft();
+        });
+
+        $("#btn-save").click(function (e) {
+            SilentSavePOHeader();
+            var isPOManual = $("#cmb-poitem-creationtype").valOrDefault() === "@POCreationType.Manual";
+            if (ValidatePOSave()) {
+                if (!ValidatePOItem())
+                    $.messagebox.show("@ActionResponseViewModel.Error", isPOManual ? "Please add or save item first." : "PR isn't adopted yet.", "@ActionResponseViewModel.Error");
+                else {
+                    RefreshSPKAmount();
+                    $("#pop-createspkconfirm").modal();
+                }
+            }
+        });
+
+        $("#btnsave-ok").click(function (e) {
+            OnAjaxBegin("Save Purchase Order");
+
+            var paramData = GetEditedData(false);
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.Save",
+                data: JSON.stringify(paramData),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: function (data) {
+                    $("#pop-saveconfirm").modal("hide");
+                    if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                        $.messagebox.show("@ActionResponseViewModel.Success", data.Message, "@ActionResponseViewModel.Success");
+                        ResetForm();
+                        window.location.href = "@POInquiryController.Action.Index";
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: function (data) {
+                    $("#pop-saveconfirm").modal("hide");
+
+                    OnAjaxError(data);
+                }
+            });
+        });
+
+        $("#btnsave-cancel").click(function (e) {
+            $("#pop-saveconfirm").modal("hide");
+        });
+
+        $("#btn-backtoinquiry").click(function (e) {
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.TempDataClear",
+                async: false,
+                data: {
+                    processId: ViewData.Get("ProcessId")
+                },
+                success: function (data) {
+                    if (data.ResponseType === "@ActionResponseViewModel.Error")
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    else
+                        console.log("Clear PO Item success.");
+                },
+                error: OnAjaxError
+            });
+
+            window.close();
+            window.location.href = "@POInquiryController.Action.Index";
+        });
+
+        
+
+        function ValidateAddItem() {
+            var headerSelectorList = [
+                "#lookup-vendor",
+                "#cmbedit-purchasinggroup",
+                "#cmbedit-currency"
+            ];
+
+            var materialItemSelectorList = [
+                "#lookup-itemedit-category",
+                "#txt-itemedit-matdesc",
+                "#txt-itemedit-qty",
+                "#cmb-itemedit-uom",
+                "#txt-itemedit-price",
+                "#lookup-itemedit-wbsno",
+                "#cmb-itemedit-costcenter",
+                "#lookup-itemedit-glaccount",
+                "#txt-poitemadditional-deliverydate",
+                "#cmb-poitemadditional-plant",
+                "#cmb-poitemadditional-sloc"
+            ];
+
+            var serviceItemSelectorList = [
+                "#lookup-itemedit-category",
+                "#txt-itemedit-matdesc",
+                "#txt-poitemadditional-deliverydate",
+                "#cmb-poitemadditional-plant",
+                "#cmb-poitemadditional-sloc"
+            ];
+
+            var subItemSelectorList = [];
+            GetSubItemRowList().each(function () {
+                var subItemRow = $(this);
+                var subItemElInfo = subItemRow.GetElementInfo();
+                var dataNo = subItemElInfo.DataNo;
+                subItemSelectorList.push("#txt-subitemedit-matdesc-" + dataNo);
+                subItemSelectorList.push("#txt-subitemedit-qty-" + dataNo);
+                subItemSelectorList.push("#cmb-subitemedit-uom-" + dataNo);
+                subItemSelectorList.push("#txt-subitemedit-price-" + dataNo);
+                subItemSelectorList.push("#lookup-subitemedit-wbsno-" + dataNo);
+                subItemSelectorList.push("#cmb-subitemedit-costcenter-" + dataNo);
+                subItemSelectorList.push("#lookup-subitemedit-glaccount-" + dataNo);
+            });
+
+            var currentItemCategory = ViewData.Get("CurrentItemCategory");
+            var isItemClassMaterial = currentItemCategory.ItemClass === "@POCreationType.Manual";
+
+            var isHeaderValid = $.ValidateMandatory(headerSelectorList),
+                isItemValid = $.ValidateMandatory(serviceItemSelectorList),
+                isSubItemValid = $.ValidateMandatory(subItemSelectorList);
+
+            if (isItemClassMaterial) {
+                isItemValid = $.ValidateMandatory(materialItemSelectorList);
+                isSubItemValid = true;
+            }
+
+            return isHeaderValid && isItemValid && isSubItemValid;
+        }
+
+        /* =============================== CRUD: end =============================== */
+
+        /* =========================== Item Editor: begin =========================== */
+
+        function InitSubItemLookup() {
+            var wbspopup = '@Html.LookupContainer("subitemedit-wbsno")';
+            var glaccountpopup = '@Html.LookupContainer("subitemedit-glaccount")';
+
+            if ($("div.page-content #popuplookup-subitemedit-wbsno").length === 0) {
+                $("div.page-content").append(wbspopup);
+                $("div.page-content").append(glaccountpopup);
+            }
+
+            $("#lookup-subitemedit-wbsno").lookup({
+                IsSingleSelection: true,
+                SelectedFormatter: function (selected) { return selected.Value; },
+                DataName: "wbsno",
+                LookupOpenUrl: "@POCreationController.Action.OpenWBSLookup",
+                LookupSearchUrl: "@POCreationController.Action.SearchWBSLookup",
+                OnBeginCallback: function () { OnAjaxBegin("Search WBS"); },
+                OnEndCallback: OnAjaxComplete
+            });
+
+            $("#lookup-subitemedit-glaccount").lookup({
+                IsSingleSelection: true,
+                SelectedFormatter: function (selected) { return selected.Value; },
+                DataName: "glaccount",
+                LookupOpenUrl: "@POCreationController.Action.OpenGLAccountLookup",
+                LookupSearchUrl: "@POCreationController.Action.SearchGLAccountLookup",
+                OnBeginCallback: function () { OnAjaxBegin("Search GL Account"); },
+                OnEndCallback: OnAjaxComplete
+            });
+        }
+
+        function InitSubItemPrice() {
+            var qtySelector = "#txt-subitemedit-qty",
+                priceSelector = "#txt-subitemedit-price",
+                amountSelector = "#txt-subitemedit-amount";
+
+            function AmountCalculatorClosure() { GetAmount(qtySelector, priceSelector, amountSelector); }
+
+            $(document).onOnce("keydown", qtySelector, $.NumericKey);
+            $(document).onOnce("keydown", priceSelector, $.NumericKey);
+            $(document).onOnce("keyup", qtySelector, AmountCalculatorClosure);
+            $(document).onOnce("keyup", priceSelector, AmountCalculatorClosure);
+        }
+
+        function ResetSubItemEditor() {
+            $.Clear([
+                "#txt-subitemedit-category",
+                "#txt-subitemedit-matdesc",
+                "#txt-subitemedit-qty",
+                "#cmb-subitemedit-uom",
+                "#txt-subitemedit-price",
+                "#txt-subitemedit-amount",
+                "#cmb-subitemedit-costcenter"
+            ]);
+
+            $.ClearLookup([
+                "#lookup-subitemedit-wbsno",
+                "#lookup-subitemedit-glaccount"
+            ]);
+        }
+
+        function FillSubItemEditor(data) {
+            //$.Disable(["#txt-subitemedit-matdesc"]);
+            $.Disable(["#cmb-subitemedit-uom"]);
+            $.Disable(["#txt-subitemedit-amount"]);
+            $.Disable(["#lookup-subitemedit-wbsno"]);
+
+            //$('#lookup-subitemedit-wbsno').att
+            $("#lookup-subitemedit-wbsno").attr('disabled', 'disabled');
+
+            //$.Disable(["#cmb-subitemedit-costcenter"]);
+            $.Disable(["#lookup-subitemedit-glaccount"]);
+
+            $("#txt-subitemedit-matdesc").val(data.MatDesc);
+            $("#txt-subitemedit-qty").val(data.Qty);
+            $("#cmb-subitemedit-uom").val(data.UOM);
+            $("#cmb-subitemedit-costcenter").val(data.UOM);
+
+            $("#txt-subitemedit-price").val(data.PricePerUOM);
+            $("#txt-subitemedit-amount").val(data.PriceAmount);
+            $("#lookup-subitemedit-wbsno").LookupVal(data.WBSNo);
+            $("#cmb-subitemedit-costcenter").val(data.CostCenter);
+			$("#lookup-subitemedit-glaccount").LookupVal(data.GLAccount);
+        }
+
+        function MoveBackSubItemEditor() {
+            var currentEditor = $("#subrowedited");
+            var editorRow = $("#subrowedit").html(currentEditor.html());
+            currentEditor.remove();
+        }
+
+        function MoveEmptySubItemEditorAfterItemRow(data, expanderRow) {
+            var editorRow = $("#subrowedit");
+            var editorRowContent = editorRow.html();
+
+            var isCurrentRowBeingEdited = editorRowContent === "" && expanderRow.hasClass("roweditcurrent-poitem");
+            var isEditorCanBeMoved = !isCurrentRowBeingEdited;
+            if (isEditorCanBeMoved) {
+                var row = $(document.createElement("tr"));
+                row.attr("id", "subrowedited");
+                row.addClass("roweditcurrent-poitem form-group-xs");
+                row.html(editorRowContent);
+                expanderRow.after(row);
+                editorRow.empty();
+
+                $("#btn-subitemedit-save").data("embedded", data);
+                $("#btn-subitemedit-cancel").data("embedded", data);
+            }
+
+            return isEditorCanBeMoved;
+        }
+
+        function MoveSubItemEditorToAfterItemRow(currentIdx, data, currentRow) {
+            var editorRow = $("#subrowedit");
+            var editorRowContent = editorRow.html();
+            var currentRowContent = currentRow.html();
+
+            var isCurrentRowBeingEdited = editorRowContent === "" && currentRow.hasClass("roweditcurrent-poitem");
+            var isEditorCanBeMoved = !isCurrentRowBeingEdited;
+            if (isEditorCanBeMoved) {
+                var row = $(document.createElement("tr"));
+                row.addClass("roweditcurrent-poitem form-group-xs");
+                row.html(editorRowContent);
+                currentRow.after(row);
+
+                /*$("#subrowedited").html(currentRowContent);
+                editorRow.empty();*/
+
+                $("#btn-subitemedit-save").data("embedded", data);
+                $("#btn-subitemedit-cancel").data("embedded", data);
+            }
+
+            return isEditorCanBeMoved;
+        }
+
+        function ResetSubItemEditedRowValue() {
+            ResetSubItemEditor();
+            var originalRow = $("[id^=expchildrow-].hidden");
+            originalRow.removeClass("hidden");
+            originalRow.find(".subitemedit-col-action > button.hidden").removeClass("hidden");
+        }
+
+        function InitEmptySubItemEditor() {
+            OnAjaxBegin("Adding Sub Item");
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.POSubItemEditorShow",
+                data: JSON.stringify({
+                    ProcessId: processId,
+                    PONo: "",
+                    POItemNo: "",
+                    SeqItemNo: "",
+                    DataNo: 1,
+                    DataName: "poitem",
+                    CurrentPage: 1,
+                    PageSize: Number("@PaginationViewModel.DefaultPageSize")
+                }),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#rowadded").after(data);
+                        $("#txt-subitemedit-qty").val("0");
+                        $("#txt-subitemedit-price").val("0");
+                        $("#txt-subitemedit-amount").val("0");
+                        InitSubItemLookup();
+                        InitSubItemPrice();
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+
+                    OnAjaxComplete();
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+
+            /*var currentRow = $("#subrowadded");
+            var isEditorMoved = MoveSubItemEditorToAfterItemRow(0, { PONo: poNo, POItemNo: "", SeqItemNo: "" }, currentRow);
+            if (isEditorMoved) {
+                currentRow.removeClass("hidden");
+                InitSubItemLookup();
+                InitSubItemPrice();
+            }*/
+        }
+
+        function InitLookup() {
+
+            $("#lookup-itemedit-category").lookup({
+                IsSingleSelection: true,
+                SelectedFormatter: function (selected) { return selected.ValuationClass; },
+                DataName: "valuationclass",
+                AdditionalParam: [{
+                    Name: "PurchasingGroup",
+                    Type: "I",
+                    Value: "#cmbedit-purchasinggroup"
+                }],
+                LookupOpenUrl: "@POCreationController.Action.OpenValuationClassLookup",
+                LookupSearchUrl: "@POCreationController.Action.SearchValuationClassLookup",
+                OnBeginCallback: function () { OnAjaxBegin("Search Category"); },
+                OnEndCallback: OnAjaxComplete,
+                OnLookupButtonClick: function () {
+                    var purchasinggroup = $("#cmbedit-purchasinggroup").valOrDefault();
+                    if (purchasinggroup !== "")
+                        return true;
+
+                    $.messagebox.show("@ActionResponseViewModel.Error", "Purchasing group is not selected.", "@ActionResponseViewModel.Error");
+                    return false;
+                },
+                OnRowSelected: function (selected) {
+                    //ResetEditor();
+                    ViewData.Add("CurrentItemCategory", selected);
+                    GetSubItemRowList().remove();
+                    if (selected.ItemClass === "S") {
+                        DisableAddedRowForm();
+                        $.Enable(["#txt-itemedit-matdesc"]);
+
+                        $("#txt-itemedit-qty").val("1");
+                        $("#cmb-itemedit-uom").val("AU");
+                        $("#txt-itemedit-price").val("0");
+                        $("#txt-itemedit-amount").val("0");
+
+                        var isSubItemInitialized = GetSubItemRowList().length > 0;
+                        if (!isSubItemInitialized)
+                            InitEmptySubItemEditor();
+                    }
+                    else if (selected.ItemClass === "M") {
+                        EnableAddedRowForm();
+
+                        //$("#txt-itemedit-qty").val("1");
+                        $("#cmb-itemedit-uom").val(selected.UOM);
+                        $("#txt-itemedit-price").val(selected.Price);
+                        $("#txt-itemedit-amount").val("0");
+                    }
+
+                    $("#popuplookup-itemedit-category").modal("hide");
+                }
+            });
+
+            $("#lookup-itemedit-matno").lookup({
+                IsSingleSelection: true,
+                SelectedFormatter: function (selected) { return selected.MaterialNo; },
+                DataName: "material",
+                AdditionalParam: [{
+                    Name: "ValuationClass",
+                    Type: "C",
+                    Value: function () {
+                        return $("#lookup-itemedit-category").LookupVal();
+                    }
+                }, {
+                    Name: "Currency",
+                    Type: "I",
+                    Value: "#cmbedit-currency"
+                }],
+                LookupOpenUrl: "@POCreationController.Action.OpenMaterialLookup",
+                LookupSearchUrl: "@POCreationController.Action.SearchMaterialLookup",
+                OnBeginCallback: function () { OnAjaxBegin("Search Material"); },
+                OnEndCallback: OnAjaxComplete,
+                OnRowSelected: function (selected) {
+                    if ($.ValidateMandatory(["#lookup-vendor", "#cmbedit-purchasinggroup", "#cmb-poitemadditional-plant"])) {
+                        $.progressbox.show($tdk.PageTitle, "Checking material on Source List");
+                        var vendor = ViewData.Get("VendorInfo");
+                        $.ajax({
+                            type: "POST",
+                            url: "@POCreationController.Action.SourceListCheck",
+                            data: {
+                                material: selected.MaterialNo,
+                                vendor: vendor.Code,
+                                plant: $("#cmb-poitemadditional-plant").valOrDefault(),
+                                purchasingGroup: $("#cmbedit-purchasinggroup").valOrDefault()
+                            },
+                            success: function (data) {
+                                if (data.ResponseType !== "@ActionResponseViewModel.Error" && data.ResponseType !== "@ActionResponseViewModel.Warning") {
+                                    $.Disable(["#txt-itemedit-matdesc"]);
+                                    $("#txt-itemedit-matdesc").val(selected.MaterialDesc);
+                                    var txtQty = $("#txt-itemedit-qty");
+                                    var txtUOM = $("#cmb-itemedit-uom");
+                                    var txtPrice = $("#txt-itemedit-price");
+                                    txtQty.val("1");
+                                    txtUOM.val(selected.UOM);
+                                    txtPrice.val("0");
+                                    $("#txt-itemedit-amount").val("0");
+
+                                    $("#popuplookup-itemedit-matno").modal("hide");
+                                }
+                                else {
+                                    $.messagebox.show(data.ResponseType, data.Message, data.ResponseType);
+                                }
+                            },
+                            complete: $.progressbox.hide,
+                            error: OnAjaxError
+                        });
+                    }
+                    else {
+                        $("#popuplookup-itemedit-matno").modal("hide");
+                    }
+                }
+            });
+
+            $("#lookup-itemedit-wbsno").lookup({
+                IsSingleSelection: true,
+                SelectedFormatter: function (selected) { return selected.Value; },
+                DataName: "wbsno",
+                LookupOpenUrl: "@POCreationController.Action.OpenWBSLookup",
+                LookupSearchUrl: "@POCreationController.Action.SearchWBSLookup",
+                OnBeginCallback: function () { OnAjaxBegin("Search WBS"); },
+                OnEndCallback: OnAjaxComplete
+            });
+
+            $("#lookup-itemedit-glaccount").lookup({
+                IsSingleSelection: true,
+                SelectedFormatter: function (selected) { return selected.Value; },
+                DataName: "glaccount",
+                LookupOpenUrl: "@POCreationController.Action.OpenGLAccountLookup",
+                LookupSearchUrl: "@POCreationController.Action.SearchGLAccountLookup",
+                OnBeginCallback: function () { OnAjaxBegin("Search GL Account"); },
+                OnEndCallback: OnAjaxComplete
+            });
+        }
+
+        function GetAmount(qtySelector, priceSelector, amountSelector) {
+            var qtyElement = $(qtySelector),
+                priceElement = $(priceSelector),
+                amountElement = $(amountSelector);
+
+            var qty = $.FromPrice(qtyElement.valOrDefault()),
+                price = $.FromPrice(priceElement.valOrDefault());
+
+            qtyElement.val($.AsPrice(qty));
+            priceElement.val($.AsPrice(price));
+            amountElement.val($.AsPrice(qty * price));
+        }
+
+        function InitPrice() {
+            var qtySelector = "#txt-itemedit-qty",
+                priceSelector = "#txt-itemedit-price",
+                amountSelector = "#txt-itemedit-amount";
+
+            function AmountCalculatorClosure() { GetAmount(qtySelector, priceSelector, amountSelector); }
+
+            $(document).on("keydown", qtySelector, $.NumericKey);
+            $(document).on("keydown", priceSelector, $.NumericKey);
+            $(document).on("keyup", qtySelector, AmountCalculatorClosure);
+            $(document).on("keyup", priceSelector, AmountCalculatorClosure);
+        }
+
+        function ResetEditor() {
+            $.Clear([
+                "#txt-itemedit-prno",
+                "#txt-itemedit-pritemno",
+                "#txt-itemedit-matdesc",
+                "#txt-itemedit-qty",
+                "#cmb-itemedit-uom",
+                "#txt-itemedit-price",
+                "#txt-itemedit-amount",
+                "#cmb-itemedit-costcenter",
+                "#cmb-itemedit-plant",
+                "#cmb-itemedit-sloc",
+                "#txt-itemedit-deliverydate",
+                "#txtlookup-vendor"
+            ]);
+
+            $.ClearLookup([
+                "#lookup-itemedit-category",
+                "#lookup-itemedit-matno",
+                "#lookup-itemedit-wbsno",
+                "#lookup-itemedit-glaccount"
+            ]);
+        }
+
+        function FillEditor(data) {
+            $("#txt-itemedit-prno").val(data.PRNo);
+            $("#txt-itemedit-pritemno").val(data.PRItemNo);
+            $("#lookup-itemedit-category").LookupVal(data.ValuationClass);
+            $("#lookup-itemedit-matno").LookupVal(data.MatNo);
+            $("#txt-itemedit-matdesc").val(data.MatDesc);
+            $("#txt-itemedit-qty").val(data.Qty);
+            $("#cmb-itemedit-uom").val(data.UOM);
+            $("#txt-itemedit-price").val(data.PricePerUOM);
+            $("#txt-itemedit-amount").val(data.PriceAmount);
+            $("#lookup-itemedit-wbsno").LookupVal(data.WBSNo);
+            $("#cmb-itemedit-costcenter").val(data.CostCenter);
+            $("#lookup-itemedit-glaccount").LookupVal(data.GLAccount);
+
+            var combinedId = data.PONo + ";" + data.POItemNo + ";" + data.SeqItemNo;
+            $("#cmb-poitem-additional").val(combinedId);
+            $("#txt-poitemadditional-deliverydate").val(data.DeliveryPlanDateString);
+            $("#cmb-poitemadditional-plant").val(data.Plant);
+            RefreshSLoc("poitem", data.Plant, function () {
+                $("#cmb-poitemadditional-sloc").val(data.SLoc);
+                //$.Enable(["#cmb-poitemadditional-plant", "#cmb-poitemadditional-sloc"]);
+                $.Disable(["#cmb-poitemadditional-sloc"]);
+            });
+        }
+
+        function MoveEditorToCurrentRow(currentIdx, data, currentRow) {
+            var editorRow = $("#rowedit");
+            var editorRowContent = editorRow.html();
+            var currentRowContent = currentRow.html();
+
+            var isCurrentRowBeingEdited = editorRowContent === "" && currentRow.hasClass("roweditcurrent-poitem");
+            var isEditorCanBeMoved = !isCurrentRowBeingEdited;
+            if (isEditorCanBeMoved) {
+                currentRow.addClass("roweditcurrent-poitem form-group-xs");
+                currentRow.html(editorRowContent);
+
+                $("#rowedited").html(currentRowContent);
+                editorRow.empty();
+
+                $("#btn-itemedit-save").data("no", currentIdx);
+                $("#btn-itemedit-save").data("embedded", data);
+                $("#btn-itemedit-cancel").data("no", currentIdx);
+            }
+
+            return isEditorCanBeMoved;
+        }
+
+        function EnableAdditional() {
+            $.Enable([
+                "#cmb-poitemadditional-plant",
+                "#cmb-poitemadditional-sloc",
+                "#txt-poitemadditional-deliverydate"
+            ]);
+
+            $.Disable([
+                "#cmb-poitem-additional"
+            ]);
+        }
+
+        function DisableAdditional() {
+            $.Enable([
+                "#cmb-poitem-additional"
+            ]);
+
+            $.Disable([
+                "#cmb-poitemadditional-plant",
+                "#cmb-poitemadditional-sloc",
+                "#txt-poitemadditional-deliverydate"
+            ]);
+        }
+
+        function InitEmptyItemEditor() {
+            var currentRow = $("#rowadded");
+            var isEditorMoved = MoveEditorToCurrentRow(0, { PONo: poNo, POItemNo: "", SeqItemNo: "" }, currentRow);
+            if (isEditorMoved) {
+                currentRow.removeClass("hidden");
+                InitLookup();
+                InitPrice();
+            }
+        }
+
+        function ResetAddedRowValue() {
+            var editorRow = $("#rowedit");
+            var currentRow = $("#rowadded.roweditcurrent-poitem");
+            editorRow.html(currentRow.html());
+            currentRow.removeClass("roweditcurrent-poitem form-group-xs");
+            currentRow.empty();
+            currentRow.addClass("hidden");
+        }
+
+        function InitEditedRow(currentIdx) {
+            var currentRowCheckbox = $("#chk-poitem-" + currentIdx);
+            var currentRow = currentRowCheckbox.parent().parent();
+            var data = currentRowCheckbox.data("embedded");
+            MoveEditorToCurrentRow(currentIdx, data, currentRow);
+            InitLookup();
+            InitPrice();
+            FillEditor(data);
+            $.Disable(["#cmb-poitem-additional", "#txt-itemedit-matdesc", "#cmb-itemedit-uom"]);
+            $.DisableLookup(["#lookup-itemedit-category","#lookup-itemedit-matno"]);
+            if ($("#txtlookup-itemedit-matno").val() == '') $.Enable(["#txt-itemedit-matdesc"]);
+        }
+
+        function ResetEditedRowValue(currentIdx) {
+            var currentRow = $("[id^=exprow-" + itemDataName + "-" + currentIdx + "].roweditcurrent-poitem");
+            $("#rowedit").html(currentRow.html());
+            var currentRowContentBackup = $("#rowedited").html();
+            currentRow.removeClass("roweditcurrent-poitem form-group-xs");
+            currentRow.nextAll("[id^=expchildrow-"+itemDataName + currentIdx+"-]").remove();
+            currentRow.html(currentRowContentBackup);
+            $("#rowedited").empty();
+            MoveBackSubItemEditor();
+            $.Enable(["[id^=btn-"+itemDataName+"-edit-]", "[id^=btn-"+itemDataName+"-delete-]"]);
+
+            $.Clear([
+                "#cmb-poitem-additional",
+                "#txt-poitemadditional-deliverydate",
+                "#cmb-poitemadditional-plant"
+            ]);
+            $.Enable(["#cmb-poitem-additional"]);
+            var data = currentRow.data("embedded");
+            RefreshSLoc("poitem", data.Plant, function () {
+                $("#cmb-poitemadditional-sloc").val(data.SLoc);
+                $.Disable(["#cmb-poitemadditional-plant", "#cmb-poitemadditional-sloc"]);
+                $.Clear(["#cmb-poitemadditional-sloc"]);
+            });
+        }
+
+        function NotInPOManualToggle() {
+            var isPOManual = $("#cmb-poitem-creationtype").valOrDefault() === "@POCreationType.Manual";
+            if (isPOManual)
+                $(".not-in-pomanual").addClass("hidden");
+            else
+                $(".not-in-pomanual").removeClass("hidden");
+        }
+
+        function ShowInlineItemEditor(selectedType) {
+            switch (selectedType) {
+                case "@POCreationType.Manual":
+                    InitEmptyItemEditor();
+                    EnableAdditional();
+                    if ($("#lookup-itemedit-category").LookupVal() === "") DisableAddedRowForm();
+                    $("#btn-adoptpr").addClass("hidden");
+                    break;
+                case "@POCreationType.Standard":
+                default:
+                    ResetAddedRowValue();
+                    DisableAdditional();
+                    $("#btn-adoptpr").removeClass("hidden");
+                    break;
+            }
+
+            NotInPOManualToggle();
+        }
+
+        function DisableAddedRowForm() {
+            $.DisableLookup([
+                "#lookup-itemedit-matno",
+                "#lookup-itemedit-wbsno",
+                "#lookup-itemedit-glaccount"
+            ]);
+            $.Disable([
+                "#cmb-itemedit-costcenter"
+            ]);
+        }
+
+        function EnableAddedRowForm() {
+            $.EnableLookup([
+                "#lookup-itemedit-matno",
+                "#lookup-itemedit-wbsno",
+                "#lookup-itemedit-glaccount"
+            ]);
+            $.Enable([
+                "#txt-itemedit-matdesc",
+                "#txt-itemedit-qty",
+                "#cmb-itemedit-uom",
+                "#txt-itemedit-price",
+                "#cmb-itemedit-costcenter"
+            ]);
+        }
+
+        /* ============================ Item Editor: end ============================ */
+
+        /* ============================ Condition: begin ============================ */
+
+        $("#btn-condition-addcond").click(function (e) {
+            DisableAllFeatures();
+            $("#btn-condedit-save").removeClass("disabled");
+            $("#btn-condedit-cancel").removeClass("disabled");
+            $("#btn-condedit-cancel").data("editmode", "@EditMode.Add");
+            $("#rowedit-condition").addClass("roweditcurrent-condition");
+            $("#rowedit-condition").removeClass("hidden");
+        });
+
+        function ResetConditionEditor() {
+            $("#cmb-condedit-comppricecode").val(undefined);
+            $("#cmb-condedit-condtype").val(undefined);
+            $("#txt-condedit-rate").val("");
+        }
+
+        function MoveConditionEditorToEditedRow(currentIdx) {
+            var currentRowEditButton = $("#btn-condition-edit-" + currentIdx);
+            var currentRow = currentRowEditButton.parent().parent();
+            var currentRowContent = currentRow.html();
+            var editorRowContet = $("#rowedit-condition").html();
+
+            currentRow.addClass("roweditcurrent-condition form-group-xs");
+            currentRow.html(editorRowContet);
+
+            $("#rowedited-condition").html(currentRowContent);
+            $("#rowedit-condition").empty();
+
+            $("#cmb-condedit-comppricecode").val(currentRowEditButton.data("comppricecode"));
+            $("#txt-condedit-comppricedesc").val(currentRowEditButton.data("comppricedesc"));
+            $("#cmb-condedit-condtype").val(currentRowEditButton.data("condtype"));
+            $("#txt-condedit-qtyperuom").val(currentRowEditButton.data("qtyperuom"));
+            $("#txt-condedit-rate").val(currentRowEditButton.data("rate"));
+            $("#txt-condedit-amount").val(currentRowEditButton.data("amount"));
+
+            $("#btn-condedit-save").data("no", currentIdx);
+            $("#btn-condedit-cancel").data("no", currentIdx);
+            $("#btn-condedit-cancel").data("editmode", "@EditMode.Edit");
+        }
+
+        $(document).on("click", "[id^=btn-condition-edit]", function (e) {
+            DisableAllFeatures();
+
+            ResetConditionEditor();
+            MoveConditionEditorToEditedRow($(this).data("no"));
+
+            $("#btn-condedit-save").removeClass("disabled");
+            $("#btn-condedit-cancel").removeClass("disabled");
+        });
+
+        function ResetEditedConditionRowValue() {
+            var currentRow = $(".roweditcurrent-condition");
+            $("#rowedit-condition").html(currentRow.html());
+            var currentRowContentBackup = $("#rowedited-condition").html();
+            currentRow.removeClass("roweditcurrent-condition form-group-xs");
+            currentRow.html(currentRowContentBackup);
+            $("#rowedited-condition").empty();
+        }
+
+        $(document).on("click", "#btn-condedit-cancel", function (e) {
+            DisableAllFeatures();
+            switch ($(this).data("editmode")) {
+                case "@EditMode.Add":
+                    $("#rowedit-condition").removeClass("roweditcurrent-condition");
+                    $("#rowedit-condition").addClass("hidden");
+                    break;
+                case "@EditMode.Edit":
+                    ResetEditedConditionRowValue();
+                    ResetConditionEditor();
+                    break;
+            }
+            EnableAllFeatures();
+        });
+
+        function ValidateConditionSave() {
+            if ($("#cmb-condedit-comppricecode").valOrDefault() === "")
+                return "Please select Condition Code.";
+            if ($("#cmb-condedit-condtype").valOrDefault() === "")
+                return "Please select Condition Type.";
+
+            return "";
+        }
+
+        $(document).on("click", "#btn-condedit-save", function (e) {
+            OnAjaxBegin("Save Condition");
+            var message = ValidateConditionSave();
+            if (message === "") {
+                var currentRow = $(this);
+                $.ajax({
+                    type: "POST",
+                    url: "@POCreationController.Action.ItemConditionAdd",
+                    contentType: "@CommonFormat.JsonMimeType",
+                    data: JSON.stringify({
+                        processId: processId,
+                        valuationClass: $tdk.POItemCondition.ValuationClass,
+                        addViewModel: {
+                            PONo: $tdk.POItemCondition.PONo,
+                            POItemNo: $tdk.POItemCondition.POItemNo,
+                            SeqItemNo: $tdk.POItemCondition.SeqItemNo,
+                            SeqNo: Number(currentRow.data("no")),
+                            CompPriceCode: $("#cmb-condedit-comppricecode").valOrDefault(),
+                            ConditionType: $("#cmb-condedit-condtype").valOrDefault(),
+                            CompPriceRate: $("#txt-condedit-rate").valOrDefault(),
+                            ExchangeRate: $("#txtedit-exchangerate").valOrDefault(),
+                            Currency: $("#cmbedit-currency").valOrDefault(),
+                            QtyPerUOM: Number($("#txt-condedit-qtyperuom").valOrDefault()),
+                            Qty: $tdk.POItemCondition.Qty
+                        }
+                    }),
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            $("#grid-poitem-condition").html(data);
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            }
+            else {
+                $.messagebox.show("@ActionResponseViewModel.Error", message, "@ActionResponseViewModel.Error");
+                EnableAllFeatures();
+
+                $.progressbox.hide();
+            }
+        });
+
+        $(document).on("click", "[id^=btn-condition-delete]", function (e) {
+            OnAjaxBegin("Delete Condition");
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.ItemConditionDelete",
+                contentType: "@CommonFormat.JsonMimeType",
+                data: JSON.stringify({
+                    processId: processId,
+                    deleteViewModel: {
+                        PONo: $tdk.POItemCondition.PONo,
+                        POItemNo: $tdk.POItemCondition.POItemNo,
+                        SeqItemNo: $tdk.POItemCondition.SeqItemNo,
+                        SeqNo: Number($(this).data("no"))
+                    }
+                }),
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#grid-poitem-condition").html(data);
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        function RefreshPOItemMat(procesId, poNo) {
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.RefreshItemMaterialList",
+                data: {
+                    dropdownId: "poitem-condition",
+                    processId: processId,
+                    poNo: poNo
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#condition-poitem-container").html(data);
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                error: OnAjaxError
+            });
+        }
+
+        $(document).on("change", "#cmb-poitem-condition", function (e) {
+            $.progressbox.show($tdk.PageTitle, "PO Item Condition");
+            var splittedId = $("#cmb-poitem-condition").valOrDefault().split(";");
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.GetItemConditionList",
+                data: {
+                    processId: processId,
+                    poNo: poNo,
+                    poItemNo: splittedId[1],
+                    seqItemNo: splittedId[2]
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#grid-poitem-condition").html(data);
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: function () {
+                    $.progressbox.hide();
+                },
+                error: OnAjaxError
+            });
+        });
+
+        /* ============================= Condition: end ============================= */
+
+        /* ============================= Upload: begin ============================= */
+        function UploadBidingDocFile(file) {
+            var formData = new FormData();
+            formData.append("uploadedFile", file);
+            formData.append("processId", processId);
+            formData.append("poNo", poNo);
+
+            var html = "";
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.UploadBidingDocFile",
+                contentType: false, // NOTE: disable header to include content-type
+                processData: false, // NOTE: disabe jquery to convert data to string
+                data: formData,
+                success: function (data) {
+                    if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                        $.messagebox.show(data.ResponseType, data.Message.split('|')[0], data.ResponseType);
+
+                        //$('.remove-list-bid').remove();
+                        html = html + "<span class='remove-list-bid' id='isrow-"+data.Message.split('|')[3]+"'>" +
+                                        "<a href='#' id='lnk-delfile-bid'  data-spanid = 'isrow-"+data.Message.split('|')[3]+"' data-path='" + data.Message.split('|')[1] + "' data-type='bid'>" +
+                                            "<img width='15' height='15' src='@Url.Content("../Content/img/error.png")' title='Delete " + file.name + "'>" +
+                                        "</a>" +
+                                        "<a href = '#' onclick = \"javascript:downloadFile('"+ processId + "', '"+ data.Message.split('|')[1] + "')\">" + (file.name.length > 20 ? file.name.substring(0, 20) + ". . ." : file.name) + "</a>";;
+                        html = html + "</span>";
+
+                        if(data.Message.split('|')[2]>=5)
+                        {
+                            $("#upledit-bidingdoc").hide();
+                        }
+
+                        $('.appended-file-bid').append(html);
+                        $('.appended-file-bid').show();
+                        $("#upledit-bidingdoc").val("");
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        }
+
+        $(document).on("change", "#upledit-bidingdoc", function (e) {
+            OnAjaxBegin("Upload Biding document");
+
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: "@POCreationController.Action.GetUploadValidationInfo",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        try {
+                            var uploadControl = $(e.target);
+                            if (uploadControl[0].files.length > 0) {
+                                uploadControl.validatefile(data);
+                                UploadBidingDocFile(e.target.files[0]);
+                            }
+                        }
+                        catch (ex) {
+                            var parsedEx = JSON.parse(ex.message);
+                            $.messagebox.show(parsedEx.name, parsedEx.message, "@ActionResponseViewModel.Error");
+                        }
+                    }
+                    else {
+                        $.messagebox.show(data.ResponseType, data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        function UploadQuotationFile(file) {
+            var formData = new FormData();
+            formData.append("uploadedFile", file);
+            formData.append("processId", processId);
+            formData.append("poNo", poNo);
+
+            var html = "";
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.UploadQuotationFile",
+                contentType: false, // NOTE: disable header to include content-type
+                processData: false, // NOTE: disabe jquery to convert data to string
+                data: formData,
+                success: function (data) {
+                    if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                        $.messagebox.show(data.ResponseType, data.Message.split('|')[0], data.ResponseType);
+                        //$('.remove-list-quot').remove();
+                        html = html + "<span class='remove-list-quot' id='isrow-"+data.Message.split('|')[3]+"'>" +
+                                        "<a href='#' id='lnk-delfile-quot' data-spanid = 'isrow-"+data.Message.split('|')[3]+"' data-path='" + data.Message.split('|')[1] + "' data-type='quot'>" +
+                                            "<img width='15' height='15' src='@Url.Content("../Content/img/error.png")' title='Delete " + file.name + "'>" +
+                                        "</a>" +
+                                        "<a href = '#' onclick = \"javascript:downloadFile('"+ processId + "', '"+ data.Message.split('|')[1] + "')\">" + (file.name.length > 20 ? file.name.substring(0, 20) + ". . ." : file.name) + "</a>";
+                        html = html + "</span>";
+                        if(data.Message.split('|')[2]>=5)
+                        {
+                            $("#upledit-quotation").hide();
+                        }
+                        $('.appended-file-quot').append(html);
+                        $('.appended-file-quot').show();
+                        $("#upledit-quotation").val("");
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        }
+
+        $(document).on("change", "#upledit-quotation", function (e) {
+            OnAjaxBegin("Upload Quotation document");
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: "@POCreationController.Action.GetUploadValidationInfo",
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        try {
+                            var uploadControl = $(e.target);
+                            if (uploadControl[0].files.length > 0) {
+                                uploadControl.validatefile(data);
+                                UploadQuotationFile(e.target.files[0]);
+                            }
+                        }
+                        catch (ex) {
+                            var parsedEx = JSON.parse(ex.message);
+                            $.messagebox.show(parsedEx.name, parsedEx.message, "@ActionResponseViewModel.Error");
+                        }
+                    }
+                    else {
+                        $.messagebox.show(data.ResponseType, data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        /* ============================== Upload: end ============================== */
+
+        /* =============================== SPK: begin =============================== */
+
+        function RefreshSPKAmount() {
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.RefreshSPKAmount",
+                data: {
+                    processId: ViewData.Get("ProcessId"),
+                    poNo: ViewData.Get("PONo")
+                },
+                success: function (data) {
+                    if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                        $("#txtspk-amount").val($.AsPrice(data.Message));
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                error: OnAjaxError
+            });
+        }
+
+
+        ViewData.Add("OnOKSPOKConfirmButtonClick", function () {
+            $("#pop-createspkconfirm").modal("hide");
+            $("#pop-spkform").modal();
+        });
+
+        ViewData.Add("OnCancelSPKConfirmButtonClick", function () {
+            $("#pop-createspkconfirm").modal("hide");
+            $("#pop-saveconfirm").modal();
+        });
+
+        ViewData.Add("OnOKSPKButtonClick", function () {
+            $("#pop-savespkconfirm").modal();
+        });
+
+        ViewData.Add("OnCancelSPKButtonClick", function () {
+            $("#pop-cancelspkconfirm").modal();
+        });
+
+        ViewData.Add("OnOKSaveSPKConfirmButtonClick", function () {
+            $("#pop-savespkconfirm").modal("hide");
+            $("#pop-spkform").modal("hide");
+            $("#pop-saveconfirm").modal();
+        });
+
+        ViewData.Add("OnCancelSaveSPKConfirmButtonClick", function () {
+            $("#pop-savespkconfirm").modal("hide");
+        });
+
+        ViewData.Add("OnOKCancelSPKConfirmButtonClick", function () {
+            var oriSPK = ViewData.Get("OriginalSPKInfo");
+            if (oriSPK !== undefined) {
+                ViewData.Add("SPKInfo", oriSPK);
+                InitSPKForm();
+                FillSPKInfo(oriSPK);
+            }
+
+            $("#pop-cancelspkconfirm").modal("hide");
+            $("#pop-spkform").modal("hide");
+            $("#pop-saveconfirm").modal();
+        });
+
+        ViewData.Add("OnCancelCancelSPKConfirmButtonClick", function () {
+            $("#pop-cancelspkconfirm").modal("hide");
+        });
+
+        /* ================================ SPK: end ================================ */
+
+        /* =============================== Attachment: begin =============================== */
+
+        function RefreshAttachment() {
+            //added : 20190528 : isid.ragil
+            $('.remove-list-bid').remove();
+            $('.remove-list-quot').remove();
+            //ended : 20190528 : isid.ragil
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.RefreshAttachment",
+                data: {
+                    processId: ViewData.Get("ProcessId"),
+                    poNo: ViewData.Get("PONo"),
+					prNo: ViewData.Get("PRNo"),
+                    docType: "BID"
+                },
+                success: function (data) {
+                    if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                        if(data.Message.split('|')[1]>=1)
+                        {
+                            $("#upledit-bidingdoc").hide();
+                            $('.appended-file-bid').append(data.Message.split('|')[0]);
+                            $('.appended-file-bid').show();
+                        }
+                        else
+                        {
+                            $('.remove-list-bid').remove();
+                            $("#upledit-bidingdoc").show();
+                            $('.appended-file-bid').hide();
+                        }
+
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                error: OnAjaxError
+            });
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.RefreshAttachment",
+                data: {
+                    processId: ViewData.Get("ProcessId"),
+                    poNo: ViewData.Get("PONo"),
+					prNo: ViewData.Get("PRNo"),
+                    docType: "QUOT"
+                },
+                success: function (data) {
+                    if (data.ResponseType !== "@ActionResponseViewModel.Error")
+                    {
+                        if(data.Message.split('|')[1] >=1)
+                        {
+                            if(data.Message.split('|')[1]>5)
+                            {
+                                $("#upledit-quotation").hide();
+                            }
+                            $('.appended-file-quot').append(data.Message.split('|')[0]);
+                            $('.appended-file-quot').show();
+                        }
+                        else
+                        {
+                            $('.remove-list-quot').remove();
+                            $("#upledit-quotation").show();
+                            $('.appended-file-quot').hide();
+                        }
+
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                error: OnAjaxError
+            });
+        }
+        /* =============================== Attachment: End =============================== */
+
+        var errorIndicate = "@ViewBag.ERROR_EXCEPTION";
+        console.log("@ViewBag.ERROR_EXCEPTION");
+
+        if(errorIndicate != "")
+        {
+            $.messagebox.show(
+                        "@ActionResponseViewModel.Error",
+                        errorIndicate.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "window.close();",
+                        "");
+            return false;
+        }
+    });
+
+    function downloadFile(processId, path) {
+        $.progressbox.show("Download Attachment", "Downloading . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@POCreationController.Action._ValidateDownloadCreation",
+            data: { processId:processId, path: path},
+            success: function (resultMessage) {
+                if (resultMessage == 'Y') {
+                    window.open("@Url.Content("~/POCreation/DownloadFile?")" + "processId=" + processId + "&path=" + path , '_self');
+                    $.progressbox.hide();
+                }
+                else {
+                    $.messagebox.show(
+                        "Download Attachment",
+                        resultMessage,
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    $.progressbox.hide();
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+    // add by khanif 25 April 2019
+    function RefreshVendlook(divlook){
+
+        var ven = divlook.split(",");
+
+        if(ven.length <= 1){
+
+            $("#txtlookup-vendor").val(ven[0]);
+        }
+        else{
+            $("#txtlookup-vendor").val();
+        }
+        //$("#txtlookup-vendor").val(divlook);
+    }
+    //end add khanif 25 April 2019
+
+</script>
+<div class="form-horizontal">
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="cmb-poitem-creationtype" class="col-xs-5 col-sm-4 control-label text-muted">PO Type</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-poitem-creationtype", POCreationController.CreationTypeSelectList, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="txtlookup-vendor" class="col-xs-5 col-sm-4 control-label required-left text-muted">Vendor</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.Lookup("vendor", true)
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="cmbedit-currency" class="col-xs-5 col-sm-4 control-label required-left text-muted">Currency</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmbedit-currency", CurrencyController.CurrencySelectList, new { tabindex = "5", @class = "form-control mandatory" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="upledit-bidingdoc" class="col-xs-5 col-sm-4 control-label text-muted">Attachment</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="file" id="upledit-bidingdoc" tabindex="8" value="" />
+                    <div class="appended-file-bid" style="font-size:x-small;margin-top:5px;display:none">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="cmbedit-purchasinggroup" class="col-xs-5 col-sm-4 control-label required-left text-muted">Purch. Group</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmbedit-purchasinggroup", PurchasingGroupController.PurchasingGroupByRegNoSelectList(Model.CurrentUser.RegistrationNumber), new { autofocus = "autofocus", tabindex = "1", @class = "form-control mandatory" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="cmbedit-deliveryaddr" class="col-xs-5 col-sm-4 control-label required-left text-muted">Delivery Addr.</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmbedit-deliveryaddr", DeliveryAddrController.DeliveryAddrSelectList, new { tabindex = "10", @class = "form-control mandatory" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="txtedit-exchangerate" class="col-xs-5 col-sm-4 control-label text-muted">Exch. Rate</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="number" id="txtedit-exchangerate" tabindex="6" min="0" step="0.1" class="form-control" disabled />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="upledit-quotation" class="col-xs-5 col-sm-4 control-label text-muted">Quotation</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="file" id="upledit-quotation" tabindex="9" value="" />
+                    <div class="appended-file-quot" style="font-size:x-small;margin-top:5px;display:none">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txtedit-poheadertext" class="col-xs-5 col-sm-4 control-label required-left text-muted">Header Text</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txtedit-poheadertext" tabindex="2" class="form-control mandatory" />
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-createddate" class="col-xs-5 col-sm-4 control-label text-muted">Doc Date</label>
+                <div class="col-xs-7 col-sm-8">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" id="txtedit-createddate" tabindex="4" class="form-control" value="@DateTime.Now.ToStandardFormat()" placeholder='@CommonDisplayMessage.DateTimePlaceholder' readonly autocomplete="off" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6">
+            <div class="form-group form-group-xs">
+                <label for="txtedit-ponote" class="col-xs-3 col-sm-2 control-label required-left text-muted">PO Note</label>
+                <div class="col-xs-9 col-sm-10">
+                    <textarea id="txtedit-ponote" class="form-control" rows="3" placeholder="One note per line, max 10 lines"></textarea>
+                </div>
+            </div>
+
+            <div class="form-group form-group-xs">
+                <label for="upledit-quotation" class="col-xs-3 col-sm-2 control-label text-muted">Other e-Mail</label>
+                <input type="text" id="hiddenmail" style="display:none">
+                <div class="col-xs-9 col-sm-10">
+                    <div class="col-xs-8 col-sm-8" style="padding: 0px;">
+                        <input type="text" id="txtedit-poaddnotif" tabindex="2" class="form-control" />
+                    </div>
+
+                    <div class="col-xs-4 col-sm-4">
+                        <button id="btn-detail" class="btn btn-primary btn-xs" onclick="javascript:onaddedmail();return false;">Add</button>
+                    </div>
+
+                    <div class="col-xs-9 col-sm-10" style="padding: 0px;">
+                        <div class="appended-mail" style="font-size:x-small;margin-top:5px;">
+                            @if (@Model.Header.OtherMail != null && @Model.Header.OtherMail != "")
+                            {
+                                int i = 0;
+                                foreach (string mail in @Model.Header.OtherMail.Split(';'))
+                                {
+                                    if (mail != "")
+                                    {
+                                        <p>
+                                            <span class="remove-list-mail-@i.ToString()" id="isrow-mail-@i.ToString()">
+                                                <a href="#" onclick="deleteMail('@i.ToString()')"><img width="15" height="15" src="../Content/img/error.png" title="Delete Mail"></a>
+                                                @mail
+                                            </span>
+                                        </p>
+                                    }
+                                    i = i + 1;
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="line-br"></div>
+    <div class="row">
+        <div class="col-xs-12 text-left">
+            <button id="btn-save" tabindex="10" class="btn btn-xs btn-primary">Submit</button>
+            <button id="btnsave-draft" tabindex="11" class="btn btn-xs btn-primary">Save as Draft</button>
+            <button id="btn-backtoinquiry" tabindex="12" class="btn btn-xs btn-danger">Cancel</button>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div class="col-xs-12">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a id="tab-poitem" tabindex="13" data-toggle="tab" href="#poitem">PO Item</a>
+                </li>
+                <li>
+                    <a id="tab-poitem-condition" tabindex="14" data-toggle="tab" href="#poitem-condition">Conditions</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div id="poitem" class="tab-pane fade active in">
+                    <div class="form-group form-group-xs">
+                        <div class="col-xs-12 text-right">
+                            <button id="btn-adoptpr" tabindex="15" class="btn btn-xs btn-primary">Adopt PR</button>
+                        </div>
+                    </div>
+                    <div class="v-space"></div>
+                    <div id="grid-poitem">
+                        @Html.Partial(POCommonController.Partial.CommonItemGrid, Model.ItemList)
+                    </div>
+                </div>
+                <div id="poitem-condition" class="tab-pane fade">
+                    <div class="form-group form-group-xs">
+                        <div class="col-xs-10">
+                            <div class="col-xs-2">
+                                <label for="cmb-poitem-condition" class="control-label text-muted">Condition for</label>
+                            </div>
+                            <div id="condition-poitem-container" class="col-xs-3">
+                                <select id="cmb-poitem-condition" tabindex="16" class="form-control">
+                                    <option value=""></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xs-2 text-right">
+                            <button id="btn-condition-addcond" tabindex="17" class="btn btn-xs btn-primary btn-std">Add Cond.</button>
+                        </div>
+                    </div>
+                    <div class="v-space"></div>
+                    <div id="grid-poitem-condition"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.LookupContainer("vendor")
+@Html.ModalContainer("pop-pritem")
+
+<div id="pop-saveconfirm" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-title">
+                    Save Confirmation
+                </p>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Are you sure want to create PO?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <div class="btn-group-xs text-right">
+                    <button id="btnsave-ok" class="btn btn-xs btn-primary btn-std">Ok</button>
+                    <button id="btnsave-cancel" class="btn btn-xs btn-danger btn-std" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="pop-changecreationtypeconfirm" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-title">
+                    Reset item Confirmation
+                </p>
+            </div>
+            <div class="modal-body">
+                <p>
+                    When you change PO Type or Purchasing Group, all items will be deleted. Are you sure you want to continue?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <div class="btn-group-xs text-right">
+                    <button id="btnchangecreationtype-ok" class="btn btn-xs btn-primary btn-std">Ok</button>
+                    <button id="btnchangecreationtype-cancel" class="btn btn-xs btn-danger btn-std" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.Partial(POCommonController.Partial.CommonSPKForm)
+
+<br />
+<script type="text/javascript">
+    var listmail = new Array();
+
+    function validateEmail(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@@"]+(\.[^<>()\[\]\\.,;:\s@@"]+)*)|(".+"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+
+    function deleteMail(index) {
+        var mail = listmail[index];
+        $("#isrow-mail-" + index).remove();
+        $("#hiddenmail").val($("#hiddenmail").val().replace(mail + ";", ""));
+    }
+
+    function onaddedmail() {
+        var mail = $("#txtedit-poaddnotif").val();
+        if (mail !== null && mail !== "" && mail !== "undefined") {
+            if(validateEmail(mail))
+            {
+                listmail.push(mail);
+                if ($("#hiddenmail").val() == "" || $("#hiddenmail").val() == null || $("#hiddenmail").val() == "undefined") $("#hiddenmail").val('');
+
+                if ($("#hiddenmail").val().toLowerCase().indexOf(mail.toLowerCase()) == -1) {
+                    var html = "";
+                    html = html + "<p><span class='remove-list-mail-" + listmail.indexOf(mail) + "' id='isrow-mail-" + listmail.indexOf(mail) + "'>" +
+                                    "<a href='#' onclick=\"deleteMail('" + listmail.indexOf(mail) + "')\">" +
+                                        "<img width='15' height='15' src='@Url.Content("../Content/img/error.png")' title='Delete Mail'>" +
+                                                "</a>";
+                            html = html + "" + mail + "</span></p>"
+
+                            $("#hiddenmail").val($("#hiddenmail").val() + mail + ";");
+
+                            $.Clear(["#txtedit-poaddnotif"]);
+                            $('.appended-mail').append(html);
+                            $('.appended-mail').show();
+                        }
+                        else {
+                            $.messagebox.show(
+                                "Email Address Validation",
+                                "Mail address " + mail + " already added",
+                                "WRN",
+                                "SINGLE",
+                                "",
+                                ""
+                            )
+                        }
+                    }
+                    else{
+                        $.messagebox.show(
+                            "Email Address Validation",
+                            "Email address is not valid",
+                            "WRN",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                }
+            }
+</script>

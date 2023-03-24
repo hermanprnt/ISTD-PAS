@@ -1,0 +1,456 @@
+﻿@using GPS.Constants.Master
+@using GPS.Core.ViewModel
+<script type="text/javascript" id="Common-ValuationClass">
+    $tdk.AjaxMethod = "POST";
+    $tdk.Alert = "#alert-search";
+    $tdk.AlertDetail = "#alert-detail";
+    $tdk.Success = "#success-search";
+    $tdk.Warning = "#warning-search";
+    $tdk.Division = "";
+    $tdk.isDetail = 0;
+    messagelife = 1;
+
+    function GetInquiryFeatureSelectors() {
+        return [
+            "#valuation_class",
+            "#valuationdesc",
+            "#area",
+            "#prtype",
+            "#purchasinggrp",
+            "#fd",
+            "#calculation_scheme",
+            "#coordinator",
+            "#btnsearch",
+            "#btnclear",
+            "#btnadd",
+            "#btnedit",
+            "#btnToggleDetail"
+        ];
+    }
+
+    function GetCreationFeatureSelectors() {
+        return [
+            "#valclass",
+            "#valdesc",
+            "#valarea",
+            "#matgroup",
+            "#valprtype",
+            "#valpurcgrp",
+            "#valfd",
+            "#valcalculation",
+            "#valstatus"
+        ];
+    }
+
+    function DisableAllFeatures() {
+        $.Disable(GetInquiryFeatureSelectors());
+        $.Disable(GetCreationFeatureSelectors());
+    }
+
+    function EnableAllFeatures() {
+        $.Enable(GetInquiryFeatureSelectors());
+        $.Enable(GetCreationFeatureSelectors());
+    }
+
+    function OnAjaxBegin(title) {
+        $.progressbox.show($tdk.PageTitle, title);
+        DisableAllFeatures();
+    }
+
+    function OnAjaxComplete() {
+        EnableAllFeatures();
+        $.progressbox.hide();
+    }
+
+    function OnAjaxError(data) {
+        var result = $.ValidateASPError(data.responseText);
+        $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+    }
+
+    function toggleSearch() {
+        $("._criteria").toggle(200, "linear");
+        //toogle('moreinquiry', 'Search Criteria');
+        if ($("#toogle-search").hasClass("fa-angle-double-up")) {
+            $("#toogle-search").removeClass("fa-angle-double-up");
+            $("#toogle-search").addClass("fa-angle-double-down");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            $("#tScrollBody").height(355);
+            $("#toogle-search").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-search").removeClass("fa-angle-double-down");
+            $("#toogle-search").addClass("fa-angle-double-up");
+            $("#toogle-search").removeClass("btn-tiny-down");
+            $("#toogle-search").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            $("#tScrollBody").height(280);
+            $("#toogle-search").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+
+    function toggleDetail() {
+        $("._detailpr").toggle(200, "linear");
+        //toogle('moreinquiry', 'Search Criteria');
+        if ($("#toogle-detail").hasClass("fa-angle-double-up")) {
+            $("#toogle-detail").removeClass("fa-angle-double-up");
+            $("#toogle-detail").addClass("fa-angle-double-down");
+            $("#toogle-detail").removeClass("btn-tiny-down");
+            $("#toogle-detail").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'none';
+            //$("#tScrollBody_detail").height(300);
+            $("#toogle-detail").prop('title', 'Show filter');
+        }
+        else {
+            $("#toogle-detail").removeClass("fa-angle-double-down");
+            $("#toogle-detail").addClass("fa-angle-double-up");
+            $("#toogle-detail").removeClass("btn-tiny-down");
+            $("#toogle-detail").addClass("btn-tiny-down");
+            document.getElementById('hrsrc').style.display = 'block';
+            //$("#tScrollBody_detail").height(190);
+            $("#toogle-_detail").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+    }
+
+    function toogle(_class, displaytext) {
+        var _criteria = $("." + _class);
+        var text = $("#lnsearch-toggle-" + _class).text();
+        _criteria.toggle(200, "linear");
+        $("#lnsearch-toggle-" + _class).text(text == "More " + displaytext ? "Less " + displaytext : "More " + displaytext);
+    }
+
+    function detailGrid() {
+        if ($tdk.isDetail > 0) {
+            $("#btnToggleDetail").html('Show Detail');
+            $("._toggle-detail").hide();
+            $tdk.isDetail = 0;
+        }
+        else {
+            $("#btnToggleDetail").html('Hide Detail');
+            $("._toggle-detail").show();
+            $tdk.isDetail = 1;
+        }
+    }
+
+    function MessageFormat(message, param) {
+        for (var i = 0; i < param.length; i++) {
+            message = message.replace("{" + i + "}", param[i].toString());
+        }
+        return message;
+    }
+
+    function IgnoreInput(e) {
+        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+            (e.keyCode == 65 && e.ctrlKey === true) ||
+            (e.keyCode >= 35 && e.keyCode <= 40)) {
+            e.preventDefault();
+        }
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+        if ((e.shiftKey >= 48) || (e.shiftKey <= 57))
+        { e.preventDefault(); }
+    }
+
+    function Messages(id, display, msg) {
+        $(id).css("display", display);
+        $(id).html(msg);
+    }
+
+    function AssignVariable(message, param) {
+        for (var i = 0; i < param.length; i++) {
+            message = message.replace("{" + i + "}", param[i]);
+        }
+        return message;
+    }
+</script>
+
+<script type="text/javascript" id="Search-Data">
+    function ClearCriteria() {
+        $.progressbox.show("Search Valuation Class", "Clearing Data...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._SearchValuationClass)",
+            data: { issearch: 'N' },
+            success: function (resultMessage) {
+                $('.TableList').html(resultMessage);
+                messagelife = 1;
+                $("#valuation_class").val("");
+                $("#valuationdesc").val("");
+                $("#area").val("");
+                $("#prtype").val("");
+                $("#purchasinggrp").val("");
+                $("#calculation_scheme").val("");
+                $("#fd").val("");
+                $("#coordinator").val("");
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function GetSearchValuationClassParam(page) {
+        return {
+            VALUATION_CLASS: $("#valuation_class").val(),
+            VALUATION_CLASS_DESC: $("#valuationdesc").val(),
+            AREA_DESC: $("#area").val(),
+            PROCUREMENT_TYPE: $("#prtype").val(),
+            FD_GROUP_CD: $("#fd").val(),
+            PURCHASING_GROUP_CD: $("#purchasinggrp").val(),
+            PR_COORDINATOR: $("#coordinator").val(),
+            CALCULATION_SCHEME_CD: $("#calculation_scheme").val(),
+            issearch: 'Y',
+            page: page,
+            pageSize: $('.page').val() || 10
+        };
+    }
+
+    function SearchValuationClass(page, isbutton) {
+        var param = GetSearchValuationClassParam(page);
+
+        if (isbutton === 1)
+            messagelife = 1;
+
+        OnAjaxBegin("");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._SearchValuationClass)",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (resultMessage) {
+                var maxperpage = $('.page').val() || 10;
+                $('.TableList').html(resultMessage);
+                $('.page').val(maxperpage);
+                OnAjaxComplete();
+            },
+            error: function (resultMessage) {
+
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript" id="CRUDS">
+    function openPopup(flag) {
+        var validmsg = "";
+        var valclass;
+        var prtype;
+
+
+        if (flag == 0) {
+            valclass = null;
+        }
+        else {
+            var checked = [];
+            $("input[name='checkdata[]']:checked").each(function () { checked.push($(this).val()); });
+            validmsg = ValidChecked(checked, "edited");
+            if (validmsg != "") {
+                $.messagebox.show(
+                    "Edit Valuation Class",
+                    validmsg,
+                    "WRN",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+            }
+            else {
+                valclass = checked[0].split("-")[0];
+                prtype = checked[0].split("-")[1];
+            }
+        }
+
+        if (validmsg == "") {
+            OnAjaxBegin("Load Valuation Class Data...");
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._GetSelectedVCData)",
+                data: { isedit: flag, VALUATION_CLASS: valclass, PR_TYPE: prtype },
+                success: function (data) {
+
+                    //if (isedit = 1) { //comment by khanif hanafi 18-07-2019
+                    //di ganti menjadi "if (flag == 1)" { karena return dari controler berupa null
+                    if (flag == 1) {
+                        $.ajax({
+                            type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._GetSingleVCData)",
+                            data: { VALUATION_CLASS: valclass, PR_TYPE: prtype },
+                            success: function (detail) {
+                                $("#valprtype").val(detail.PROCUREMENT_TYPE);
+                                $("#valpurcgrp").val(detail.PURCHASING_GROUP_CD);
+                                $("#valfd").val(detail.FD_GROUP_CD);
+                                $("#valcalculation").val(detail.CALCULATION_SCHEME_CD);
+                                $("#valstatus").val(detail.STATUS);
+                                $("#valitemclass").val(detail.ITEM_CLASS);
+                                $("#valPRCoordinator").val(detail.PR_COORDINATOR_CD);
+                                $("#matgroup").val(detail.MATL_GROUP);
+
+                                $("#valclass").prop("disabled", true);
+
+                                if (detail === "")
+                                    $("#valprtype").val("RM");
+                            },
+                            error: function (resultMessage) { alert("TEST \n" + resultMessage); }
+                        });
+                    }
+
+                    //$("#addedit-popup-container").html(data);
+                    //$("#addedit-popup-container").modal();
+
+                    //start : 20190710 : isid.rgl
+                    if ($("#addedit-popup-container").html() != "") {
+                        $("#addedit-popup-container").html("");
+                        $("#addedit-popup-container").html(data);
+                        $("#addedit-popup-container").modal();
+                        $("#addedit-popup-container").show();
+
+                    } else {
+                        $("#addedit-popup-container").html(data);
+                        $("#addedit-popup-container").modal();
+                        $("#valclass").prop("disabled", false);
+                    }
+
+                },
+                error: function (resultMessage) {
+                    $.progressbox.hide();
+                    //Display Ajay Error Message
+                },
+                complete: OnAjaxComplete
+            });
+        }
+    }
+
+    function ValidChecked(checked, method) {
+        return checked.length > 1 ? MessageFormat("@MasterMessages.singleChecked", [method]) :
+                  (checked.length <= 0 ? MessageFormat("@MasterMessages.selectRecord", [method]) : "");
+    }
+
+    function GetSaveParam(flag) {
+        return {
+            VALUATION_CLASS: $("#valclass").val(),
+            VALUATION_CLASS_DESC: $("#valdesc").val(),
+            AREA_DESC: $("#valarea").val(),
+            PROCUREMENT_TYPE: $("#valprtype").val(),
+            PURCHASING_GROUP_CD: $("#valpurcgrp").val(),
+            FD_GROUP_CD: $("#valfd").val(),
+            CALCULATION_SCHEME_CD: $("#valcalculation").val(),
+            STATUS: $("#valstatus").val(),
+            MATL_GROUP: $("#matgroup").val(),               ///added : 20190710 : isid.rgl
+            PR_COORDINATOR_CD: $("#valPRCoordinator").val(),
+            ITEM_CLASS: $("#valitemclass").val(),
+            isedit: flag
+        };
+    }
+
+    function SaveData(flag) {
+        var error = SaveValidation();
+
+        if (error == 0) {
+            var param = GetSaveParam(flag);
+
+            OnAjaxBegin("Save Valuation Class Data", "Processing...");
+            $.ajax({
+                type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._SaveValuationClass)",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (resultMessage) {
+                    var message = resultMessage.split('|');
+                    if (message[0] === 'SUCCESS') {
+                        $.messagebox.show(
+                            "Save PR",
+                            AssignVariable("@MasterMessages.successSaveValuationClass", [message[1]]),
+                            "SUC",
+                            "SINGLE",
+                            "ShowLatestCreation('" + message[1] + "')",
+                            ""
+                        )
+                    }
+                    else if (message[0] === 'WARNING') {
+                        $.messagebox.show(
+                            "Save Valuation Class",
+                            "Success Saving data with Valuation Class " + message[1] + ", with WARNING " + message[2],
+                            "WRN",
+                            "SINGLE",
+                            "ShowLatestCreation('" + message[1] + "')",
+                            ""
+                        )
+                    }
+                    else {
+                        $.Enable([".btnsavehead", ".btncancelhead"]);
+                        //Messages(Error, "inherit", message[0]);
+
+                        $.messagebox.show(
+                            "Save Valuation Class",
+                            message[0],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                },
+                error: function (resultMessage) {
+                    $.progressbox.hide();
+                },
+                complete: OnAjaxComplete
+            });
+        }
+    }
+
+    function ShowLatestCreation(VALUATION_CLASS) {
+        $("#addedit-popup-container").hide();
+        $("#valuation_class").val(VALUATION_CLASS);
+        SearchValuationClass(1, 1);
+    }
+
+    function SaveValidation() {
+        var error = 0;
+
+        var isValid = $.ValidateMandatory(["#valclass", "#valdesc", "#valprtype", "#valpurcgrp", "#valcalculation", "#valstatus", "#valitemclass", "#valPRCoordinator", "#matgroup"]);
+        if (!isValid) error = 1;
+
+        return error;
+    }
+
+    function ActiveInactive(newstatus, VALUATION_CLASS) {
+        var type;
+        if (newstatus == "A") type = "Activate";
+        else type = "Inactivate";
+
+        OnAjaxBegin(type + " Valuation Class Data...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@Url.Content(MasterControllerMethod._ActiveInactiveValuationClass)",
+            data: { newstatus: newstatus, VALUATION_CLASS: VALUATION_CLASS },
+            success: function (resultMessage) {
+                var message = resultMessage.split('|');
+                if (message[0] === 'SUCCESS') {
+                    $.messagebox.show(
+                        type + " Valuation Class Data",
+                        AssignVariable("@MasterMessages.successActivateInactivate", [VALUATION_CLASS, type]),
+                        "SUC",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    SearchValuationClass(1, 1);
+                }
+                else {
+                    $.messagebox.show(
+                        type + " Valuation Class Data",
+                        message[0],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                //Display Ajay Error Message
+            },
+            complete: OnAjaxComplete
+        });
+    }
+</script>

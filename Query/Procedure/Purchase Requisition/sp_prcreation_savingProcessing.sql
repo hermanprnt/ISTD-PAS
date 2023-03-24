@@ -1,0 +1,393 @@
+﻿--USE [PASS_DB_DEV]
+GO
+/****** Object:  StoredProcedure [dbo].[sp_prcreation_savingProcessing]    Script Date: 1/14/2016 10:03:23 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		FID)Reggy Budiana
+-- Create date: 03/08/2015
+-- Description:	
+
+-- Modified by: FID)Intan Puspitasari
+-- Modified dt: 27/10/2015
+-- Description: Move data checking to controller & modified source with new table
+-- Modified by: FID)Asep Syahidin
+-- Modified dt: 20/01/2017
+-- Description: Insert TB_R_ASSET if exist Asset No
+-- =============================================
+ALTER PROCEDURE [dbo].[sp_prcreation_savingProcessing]
+	@USER_ID VARCHAR(20),
+	@NOREG VARCHAR(15),
+	@PR_NO varchar(12),
+	@PROCESS_ID bigint,
+	@DIVISION_ID int,
+	@INPUT_SOURCE VARCHAR(2), --SP (Screen Process) / BP (Background Process)
+	@TYPE VARCHAR(10), --SUBMIT/SAVE
+	@PRH_DATA PR_H_TEMP READONLY
+AS
+BEGIN
+DECLARE @EDIT_FLAG CHAR(1),
+		@STATUS VARCHAR(20) = 'SUCCESS',
+		@MSG VARCHAR(MAX),
+		@TEMP_LOG LOG_TEMP,
+		@IS_DRAFT CHAR(1),
+		@IS_CANCELLED CHAR(1),
+		@MODULE VARCHAR(10) = '2',
+		@FUNCTION VARCHAR(20) = '201002',
+		@LOCATION VARCHAR(50) = 'Saving Process',
+		@MSG_ID VARCHAR(12)
+
+DECLARE @NEXT_PERSONNEL_NAME VARCHAR(100),
+		@ITEM_NO AS VARCHAR(50),
+		@ITEM_DESCRIPTION AS VARCHAR(MAX),
+		@LINK_PR_APPROVAL VARCHAR(100),
+		@AMOUNT_APPROVAL AS MONEY
+
+DECLARE @PR_COORDINATOR VARCHAR(6)
+
+SET NOCOUNT ON;
+
+SET @MSG = 'Saving Process Started'
+SET @MSG_ID = 'MSG0000001'
+EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'INF', @MODULE, @FUNCTION, 1;
+		
+BEGIN TRANSACTION
+
+SELECT @IS_CANCELLED = CASE WHEN (PR_STATUS = '95') THEN 'Y' ELSE 'N' END FROM TB_R_PR_H WHERE PR_NO = @PR_NO AND PROCESS_ID = @PROCESS_ID
+SELECT @EDIT_FLAG = CASE WHEN COUNT(*) > 0 THEN 'Y' ELSE 'N' END FROM TB_R_PR_H WHERE PR_NO = @PR_NO AND PROCESS_ID = @PROCESS_ID
+IF(@EDIT_FLAG = 'Y')
+BEGIN
+	SELECT @IS_DRAFT = CASE WHEN(PR_STATUS = '94') THEN 'Y' ELSE 'N' END FROM TB_R_PR_H WHERE PR_NO = @PR_NO AND PROCESS_ID = @PROCESS_ID
+END
+
+IF((@STATUS = 'SUCCESS') AND (@TYPE = 'SUBMIT'))
+	INSERT INTO @TEMP_LOG 
+	EXEC [dbo].[sp_prcreation_savePRHistory]
+		@PR_NO,
+		@PROCESS_ID,
+		@USER_ID,
+		@PRH_DATA,
+		@STATUS OUTPUT	
+
+IF(@STATUS = 'SUCCESS')
+	INSERT INTO @TEMP_LOG 
+	EXEC [dbo].[sp_prcreation_savePR] 
+		@PR_NO, 
+		@PROCESS_ID, 
+		@USER_ID, 
+		@DIVISION_ID, 
+		@EDIT_FLAG,
+		@PRH_DATA, 
+		@STATUS OUTPUT
+
+IF(@STATUS = 'SUCCESS' AND @TYPE = 'SUBMIT')
+BEGIN
+	BEGIN TRY
+		SET @MSG = 'Merge TB_R_ASSET for Document No ' + @PR_NO + ' Started'
+		SET @MSG_ID = 'MSG0000085'
+		EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'INF', @MODULE, @FUNCTION, 1;
+		INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'INF', @MSG, @MODULE, @LOCATION, @FUNCTION, 1, @USER_ID
+
+		MERGE INTO TB_R_ASSET pri USING (    
+            SELECT item.PR_NO, item.PR_ITEM_NO, item.PR_QTY, item.ASSET_CATEGORY,  item.ASSET_CLASS,  item.ASSET_LOCATION, item.ASSET_NO   
+            FROM TB_R_PR_ITEM  item WITH(NOLOCK)  
+            WHERE item.PR_NO = @PR_NO  
+        ) tmp ON pri.PR_NO = tmp.PR_NO AND pri.PR_ITEM_NO = tmp.PR_ITEM_NO    
+	  WHEN NOT MATCHED BY TARGET AND  ISNULL( tmp.ASSET_NO ,'') <> ''  
+	   THEN INSERT(PR_NO, PR_ITEM_NO, SEQ_NO, PROCESS_ID, REGISTRATION_DT, ASSET_CATEGORY, ASSET_CLASS, ASSET_LOCATION, ASSET_NO, SUB_ASSET_NO,   
+		  SERIAL_NO, PO_NO, PO_ITEM_NO, ASSET_STATUS, CREATED_BY, CREATED_DT, CHANGED_BY,CHANGED_DT)   
+		  VALUES(tmp.PR_NO, tmp.PR_ITEM_NO, tmp.PR_QTY, NULL, NULL, tmp.ASSET_CATEGORY, tmp.ASSET_CLASS, tmp.ASSET_LOCATION, (SELECT TOP 1 SUBSTRING(Split,1,7) From dbo.SplitString(tmp.ASSET_NO, '-') where No = 1), (SELECT TOP 1 SUBSTRING(Split,1,2) From dbo.SplitString(tmp.ASSET_NO, '-') where No = 2),  
+		  NULL, NULL, NULL, '51', @USER_ID, GETDATE(), NULL, NULL)  
+	  WHEN MATCHED AND  ISNULL( tmp.ASSET_NO ,'') <> ''    
+	   THEN UPDATE SET pri.ASSET_CATEGORY = tmp.ASSET_CATEGORY, pri.ASSET_CLASS = tmp.ASSET_CLASS, pri.ASSET_LOCATION = tmp.ASSET_LOCATION,  
+		pri.ASSET_NO = (SELECT TOP 1 SUBSTRING(Split,1,7) From dbo.SplitString(tmp.ASSET_NO, '-') where No = 1), pri.SUB_ASSET_NO =(SELECT TOP 1 SUBSTRING(Split,1,2) From dbo.SplitString(tmp.ASSET_NO, '-') where No = 2),   
+		pri.CHANGED_BY = @USER_ID, pri.CHANGED_DT = GETDATE() 
+	  WHEN MATCHED AND ISNULL( tmp.ASSET_NO ,'') = '' 
+	   THEN DELETE;
+
+		SET @MSG = 'Merge TB_R_ASSET for Document No ' + @PR_NO + ' Success'
+		SET @MSG_ID = 'MSG0000086'
+		EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'INF', @MODULE, @FUNCTION, 2;
+		INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'INF', @MSG, @MODULE, @LOCATION, @FUNCTION, 2, @USER_ID
+	END TRY
+	BEGIN CATCH
+		SET @MSG = 'Merge TB_R_ASSET for Document No ' + @PR_NO + ' Failed'
+		SET @MSG_ID = 'MSG0000087'
+		EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'ERR', @MODULE, @FUNCTION, 3;
+		INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'ERR', @MSG, @MODULE, @LOCATION, @FUNCTION, 3, @USER_ID
+
+		SET @MSG = ERROR_MESSAGE()
+		SET @MSG_ID = 'EXCEPTION'
+		EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'ERR', @MODULE, @FUNCTION, 3;
+		INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'ERR', @MSG, @MODULE, @LOCATION, @FUNCTION, 3, @USER_ID
+
+		SET @STATUS = 'FAILED'
+	END CATCH
+END
+
+IF(@STATUS = 'SUCCESS' AND @TYPE = 'SUBMIT')
+BEGIN
+	SELECT @PR_COORDINATOR = PR_COORDINATOR FROM @PRH_DATA WHERE PROCESS_ID = @PROCESS_ID AND PR_NO = @PR_NO
+	IF((@IS_DRAFT = 'Y' OR @IS_CANCELLED = 'Y') AND @TYPE = 'SUBMIT')
+	BEGIN
+		SET @EDIT_FLAG = 'N'
+		UPDATE TB_T_PR_ITEM SET NEW_FLAG = 'Y'
+		WHERE PROCESS_ID = @PROCESS_ID
+		UPDATE TB_T_PR_SUBITEM SET NEW_FLAG = 'Y'
+		WHERE PROCESS_ID = @PROCESS_ID
+	END
+	IF(@STATUS = 'SUCCESS')
+		INSERT INTO @TEMP_LOG 
+		EXEC [dbo].[sp_prcreation_createWorklist] 
+			@PR_NO, 
+			@PROCESS_ID, 
+			@USER_ID, 
+			@DIVISION_ID, 
+			@NOREG, 
+			@EDIT_FLAG, 
+			@PR_COORDINATOR,
+			@STATUS OUTPUT
+END
+
+IF(@STATUS = 'SUCCESS')
+BEGIN
+	BEGIN TRY
+		SET @MSG = 'Update PR Status for Document No ' + @PR_NO + ' Started'
+		SET @MSG_ID = 'MSG0000081'
+		EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'INF', @MODULE, @FUNCTION, 1;
+		INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'INF', @MSG, @MODULE, @LOCATION, @FUNCTION, 1, @USER_ID
+
+		DECLARE @PR_STATUS CHAR(2)
+
+		IF NOT EXISTS(SELECT 1 FROM TB_R_PR_ITEM WHERE PR_NO = @PR_NO AND PR_STATUS <> '10')
+		BEGIN
+			SET @PR_STATUS = '90'
+		END
+		ELSE IF NOT EXISTS (SELECT 1 FROM TB_R_PR_ITEM WHERE PR_NO = @PR_NO AND PR_STATUS <> '14')
+		BEGIN
+			SET @PR_STATUS = '92'
+		END
+		ELSE IF NOT EXISTS(SELECT 1 FROM TB_R_PR_ITEM WHERE PR_NO = @PR_NO AND PR_STATUS <> '98')
+		BEGIN
+			SET @PR_STATUS = '95'
+		END
+		ELSE IF NOT EXISTS(SELECT 1 FROM TB_R_PR_ITEM WHERE PR_NO = @PR_NO AND PR_STATUS <> '00')
+		BEGIN
+			SET @PR_STATUS = '94'
+		END
+		ELSE
+		BEGIN
+			SET @PR_STATUS = '91'
+		END
+
+		UPDATE TB_R_PR_H SET PR_STATUS = @PR_STATUS WHERE PR_NO = @PR_NO
+		UPDATE TB_H_PR_H SET PR_STATUS = @PR_STATUS WHERE PR_NO = @PR_NO AND PROCESS_ID = @PROCESS_ID
+
+		SET @MSG = 'Update PR Status for Document No ' + @PR_NO + ' Success'
+		SET @MSG_ID = 'MSG0000081'
+		EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'INF', @MODULE, @FUNCTION, 2;
+		INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'INF', @MSG, @MODULE, @LOCATION, @FUNCTION, 2, @USER_ID
+	END TRY
+	BEGIN CATCH
+		SET @MSG = 'Update PR Status for Document No ' + @PR_NO + ' Failed'
+		SET @MSG_ID = 'MSG0000084'
+		EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'ERR', @MODULE, @FUNCTION, 3;
+		INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'ERR', @MSG, @MODULE, @LOCATION, @FUNCTION, 3, @USER_ID
+
+		SET @MSG = ERROR_MESSAGE()
+		SET @MSG_ID = 'EXCEPTION'
+		EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'ERR', @MODULE, @FUNCTION, 3;
+		INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'ERR', @MSG, @MODULE, @LOCATION, @FUNCTION, 3, @USER_ID
+
+		SET @STATUS = 'FAILED'
+	END CATCH
+END
+
+IF(@STATUS = 'SUCCESS' AND @TYPE = 'SUBMIT')
+BEGIN
+	SET @MSG = 'Insert data announcement for PR No ' + @PR_NO + ' Started'
+	SET @MSG_ID = 'MSG0000081'
+	EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'INF', @MODULE, @FUNCTION, 1;
+	INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'INF', @MSG, @MODULE, @LOCATION, @FUNCTION, 1, @USER_ID
+
+	DECLARE @NEXT_APPROVER VARCHAR(8)
+	SELECT TOP 1 @NEXT_APPROVER = NOREG
+		FROM TB_R_WORKFLOW WHERE DOCUMENT_NO = @PR_NO AND IS_DISPLAY = 'Y' AND IS_APPROVED = 'N' AND APPROVED_DT IS NULL
+		ORDER BY ITEM_NO, DOCUMENT_SEQ ASC
+
+	DECLARE @PIC VARCHAR(MAX) = @NOREG + ';' + ISNULL(@NEXT_APPROVER, '')
+	DECLARE @MESSAGE_ANN VARCHAR(MAX) = 'PR No ' + @PR_NO + ' has been ' + CASE WHEN(@EDIT_FLAG = 'Y') THEN 'edited' ELSE 'created' END
+
+	INSERT INTO [dbo].[TB_R_ANNOUNCEMENT]
+           ([PROCESS_ID]
+           ,[MSG_TYPE]
+           ,[TARGET_RECIPIENT]
+           ,[MSG_CONTENT]
+           ,[MSG_ATTACHMENT]
+           ,[CREATED_BY]
+           ,[CREATED_DT]
+           ,[CHANGED_BY]
+           ,[CHANGED_DT])
+     VALUES
+           (@PROCESS_ID
+           ,'INF'
+           ,@PIC
+           ,@MESSAGE_ANN
+           ,NULL
+           ,@USER_ID
+           ,GETDATE()
+           ,NULL
+           ,NULL)
+
+	SET @MSG = 'Insert data announcement for PR No ' + @PR_NO + ' Success'
+	SET @MSG_ID = 'MSG0000082'
+	EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'SUC', @MODULE, @FUNCTION, 2;
+	INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'SUC', @MSG, @MODULE, @LOCATION, @FUNCTION, 2, @USER_ID
+
+	--Note :Uncomment if sp_send_email ready to execute
+	SET @MSG = 'Send email announcement for PR No ' + @PR_NO + ' Started'
+	SET @MSG_ID = 'MSG0000081'
+	EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'INF', @MODULE, @FUNCTION, 1;
+	INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'INF', @MSG, @MODULE, @LOCATION, @FUNCTION, 1, @USER_ID
+
+	SELECT @LINK_PR_APPROVAL = SYSTEM_VALUE   
+	FROM TB_M_SYSTEM WHERE FUNCTION_ID = 'MAIL' AND SYSTEM_CD = 'LINK_PRAPPROVAL' 
+
+	if(@NEXT_APPROVER='-')
+	BEGIN
+		SELECT TOP 1 @NEXT_APPROVER = NOREG
+		FROM TB_R_WORKFLOW WHERE DOCUMENT_NO = @PR_NO AND IS_DISPLAY = 'Y' AND IS_APPROVED = 'N' AND APPROVED_DT IS NULL AND NOREG <>'-'
+		ORDER BY ITEM_NO, DOCUMENT_SEQ ASC
+	END
+
+	IF(@NEXT_APPROVER IS NOT NULL)
+	BEGIN
+	SELECT TOP 1 @NEXT_PERSONNEL_NAME = PERSONNEL_NAME
+		FROM TB_R_SYNCH_EMPLOYEE WHERE NOREG = @NEXT_APPROVER AND GETDATE() BETWEEN VALID_FROM AND VALID_TO 
+	ORDER BY POSITION_LEVEL DESC
+
+	--Note : Uncomment this if sp_send_email ready to execute
+	--DECLARE @SUBJECT VARCHAR(100) = 'PR No ' + @DOC_NO + ' Item ' + @ITEM_NO + ' Approval ' + CAST(GETDATE() AS VARCHAR)
+	DECLARE @SUBJECT VARCHAR(100) = '[PAS] PR Approval Notification'
+	--DECLARE @BODY VARCHAR(MAX) = '<p>' + @MESSAGE_ANN + '</p>'
+	
+	DECLARE @BODY VARCHAR(MAX) = '<br/>PR No : <a href="'+@LINK_PR_APPROVAL+'">' + @PR_NO + '</a><br/>';
+	SET @BODY = @BODY + '<table  style = "border: 1px solid black;border-collapse: collapse; width: 800px">';
+	SET @BODY = @BODY + '	<tr style = "border: 1px solid black;">';
+	SET @BODY = @BODY + '		<th style = "border: 1px solid black;text-align: left;font-weight: normal;width: 100px;">PR Item No</th>';
+	SET @BODY = @BODY + '		<th style = "border: 1px solid black;text-align: left;font-weight: normal;">Description</th>';
+	SET @BODY = @BODY + '		<th style = "border: 1px solid black;text-align: center;font-weight: normal;width: 200px;">Amount</th>';
+	SET @BODY = @BODY + '	</tr>';
+
+	declare @i_numItem AS int = 0
+	DECLARE db_cursor CURSOR FOR  
+	select DISTINCT item.PR_ITEM_NO, item.MAT_DESC, item.LOCAL_AMOUNT 
+	from TB_R_PR_H h
+	INNER JOIN TB_R_PR_ITEM item ON item.PR_NO = h.PR_NO
+	INNER JOIN tb_r_workflow wflow ON wflow.DOCUMENT_NO = item.PR_NO AND wflow.ITEM_NO = item.PR_ITEM_NO
+	where h.PR_NO =@PR_NO and wflow.NOREG = @NEXT_APPROVER AND IS_DISPLAY = 'Y' AND IS_APPROVED = 'N' AND APPROVED_DT IS NULL
+
+	OPEN db_cursor   
+	FETCH NEXT FROM db_cursor INTO @ITEM_NO, @ITEM_DESCRIPTION, @AMOUNT_APPROVAL
+
+	WHILE @@FETCH_STATUS = 0   
+	BEGIN   
+		SET @BODY = @BODY + '	<tr style = "border: 1px solid black;">';
+		SET @BODY = @BODY + '		<th style = "border: 1px solid black;text-align: left;font-weight: normal;width: 100px;">' + @ITEM_NO + '</th>';
+		SET @BODY = @BODY + '		<th style = "border: 1px solid black;text-align: left;font-weight: normal;">' + @ITEM_DESCRIPTION + '</th>';
+		SET @BODY = @BODY + '		<th style = "border: 1px solid black;text-align: right;font-weight: normal;width: 200px;">' + convert(varchar, cast(@AMOUNT_APPROVAL as money), 1) + '</th>';
+		SET @BODY = @BODY + '	</tr>';
+
+		SET @i_numItem = @i_numItem + 1
+		FETCH NEXT FROM db_cursor INTO @ITEM_NO, @ITEM_DESCRIPTION, @AMOUNT_APPROVAL 
+	END 
+
+	SET @BODY = @BODY + '</table></p>';
+	SET @BODY = @BODY + '<br/><a href="'+@LINK_PR_APPROVAL+'">[Go To PR Approval]</a> Click this link to display all PR Approval on PAS.';
+	SET @BODY = @BODY + '<p>Best Regards,</p>PAS Admin<br/>';
+
+	DECLARE @BODYHEADER VARCHAR(MAX) = '<p>Dear '+@NEXT_PERSONNEL_NAME+', <br/><br/>You have '+CAST(@i_numItem AS VARCHAR)+' worklist to be approved.'; 
+	SET @BODY =  @BODYHEADER + @BODY;
+
+	CLOSE db_cursor   
+	DEALLOCATE db_cursor
+
+	EXEC [dbo].[sp_announcement_sendmail]
+	  	 @NEXT_APPROVER,
+		 @SUBJECT,
+		 @BODY,
+		 @STATUS OUTPUT
+
+		IF(@STATUS = 'SUCCESS')
+		BEGIN
+			SET @MSG = 'Send email announcement for PR No ' + @PR_NO + ' Success'
+			SET @MSG_ID = 'MSG0000082'
+			EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'SUC', @MODULE, @FUNCTION, 2;
+			INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'SUC', @MSG, @MODULE, @LOCATION, @FUNCTION, 2, @USER_ID
+		END
+		ELSE
+		BEGIN
+			SET @MSG = 'Send email announcement for PR No ' + @PR_NO + ' Failed : ' + @STATUS
+			SET @MSG_ID = 'MSG0000084'
+			EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'ERR', @MODULE, @FUNCTION, 3;
+			INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'ERR', @MSG, @MODULE, @LOCATION, @FUNCTION, 3, @USER_ID
+	
+			SET @STATUS = 'FAILED'
+		END
+	END
+END
+		
+IF(@STATUS = 'SUCCESS')
+BEGIN
+	BEGIN TRY
+		SET @MSG = 'Unlocking TB_R_PR_H with PR No ' + @PR_NO + ' Started'
+		SET @MSG_ID = 'MSG0000081'
+		EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'INF', @MODULE, @FUNCTION, 1;
+		INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'INF', @MSG, @MODULE, @LOCATION, @FUNCTION, 1, @USER_ID
+
+		UPDATE TB_R_PR_H SET PROCESS_ID = NULL WHERE PR_NO = @PR_NO
+		UPDATE TB_R_PR_ITEM SET PROCESS_ID = NULL WHERE PR_NO = @PR_NO AND PROCESS_ID = @PROCESS_ID
+		SET @STATUS = 'SUCCESS'
+
+		DELETE FROM TB_T_LOCK WHERE PROCESS_ID = @PROCESS_ID AND [USER_ID] = @USER_ID 
+
+		SET @MSG = 'Unlocking TB_R_PR_H with PR No ' + @PR_NO + ' Success'
+		SET @MSG_ID = 'MSG0000082'
+		EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'SUC', @MODULE, @FUNCTION, 2;
+		INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'SUC', @MSG, @MODULE, @LOCATION, @FUNCTION, 2, @USER_ID
+	END TRY
+	BEGIN CATCH
+		SET @MSG = 'Unlocking TB_R_PR_H with PR No ' + @PR_NO + ' Failed'
+		SET @MSG_ID = 'MSG0000084'
+		EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'ERR', @MODULE, @FUNCTION, 3;
+		INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'ERR', @MSG, @MODULE, @LOCATION, @FUNCTION, 3, @USER_ID
+
+		SET @MSG = ERROR_MESSAGE()
+		SET @MSG_ID = 'EXCEPTION'
+		EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'ERR', @MODULE, @FUNCTION, 3;
+		INSERT INTO @TEMP_LOG SELECT @PROCESS_ID, GETDATE(), @MSG_ID, 'ERR', @MSG, @MODULE, @LOCATION, @FUNCTION, 3, @USER_ID
+
+		SET @STATUS = 'FAILED'
+	END CATCH
+END
+
+IF(@STATUS = 'SUCCESS')
+BEGIN
+	COMMIT TRANSACTION
+
+	SET @MSG = 'Saving Process For PR No. ' + @PR_NO + ' Success'
+	SET @MSG_ID = 'MSG0000080'
+	EXEC dbo.sp_PutLog @MSG, @USER_ID, @LOCATION, @PROCESS_ID , @MSG_ID, 'SUC', @MODULE, @FUNCTION, 2;
+
+	SELECT @PR_NO AS [MESSAGE], @STATUS AS PROCESS_STATUS
+END
+ELSE
+BEGIN
+	ROLLBACK TRANSACTION
+	EXEC sp_PutLog_Temp @TEMP_LOG
+
+	SELECT CONVERT(VARCHAR, @PROCESS_ID) AS [MESSAGE], @STATUS AS PROCESS_STATUS
+END
+END

@@ -1,0 +1,18 @@
+﻿@using GPS.Constants.PRPOApproval
+<div class="modal-dialog modal-lg" style="width:70%;min-height:400px">
+    <div class="modal-content">
+        <div class="modal-header">
+            <b>
+                <h4 class="modal-title">Approval Status</h4>
+            </b>
+        </div>
+        <div class="modal-body" id="data-container-@PRPOApprovalPage.POApprovalHistory" style="margin-top:-1.5em;">
+            @Html.Partial(PRPOApprovalPage.POApprovalHistoryGrid)
+        </div>
+        <div class="modal-footer">
+            <div class="text-right">
+                <button id="btn-close-detail" type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

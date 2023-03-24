@@ -1,0 +1,102 @@
+﻿@using GPS.Models.Master
+@{
+   CostCenterGroup CostGroupData = ViewData["CostGroupData"] != null ? (CostCenterGroup)ViewData["CostGroupData"] : new CostCenterGroup();
+   List<Division> division = ViewData["Division"] != null ? (List<Division>)ViewData["Division"] : new List<Division>();
+   
+    string edit = (string)ViewData["edit"];
+    string disabled = "";
+    string cursor = "pointer";
+    string mandatory = "mandatory";
+    string selected = "selected";
+    if (edit == "1")
+    {
+        mandatory = "";
+        disabled = "disabled='disabled'";
+        cursor = "";
+    } 
+}
+
+<div class="modal-dialog" style="width: 900px">
+<form  method="post" action="javascript: onSaveData();" >
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                <span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <div class="modal-title" id="myModalLabel">
+                <h4>
+                    Cost Center Group Master</h4>
+            </div>
+            <input type="hidden" id="txtEdit" value="@edit"/>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="form-horizontal">
+                    <div class="col-xs-12">
+                        <div class="col-xs-12 col-sm-4 col-md-4">
+                            <div class="form-group form-group-xs">                            
+                                <label class="col-sm-5 col-md-5 control-label text-muted">
+                                    Cost Center Group</label>                                   
+                                <div class="col-sm-7 col-md-7">                         
+                                  <input type="text" id="txtCostGrpForm" class="form-control @mandatory" @disabled value="@CostGroupData.CostCenterGroupCd"/>
+                                </div>                                    
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-4 col-md-4">
+                            <div class="form-group form-group-xs">
+                                <label class="col-sm-5 col-md-5 control-label text-muted ">
+                                    Division</label>
+                                <div class="col-sm-7 col-md-7">
+                                    <select id="txtDivCdForm" class="form-control">
+                                        <option value="" @selected></option>
+                                        @foreach (Division d in division)
+                                        { 
+                                            <option value="@d.Division_ID" @if(CostGroupData.DivisionCd == d.Division_ID){ @selected } >@d.Division_NAME</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-4 col-md-4">
+                            <div class="form-group form-group-xs">
+                                <label class="col-sm-5 col-md-5 control-label text-muted">
+                                    Description</label>
+                                <div class="col-sm-7 col-md-7">
+                                   <input type="text" id="txtCostGrpDescForm" class="form-control" value="@CostGroupData.CostCenterGroupDesc"/>
+                                </div>
+                            </div>
+                        </div>                                            
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="modal-footer">
+                    <div class="col-xs-6">
+                    </div>
+                <div class="col-xs-6 text-right">
+                    <div class="form-group-xs">
+                        <button type="submit" class="btn btn-primary btn-xs">
+                            Save</button>                       
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function () {
+    $('.date-picker').datepicker({
+        autoclose: true,
+        todayHighlight: true
+    })
+    //show datepicker when clicking on the icon
+	.next().on(ace.click_event, function () {
+		$(this).prev().focus();
+	});       
+}); 
+</script>
+
+

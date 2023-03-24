@@ -1,0 +1,12 @@
+﻿@using System
+@using System.Collections.Generic
+@using GPS.Models.Common
+@model GPS.ViewModels.DropdownListViewModel
+@{
+    var htmlAttrList = new Dictionary<String, Object>();
+    htmlAttrList.Add("class", "form-control");
+    foreach (NameValueItem embeddedData in Model.EmbeddedDataList) {
+        htmlAttrList.Add("data-" + embeddedData.Name, embeddedData.Value);
+    }
+}
+@Html.DropDownList("cmb-" + Model.DataName, Model.DataList, @htmlAttrList)

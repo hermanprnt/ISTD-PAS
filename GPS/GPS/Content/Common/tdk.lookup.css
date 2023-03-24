@@ -1,0 +1,4 @@
+﻿.modal-body.lookup div[id^=datagrid-] {
+    overflow: auto;
+    max-height: 515px;
+}

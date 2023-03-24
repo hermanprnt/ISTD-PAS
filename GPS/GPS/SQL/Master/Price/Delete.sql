@@ -1,0 +1,1 @@
+﻿EXEC sp_MaterialPrice_Delete @PrimaryKeyList

@@ -1,0 +1,63 @@
+﻿@using GPS.Constants
+@using GPS.Models.Common
+@using GPS.ViewModels
+@{
+    List<Worklist> prApprovalHistoryList = ViewData["PRApprovalHistory"] != null ? (List<Worklist>)ViewData["PRApprovalHistory"] : new List<Worklist>();
+    PaginationViewModel paginationViewModel = ViewData["PRApprovalHistoryPage"] != null ? (PaginationViewModel)ViewData["PRApprovalHistoryPage"] : new PaginationViewModel();
+    string errormessage = ViewData["Message"] != null ? ViewData["Message"].ToString() : "";
+    
+    //if(PaginationViewModel )
+    
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        var errormessage = "@errormessage";
+        if (errormessage !== "")
+        {
+            $("#alert-worklist").css("display", "inherit");
+            $("#alert-worklist").html(errormessage);
+        }
+    })
+</script>
+<style>
+    .table > tr > td, 
+    .table > thead > tr > th {
+        vertical-align : middle;    
+    }
+</style>
+<div style="width:100%;margin-top:10px;">
+    <table class="table table-striped table-bordered table-condensed">
+        <thead>
+            <tr style="width:100%;">
+                <th>Doc. No</th>
+                <th>Type</th>
+                <th>Organization Structure</th>
+                <th>User</th>
+                <th>Status</th>
+                <th>Action Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (prApprovalHistoryList.Count > 0)
+        {
+            foreach (Worklist item in prApprovalHistoryList)
+            {
+                <tr>
+                    <td class="text-center">@item.DOCUMENT_NO</td>
+                    <td class="text-center">@item.DOCUMENT_TYPE</td>
+                    <td class="text-left">@item.STRUCTURE_NAME</td>
+                    <td class="text-left">@item.APPROVED_BY</td>
+                    <td class="text-left">@item.APPROVAL_DESC</td> 
+                    <td class="text-center">@(item.APPROVED_DT != DateTime.MinValue ? item.APPROVED_DT.ToString(CommonFormat.Date) : "")</td>  
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">No Data</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

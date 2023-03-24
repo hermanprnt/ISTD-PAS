@@ -1,0 +1,524 @@
+﻿@using GPS.CommonFunc.WebControl
+@using GPS.Controllers.PO
+@using GPS.Core.ViewModel
+
+<style>
+    .datepicker {
+        z-index:999999 !important;
+    }
+</style>
+
+<div id="pop-spkform" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-title">
+                    SPK Information
+                </p>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-xs-12 form-horizontal">
+                        <div class="form-group form-group-xs">
+                            <label for="txtdateinput-spkbiddingdate" class="col-xs-3 col-sm-2 control-label text-muted">Bidding Date</label>
+                            <div class="col-xs-9 col-sm-10">
+                                @Html.DateInputBox("spkbiddingdate")
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label for="txtspk-opening" class="col-xs-3 col-sm-2 control-label text-muted">Opening</label>
+                            <div class="col-xs-9 col-sm-10">
+                                <textarea class="form-control" rows="3" id="txtspk-opening" placeholder="Max 270 character"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label for="txtspk-work" class="col-xs-3 col-sm-2 control-label text-muted">Work Desc.</label>
+                            <div class="col-xs-9 col-sm-10">
+                                <input type="text" class="form-control" id="txtspk-work" />
+                                <input type="hidden" id="txtspk-spkno" />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label for="txtspk-amount" class="col-xs-3 col-sm-2 control-label text-muted">Amount</label>
+                            <div class="col-xs-9 col-sm-10">
+                                <input type="text" class="form-control" id="txtspk-amount" />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label for="txtspk-location" class="col-xs-3 col-sm-2 control-label text-muted">Location</label>
+                            <div class="col-xs-9 col-sm-10">
+                                <input type="text" class="form-control" id="txtspk-location" />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs hidden">
+                            <label for="txtspk-location" class="col-xs-3 col-sm-2 control-label text-muted">Vendor</label>
+                            <div class="col-xs-9 col-sm-10">
+                                @Html.Lookup("spkvendor")
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs hidden">
+                            <label for="txtspk-vendoraddr" class="col-xs-3 col-sm-2 control-label text-muted">Vendor Address</label>
+                            <div class="col-xs-9 col-sm-10">
+                                <input type="text" class="form-control" id="txtspk-vendoraddr" />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs hidden">
+                            <label for="txtspk-vendorpostal" class="col-xs-3 col-sm-2 control-label text-muted">Vendor Postal Code</label>
+                            <div class="col-xs-9 col-sm-10">
+                                <input type="text" class="form-control" id="txtspk-vendorpostal" />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs hidden">
+                            <label for="txtspk-vendorcity" class="col-xs-3 col-sm-2 control-label text-muted">Vendor City</label>
+                            <div class="col-xs-9 col-sm-10">
+                                <input type="text" class="form-control" id="txtspk-vendorcity" />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label for="txtdateinput-spkperiod" class="col-xs-3 col-sm-2 control-label text-muted">Period</label>
+                            <div class="col-xs-9 col-sm-10">
+                                @Html.DateInputBox("spkperiod")
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label for="txtspk-retention" class="col-xs-3 col-sm-2 control-label text-muted">Retention</label>
+                            <div class="col-xs-9 col-sm-10">
+                                <input type="text" class="form-control" id="txtspk-retention" />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-6 col-sm-4 col-md-2 control-label text-muted">Termin I</label>
+                            <div class="col-xs-6 col-sm-4 col-md-2">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="txtspk-termin-1" />
+                                    <span class="input-group-addon">%</span>
+                                </div>
+                            </div>
+                            <select id="cmbspk-termindescprefix-1" class="col-xs-6 col-sm-4 col-md-2">
+                                <option value="sebagai">sebagai</option>
+                                <option value="setelah">setelah</option>
+                            </select>
+                            <div class="col-xs-6">
+                                <input type="text" class="form-control" id="txtspk-termindesc-1" />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-6 col-sm-4 col-md-2 control-label text-muted">Termin II</label>
+                            <div class="col-xs-6 col-sm-4 col-md-2">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="txtspk-termin-2" />
+                                    <span class="input-group-addon">%</span>
+                                </div>
+                            </div>
+                            <select id="cmbspk-termindescprefix-2" class="col-xs-6 col-sm-4 col-md-2">
+                                <option value="sebagai">sebagai</option>
+                                <option value="setelah">setelah</option>
+                            </select>
+                            <div class="col-xs-6">
+                                <input type="text" class="form-control" id="txtspk-termindesc-2" />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-6 col-sm-4 col-md-2 control-label text-muted">Termin III</label>
+                            <div class="col-xs-6 col-sm-4 col-md-2">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="txtspk-termin-3" />
+                                    <span class="input-group-addon">%</span>
+                                </div>
+                            </div>
+                            <select id="cmbspk-termindescprefix-3" class="col-xs-6 col-sm-4 col-md-2">
+                                <option value="sebagai">sebagai</option>
+                                <option value="setelah">setelah</option>
+                            </select>
+                            <div class="col-xs-6">
+                                <input type="text" class="form-control" id="txtspk-termindesc-3" />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-6 col-sm-4 col-md-2 control-label text-muted">Termin IV</label>
+                            <div class="col-xs-6 col-sm-4 col-md-2">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="txtspk-termin-4" />
+                                    <span class="input-group-addon">%</span>
+                                </div>
+                            </div>
+                            <select id="cmbspk-termindescprefix-4" class="col-xs-6 col-sm-4 col-md-2">
+                                <option value="sebagai">sebagai</option>
+                                <option value="setelah">setelah</option>
+                            </select>
+                            <div class="col-xs-6">
+                                <input type="text" class="form-control" id="txtspk-termindesc-4" />
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-6 col-sm-4 col-md-2 control-label text-muted">Termin V</label>
+                            <div class="col-xs-6 col-sm-4 col-md-2">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="txtspk-termin-5" />
+                                    <span class="input-group-addon">%</span>
+                                </div>
+                            </div>
+                            <select id="cmbspk-termindescprefix-5" class="col-xs-6 col-sm-4 col-md-2">
+                                <option value="sebagai">sebagai</option>
+                                <option value="setelah">setelah</option>
+                            </select>
+                            <div class="col-xs-6">
+                                <input type="text" class="form-control" id="txtspk-termindesc-5" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="btn-group-xs text-right">
+                    <button id="btnspk-ok" class="btn btn-xs btn-primary btn-std">Ok</button>
+                    <button id="btnspk-cancel" class="btn btn-xs btn-danger btn-std">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="pop-createspkconfirm" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-title">
+                    Create SPK Confirmation
+                </p>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Do you want to <span id="spkmode">create</span> SPK?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <div class="btn-group-xs text-right">
+                    <button id="btnspkconfirm-ok" class="btn btn-xs btn-primary btn-std">Yes</button>
+                    <button id="btnspkconfirm-cancel" class="btn btn-xs btn-danger btn-std">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.LookupContainer("spkvendor")
+
+<div id="pop-savespkconfirm" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-title">
+                    Save SPK Confirmation
+                </p>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Do you want to save SPK?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <div class="btn-group-xs text-right">
+                    <button id="btnspksaveconfirm-ok" class="btn btn-xs btn-primary btn-std">Yes</button>
+                    <button id="btnspksaveconfirm-cancel" class="btn btn-xs btn-danger btn-std">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="pop-cancelspkconfirm" class="modal fade" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p class="modal-title">
+                    Cancel SPK Confirmation
+                </p>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Are you sure to cancel?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <div class="btn-group-xs text-right">
+                    <button id="btnspkcancelconfirm-ok" class="btn btn-xs btn-primary btn-std">Yes</button>
+                    <button id="btnspkcancelconfirm-cancel" class="btn btn-xs btn-danger btn-std">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        /* =============================== SPK: begin =============================== */
+
+        var OnOKSPOKConfirmButtonClick = ViewData.Get("OnOKSPOKConfirmButtonClick"),
+            OnCancelSPKConfirmButtonClick = ViewData.Get("OnCancelSPKConfirmButtonClick"),
+            OnOKSPKButtonClick = ViewData.Get("OnOKSPKButtonClick"),
+            OnCancelSPKButtonClick = ViewData.Get("OnCancelSPKButtonClick"),
+            OnOKSaveSPKConfirmButtonClick = ViewData.Get("OnOKSaveSPKConfirmButtonClick"),
+            OnCancelSaveSPKConfirmButtonClick = ViewData.Get("OnCancelSaveSPKConfirmButtonClick"),
+            OnOKCancelSPKConfirmButtonClick = ViewData.Get("OnOKCancelSPKConfirmButtonClick"),
+            OnCancelCancelSPKConfirmButtonClick = ViewData.Get("OnCancelCancelSPKConfirmButtonClick");
+
+        $("#txtdateinput-spkbiddingdate").todatepicker();
+        $("#txtdateinput-spkperiod").todaterangepicker();
+
+        ViewData.Add("InitSPKForm", InitSPKForm);
+        ViewData.Add("FillSPKInfo", FillSPKInfo);
+
+        function InitSPKForm() {
+            ResetSPKForm();
+
+            var termin1 = $("#txtspk-termin-1");
+            termin1.val("100");
+        }
+
+        function ResetSPKForm() {
+            $.Clear([
+                "#txtdateinput-spkbiddingdate",
+                "#txtspk-opening",
+                "#txtspk-work",
+                "#txtspk-spkno",
+                "#txtspk-amount",
+                "#txtspk-location",
+                "#txtspk-vendoraddr",
+                "#txtspk-vendorpostal",
+                "#txtspk-vendorcity",
+                "#txtdateinpunt-spkperiod",
+                "#txtspk-retention",
+                "#txtspk-termin-1",
+                "#txtspk-termin-2",
+                "#txtspk-termin-3",
+                "#txtspk-termin-4",
+                "#txtspk-termin-5",
+                "#cmbspk-termindescprefix-1",
+                "#cmbspk-termindescprefix-2",
+                "#cmbspk-termindescprefix-3",
+                "#cmbspk-termindescprefix-4",
+                "#cmbspk-termindescprefix-5",
+                "#txtspk-termindesc-1",
+                "#txtspk-termindesc-2",
+                "#txtspk-termindesc-3",
+                "#txtspk-termindesc-4",
+                "#txtspk-termindesc-5"
+            ]);
+            $.ClearLookup(["#lookup-spkvendor"]);
+        }
+
+        function FillSPKInfo(spk) {
+            var termin1Desc = spk.TerminIDesc.split(" "),
+                termin2Desc = spk.TerminIIDesc.split(" "),
+                termin3Desc = spk.TerminIIIDesc.split(" "),
+                termin4Desc = spk.TerminIVDesc.split(" "),
+                termin5Desc = spk.TerminVDesc.split(" ");
+
+            $("#txtdateinput-spkbiddingdate").val(spk.BiddingDateString);
+            $("#txtspk-opening").val(spk.Opening);
+            $("#txtspk-work").val(spk.Work);
+            $("#txtspk-amount").val($.AsPrice(spk.Amount));
+            $("#txtspk-location").val(spk.Location);
+            $("#lookup-spkvendor").LookupVal(spk.VendorCode + " - " + spk.VendorName);
+            $("#txtspk-vendoraddr").val(spk.VendorAddress);
+            $("#txtspk-vendorpostal").val(spk.VendorPostal);
+            $("#txtspk-vendorcity").val(spk.VendorCity);
+            $("#txtdateinput-spkperiod").val(spk.PeriodStartString + " - " + spk.PeriodEndString);
+            $("#txtspk-retention").val(spk.Retention);
+            $("#txtspk-termin-1").val(spk.TerminI === "0" ? "" : spk.TerminI);
+            $("#cmbspk-termindescprefix-1").val(termin1Desc[0]);
+            $("#txtspk-termindesc-1").val(termin1Desc.slice(1, termin1Desc.length).join(" "));
+            $("#txtspk-termin-2").val(spk.TerminII === "0" ? "" : spk.TerminII);
+            $("#cmbspk-termindescprefix-2").val(termin2Desc[0]);
+            $("#txtspk-termindesc-2").val(termin2Desc.slice(1, termin2Desc.length).join(" "));
+            $("#txtspk-termin-3").val(spk.TerminIII === "0" ? "" : spk.TerminIII);
+            $("#cmbspk-termindescprefix-3").val(termin3Desc[0]);
+            $("#txtspk-termindesc-3").val(termin3Desc.slice(1, termin3Desc.length).join(" "));
+            $("#txtspk-termin-4").val(spk.TerminIV === "0" ? "" : spk.TerminIV);
+            $("#cmbspk-termindescprefix-4").val(termin4Desc[0]);
+            $("#txtspk-termindesc-4").val(termin4Desc.slice(1, termin4Desc.length).join(" "));
+            $("#txtspk-termin-5").val(spk.TerminV === "0" ? "" : spk.TerminV);
+            $("#cmbspk-termindescprefix-5").val(termin5Desc[0]);
+            $("#txtspk-termindesc-5").val(termin5Desc.slice(1, termin5Desc.length).join(" "));
+        }
+
+        function ValidateSPKForm() {
+            var mainFieldSelectorList = [
+                "#txtdateinput-spkbiddingdate",
+                "#txtspk-opening",
+                "#txtspk-work",
+                "#txtspk-amount",
+                "#txtspk-location",
+                "#txtdateinput-spkperiod",
+                "#txtspk-retention"
+            ];
+            if (!$("#lookup-spkvendor").closest(".form-group").hasClass("hidden")) {
+                mainFieldSelectorList.concat([
+                    "#lookup-spkvendor",
+                    "#txtspk-vendoraddr",
+                    "#txtspk-vendorpostal",
+                    "#txtspk-vendorcity"
+                ]);
+            }
+            var isMainFieldValid = $.ValidateMandatory(mainFieldSelectorList);
+
+            var openingLength = $("#txtspk-opening").valOrDefault().length;
+            if (openingLength > 270) {
+                $.messagebox.show("@ActionResponseViewModel.Error", "SPK Opening's length: " + openingLength + " are exceeding max length: 270", "@ActionResponseViewModel.Error");
+                return false;
+            }
+
+            var totalPercentage =
+                Number($("#txtspk-termin-1").valOrDefault()) +
+                Number($("#txtspk-termin-2").valOrDefault()) +
+                Number($("#txtspk-termin-3").valOrDefault()) +
+                Number($("#txtspk-termin-4").valOrDefault()) +
+                Number($("#txtspk-termin-5").valOrDefault());
+
+            if (totalPercentage !== 100) {
+                $.messagebox.show("@ActionResponseViewModel.Error", "Total percentage must be 100%", "@ActionResponseViewModel.Error");
+                return false;
+            }
+
+            var terminSelectorList = [];
+            $("[id^=txtspk-termin-]").each(function (idx, el) {
+                var $this = $(this);
+                var $thisElInfo = $this.GetElementInfo();
+                var dataNo = $thisElInfo.DataNo;
+                if ($this.valOrDefault() !== "") {
+                    if ($("#cmbspk-termindescprefix-" + dataNo).valOrDefault() === "")
+                        terminSelectorList.push("#cmbspk-termindescprefix-" + dataNo);
+                    if ($("#txtspk-termindesc-" + dataNo).valOrDefault() === "")
+                        terminSelectorList.push("#txtspk-termindesc-" + dataNo);
+                }
+             });
+             var isTerminValid = $.ValidateMandatory(terminSelectorList);
+
+            return isMainFieldValid && isTerminValid;
+        }
+
+        $("#txtspk-amount").on("keydown", null, $.NumericKey);
+        $("#txtspk-amount").on("keyup", null, function () {
+            var $this = $(this);
+            var $thisPriceValue = $.AsPrice($this.valOrDefault());
+
+            $this.val($thisPriceValue);
+        });
+
+        $("[id^=txtspk-termin-]").on("keydown", null, $.NumericKey);
+
+        function GetEmptySPKInfo() {
+            return {
+                IsSPKCreated: false,
+                SPKNo: "",
+                BiddingDateString: "",
+                Opening: "",
+                Work: "",
+                Amount: "0",
+                Location: "",
+                VendorCode: "",
+                VendorName: "",
+                VendorAddress: "",
+                VendorPostal: "",
+                VendorCity: "",
+                PeriodStartString: "",
+                PeriodEndString: "",
+                Retention: "",
+                TerminI: "",
+                TerminIDesc: "",
+                TerminII: "",
+                TerminIIDesc: "",
+                TerminIII: "",
+                TerminIIIDesc: "",
+                TerminIV: "",
+                TerminIVDesc: "",
+                TerminV: "",
+                TerminVDesc: ""
+            };
+        }
+
+        function CacheSPKInfo() {
+            var periodDate = $("#txtdateinput-spkperiod").parsedaterange();
+            var vendor = ViewData.Get("VendorInfo") || {
+                Code: "",
+                Name: "",
+                Address: "",
+                Postal: "",
+                City: ""
+            };
+            var spk = {
+                IsSPKCreated: true,
+                SPKNo: $("#txtspk-spkno").valOrDefault(),
+                BiddingDateString: $("#txtdateinput-spkbiddingdate").valOrDefault(),
+                Opening: $("#txtspk-opening").valOrDefault(),
+                Work: $("#txtspk-work").valOrDefault(),
+                Amount: $.FromPrice($("#txtspk-amount").valOrDefault()).toFixed(2),
+                Location: $("#txtspk-location").valOrDefault(),
+                VendorCode: vendor.Code,
+                VendorName: vendor.Name,
+                VendorAddress: vendor.Address,
+                VendorPostal: vendor.Postal,
+                VendorCity: vendor.City,
+                PeriodStartString: periodDate.From,
+                PeriodEndString: periodDate.To,
+                Retention: Number($("#txtspk-retention").valOrDefault()),
+                TerminI: $("#txtspk-termin-1").valOrDefault(),
+                TerminIDesc: $("#cmbspk-termindescprefix-1").valOrDefault() + " " + $("#txtspk-termindesc-1").valOrDefault(),
+                TerminII: $("#txtspk-termin-2").valOrDefault(),
+                TerminIIDesc: $("#cmbspk-termindescprefix-2").valOrDefault() + " " + $("#txtspk-termindesc-2").valOrDefault(),
+                TerminIII: $("#txtspk-termin-3").valOrDefault(),
+                TerminIIIDesc: $("#cmbspk-termindescprefix-3").valOrDefault() + " " + $("#txtspk-termindesc-3").valOrDefault(),
+                TerminIV: $("#txtspk-termin-4").valOrDefault(),
+                TerminIVDesc: $("#cmbspk-termindescprefix-4").valOrDefault() + " " + $("#txtspk-termindesc-4").valOrDefault(),
+                TerminV: $("#txtspk-termin-5").valOrDefault(),
+                TerminVDesc: $("#cmbspk-termindescprefix-5").valOrDefault() + " " + $("#txtspk-termindesc-5").valOrDefault()
+            };
+            ViewData.Add("SPKInfo", spk);
+        }
+
+        var currentSPK = ViewData.Get("SPKInfo");
+        if (currentSPK === undefined || currentSPK.SPKNo === "") {
+            InitSPKForm();
+        }
+
+        $("#btnspkconfirm-ok").click(function (e) {
+            OnOKSPOKConfirmButtonClick();
+        });
+
+        $("#btnspkconfirm-cancel").click(function (e) {
+            OnCancelSPKConfirmButtonClick();
+        });
+
+        $("#btnspk-ok").click(function (e) {
+            OnOKSPKButtonClick();
+        });
+
+        $("#btnspk-cancel").click(function (e) {
+            OnCancelSPKButtonClick();
+        });
+
+        $("#btnspksaveconfirm-ok").click(function (e) {
+            if (ValidateSPKForm()) {
+                CacheSPKInfo();
+                OnOKSaveSPKConfirmButtonClick();
+            }
+        });
+
+        $("#btnspksaveconfirm-cancel").click(function (e) {
+            OnCancelSaveSPKConfirmButtonClick();
+        });
+
+        $("#btnspkcancelconfirm-ok").click(function (e) {
+            OnOKCancelSPKConfirmButtonClick();
+        });
+
+        $("#btnspkcancelconfirm-cancel").click(function (e) {
+            OnCancelCancelSPKConfirmButtonClick();
+        });
+
+        /* ================================ SPK: end ================================ */
+    });
+
+    //# sourceURL=_purchaseOrderSPKForm.cshtml
+</script>

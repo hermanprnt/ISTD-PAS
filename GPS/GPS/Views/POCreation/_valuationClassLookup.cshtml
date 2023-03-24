@@ -1,0 +1,47 @@
+@using System.Web.Mvc.Html
+@using GPS.Constants
+@using GPS.Controllers.PO
+@using GPS.Models.Master
+@using GPS.ViewModels.Lookup
+@model LookupViewModel<GPS.ViewModels.PO.ValuationClassLookupViewModel>
+
+<div class="modal-dialog modal-md">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>@Model.Title - Lookup</div>
+        </div>
+        <div class="modal-body lookup">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="input-group">
+                        <input id="txtfilter-@Model.GridPaging.DataName" class="form-control" type="text" placeholder="Filter item"/>
+                        <div class="input-group-btn">
+                            <button id="btnfilter-@Model.GridPaging.DataName" class="btn btn-primary btn-xs">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            <button id="btnclearfilter-@Model.GridPaging.DataName" class="btn btn-default btn-xs">
+                                <i class="fa fa-eraser"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="v-space"></div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="datagrid-@Model.GridPaging.DataName" style="overflow: hidden;">
+                        @Html.Partial(POCreationController.Partial.ValuationClassLookupGrid, Model)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="row">
+                <div class="col-xs-12 text-right">
+                    <button type="button" class="btn btn-primary btn-xs btn-action" data-role="select-lookup">OK</button>
+                    <button type="button" class="btn btn-danger btn-xs btn-action" data-role="dismiss-lookup">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

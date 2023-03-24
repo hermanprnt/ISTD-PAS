@@ -1,0 +1,136 @@
+﻿@using GPS.Controllers.PR;
+@{
+    int DIVISION_ID = TempData["DIVISION_ID"] != null ? Convert.ToInt32(TempData["DIVISION_ID"]) : 0;
+}
+
+<script type="text/javascript" id="Common-PR">
+    $tdk.AjaxMethod = "POST";
+    $(document).ready(function () {
+        autosizeGrid();
+        $("#division").val("@DIVISION_ID.ToString()");
+        $("._criteria").hide();
+        $("#orderBy option:eq(1)").attr('selected', 'selected');
+    });
+
+    $(".input_keyup").on('keyup', function (e) {
+        if (e.keyCode == 13) {
+            SearchPRDetail(1);
+        }
+    });
+
+    $(window).resize(function () {
+        autosizeGrid();
+    });
+
+    function autosizeGrid()
+    {
+        $("#tScrollBody").height($(document).height() - 270);
+    }
+
+    function ShowPRinquiry(PR_NO) {
+        DIVISION_ID = $('#division').val();
+        $.progressbox.show("Get PR Data", "Get New PR Data . . .");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "@PRInquiryController._ShowLatestPR",
+            data: {
+                PR_NO: PR_NO,
+                DIVISION_ID: DIVISION_ID
+            },
+            success: function (resultMessage) {
+                $.progressbox.hide();
+                window.location = "/PRInquiry";
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function GetSearchPRParameters(page) {
+        return {
+            DIVISION_ID: $("#division").val(),
+            PR_NO: $("#prno").val(),
+            PR_DESC: $("#prdescription").val(),
+            CREATED_BY: $("#createdby").val(),
+            PO_NO: $("#pono").val(),
+            VENDOR: $("#vendor").val(),
+            GR_NO: $("#grno").val(),
+            ORDER_BY: $("#orderBy").val(),
+            page: page,
+            pageSize: $('.page').val() || 10
+        };
+    }
+
+    function SearchPRDetail(page) {
+        var param = GetSearchPRParameters(page);
+        $.progressbox.show("Search PR", "Loading Data...");
+        $.ajax({
+            type: $tdk.AjaxMethod, url: "/PRStatusMonitoring/SearchData",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            success: function (resultMessage) {
+                var maxperpage = $('.page').val() || 10;
+                $(".TableList").html(resultMessage);
+                $('.page').val(maxperpage);
+                $.progressbox.hide();
+                autosizeGrid();
+            },
+            error: function (resultMessage) {
+                console.log(resultMessage);
+                $.progressbox.hide();
+                $.messagebox.show(
+                    "Error",
+                    resultMessage,
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+            }
+        });
+    }
+
+    function DownloadPRDetail() {
+
+        var param = GetSearchPRParameters(1);
+
+        $.progressbox.show($tdk.PageTitle, "Download File");
+        $.fileDownload("/PRStatusMonitoring/OnDownloadExcel", {
+            data: param,
+            successCallback: function (responseHtml, url) {
+                $.progressbox.hide();
+            },
+            failCallback: function (responseHtml, url) {
+                console.log(responseHtml);
+                $.progressbox.hide();
+                alert("A file download error has occured, please try again");
+            }
+        });
+    }
+
+    function toggleSearch() {
+        $("._criteria").slideToggle("slow");
+        if ($("#toogle-search").hasClass("fa-angle-double-left")) {
+            $("#toogle-search").removeClass("fa-angle-double-left");
+            $("#toogle-search").addClass("fa-angle-double-right");
+            $("#toogle-search").prop('title', 'Show filter');
+            clearForm();
+        }
+        else {
+            $("#toogle-search").removeClass("fa-angle-double-right");
+            $("#toogle-search").addClass("fa-angle-double-left");
+            $("#tScrollBody").height(45);
+            $("#toogle-search").prop('title', 'Hide filter');
+        }
+        $("#toogle-search").blur();
+        autosizeGrid();
+    }
+
+    function clearForm() {
+        $("#pono").val('');
+        $("#prno").val('');
+        $("#vendor").val('');
+        $("#prdescription").val('');
+        $("#createdby").val('');
+    }
+</script>

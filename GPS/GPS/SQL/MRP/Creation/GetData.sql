@@ -1,0 +1,21 @@
+﻿
+WITH getData AS
+		(
+<<<<<<< HEAD
+		SELECT ROW_NUMBER() OVER(ORDER BY [CREATED_DT] DESC) AS NUMBER	
+=======
+		SELECT ROW_NUMBER() OVER(ORDER BY [CREATED_DT]) AS NUMBER	
+>>>>>>> 3773a59e77a4b2339d5f378fb2c408bd394770ee
+		, [PROCESS_ID]
+      ,[TASK_STATUS]
+      ,[PARAMETER]
+      ,[MRP_TYPE]
+      ,[CREATED_BY]
+      ,[CREATED_DT]
+      ,[START_DT]
+      ,[END_DT]
+	 FROM [dbo].[TB_R_MRP_QUEUE]
+		)
+SELECT *
+FROM getData
+WHERE NUMBER >= @start AND NUMBER <= @length

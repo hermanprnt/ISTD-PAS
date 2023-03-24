@@ -1,0 +1,1 @@
+﻿EXEC [dbo].[sp_Generate_Quota_Confirm] @NOW_DATE,@USER_ID

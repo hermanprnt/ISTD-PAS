@@ -1,0 +1,1 @@
+﻿EXEC sp_PRApproval_GetNoticeList @DOC_NO, @NOREG

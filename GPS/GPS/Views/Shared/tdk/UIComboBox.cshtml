@@ -1,0 +1,40 @@
+﻿@using Toyota.Common.Utilities
+@model UIComboBoxSettings
+           
+@if (Model.Type == UIComboBoxType.Standard)
+{
+    <div id="@Model.Id" class="btn-group _combobox @Model.PrintCssClass()">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="selected-label">@Model.NullText.ToMvcHtmlString()</span><i class="fa fa-caret-down text-left"></i></button>
+        <ul class="dropdown-menu" role="menu">
+            @{
+                Model.GetItems().EnumerateAsKeyValuePair(Model.ValueField, Model.TextField, (value, text) =>
+                {
+                    ViewContext.Writer.Write(string.Format("<li><a href=\"#\" data-value=\"{0}\">{1}</a></li>", value, text));
+                });   
+            }
+        </ul>
+    </div>
+}
+else
+{
+    <div id="@Model.Id" class="btn-group _combobox split @Model.PrintCssClass()">
+        <button type="button" class="btn btn-primary"><span class="selected-label">@Model.NullText.ToMvcHtmlString()</span></button>
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-caret-down text-left"></i><span class="sr-only">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            @{
+                Model.GetItems().EnumerateAsKeyValuePair(Model.ValueField, Model.TextField, (value, text) =>
+                {
+                    ViewContext.Writer.Write(string.Format("<li><a href=\"#\" data-value=\"{0}\">{1}</a></li>", value, text));
+                });   
+            }
+        </ul>
+    </div>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#@Model.Id").tdkComboBox(@Model.PrintJsProperties());    
+    });    
+</script>

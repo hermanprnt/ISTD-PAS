@@ -1,0 +1,18 @@
+﻿@using GPS.Models.Master
+@{
+    List<SLoc> slocList = ViewData["Sloc"] != null ? (List<SLoc>)ViewData["Sloc"] : new List<SLoc>();
+}
+
+<select tabindex="6" id="astorage" class="cursor-1 addinput mandatory" style="width:100%;">
+    @if ((slocList != null) && (slocList.Count > 0))
+    {
+        <option class="cursor-1" value="">None</option>
+        foreach (SLoc cl in slocList)
+        {
+            <option class="cursor-1" value="@cl.SLOC_CD">@cl.SLOC_CD - @cl.SLOC_NAME</option>
+        }
+    }
+    else { 
+        <option class="cursor-1" value="">Select Plant</option>
+    }
+</select>

@@ -1,0 +1,407 @@
+﻿@using GPS.Constants
+@using GPS.Constants.PRPOApproval
+@using GPS.Models.Common
+@using GPS.Models.PRPOApproval
+@using GPS.ViewModels
+@{
+    PRApproval prApproval = (PRApproval)ViewData["PRApproval"];
+    List<PRApprovalDetail> prApprovalList = (List<PRApprovalDetail>)ViewData["PRApprovalDetail"];
+    PaginationViewModel paginationModel = (PaginationViewModel)ViewData["PRApprovalDetailPage"];
+    
+    string DOC_NO = string.Empty;
+    string DOC_TYPE = string.Empty;
+    string USER_TYPE = string.Empty;
+    if (prApproval != null)
+    {
+        DOC_NO = prApproval.DOC_NO;
+        DOC_TYPE = prApproval.DOC_TYPE;
+        USER_TYPE = prApproval.USER_TYPE;           
+    }
+}
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <div style="border: 1pt solid #ccc;">
+        <div id="tScrollHeadItem" style="width: 98.65%; overflow: hidden;">
+            <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 1340px; max-width: 1340px;">
+                <thead>
+                    <tr>
+                        <th style="width:29px;"><input id="chk-all-detail" type="checkbox" /></th>
+                        <th style="width:29px;"></th>
+                        <th style="width:50px;">Item</th>
+                        @*<th style="width:50px;">Class</th>
+                        <th style="width:60px;">Category</th>*@
+                        <th style="width:90px;">Material</th>
+                        <th style="width:179px;">Description</th>
+                        <th style="width:50px;">Qty</th>
+                        <th style="width:40px;">UOM</th>
+                        <th style="width:30px;">Curr</th>
+                        <th style="width:90px;">Price</th>
+                        <th style="width:90px;">Amount</th>
+                        <th style="width:200px;">Vendor</th>
+                        <th style="width:135px;">WBS</th>
+                        <th style="width:70px;">Cost Center</th>
+                        <th style="width:80px;">GL Account</th>
+                        <th style="width:80px;">Delivery Plan</th>
+                        @*<th style="width:100px;">Asset Category</th>
+                        <th style="width:100px;">Asset Class</th>
+                        <th style="width:100px;">Asset Location</th>*@
+                        <th style="width:100px;">Asset No</th>
+                    </tr>  
+                </thead>
+            </table>
+        </div>
+        <div id="tScrollBodyItem" style="overflow: scroll;min-height:80px;">
+            <table id="table-@PRPOApprovalPage.PRApprovalDetailGrid" class="table table-striped table-bordered table-condensed table-fixed" style="width: 1340px; max-width: 1340px;">
+                <tbody>
+                @if (prApprovalList.Count > 0)
+                {
+                    foreach (PRApprovalDetail item in prApprovalList)
+                    {
+                        <tr id="row-approval-detail-@item.NUMBER" data-is-rejected="@item.IS_REJECTED">
+                            <td class="text-center" style="width:29px;"><input id="chk-approval-detail-@item.NUMBER" name="chk-approval-detail-grid" data-docno="@item.DOC_NO" data-itemno="@item.ITEM_NO" type="checkbox"/></td>
+                            <td class="text-center" style="width:29px;">
+                                @if(@item.IS_PARENT == "Y" && @item.ITEM_CLASS == "S")
+                                {
+                                    <div id="@item.ITEM_NO" onclick="javascript:changeIcon('@item.ITEM_NO', '@item.DOC_NO');">
+                                        <span class="fa fa-plus-square-o" style="cursor: pointer;"></span>
+                                    </div>
+                                }
+                            </td>
+                            <td class="text-center" style="width:50px;">@item.ITEM_NO</td>
+                            @*<td class="text-center" style="width:50px;">@item.ITEM_CLASS</td>
+                            <td class="text-center" style="width:60px;">@item.VALUATION_CLASS</td>*@
+                            <td class="text-center" style="width:90px">@if(item.MAT_NO != "X") { @item.MAT_NO }</td>
+                            <td class="text-left" style="width:179px">@item.MAT_DESC</td>
+                            <td class="text-right" style="width:50px">@(String.Format("{0:n}", item.QTY))</td>
+                            <td class="text-center" style="width:40px">@item.UOM</td>
+                            <td class="text-center" style="width:30px">@item.CURR</td>
+                            <td class="text-right" style="width:90px">@(String.Format("{0:n}", item.PRICE))</td>
+                            <td class="text-right" style="width:90px">@(String.Format("{0:n}", Double.Parse(item.AMOUNT)))</td>
+                            <td class="text-left" style="width:200px">@item.VENDOR_NAME</td>
+                            <td class="text-left" style="width:135px">@if(item.WBS_NO != "X") { @item.WBS_NO }</td>
+                            <td class="text-center" style="width:70px">@if(item.COST_CENTER_CD != "X") { @item.COST_CENTER_CD }</td>
+                            <td class="text-center" style="width:80px">@if(item.GL_ACCOUNT != "X") { @item.GL_ACCOUNT }</td>
+                            <td class="text-center" style="width:80px">@item.DELIVERY_PLAN_DT</td>
+                            @*<td class="text-left" style="width:100px">@item.ASSET_CATEGORY</td>
+                            <td class="text-left" style="width:100px">@item.ASSET_CLASS</td>
+                            <td class="text-left" style="width:100px">@item.ASSET_LOCATION</td>*@
+                            <td class="text-center" style="width:100px">@item.ASSET_NO</td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="12" class="text-center">@CommonDisplayMessage.NoData</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top: 5px;">
+            @Html.Partial(CommonPage.GridPagination, paginationModel)
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function (e) {
+        docNo = '@DOC_NO';
+        docType = '@DOC_TYPE';
+        userType = '@USER_TYPE';
+
+        InitDetailCheck();
+        BindDetailCheck();
+    });
+
+    $("#tScrollBodyItem").scroll(function () {
+        $("#tScrollHeadItem").scrollLeft($("#tScrollBodyItem").scrollLeft());
+    });
+
+    var table = document.getElementById("dynamic-table");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    //tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+
+    ///////// Detail Populate Data Methods
+    function AddDetailCheck(itemNo) {
+        var result = $("#docitemno-list-value").val();
+
+        var docMode = docNo + "|" + docType + "|" + detailSelectionMode + "|";
+        var docNoIndex = result.indexOf(docMode);        
+        if (docNoIndex != -1) {            
+            var delimitterIndex = result.indexOf(";", docNoIndex);
+            var docItemList = result.substring(docNoIndex, delimitterIndex);
+            var itemList = docItemList.replace(docMode, "");
+            var itemIndex = itemList.indexOf(itemNo);             
+            if (itemIndex == -1) {
+                itemList = itemList + itemNo + ",";
+                result = result.replace(docItemList, (docMode + itemList));
+            }
+        }
+        else {
+            result = result + docMode + itemNo + "," + ";";
+        }
+
+        return result;
+    }
+    function RemoveDetailCheck(itemNo) {
+        var result = $("#docitemno-list-value").val();
+
+        var docMode = docNo + "|" + docType + "|" + detailSelectionMode + "|";
+        var docNoIndex = result.indexOf(docMode);
+        if (docNoIndex != -1) {            
+            var delimitterIndex = result.indexOf(";", docNoIndex);
+            var docItemList = result.substring(docNoIndex, delimitterIndex);
+            var itemList = docItemList.replace(docMode, "");
+            var itemIndex = itemList.indexOf(itemNo);             
+            if (itemIndex != -1) {
+                itemList = itemList.replace(itemNo + ",", "");
+                result = result.replace(docItemList, (docMode + itemList));
+            }
+        }
+        
+        return result;
+    }
+    function FindDetailCheck(itemNo) {
+        docItemNoList = $("#docitemno-list-value").val();
+
+        var result = -1;
+
+        var docMode = docNo + "|" + docType + "|" + detailSelectionMode + "|";
+        var docNoIndex = docItemNoList.indexOf(docMode);
+        if (docNoIndex != -1) {            
+            var delimitterIndex = docItemNoList.indexOf(";", docNoIndex);
+            var docItemList = docItemNoList.substring(docNoIndex, delimitterIndex);
+            var itemList = docItemList.replace(docMode, "");
+            result = itemList.indexOf(itemNo);    
+        }
+
+        return result;
+    }
+
+    function InitDetailCheck() {
+        detailSelectionMode = $("#detail-selection-mode").val();
+        docItemNoCount = parseInt($("#docitemno-count-value").val(), 10);
+        docItemNoList = $("#docitemno-list-value").val();
+
+        if (detailSelectionMode == 'EXC')
+            docItemNoCount = @(paginationModel.TotalDataCount) - docItemNoCount;
+            
+        $("#detail-selection-mode").val(detailSelectionMode);
+        $("#docitemno-count-value").val(docItemNoCount);
+        $("#docitemno-list-value").val(docItemNoList);
+    }
+    function BindDetailCheck() {
+        detailSelectionMode = $("#detail-selection-mode").val();
+        docItemNoCount = parseInt($("#docitemno-count-value").val(), 10);
+        docItemNoList = $("#docitemno-list-value").val();
+        flagAccountingGrid = $("#flag-accounting-value").val();
+        
+        
+        // If doc item no count is set from header.     
+        if (docItemNoCount == @(paginationModel.TotalDataCount) && @(paginationModel.TotalDataCount) > 0) {
+            detailSelectionMode = "EXC";
+            docItemNoList = "";
+            if(flagAccountingGrid != "True")
+            {
+                updateHeaderCheck(docNo, docType, true);
+            }
+            bindHeaderCheck();
+            $("#chk-all-detail").prop("checked", true);
+        }
+        else if (docItemNoCount == 0) {
+            detailSelectionMode = "INC";
+            docItemNoList = "";  
+            if(flagAccountingGrid != "True")
+            {
+                updateHeaderCheck(docNo, docType, false);
+            }
+            bindHeaderCheck();
+            $("#chk-all-detail").prop("checked", false);   
+        }
+        else
+        {
+            if(flagAccountingGrid != "True")
+            {
+                updateHeaderCheck(docNo, docType, false);
+            }
+            bindHeaderCheck();
+            $("#chk-all-detail").prop("checked", false);   
+        }
+
+        $("#detail-selection-mode").val(detailSelectionMode);
+        $("#docitemno-count-value").val(docItemNoCount);
+        $("#docitemno-list-value").val(docItemNoList);
+
+        switch (detailSelectionMode.toUpperCase())
+        {
+            case "INC":
+                $("[id^=chk-approval-detail-]", "#table-@PRPOApprovalPage.PRApprovalDetailGrid").each(function (idx) {
+                    if (FindDetailCheck($(this).data("itemno")) != -1)
+                        $(this).prop("checked", true);
+                    else
+                        $(this).prop("checked", false);
+                });
+                break;
+            case "EXC": 
+                $("[id^=chk-approval-detail-]", "#table-@PRPOApprovalPage.PRApprovalDetailGrid").each(function (idx) {
+                    if (FindDetailCheck($(this).data("itemno")) != -1)
+                        $(this).prop("checked", false);
+                    else
+                        $(this).prop("checked", true);
+                });
+                break;
+        }        
+    }
+
+    $("#chk-all-detail").change(function (e) {
+        // Reset Detail List.
+        var chkAll = this;
+        $("[id^=chk-approval-detail-]", "#table-@PRPOApprovalPage.PRApprovalDetailGrid").each(function (idx) {
+            $(this).prop("checked", chkAll.checked);
+        });
+
+        flagAccountingGrid = $("#flag-accounting-value").val();
+
+        if (chkAll.checked) {
+            detailSelectionMode = "EXC";
+            docItemNoList = "";
+            docItemNoCount = @(paginationModel.TotalDataCount);
+        }
+        else {
+            detailSelectionMode = "INC";
+            docItemNoList = "";
+            docItemNoCount = 0;
+        }
+
+        $("#detail-selection-mode").val(detailSelectionMode);
+        $("#docitemno-list-value").val(docItemNoList);
+        $("#docitemno-count-value").val(docItemNoCount);
+
+        // Reset Detail Main List And Update Header List.
+        if(flagAccountingGrid=="True")
+        {
+            var docItemNoMainList = $("#docitemno-main-list-value").val();
+            var docNoList = "";
+            $("[id^=chk-approval-detail-]", "#table-@PRPOApprovalPage.PRApprovalDetailGrid").each(function (idx) {
+                itemNo = $(this).data("itemno");
+                updateHeaderCheck(docNo+"|"+itemNo, docType, chkAll.checked);
+                switch (detailSelectionMode.toUpperCase())
+                {
+                    case "EXC": 
+                        if(docNoList.indexOf(docNo)==-1)   
+                        {
+                            docItemNoMainList = docItemNoMainList + docNo+"|"+docType+"|"+detailSelectionMode+"|;"
+                            docNoList = docNoList+docNo+",";
+                        }
+                        break;
+                }
+            });
+
+            $("#docitemno-main-list-value").val(docItemNoMainList);
+            bindHeaderCheck();
+        }else
+        {
+            updateHeaderCheck(docNo, docType, chkAll.checked);
+            bindHeaderCheck();
+            removeDetailMainList(docNo);
+        }
+
+        
+    });
+
+    $("[id^=chk-approval-detail-]", "#table-@PRPOApprovalPage.PRApprovalDetailGrid").change(function (e) {
+        docItemNoList = $("#docitemno-list-value").val();
+        docItemNoCount = parseInt($("#docitemno-count-value").val(), 10);
+        headerSelectionMode = $("#header-selection-mode").val();
+
+        if (this.checked) {
+            switch (detailSelectionMode.toUpperCase())
+            {
+                case "INC":
+                    docItemNoList = AddDetailCheck($(this).data("itemno"));
+                    docItemNoCount = docItemNoCount + 1;
+                    break;
+                case "EXC": 
+                    docItemNoList = RemoveDetailCheck($(this).data("itemno"));
+                    docItemNoCount = docItemNoCount + 1;
+                    break;
+            }
+        }
+        else {
+            switch (detailSelectionMode.toUpperCase())
+            {
+                case "EXC":
+                    docItemNoList = AddDetailCheck($(this).data("itemno"));
+                    docItemNoCount = docItemNoCount - 1;
+                    break;
+                case "INC": 
+                    docItemNoList = RemoveDetailCheck($(this).data("itemno"));
+                    docItemNoCount = docItemNoCount - 1;
+                    break;
+            }
+        }
+
+        flagAccountingGrid = $("#flag-accounting-value").val();
+        if(flagAccountingGrid == "True")
+        {
+            docNoList = $("#docno-list-value").val();
+            docNoCount = parseInt($("#docno-count-value").val(), 10);
+            if (this.checked) {
+                switch (headerSelectionMode.toUpperCase())
+                {
+                    case "INC":
+                        docNoList = docNoList + $(this).data("docno")+"|"+ $(this).data("itemno") + ",";
+                        docNoCount = docNoCount + 1;
+                        break;
+                    case "EXC": 
+                        docNoList = docNoList.replace($(this).data("docno") +"|"+ $(this).data("itemno") + ",", "");
+                        docNoCount = docNoCount + 1;
+                        break;
+                }
+            }
+            else {
+                switch (headerSelectionMode.toUpperCase())
+                {
+                    case "EXC":
+                        docNoList = docNoList + $(this).data("docno")+"|"+ $(this).data("itemno") + ",";
+                        docNoCount = docNoCount - 1;
+                        break;
+                    case "INC": 
+                        docNoList = docNoList.replace($(this).data("docno") +"|"+ $(this).data("itemno") + ",", "");
+                        docNoCount = docNoCount - 1;
+                        break;
+                }
+            }
+
+            $("#docno-list-value").val(docNoList);
+            $("#docno-count-value").val(docNoCount);
+            detailSelectionMode == 'INC'
+        }
+        
+        $("#docitemno-list-value").val(docItemNoList);
+        $("#docitemno-count-value").val(docItemNoCount);
+        $("#detail-selection-mode").val(detailSelectionMode.toUpperCase());
+        BindDetailCheck();
+    });
+    ///////// End Detail Populate Data Methods
+
+    $("[id^=lnk-status-detail-]", "#table-@PRPOApprovalPage.PRApprovalDetailGrid").click(function (e) {
+        e.preventDefault();
+        itemNo = $(this).data("itemno");
+
+        OpenPRApprovalHistory(undefined, undefined, function (data) {
+            $("#history-popup-container").html(data);
+            $("#history-popup-container").modal();
+        });
+    });
+</script>

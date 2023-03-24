@@ -1,0 +1,94 @@
+﻿@using GPS.CommonFunc.WebControl
+@using GPS.Controllers.Master
+@using GPS.Core.ViewModel
+@{
+    Tuple<string, long, int, string> VALIDATION_FILE =
+                            (Tuple<string, long, int, string>)ViewData["ValidationTemp"] != null ?
+                            (Tuple<string, long, int, string>)ViewData["ValidationTemp"] :
+                            new Tuple<string, long, int, string>("", 0, 0, "");
+
+    string PROCESS_ID = (string)ViewData["ProcessId"] != null ? (string)ViewData["ProcessId"] : "0";    
+}
+
+<script type="text/javascript">
+    var oldtype;
+
+    $(document).ready(function () {
+        $.Disable(["#btnupload-file"]);
+        $("#procid").val("@PROCESS_ID");
+        $("#cmbupload-pricetype option[value='']").remove();
+
+        oldtype = $("#cmbupload-pricetype").val();
+
+        $("#a-download").html("Download " + $("#cmbupload-pricetype").find(":selected").text() + " Price Template");
+
+        $(document).on("change", "#cmbupload-pricetype", function (e) {
+            if ($("#txt-upfile").val() !== null && $("#txt-upfile").val() !== "" && $("#txt-upfile").val() !== undefined) {
+                $.messagebox.show(
+                    "Info",
+                    "Uploaded file will be deleted. Are you sure you want to continue?",
+                    "INF",
+                    "CONFIRM",
+                    "onChangeType()",
+                    "$('#cmbupload-pricetype').val(oldtype)"
+                )
+            }
+            else {
+                oldtype = $("#cmbupload-pricetype").val();
+                $("#a-download").html("Download " + $("#cmbupload-pricetype").find(":selected").text() + " Price Template");
+            }
+        });
+
+        File = {
+            PRICE: { size: Number("@VALIDATION_FILE.Item2.ToString()"), count: 0, validext: "@VALIDATION_FILE.Item1.ToString()", max: Number("@VALIDATION_FILE.Item3.ToString()") }
+        };
+    });
+
+    function onChangeType() {
+        $("#a-download").html("Download " + $("#cmbupload-pricetype").find(":selected").text() + " Price Template");
+        $("#a-files").trigger("click");
+    }
+</script>
+<div class="modal-dialog modal-md" style="width:500px">
+    <div class="modal-content" >
+        <div class="modal-header">
+            Upload Material Price
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="form-horizontal">
+                    <div class="col-xs-12 col-sm-12 col-md-12 text center">
+                        <a id="a-download" href="javascript:DownloadTemplate()" style="margin:10px"></a>
+                        <div class="v-space"></div>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Price Type</label>
+                        <div class="input-group pos-rel col-xs-8 col-sm-7 col-md-6">
+                            @Html.DropDownList("cmbupload-pricetype", PriceController.PriceTypeSelectList, new {@class = "form-control"})
+                        </div>
+                        <div class="v-space"></div>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">Upload File</label>
+                        <input type="text" class="hidden" id="procid">
+                        <div class="input-group pos-rel col-xs-8 col-sm-7 col-md-6">
+                            <input type="file" value="" name="price" id="txt-upfile" class="custom-file" onchange="javascript:validateFile()"/>
+                            <div class="appended-file-price" style="font-size:x-small;margin-top:5px;display:none">
+			                    
+		                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="col-xs-6"> </div>
+            <div class="col-xs-6 text-right">
+                <div class="form-group-xs">
+                    <button type="button" id="btnupload-file" class="btn btn-primary btn-xs btn-std" onclick="uploadFile()">Upload</button>
+                    <button type="button" id="btnupload-cancel" class="btn btn-danger btn-xs btn-std" onclick="cancelUpload()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

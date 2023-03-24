@@ -1,0 +1,91 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Models.PRPOApproval
+@using CommonFormat = GPS.Constants.CommonFormat
+@{
+    List<PRApprovalDelay> prApprovalDelayList = (List<PRApprovalDelay>)ViewData["HomeWorklist"];
+}
+
+<div style="width:100%;overflow:auto;">
+    <table id="table-HomeWorklist" class="table table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th style="width:10em;">Doc. No</th>
+                <th style="width:10em;">Doc. Date</th>
+                <th style="width:7em;">Curr</th>
+                <th style="width:13em;">Amount</th>
+                <th style="width:8em;">Division</th>
+                @*<th style="width:10em;">Creator</th>*@
+                <th style="width:13em;">Status</th>
+                <th style="width:10em;">Approve Date</th>
+                <th style="width:10em;">Delay</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (prApprovalDelayList.Count > 0)
+        {
+            foreach (PRApprovalDelay item in prApprovalDelayList)
+            {
+                <tr class="data" data-embedded="@item.AsEmbeddedData()">
+                    <td class="text-center">@item.DOC_NO</td>
+                    <td class="text-center">@(item.DOC_DT != DateTime.MinValue ? item.DOC_DT.ToString(CommonFormat.Date) : "")</td>
+                    <td class="text-center">@item.CURR</td>
+                    <td class="text-right">@(String.Format("{0:n}", item.AMOUNT))</td>
+                    <td class="text-center">@item.DIVISION_NAME</td>
+                    @*<td class="text-center">@item.CREATED_BY</td>*@
+                    <td class="text-left">@item.STATUS_DESC</td>
+                    <td class="text-center">@(item.APPROVED_DT != DateTime.MinValue ? item.APPROVED_DT.ToString(CommonFormat.Date) : "")</td>
+                    <td class="text-center">@item.DELAY day(s)</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="8" class="text-center">@CommonDisplayMessage.NoData</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#table-HomeWorklist tr[class='data']").click(function () {
+            var embedded = $(this).data("embedded");
+            docNo = embedded.DOC_NO;
+            docType = embedded.DOC_TYPE;
+            docDt = embedded.STR_DOC_DT;
+            docDesc = embedded.DOC_DESC;
+            divisionName = embedded.DIVISION_NAME;
+            detailSelectionMode = "INC";
+            docItemNoCount = 0;
+            docItemNoList = "";
+            $("#detail-selection-mode").val(detailSelectionMode);
+            $("#docitemno-list-value").val(docItemNoList);
+            $("#docitemno-count-value").val(docItemNoCount);
+
+            var onOpenApprovalDetail = function (data) {
+                var isError = false;
+                if (!data.ResponseType)
+                    isError = data.toLowerCase().indexOf("not authorized") > -1;
+                else
+                    isError = true;
+
+                if (isError)
+                    $.messagebox.show("E", data, "E");
+                else {
+                    $("#popup-container").html(data);
+                    $("#popup-container").modal();
+                }
+            };
+
+            if (docType === 'PR') {
+                openPRApprovalDetail(undefined, undefined, onOpenApprovalDetail);
+            } else {
+                openPOApprovalDetail(undefined, undefined, true, onOpenApprovalDetail);
+            }
+        });
+    });
+</script>
+

@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPS", "GPS\GPS.csproj", "{2DC5FC0C-9911-47D7-883B-8744230B4D6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPS.Core", "..\GPS.Core\GPS.Core\GPS.Core.csproj", "{CBFCA838-A4D0-41F0-9258-F6DCDCA31DFA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2DC5FC0C-9911-47D7-883B-8744230B4D6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DC5FC0C-9911-47D7-883B-8744230B4D6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DC5FC0C-9911-47D7-883B-8744230B4D6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DC5FC0C-9911-47D7-883B-8744230B4D6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBFCA838-A4D0-41F0-9258-F6DCDCA31DFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBFCA838-A4D0-41F0-9258-F6DCDCA31DFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBFCA838-A4D0-41F0-9258-F6DCDCA31DFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBFCA838-A4D0-41F0-9258-F6DCDCA31DFA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

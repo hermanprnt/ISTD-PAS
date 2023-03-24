@@ -1,0 +1,1146 @@
+﻿@using GPS.CommonFunc.WebControl
+@using GPS.Constants
+@using GPS.Constants.PO
+@using GPS.Controllers.Master
+@using GPS.Controllers.PO
+@using GPS.Core.ViewModel
+@using GPS.ViewModels
+@using GPS.ViewModels.PO
+@using GPS.Models.Master
+@model POInquiryViewModel
+@{
+    Layout = CommonPage.MainLayout;
+    string noreg = ViewData["UserNoreg"] == null ? "" : ViewData["UserNoreg"].ToString();
+    List<ProcurementChannel> Procs = ViewData["UserProcChannel"] == null ? new List<ProcurementChannel>() : (List<ProcurementChannel>)ViewData["UserProcChannel"];
+    string proc = "";
+
+    if (Procs.Count == 1)
+    {
+        proc = Procs[0].PROC_CHANNEL_CD;
+    }
+}
+
+@section HeadScript {
+    <link rel="stylesheet" href="@Url.Content("~/Content/Common/tdk.lookup.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+
+    <!-- NOTE: moment.js is referenced by daterangepicker -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/js/jquery.filedownload.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/tdk.lookup.js")"></script>
+}
+<style>
+    .cancel {
+        background-color:#ababab !important;
+        color: #fff !important;
+    }
+
+    .cancel a {
+        color: #fff !important;
+    }
+</style>
+@Html.Partial(POCommonController.Partial.CommonCss)
+
+@section BodyScript {
+    <script type="text/javascript">
+        var dataName, itemDataName, subItemDataName, docNo;
+
+        $(document).ready(function () {
+
+            /* ============================== Init: begin ============================== */
+            dataName = "@Model.GridPaging.DataName";
+            itemDataName = "@Model.ItemDataName";
+            subItemDataName = "@Model.SubItemDataName";
+
+            ViewData.Clear();
+            ViewData.Add("IsCreation", false);
+            ViewData.Add("DataName", dataName);
+            ViewData.Add("ItemDataName", itemDataName);
+            ViewData.Add("SubItemDataName", subItemDataName);
+            ViewData.Add("OnAjaxBegin", OnAjaxBegin);
+            ViewData.Add("OnAjaxComplete", OnAjaxComplete);
+            ViewData.Add("OnAjaxError", OnAjaxError);
+
+            function GetDisableList() {
+                return [
+                    "#txt-pono",
+                    $("#txt-vendor").val() != "" && $("#txt-vendor").val() != null ? "" : "#txt-createdby",
+                    $("#txt-vendor").val() != "" && $("#txt-vendor").val() != null ? "" : "#txt-vendor",
+                    $("#txt-vendor").val() != "" && $("#txt-vendor").val() != null ? "" : "#cmb-status",
+                    $("#txt-vendor").val() != "" && $("#txt-vendor").val() != null ? "" : "#cmb-purchasinggrp",
+                    "#txt-poheadertext",
+                    "#btn-cancel",
+                    "#btn-detail",
+                    "#btn-search",
+                    "#btn-clearsearch",
+                    "#btn-add",
+                    "#btn-edit",
+                    "#cmb-perpage-" + dataName
+                ];
+            }
+
+            function DisableAllFeatures() {
+                $.Disable(GetDisableList());
+                $("[id^=lnk-page-" + dataName + "-]").addClass("_pagination-disabled");
+            }
+
+            function EnableAllFeatures() {
+                $.Enable(GetDisableList());
+                $("[id^=lnk-page-" + dataName + "-]").removeClass("_pagination-disabled");
+            }
+
+            function ResetForm() {
+                $.Clear([
+                    "#txt-pono",
+                    "#txt-createdby",
+                    "#txt-vendor",
+                    "#txt-poheadertext",
+                    "#cmb-purchasinggrp",
+                    //"#txt-createddate",
+                    "#cmb-status",
+                    "#txt-prno",
+                    "#cmb-procchannel"
+                ]);
+            }
+
+            function InitForVendor() {
+                var isVendor = $tdk.User.Username.indexOf(".");
+                if (isVendor === -1)
+                    return;
+
+                var isEmployee = "FALSE";
+                $.ajax({
+                    type: "POST",
+                    url: "@POInquiryController.Action.CheckEmployee",
+                    data: { noreg: $tdk.User.RegistrationNumber },
+                    async: false,
+                    success: function (data) {
+                        if (data === "TRUE")
+                            isEmployee = "TRUE";
+                    },
+                    error: function (data) {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data, "@ActionResponseViewModel.Error");
+                    }
+                });
+
+                if (isEmployee === "TRUE")
+                    return;
+
+                var vendorList = [];
+                if (isVendor >= 0) {
+                    if (vendorList.length === 0) {
+                        var param = $tdk.User.Username.substring(0, $tdk.User.Username.indexOf("."));
+                        $.ajax({
+                            type: "POST",
+                            url: "@POInquiryController.Action.GetUserVendor",
+                            data: { vendor: param },
+                            async: false,
+                            success: function (data) {
+                                if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                                    $("#txt-vendor").val((data.Message == null || data.Message == "") ? "Unidentified vendor code" : data.Message);
+                                }
+                                else { console.log(data); }
+                            },
+                            error: function (data) {
+                                var result = $.ValidateASPError(data.responseText);
+                                $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+                            }
+                        });
+                    }
+
+                    $("#cmb-status").val("@POStatus.Released");
+                    $.Disable(["#txt-vendor", "#cmb-status", "#cmb-purchasinggrp", "#txt-createdby"]);
+                }
+            }
+
+            function OnAjaxBegin(title) {
+                $.progressbox.show($tdk.PageTitle, title);
+                DisableAllFeatures();
+            }
+
+            function OnAjaxComplete() {
+                EnableAllFeatures();
+                $.progressbox.hide();
+            }
+
+            function OnAjaxError(data) {
+                var result = $.ValidateASPError(data.responseText);
+                $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+            }
+
+            var curdate = new Date();
+            curdate.getDate();
+            curdate.setMonth(curdate.getMonth() - 3);
+
+            //$("#txt-createddate").prop("readonly", true);
+            $("#txt-createddate").todaterangepicker(curdate);
+
+            var dt = new Date();
+            dt.getDate();
+            $("#txt-createddate").val(("0" + curdate.getUTCDate()).slice(-2) + '.' + ("0" + (curdate.getUTCMonth() + 1).toString()).slice(-2) + '.' + curdate.getUTCFullYear() + " - " + ("0" + dt.getUTCDate()).slice(-2) + '.' + ("0" + (dt.getUTCMonth() + 1).toString()).slice(-2) + '.' + dt.getUTCFullYear());
+
+            ResetForm();
+            EnableAllFeatures();
+            InitForVendor();
+
+            var proc = '@proc';
+            if ((proc != undefined) && (proc != null) && (proc != "")) {
+                $("#cmb-procchannel").val(proc);
+                //$("#cmb-procchannel option[value='']").remove();
+            }
+
+            ResetCheckbox(dataName);
+            ResetCheckbox(itemDataName);
+            ResetCheckbox(subItemDataName);
+
+            /* =============================== Init: end =============================== */
+
+            /* ============================= Search: begin ============================= */
+
+            function POSearchCriteriaIsValid(page) {
+                var criteria = GetSearchCriteria(null, page);
+                if (criteria.PONo === "" && criteria.Vendor === "" &&
+                    criteria.Status === "" && criteria.DateFrom === "" &&
+                    criteria.DateTo === "" && criteria.CreatedBy === "" &&
+                    criteria.PurchasingGroup === "" && criteria.POHeaderText === "") {
+                    return false;
+                }
+
+                return true;
+            }
+
+            // NOTE: this method is used in Paging
+            var Search = window["Search" + dataName] = function (page, pageSize, responseCallback) {
+                OnAjaxBegin("Search");
+
+                var orderby = null;
+                if (ViewData.Get("OrderBy") !== undefined && ViewData.Get("OrderBy") !== null && ViewData.Get("OrderBy") !== "")
+                    orderby = ViewData.Get("OrderBy");
+
+                $.ajax({
+                    type: "POST",
+                    url: "@POInquiryController.Action.Search",
+                    data: JSON.stringify(GetSearchCriteria(orderby, page, pageSize)),
+                    contentType: "@CommonFormat.JsonMimeType",
+                    success: responseCallback,
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            };
+
+            var SearchResponseCallback = window["Search" + dataName + "ResponseCallback"] = function (data) {
+                if (!data.ResponseType) {
+                    $("#grid-" + dataName).html(data);
+
+                    if (ViewData.Get("OrderBy") !== undefined && ViewData.Get("OrderBy") !== null) {
+                        var orderby = ViewData.Get("OrderBy");
+
+                        if (orderby.substring(orderby.indexOf('|') + 1, orderby.length) == 'DESC') {
+                            removeClass = 'sorting_none';
+                            addClass = 'sorting_desc';
+                            dataSort = 'DESC';
+                        } else if (orderby.substring(orderby.indexOf('|') + 1, orderby.length) == 'ASC') {
+                            removeClass = 'sorting_none';
+                            addClass = 'sorting_asc';
+                            dataSort = 'ASC';
+                        }
+
+                        $('*[data-field="' + orderby.substring(0, orderby.indexOf('|')) + '"]').removeClass(removeClass);
+                        $('*[data-field="' + orderby.substring(0, orderby.indexOf('|')) + '"]').addClass(addClass);
+                        $('*[data-field="' + orderby.substring(0, orderby.indexOf('|')) + '"]').data("sort", dataSort);
+                    }
+                }
+                else {
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                }
+            };
+
+            $("#btn-search").click(function (e) {
+                OnAjaxBegin("Search");
+                if (POSearchCriteriaIsValid(undefined)) {
+                    Search(undefined, undefined, SearchResponseCallback);
+                }
+                else {
+                    $.displaymessagebox.show("@DisplayMessageId.SelectOneCriteria");
+
+                    OnAjaxComplete();
+                }
+            });
+            $("#btn-search").trigger("click");
+
+            $("#btn-clearsearch").click(function (e) {
+                OnAjaxBegin("Clear Search");
+                ResetForm();
+
+                var proc = '@proc';
+                if ((proc != undefined) && (proc != null) && (proc != "")) {
+                    $("#cmb-procchannel").val(proc);
+                    //$("#cmb-procchannel option[value='']").remove();
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "@POInquiryController.Action.ClearSearch",
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            $("#grid-" + dataName).html(data);
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            });
+
+            function GetSearchPOItemCriteria(page, pageSize) {
+                page = page || 1;
+                pageSize = pageSize || $("#cmb-perpage-" + itemDataName).GetPageSize();
+                return {
+                    poNo: $("#txt-get-pono").valOrDefault(),
+
+                    currentPage: page,
+                    pageSize: pageSize
+                };
+            }
+
+            window["Search" + itemDataName] = function (page, pageSize, responseCallback) {
+                OnAjaxBegin("Search PO Item");
+                $.ajax({
+                    type: "POST",
+                    url: "@POInquiryController.Action.SearchItem",
+                    data: JSON.stringify(GetSearchPOItemCriteria(page, pageSize)),
+                    contentType: "@CommonFormat.JsonMimeType",
+                    success: responseCallback,
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            }
+
+            window["Search" + itemDataName + "ResponseCallback"] = function (data) {
+                if (!data.ResponseType) {
+                    $("#grid-" + itemDataName).html(data);
+                }
+                else {
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                }
+            };
+
+            function OnSubItemCollapsing(dataName, dataNo, embedded, expanderRow, onSubItemCollapsed) {
+                $("[id^=expchildrow-" + dataName + dataNo + "]").remove();
+                OnAjaxComplete();
+            }
+
+            function OnSubItemExpanding(dataName, dataNo, embedded, expanderRow, onSubItemExpanded) {
+                OnAjaxBegin("Open Sub Item");
+                $.ajax({
+                    type: "POST",
+                    url: "@POInquiryController.Action.POSearchSubItem",
+                    data: JSON.stringify({
+                        PONo: embedded.PONo,
+                        POItemNo: embedded.POItemNo,
+                        DataName: dataName + dataNo,
+                        CurrentPage: 1,
+                        PageSize: Number("@PaginationViewModel.DefaultPageSize")
+                    }),
+                    contentType: "@CommonFormat.JsonMimeType",
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            $("[id^=expchildrow-" + dataName + dataNo + "]").remove();
+                            expanderRow.after(data);
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            }
+
+            // NOTE: this is the only works way to rebind event after ajax load partialview
+            // another way is to make it inline event eg. <input type="checkbox" onchange="eventname()" />
+            $(document).onOnce("click", "[id^=exp-" + itemDataName + "-]", function (e) {
+                var $this = $(this);
+                var embedded = $(this).data("embedded");
+                $this.ToggleSubItem(OnSubItemExpanding, void (0), OnSubItemCollapsing, void (0), embedded);
+            });
+
+            function GetSearchPOSubItemCriteria(page, pageSize) {
+                page = page || 1;
+                pageSize = pageSize || $("#cmb-perpage-" + subItemDataName).GetPageSize();
+                return {
+                    poNo: $("#txt-get-pono").valOrDefault(),
+
+                    currentPage: page,
+                    pageSize: pageSize
+                };
+            }
+
+            $(document).on("click", "[id^=unlck-]", function (e) {
+                var poNo = $(this).data("pono");
+
+                $.progressbox.show("Unlock PO", "Unlocking PO Starting...");
+                $.ajax({
+                    type: "POST",
+                    url: "@POInquiryController.Action.UnlockPO",
+                    data: JSON.stringify({ PONo: poNo }),
+                    contentType: "@CommonFormat.JsonMimeType",
+                    success: function (data) {
+                        $.progressbox.hide();
+                        if (data === "SUCCESS") {
+                            $.messagebox.show(
+                                "Unlock PO",
+                                "PO No " + poNo + " successfully unlocked.",
+                                "INF",
+                                "SINGLE",
+                                "$('#btn-search').click()",
+                                ""
+                            )
+                        }
+                        else {
+                            $.messagebox.show(
+                                "Unlock PO",
+                                data,
+                                "WRN",
+                                "SINGLE",
+                                "",
+                                ""
+                            )
+                        }
+                    },
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            });
+
+            /* ============================== Search: end ============================== */
+
+            /* ============================ PO Letter: begin ============================ */
+
+            $(document).on("click", "[id^=img-pdf-]", function (e) {
+                e.preventDefault();
+                OnAjaxBegin("Get PO Letter file");
+
+                var poNo = $(this).data("pono");
+                var poDate = $(this).data("podate");
+                $.fileDownload("@POInquiryController.Action.DownloadPdf", {
+                    httpMethod: "GET",
+                    async: false,
+                    data: { poNo: poNo, poDate: poDate }
+                });
+
+                OnAjaxComplete();
+            });
+
+            /* ============================= PO Letter: end ============================= */
+
+            /* =============================== SPK: begin =============================== */
+
+            $(document).on("click", "[id^=img-spkpdf-]", function (e) {
+                e.preventDefault();
+                OnAjaxBegin("Get SPK file");
+
+                var poNo = $(this).data("pono");
+                var poDate = $(this).data("podate");
+                $.fileDownload("@POInquiryController.Action.DownloadSPKPdf", {
+                    httpMethod: "GET",
+                    async: false,
+                    data: { poNo: poNo, poDate: poDate }
+                });
+
+                OnAjaxComplete();
+            });
+
+            /* ================================ SPK: end ================================ */
+
+            /* =============================== Get: begin =============================== */
+
+            $(document).on("click", "[id^=lnk-" + dataName + "-]", function (e) {
+                e.preventDefault();
+                OnAjaxBegin("Get Purchase Order");
+                var selectedPONo = $(this).data("pono");
+                $.ajax({
+                    type: "POST",
+                    url: "@POInquiryController.Action.GetByNo",
+                    data: {
+                        poNo: selectedPONo
+                    },
+                    success: function (data) {
+                        if (!data.ResponseType) {
+                            $("#pop-purchaseorder").html(data);
+                            $("#pop-purchaseorder").modal();
+                        }
+                        else {
+                            $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                        }
+                    },
+                    complete: OnAjaxComplete,
+                    error: OnAjaxError
+                });
+            });
+
+            /* ================================ Get: end ================================ */
+
+            /* ============================= Changed: begin ============================= */
+
+            $(document).on("change", "[id^=chk-" + dataName + "-]", function (e) {
+                var selectedDataList = $("[id^=chk-" + dataName + "-]:checked");
+                if (selectedDataList.length > 1) {
+                    $.displaymessagebox.show("@DisplayMessageId.SelectOnlyOne");
+                    $(this).prop("checked", false);
+                }
+            });
+
+            /* ============================== Changed: end ============================== */
+
+            /* ============================== CRUD: begin ============================== */
+
+            $("#btn-add").click(function (e) {
+                OnAjaxBegin("Add PO");
+
+                window.open("@POCreationController.Action.Index", "_blank");
+
+                OnAjaxComplete();
+            });
+
+            $("#btn-edit").click(function (e) {
+                OnAjaxBegin("Edit PO");
+                var selectedDataList = $("[id^=chk-" + dataName + "-]:checked");
+                if (selectedDataList.length > 1 || selectedDataList.length === 0) {
+                    $.displaymessagebox.show("@DisplayMessageId.SelectOnlyOne");
+
+                    OnAjaxComplete();
+                }
+                else {
+                    if ($(selectedDataList[0]).data("status") == '49') {
+                        $.messagebox.show(
+                                "Edit PO",
+                                "cannot edit PO with number " + $(selectedDataList[0]).data("pono") + " because it has been cancelled.",
+                                "WRN",
+                                "SINGLE",
+                                "",
+                                ""
+                            )
+                        OnAjaxComplete();
+                    }
+                    else if ($(selectedDataList[0]).data("status") == '45') {
+                        $.messagebox.show(
+                                "Edit PO",
+                                "cannot edit PO with number " + $(selectedDataList[0]).data("pono") + " because it has been rejected.",
+                                "WRN",
+                                "SINGLE",
+                                "",
+                                ""
+                            )
+                        OnAjaxComplete();
+                    }
+                    else {
+                        $.ajax({
+                            type: "POST",
+                            url: "@POCreationController.Action.Edit",
+                            data: {
+                                poNo: $(selectedDataList[0]).data("pono")
+                            },
+                            success: function (data) {
+                                if (data.ResponseType !== "@ActionResponseViewModel.Error") {
+                                    window.open(data.Message, '_blank');
+                                    $("[id^=chk-" + dataName + "-]:checked").each(function () { $(this).prop("checked", false); });
+                                }
+                                else {
+                                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                                }
+                            },
+                            complete: OnAjaxComplete,
+                            error: OnAjaxError
+                        });
+                    }
+                }
+            });
+
+            $("#btn-cancel").click(function (e) {
+                OnAjaxBegin("Cancel PO");
+                var selectedDataList = $("[id^=chk-" + dataName + "-]:checked");
+                if (selectedDataList.length > 1 || selectedDataList.length === 0) {
+                    $.displaymessagebox.show("@DisplayMessageId.SelectOnlyOne");
+
+                    OnAjaxComplete();
+                }
+                else {
+                    if ($(selectedDataList[0]).data("status") == "49") {
+                        $.messagebox.show("@ActionResponseViewModel.Warning", "PO Already Cancelled", "@ActionResponseViewModel.Warning");
+                    }
+                    else if ($(selectedDataList[0]).data("status") == '45') {
+                        $.messagebox.show(
+                                "Cancel PO",
+                                "cannot Cancel PO with number " + $(selectedDataList[0]).data("pono") + " because it has been rejected.",
+                                "WRN",
+                                "SINGLE",
+                                "",
+                                ""
+                            )
+                        OnAjaxComplete();
+                    }
+                    else {
+                        $("#hidden-pono").val($(selectedDataList[0]).data("pono"));
+                        $("#hidden-sappono").val($(selectedDataList[0]).data("sapno"));
+                        $("#lbl-pono").html("<b>" + $(selectedDataList[0]).data("pono") + "</b>");
+
+                        if ($("#hidden-sappono").val() != "" && $("#hidden-sappono").val() != null && $("#hidden-sappono").val() != "undefined")
+                            $("#postatus").removeClass("hidden");
+                        else $("#postatus").addClass("hidden");
+
+                        $("#txt-cancel").val("");
+                        $("#errormsg").html("");
+
+                        $("#cancelpo").modal();
+                    }
+
+                    OnAjaxComplete();
+                }
+            });
+
+            $("#btn-detail").click(function (e) {
+                OnAjaxBegin("Show Detail");
+
+                var eventSource = $(this);
+                $("#grid-" + dataName)
+                    .toggledetail(
+                        function (datarow) {
+                            eventSource.text("Show Detail");
+
+                            if (datarow.html() === "@CommonDisplayMessage.NoData")
+                                $(datarow[0]).attr("colspan", 11);
+                        },
+                        function (datarow) {
+                            eventSource.text("Hide Detail");
+
+                            if (datarow.html() === "@CommonDisplayMessage.NoData")
+                                $(datarow[0]).attr("colspan", 15);
+                        }
+                    );
+
+                OnAjaxComplete();
+            });
+
+            /* =============================== CRUD: end =============================== */
+
+            /* =============================== Reject: begin =============================== */
+
+            $("#btn-reject").click(function (e) {
+                e.preventDefault();
+
+                var selectedDataList = $("[id^=chk-" + dataName + "-]:checked");
+                if (selectedDataList.length > 1 || selectedDataList.length === 0) {
+                    $.displaymessagebox.show("@DisplayMessageId.SelectOnlyOne");
+
+                    OnAjaxComplete();
+                }
+                else {
+                    if ($(selectedDataList[0]).data("status") == '49') {
+                        $.messagebox.show(
+                                "Reject PO",
+                                "cannot reject PO with number " + $(selectedDataList[0]).data("pono") + " because it has been cancelled.",
+                                "WRN",
+                                "SINGLE",
+                                "",
+                                ""
+                            );
+                        OnAjaxComplete();
+                    }
+                    else if ($(selectedDataList[0]).data("status") == '45') {
+                        $.messagebox.show("@ActionResponseViewModel.Warning", "PO Already Rejected", "@ActionResponseViewModel.Warning");
+                        OnAjaxComplete();
+                    }
+                    else {
+                        $("#hidden-pono-reject").val($(selectedDataList[0]).data("pono"));
+                        $("#rejectpo").modal();
+                    }
+                }
+
+            });
+            /* ================================ Reject: end ================================ */
+        });
+
+
+        function doRejectSelectedPO(poNo, remark) {
+            $.progressbox.show($tdk.PageTitle, "Reject Purchasing Order");
+            $.Disable(GetDisableList());
+            $.ajax({
+                type: "POST",
+                url: "@POInquiryController.Action.RejectByVendor",
+                data: {
+                    poNo: poNo,
+                    rejectReason: remark
+                },
+                success: function (result) {
+                    console.log(result);
+                    if (result.ResponseType === 'S') {
+                        $.messagebox.show(
+                                "Reject PO Document",
+                                "PO No " + poNo + " successfully rejected.",
+                                "INF",
+                                "SINGLE",
+                                "$('#btn-search').click()",
+                                ""
+                            );
+                    }
+                    else {
+                        var error = result.Message;
+                        setTimeout(function () { $.messagebox.show("Reject PO Document", error, "ERR", "", ""); FinishAjax(); }, 300);
+                    }
+                },
+                complete: FinishAjax,
+                error: ErrorAjax
+            });
+        }
+
+        /* ================================ reject purpose only (make it methode double): start ================================ */
+
+        function FinishAjax() {
+            EnableState();
+            $.progressbox.hide();
+        }
+
+        function GetDisableList() {
+            return [
+                "#txt-pono",
+                $("#txt-vendor").val() != "" && $("#txt-vendor").val() != null ? "" : "#txt-createdby",
+                $("#txt-vendor").val() != "" && $("#txt-vendor").val() != null ? "" : "#txt-vendor",
+                $("#txt-vendor").val() != "" && $("#txt-vendor").val() != null ? "" : "#cmb-status",
+                $("#txt-vendor").val() != "" && $("#txt-vendor").val() != null ? "" : "#cmb-purchasinggrp",
+                "#txt-poheadertext",
+                "#btn-cancel",
+                "#btn-detail",
+                "#btn-search",
+                "#btn-clearsearch",
+                "#btn-add",
+                "#btn-edit",
+                "#cmb-perpage-" + dataName
+            ];
+        }
+
+        function EnableState() {
+            $.Enable(GetDisableList());
+            $("[id^=lnk-page-" + dataName + "-]").removeClass("_pagination-disabled");
+        }
+
+        function ErrorAjax(data) {
+            console.log(data);
+            var result = $.ValidateASPError(data.responseText);
+            $.messagebox.show("@ActionResponseViewModel.Error", result.Message, "@ActionResponseViewModel.Error");
+        }
+
+        /* ================================ reject purpose only (make it methode double): end ================================ */
+
+        function GetSearchCriteria(sortby, page, pageSize) {
+
+            page = page || 1;
+            pageSize = pageSize || $("#cmb-perpage-" + dataName).GetPageSize();
+            var createdDate = $("#txt-createddate").parsedaterange();
+            ViewData.Add("OrderBy", sortby);
+            return {
+                PONo: $("#txt-pono").valOrDefault(),
+                CreatedBy: $("#txt-createdby").valOrDefault(),
+                Vendor: $("#txt-vendor").valOrDefault(),
+                Status: $("#cmb-status").valOrDefault(),
+                DateFrom: createdDate.From,
+                DateTo: createdDate.To,
+                PurchasingGroup: $("#cmb-purchasinggrp").valOrDefault(),
+                POHeaderText: $("#txt-poheadertext").valOrDefault(),
+                PRNo: $("#txt-prno").valOrDefault().trim(),
+                ProcChannel: $("#cmb-procchannel").valOrDefault(),
+
+                OrderBy: sortby,
+                CurrentPage: page,
+                PageSize: pageSize
+            };
+        }
+
+        /* =============================== Sort: begin =============================== */
+
+        function SortGrid(orderby, page, pageSize) {
+            var param = GetSearchCriteria(orderby, page, pageSize);
+
+            $.ajax({
+                type: "POST",
+                url: "@POInquiryController.Action.SortSearch",
+                data: JSON.stringify(param),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    $("#dynamic-table").find('tbody').html(result);
+                }
+            });
+        }
+
+        /* =============================== Sort: end =============================== */
+
+        /* =============================== Download: begin =============================== */
+        function onDownload() {
+            var orderby = null;
+            if (ViewData.Get("OrderBy") !== undefined && ViewData.Get("OrderBy") !== null && ViewData.Get("OrderBy") !== "")
+                orderby = ViewData.Get("OrderBy");
+
+            $.progressbox.show($tdk.PageTitle, "Download File");
+
+            var param = GetSearchCriteria(orderby, 1, 0);
+            $.fileDownload("@POInquiryController.Action.DownloadHeader", {
+                data: param,
+                successCallback: function (responseHtml, url) {
+                    $.progressbox.hide();
+                },
+                failCallback: function (responseHtml, url) {
+                    console.log(responseHtml);
+                    $.progressbox.hide();
+                    alert("A file download error has occured, please try again");
+                }
+            });
+
+        }
+        /* ================================ Download: end ================================ */
+        function onTriggerECataloguePO() {
+            $("#btn-trigger-submit").html('Wait...');
+            $("#btn-trigger-submit").prop('disabled', true);
+            $("#process_dt_monitoring").val('');
+            $("#prno_monitoring").val('');
+            $("#status_monitoring").val('');
+
+            var $errorStatus = GetOutstanding();
+            if (!$errorStatus) {
+                $errorStatus = GetMonitoring(1);
+            }
+
+            if (!$errorStatus) {
+                $("#btn-trigger-submit").show();
+                $("#triggerpo").modal("show");
+            }
+
+            //$.messagebox.show(
+            //                    "Confirmation",
+            //                    "Force Execute Generate PO document for ECatalogue document. Are You Sure You Want to trigger this action?",
+            //                    "INF",
+            //                    "CONFIRM",
+            //                    "doTriggerECataloguePO()",
+            //                    ""
+            //                );
+        }
+
+        function GetOutstanding() {
+            $errorStatus = false;
+            $.ajax({
+                type: $tdk.AjaxMethod,
+                url: "@POInquiryController.Action.GetGeneratePROutstanding",
+                data: {
+                },
+                success: function (result) {
+                    if (!result.ResultType) {
+                        $("#generate-outstanding").html(result);
+                    }
+                    else {
+                        $("#btn-trigger-submit").html('Failed');
+                        var error = result.Content;
+                        setTimeout(function () { $.messagebox.show("Error Retrieve Data", error, "ERR", "", ""); $.progressbox.hide(); }, 300);
+                    }
+                },
+                complete: function () { return $errorStatus; },
+                error: function (result) { console.log(result); alert(result); $errorStatus = true; }
+            });
+        }
+
+        function GetMonitoring(pageNo) {
+            var createdDate = $("#process_dt_monitoring").parsedaterange();
+            var pageCount = $("#cmb-perpage-prMonitoring").val();
+            $("#generate-Monitoring").data("per-page", pageCount);
+
+            if (pageCount === undefined) pageCount = 10;
+            var param = {
+                PRNo: $("#prno_monitoring").val(),
+                Status: $("#status_monitoring").val(),
+                DateFrom: createdDate.From,
+                DateTo: createdDate.To,
+                page: pageNo,
+                pageSize: pageCount
+            };
+
+            $errorStatus = false;
+            $.ajax({
+                type: $tdk.AjaxMethod,
+                url: "@POInquiryController.Action.GetPOMonitoring",
+                data:param,
+                success: function (result) {
+                    if (!result.ResultType) {
+                        $("#generate-Monitoring").html(result);
+                        $("#btn-trigger-submit").html('Process');
+                        $("#btn-trigger-submit").prop('disabled', false);
+                    }
+                    else {
+                        $("#btn-trigger-submit").html('Failed');
+                        var error = result.Content;
+                        setTimeout(function () { $.messagebox.show("Error Retrieve Data", error, "ERR", "", ""); $.progressbox.hide(); }, 300);
+                    }
+                },
+                complete: function () {
+                    $("#cmb-perpage-prMonitoring").val($("#generate-Monitoring").data("per-page"));
+                    return $errorStatus;
+                },
+                error: function (result) { console.log(result); alert(result); $errorStatus = true; }
+            });
+        }
+
+        function doTriggerECataloguePO() {
+            $.progressbox.show("Generate Purchase Order", "Processing...");
+            $.ajax({
+                type: $tdk.AjaxMethod,
+                url: "@POInquiryController.Action._forceGeneratePO",
+                data: {
+                },
+                success: function (result) {
+                    //console.log(result);
+                    if (result.ResultType === 'S') {
+                        $("#forcePOModal").remove();
+                        var modalInfoHTML = '<div id="forcePOModal" class="modal fade bs-example-modal-lg in" data-backdrop="static" data-keyboard="false" role="dialog" aria-labelledby="basicModal" aria-hidden="true">' +
+                                                '<div class="modal-dialog" style="width: 400px;">' +
+                                                    '<div class="modal-content message-info" style="border: #3a87ad solid 2px !important;">' +
+                                                        '<div class="modal-header" style ="background-color: #3a87ad;color: white;">' +
+                                                            '<div class="close" style="opacity:1 !important;margin-top:-7px;"><span aria-hidden="true" id="message-img"><img src="/Content/Bootstrap/img/information.png" class="modal-icon"></span></div>' +
+                                                            '<div id="messagebox-title">Force Generate PO</div>' +
+                                                        '</div>' +
+                                                        '<div class="modal-body">' +
+                                                            '<div class="row" style="padding-left: 10px;display:flex;padding-right: 10px;">' +
+                                                                '<div style="width: calc(100% - 5px);">' +
+                                                                    '<div id="content" class="content-message">' +
+                                                                        '<div style="font-weight: bold;margin-bottom: 10px;">Process Generate PO has been finished</div>' +
+                                                                        '<div>Process Id : <a href="LogMonitoringDetail/?ProcessId=' + result.Content.Process_Id + '" target="_blank">' + result.Content.Process_Id + '</a></div>' +
+                                                                        '<div>Total PO Generated : ' + result.Content.Total_PO_Processed + ' Document</div>' +
+                                                                        '<div>(+)Number of PR Processing : ' + result.Content.Total_Processed + ' Document</div>' +
+                                                                        '<div>(+)Number of PR failed : <span style="font-weight: bold;color: red;">' + result.Content.Total_Failed + '</span> Document</div>' +
+                                                                        '<div>(+)Number of PR succeed : <span style="font-weight: bold;color:green;">' + result.Content.Total_Succeed + '</span> Document</div>' +
+                                                                    '</div>' +
+                                                                '</div>' +
+                                                            '</div>' +
+                                                             '<div class="row" style="text-align: center;padding-right: 10px; margin-top: 10px;">' +
+                                                                    '<button type="button" class="btn btn-primary btn-std btn-xs" data-dismiss="modal" style="width: 60px; color:White">Close</button>' +
+                                                            '</div>' +
+                                                        '</div>' +
+                                                    '</div>' +
+                                                '</div>' +
+                                            '</div>';
+                        $('body').append(modalInfoHTML);
+                        $("#forcePOModal").modal();
+                    }
+                    else {
+                        var error = result.Content;
+                        setTimeout(function () { $.messagebox.show("Generate PO Document", error, "ERR", "", ""); $.progressbox.hide(); }, 300);
+                    }
+                },
+                complete: function () { $.progressbox.hide(); },
+                error: function (result) { console.log(result); alert(result); }
+            });
+        }
+
+        function ShowCancelReason(CANCEL_REASON, PO_NO) {
+            $("#reason-popup-title").html("Cancel Reason for PO No. " + PO_NO);
+            $("#reason-container").val(CANCEL_REASON);
+            $("#cancelreason-popup-container").modal();
+        }
+
+        function doCancelAbort()
+        {
+            $("#txt-cancel").val('');
+        }
+
+        //#20191008 start for notice
+        function PostPOApprovalNotice(responseCallback) {
+            alert(docNo);
+            var param = GetPOApprovalNoticeParameter();
+            $.ajax({
+                type: "POST",
+                url: '@Html.Toyota().Page.GetActionUrl("PostPOApprovalNotice")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("PO Approval", "Post PO Approval Notice. . ."),
+            success: function (data) { responseCallback(data); $.progressbox.hide(); }
+            //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+
+    function ReplyPOApprovalNotice(responseCallback) {
+        var param = GetPOApprovalReplyNoticeParameter();
+        $.ajax({
+            type: "POST",
+            url: '@Html.Toyota().Page.GetActionUrl("ReplyPOApprovalNotice")',
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            //ajaxSend: ToogleDetailView("BeginAction"),
+            ajaxSend: $.progressbox.show("PO Approval", "Reply PO Approval Notice. . ."),
+            success: function (data) { responseCallback(data); $.progressbox.hide(); }
+
+                //ajaxComplete: ToogleDetailView("EndAction")
+        });
+    }
+
+    function GetPOApprovalNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            DOC_TYPE: "PO",
+            NOTICE_TO_USER: $("#notice-to-user-list").val(),
+            NOTICE_TO_ALIAS: $("#notice-to-alias-list").val(),
+            NOTICE_IMPORTANCE: $("#cmb-notice-importance").val(),
+            NOTICE_MESSAGE: $("#txt-notice-message").val()
+        };
+    }
+
+    function GetPOApprovalReplyNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            DOC_TYPE: "PO",
+            REPLY_FOR: seqNo,
+            NOTICE_TO_USER: $("#notice-to-user-list").val(),
+            NOTICE_TO_ALIAS: $("#notice-to-alias-list").val(),
+            NOTICE_IMPORTANCE: $("#cmb-notice-importance").val(),
+            NOTICE_MESSAGE: $("#txt-notice-message").val()
+        };
+    }
+
+    function GetPOApprovalDeleteNoticeParameter() {
+        return {
+            DOC_NO: docNo,
+            SEQ_NO: seqNo
+        };
+    }
+    </script>
+}
+
+<div class="form-horizontal">
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-pono" class="col-xs-5 col-sm-4 control-label text-muted">PO No</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-pono" tabindex="1" autofocus class="form-control"/>
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="cmb-status" class="col-xs-5 col-sm-4 control-label text-muted">Status</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-status", DocStatusController.GetDocStatusSelectList("PO"), new {tabindex="5", @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="cmb-status" class="col-xs-5 col-sm-4 control-label text-muted">Proc. Channel</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-procchannel", ProcurementChannelController.ProcurementChannelSelectList, new { tabindex = "9", @class = "form-control" })
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-poheadertext" class="col-xs-5 col-sm-4 control-label text-muted">Header Text</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-poheadertext" tabindex="2" class="form-control"/>
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="txt-createddate" class="col-xs-5 col-sm-4 control-label text-muted">Doc Date</label>
+                <div class="col-xs-7 col-sm-8">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input type="text" id="txt-createddate" placeholder='@CommonDisplayMessage.DateRangePlaceholder' tabindex="6" autocomplete="off" class="form-control"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="cmb-purchasinggrp" class="col-xs-5 col-sm-4 control-label text-muted">Purch. Group</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-purchasinggrp", PurchasingGroupController.PurchasingGroupByRegNoSelectList(null), new {tabindex = "3", @class = "form-control"})
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="txt-createdby" class="col-xs-5 col-sm-4 control-label text-muted">Created By</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-createdby" class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label for="txt-vendor" class="col-xs-5 col-sm-4 control-label text-muted">Vendor</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-vendor" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="txt-pono" class="col-xs-5 col-sm-4 control-label text-muted">PR No</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input type="text" id="txt-prno" tabindex="1" autofocus class="form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div class="col-sm-6 hidden-xs">
+        </div>
+        <div class="col-xs-12 col-sm-6 text-right">
+            <button id="btn-detail" tabindex="7" class="btn btn-primary btn-xs">Show Detail</button>
+            <button id="btn-search" tabindex="8" class="btn btn-primary btn-xs">Search</button>
+            <button id="btn-clearsearch" tabindex="9" class="btn btn-default btn-xs">Clear</button>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="line-br"></div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-6">
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POInquiry", "btn-add"))
+            {
+                <button id="btn-add" tabindex="10" class="btn btn-primary btn-xs">Add</button>
+            }
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POInquiry", "btn-edit"))
+            {
+                <button id="btn-edit" tabindex="11" class="btn btn-primary btn-xs">Edit</button>
+            }
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POInquiry", "btn-cancel"))
+            {
+                <button id="btn-cancel" tabindex="12" class="btn btn-danger btn-xs">Cancel</button>
+            }
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POInquiry", "btn-reject-vendor"))
+            {
+                <button id="btn-reject" tabindex="12" class="btn btn-warning btn-xs">Reject</button>
+            }
+        </div>
+        <div class="col-xs-12 col-sm-6 text-right">
+            <button id="btn-download" tabindex="12" class="btn btn-success btn-xs" onclick="javascript:onDownload()">Download</button>
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POInquiry", "btn-trigger-po"))
+            {
+                <button id="btn-trigger-po" tabindex="12" class="btn btn-warning btn-xs" onclick="javascript: onTriggerECataloguePO()">Trigger Generate PO</button>
+            }
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div id="grid-purchaseorder" class="col-xs-12">
+            @Html.Partial(POInquiryController.Partial.InquiryGrid, Model)
+        </div>
+    </div>
+</div>
+@Html.ModalContainer("pop-purchaseorder")
+
+<div id="pop-cancelpo">
+    @Html.Partial(POInquiryController.Partial.InquiryCancel)
+</div>
+
+<div id="pop-rejectpo">
+    @*@Html.Partial(POInquiryController.Partial.InquiryReject)*@
+</div>
+
+@Html.Partial(POInquiryController.Partial.InquiryTriggerPO)
+
+<div id="cancelreason-popup-container" class="modal fade bs-example-modal-lg ncp-theme" data-backdrop="static" data-keyboard="false">
+    @Html.Partial(POInquiryController.Partial.CancelReasonPopup)
+</div>

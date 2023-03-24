@@ -1,0 +1,13 @@
+﻿EXEC sp_price_getprice 
+	@MAT_NO, 
+	@VENDOR_CD,
+	@VALIDFROM, 
+	@VALIDTO, 
+	@PRICE_STS,
+	@PRICE_TYPE,
+	@PART_COLOR_SFX,
+	@SOURCE_TYPE,
+	@PACKING_TYPE,
+	@PRODUCTION_PURPOSE,
+	@start, 
+	@length

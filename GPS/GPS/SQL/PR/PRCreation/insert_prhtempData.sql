@@ -1,0 +1,66 @@
+﻿IF EXISTS(SELECT 1 FROM TB_T_PR_H WHERE PROCESS_ID = @PROCESS_ID)
+BEGIN
+	UPDATE TB_T_PR_H
+		SET [PR_DESC] = @PR_DESC
+			,[PR_TYPE] = @PR_TYPE
+			,[PLANT_CD] = @PLANT_CD
+			,[SLOC_CD] = @SLOC_CD
+			,[PR_COORDINATOR] = @PR_COORDINATOR
+			,[DIVISION_ID] = @DIVISION_ID
+			,[DIVISION_NAME] = @DIVISION_NAME
+			,[PROJECT_NO] = @PROJECT_NO
+			,[URGENT_DOC] = @URGENT_DOC
+			,[EQUIP_NO] = @MAIN_ASSET_NO
+			,[PR_NOTES] = @PR_NOTES
+			,[DELIVERY_PLAN_DT] = @DELIVERY_PLAN_DT
+			,[CHANGED_BY] = @USERID
+			,[CHANGED_DT] = GETDATE()
+	WHERE PROCESS_ID = @PROCESS_ID
+END
+ELSE
+BEGIN
+	INSERT INTO [dbo].[TB_T_PR_H]
+			   ([PROCESS_ID]
+			   ,[PR_NO]
+			   ,[DOC_DT]
+			   ,[PR_DESC]
+			   ,[PR_TYPE]
+			   ,[PLANT_CD]
+			   ,[SLOC_CD]
+			   ,[PR_COORDINATOR]
+			   ,[DIVISION_ID]
+			   ,[DIVISION_NAME]
+			   ,[PR_STATUS]
+			   ,[PROJECT_NO]
+			   ,[URGENT_DOC]
+			   ,[EQUIP_NO]
+			   ,[PR_NOTES]
+			   ,[DELIVERY_PLAN_DT]
+			   ,[CREATED_BY]
+			   ,[CREATED_DT]
+			   ,[CHANGED_BY]
+			   ,[CHANGED_DT])
+		 VALUES
+			   (@PROCESS_ID
+			   ,@PR_NO
+			   ,GETDATE()
+			   ,@PR_DESC
+			   ,@PR_TYPE
+			   ,@PLANT_CD
+			   ,@SLOC_CD
+			   ,@PR_COORDINATOR
+			   ,@DIVISION_ID
+			   ,@DIVISION_NAME
+			   ,null
+			   ,@PROJECT_NO
+			   ,@URGENT_DOC
+			   ,@MAIN_ASSET_NO
+			   ,@PR_NOTES
+			   ,@DELIVERY_PLAN_DT
+			   ,@USERID
+			   ,GETDATE()
+			   ,NULL
+			   ,NULL)
+END
+
+SELECT 'SUCCESS'

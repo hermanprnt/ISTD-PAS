@@ -1,0 +1,139 @@
+﻿@using GPS.Controllers.Master
+@model  GPS.Models.Common.PRPOTrackingParam
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadScript{
+    <!-- Bootstrap Datepicker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/datepicker.css")" />
+    <!-- Daterange picker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+
+    <style>
+        .initial-hide,
+        .moreinquiry {
+            display:none;
+        }
+
+        .form-group {
+            margin-bottom:10px;
+        }
+    </style>
+}
+
+@section BodyScript{
+    <!-- Bootstrap Datepicker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+    <!-- Daterange picker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+    <!-- Dropzone file js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/dropzone.js")"></script>
+
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/typeahead.jquery.js")"></script>
+
+    @Html.Partial("_PartialScript")
+    <script>
+        $(document).ready(function () {
+            $('input[name=date-range-picker]').daterangepicker({
+                format: 'DD.MM.YYYY',
+                'applyClass': 'btn-sm btn-success',
+                'cancelClass': 'btn-sm btn-default',
+                startDate: new Date(),
+                locale: {
+                    applyLabel: 'Apply',
+                    cancelLabel: 'Cancel',
+                }
+            })
+		    .prev().on(ace.click_event, function () {
+			    $(this).next().focus();
+		    });
+
+            Search(1, 'Y');
+        });
+    </script>
+    }
+<div class="alert alert-danger" role="alert" style="display:none" id="alert-search"></div>
+<div class="alert alert-warning" role="alert" style="display:none" id="warning-search"></div>
+<div class="form-horizontal" id="searchForm">
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Type</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    <div class="input-group pos-rel" style="width: 100%;">
+                        <select id="cmb-type" style="width:100%" onchange="javascript:onchangetype()">
+                            <option value="PR">PR - PO</option>
+                            <option value="PO">PO - GR</option>
+                        </select>
+					</div>
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Status</label>
+                <div class="col-xs-8 col-sm-9 col-md-8" id="div-status">
+                    @Html.Partial("_PartialStatus")
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Document Date</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    <div class="input-group">
+						<span class="input-group-addon" style="cursor: pointer;padding:4px 10px;">
+							<i class="fa fa-calendar bigger-110"></i>
+						</span>
+						<input style = "width:100%"" type="text" name="date-range-picker" id="txt-date" data-date-format="dd.mm.yyyy"/>
+					</div>
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Description</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    <div class="input-group pos-rel" style="width: 100%;">
+                        @Html.TextBoxFor(m => m.DOC_DESC, new {id = "txt-desc", @style = "width:100%"})
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Document No</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    @Html.TextBoxFor(m => m.DOC_NO, new {id = "txt-no", @style = "width:100%"})
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Register By</label>
+                <div class="col-xs-8 col-sm-9 col-md-8">
+                    @Html.TextBoxFor(m => m.REGISTERED_BY, new {id = "txt-register", @style = "width:100%"})
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6" style="margin-top: 5px;">
+            <label class="col-xs-4 col-sm-3 col-md-6 text-left hidden">
+                    <a id="lnsearch-toggle-moreinquiry" onclick="javascript:toogle('moreinquiry','Search Criteria')">More Search Criteria</a>
+            </label>
+        </div>
+        <div class="col-xs-6 text-right">
+            <div class="form-group-xs">
+                <button type="submit" id="btnsearch" name="btnsearch" class="btn btn-primary btn-search btn-xs" onclick="javascript:Search(1, 1)">Search</button>
+                <button type="submit" id="btnclear" name="btnclear" class="btn btn-default btnclear btn-xs" onclick="javascript: ClearCriteria()">Clear</button>
+                <span id="iscreate" class="hidden"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center" style="margin-bottom: 3px;">
+    <hr id="hrsrc" style="margin:0;padding:0;" />
+</div>
+
+&nbsp;
+
+<div class="row TableList">
+    @Html.Partial("_PartialGrid")
+</div>

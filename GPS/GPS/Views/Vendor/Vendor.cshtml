@@ -1,0 +1,70 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+<div class="hidden-xs">
+    @Html.Partial("_PartialScript")
+    <form role="form" class="form-horizontal" id="searchForm" method="post" action="javascript: onGetData(1)">
+        <div class="row">    
+           <div class="col-xs-12 col-sm-3 col-md-3">
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-8 col-sm-6 col-md-5 control-label text-muted">
+                        Vendor Code</label>
+                    <div class="col-xs-12 col-sm-6 col-md-7">
+                        <input type="text" id="txtVendorCode" class="form-control" />
+                    </div>
+                </div>
+             </div>
+           <div class="col-xs-12 col-sm-3 col-md-3">
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-12 col-sm-6 col-md-5 control-label text-muted">
+                        Vendor Name</label>
+                    <div class="col-xs-12 col-sm-6 col-md-7">
+                        <input type="text" id="txtVendorName" class="form-control" />
+                    </div>
+                </div>
+             </div>
+           <div class="col-xs-12 col-sm-3 col-md-3">
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-12 col-sm-6 col-md-5 control-label text-muted">
+                        Payment Method</label>
+                    <div class="col-xs-12 col-sm-6 col-md-7">
+                         <input type="text" id="txtPayMethod" class="form-control" />
+                    </div>
+                </div>
+            </div>
+           <div class="col-xs-12 col-sm-3 col-md-3">
+               <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-12 col-sm-6 col-md-5 control-label text-muted">
+                        Payment Term</label>
+                    <div class="input-group input-group-xs col-xs-12 col-sm-6 col-md-7" style="padding-left: 11px;padding-right: 11px; height: 26px;">
+                         <input type="text" id="txtPayTerm" class="form-control" />             
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6" style="margin-top: 5px;">
+            </div>
+            <div class="col-xs-6 text-right">
+                <div class="form-group-xs">        
+                    <button type="submit" class="btn btn-primary btn-xs btndisable" onclick="">
+                        Search</button>        
+                    <button type="button" class="btn btn-default btn-xs btndisable" onclick="onClear()">
+                        Clear</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="text-center" style="margin-bottom: 3px;">
+        <hr id="hrsrc" style="margin: 0; padding: 0;" />       
+    </div>
+    <div id="divtable">
+        @Html.Partial("_Grid")
+    </div>
+    <div class="modal fade" id="basicModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+         @Html.Partial("_AddEditPopUp")
+    </div>
+</!--div>
+
+<div class="visible-xs"></div>

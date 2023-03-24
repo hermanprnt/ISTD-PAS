@@ -1,0 +1,39 @@
+﻿BEGIN TRY
+    BEGIN TRAN
+
+	UPDATE TB_R_QUOTA 
+	SET UNCONFIRM_AMOUNT = ISNULL(UNCONFIRM_AMOUNT,0) + @AmountTransfer,
+	    CHANGED_BY = @Userid,
+		CHANGED_DT = GETDATE()
+    WHERE CONSUME_MONTH = @ConsumeMonth AND DIVISION_ID = @DivisionID AND  QUOTA_TYPE = @QuotaType
+	
+	INSERT INTO TB_R_QUOTA_CONSUME
+	(DOC_NO,SEQ_NO,DOC_DT,QUOTA_MONTH,DIVISION_ID,QUOTA_TYPE,MAT_NO,MAT_DESC,TRANS_STATUS,AMOUNT,
+	 CREATED_BY,CREATED_DT,CHANGED_BY,CHANGED_DT,CONFIRM_FLAG,CONSUME_DESC,DT_MONTH,DST_TYPE)
+	SELECT '-',
+		   (SELECT ISNULL((MAX(SEQ_NO) + 1),1) FROM TB_R_QUOTA_CONSUME WHERE DOC_NO = '-'),
+		   CAST(GETDATE() AS DATE), 
+		   @SourcePeriode,
+		   @DivisionID,
+		   @SourceOrderType,
+		   '-',
+		   '-',
+		   'C',
+		   @AmountTransfer,
+		   @Userid,
+		   GETDATE(),
+		   NULL,
+		   NULL,
+		   'N',
+		   NULL,
+		   @ConsumeMonth,
+		   @QuotaType
+
+    COMMIT TRAN
+	SELECT 'True|Submit data successfully'	
+
+END TRY
+BEGIN CATCH   
+	ROLLBACK TRAN
+	SELECT 'Error|' + ERROR_MESSAGE();
+END CATCH

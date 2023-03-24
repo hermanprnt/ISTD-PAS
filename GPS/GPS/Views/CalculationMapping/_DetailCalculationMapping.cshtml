@@ -1,0 +1,64 @@
+﻿@using GPS.Models.Master
+@{
+    List<CalculationMapping> GridData = ViewData["DetailCalculationMapping"] != null ?
+                            (List<CalculationMapping>)ViewData["DetailCalculationMapping"] :
+                            new List<CalculationMapping>(new List<CalculationMapping>());             
+}
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <table class="table table-striped table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th width="20px">No.</th>
+                <th width="100px">Active</th>
+                <th width="100px">Comp Price</th>
+                <th width="200px">Description</th>
+                <th width="100px">Base Value</th>
+                <th width="100px">Inventory</th>
+                <th width="80px">Sign</th>
+                <th width="120px">Qty Per UOM</th>
+                <th width="120px">Condition Category</th>
+                <th width="120px">Calculation Type</th>
+                <th width="150px">Accrual Flag</th>
+                <th width="150px">Condition Rule</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (GridData != null && GridData.Count > 0)
+        {
+            foreach (CalculationMapping item in GridData)
+            {
+                <tr>
+                    <td class="text-center" width="20px">@item.SEQ_NO</td>
+                    <td class="text-center" width="100px">
+                        @if (item.ITEM_STATUS == "A")
+                        {
+                            <a href=""><i class="fa fa-circle active" data-toggle="tooltip" title="Active"></i></a>
+                        }
+                        else
+                        {
+                            <a href=""><i class="fa fa-circle inactive" data-toggle="tooltip" title="Inactive"></i></a>
+                        }
+                    </td>
+                    <td class="text-center" width="100px">@item.COMP_PRICE_CD</td>
+                    <td class="text-left" width="200px">@item.COMP_PRICE_TEXT</td>
+                    <td class="text-center" width="100px">@item.BASE_VALUE</td>
+                    <td class="text-center" width="100px">@item.INVENTORY_FLAG</td>
+                    <td class="text-center" width="80px">@item.PLUS_MINUS_SIGN</td>
+                    <td class="text-center" width="120px">@item.QTY_PER_UOM</td>
+                    <td class="text-center" width="120px">@item.CONDITION_CATEGORY</td>
+                    <td class="text-center" width="120px">@item.CALCULATION_TYPE_DESC</td>
+                    <td class="text-center" width="150px">@item.ACCRUAL_FLAG_TYPE</td>
+                    <td class="text-center" width="150px">@item.CONDITION_RULE</td>
+                </tr>
+            } 
+        }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip({ placement: 'right' });
+    });
+</script>

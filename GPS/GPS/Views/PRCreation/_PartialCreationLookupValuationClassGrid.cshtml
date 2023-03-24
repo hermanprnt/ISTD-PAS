@@ -1,0 +1,43 @@
+﻿@using GPS.Models.PR.PRCreation
+@{
+    List<PRCreation> lpr = ViewData["ValClass"] != "" ? (List<PRCreation>)ViewData["ValClass"] : new List<PRCreation>();
+}
+<div class="table-responsive">
+    <table id="LookUpTable-valclass" style="width:668px" class="table table-striped table-bordered table-condensed val-lookup-table">
+        <thead>
+            <tr>
+                <th class="text-center control-label text-muted" colspan="5">Valuation Class</th>
+            </tr>
+            <tr>
+                <th class="text-center control-label text-muted" style="width:68px">Code</th>
+                <th class="text-center control-label text-muted" style="width:250px" colspan="2">Description</th>
+                <th class="text-center control-label text-muted" style="width:350px" colspan="2">Area</th>
+            </tr>
+        </thead>
+        <tbody id="bodylookup-valclass">
+            @if (lpr.Count > 0)
+            {
+                foreach (PRCreation pr in lpr)
+                {
+                    <tr ondblclick="javascript:MoveValuationClassKey('@pr.VALUATION_CLASS','@pr.VALUATION_CLASS_DESC', '@pr.ITEM_CLASS', '@pr.ITEM_TYPE')" style="cursor:pointer">
+                        <td>@pr.VALUATION_CLASS</td>
+                        <td colspan="2">@pr.VALUATION_CLASS_DESC</td>
+                        <td colspan="2">@pr.AREA_DESC</td>
+                    </tr>
+                }
+            }
+            else { 
+                <tr>
+                    <td colspan="5" class="text-center">No Valuation Class Data</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    @Html.Partial("_UIPaging")
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

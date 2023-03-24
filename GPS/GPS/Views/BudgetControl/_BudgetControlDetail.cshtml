@@ -1,0 +1,106 @@
+﻿@using GPS.Models.Master
+<div class="modal-dialog modal-xl">
+    <div class="modal-content">
+        <div class="modal-header">
+           
+            <div class="modal-title" id="myModalLabel">
+            <h4>
+                    Budget Control Detail</h4>
+            </div>
+            <input type="hidden" id="txtId" />
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="form-horizontal">
+                    <div class="col-xs-12">
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                            <div class="form-group form-group-xs">
+                                <label class="col-sm-4 col-md-3 control-label required text-muted">
+                                    Division</label>
+                                <div class="col-sm-5 col-md-7">
+                                    <input type="text" id="txtDivisionDetail" class="form-control" maxlength="10" required
+                                        readonly="readonly" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                            <div class="form-group form-group-xs">
+                                <label class="col-sm-4 col-md-4 control-label required text-muted">
+                                    WBS Number</label>
+                                <div class="col-sm-5 col-md-7">
+                                    <input type="text" id="txtWBSNoDetail" class="form-control" maxlength="10" required
+                                        readonly="readonly" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                            <div class="form-group form-group-xs">
+                                <label class="col-sm-4 col-md-4 control-label required text-muted">
+                                    Action Type</label>
+                                <div class="col-sm-5 col-md-7">
+                                    <select id="txtAction" class="form-control" onchange = "javascript:myFunction()" >
+                                        <option value="1">All</option>
+                                        <option value="2">Commitment</option>
+                                        <option value="3">Actual</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                        <div class="row">
+                <div class="form-horizontal">
+                    <div class="col-xs-12">
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                            <div class="form-group form-group-xs">
+                                <label class="col-sm-4 col-md-3 control-label required text-muted">
+                                    Commitment</label>
+                                <div class="col-sm-5 col-md-7">
+                                    <input type="text" id="txtCommitmentDetail" class="form-control" maxlength="10" required
+                                        readonly="readonly" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                            <div class="form-group form-group-xs">
+                                <label class="col-sm-4 col-md-4 control-label required text-muted">
+                                    Actual</label>
+                                <div class="col-sm-5 col-md-7">
+                                    <input type="text" id="txtConsumeDetail" class="form-control" maxlength="10" required
+                                        readonly="readonly" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-4">
+                            <div class="form-group form-group-xs">
+                                <label class="col-sm-4 col-md-4 control-label required text-muted">
+                                   Remaining</label>
+                                <div class="col-sm-5 col-md-7">
+                                <input type="text" id="txtRemainingDetail" class="form-control" maxlength="10" required
+                                        readonly="readonly" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-right" style="margin-bottom: 3px;">
+                <hr id="hrsrc" style="margin: 0; padding: 0;" />
+                    <button data-rel="tooltip" title="Download" onclick="javascript:onDownloadDetail()" id="btn-downloaddetail" type="button"  class="btn btn-success btn-xs">
+                    Download</button>
+            </div>
+            <div id="divReportDetailGrid">
+                @Html.Partial("_BudgetControlDetailGrid")
+            </div>
+      
+            <div class="row">
+                <div class="modal-footer">
+                 
+             <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Close</button>
+       
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

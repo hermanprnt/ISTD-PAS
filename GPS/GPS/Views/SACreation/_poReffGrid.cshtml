@@ -1,0 +1,57 @@
+﻿@using GPS.Models.MRP
+@using GPS.Models.MRP
+@{
+    List<GRCreation> PObyReff = ViewData["PObyReff"] != null ? (List<GRCreation>)ViewData["PObyReff"] : new List<GRCreation>();
+    string UserName = (string)ViewData["USER_NAME"];
+    
+}
+
+    <div class="table-responsive col-xs-12 col-sm-12"> 
+        <div style="border: 1pt solid #ccc;">
+        
+           <div style="overflow: hidden;" id="DivHeaderRow"></div>
+           <div onscroll="OnScrollDiv(this)" id="DivMainContent">          
+               <table id="tscroll" class="table table-striped table-bordered table-condensed table-fixed" style="width:100%">
+                    <thead>
+                            <tr>
+                                    <td>PO_NO</td>
+                                    <td>PO_DESC</td>
+                                    <td>VENDOR_NAME</td>
+                                    <td>PO_AMOUNT</td>
+                                    
+                            </tr>
+                    </thead>   
+                    <tbody>
+                        @{
+                            if (PObyReff.Count > 0)
+                            {
+                                foreach (GRCreation item in PObyReff)
+                                {
+                                <tr  onclick="javascript:onChoosePO('@item.PO_NO')">
+                                    <td>@item.PO_NO</td>
+                                    <td>@item.PO_DESC</td>
+                                    <td>@item.VENDOR_NAME</td>
+                                    <td>@item.PO_AMOUNT</td>
+                               @* <td class="text-center">@item.CREATED_BY</td>
+                                <td class="text-center">@item.CREATED_DT</td>
+                                <td class="text-center">@item.CHANGED_BY</td>
+                                <td class="text-center">@item.CHANGED_DT</td>*@
+                                </tr>  
+                                }
+                            }
+                            else
+                            {
+                            <tr>
+                                <td colspan="11" class="text-center">
+                                    No data found
+                                </td>
+                            </tr>
+                            }
+                        }
+                    </tbody>                               
+                </table>                    
+           </div>     
+           
+        </div>
+    </div>
+

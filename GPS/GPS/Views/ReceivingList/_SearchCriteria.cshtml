@@ -1,0 +1,131 @@
+﻿@using GPS.CommonFunc.WebControl
+@using GPS.Controllers
+@using GPS.Models.ReceivingList
+@{
+    String processId = ViewBag.processId;
+}
+<form role="form" class="form-horizontal _criteria" id="searchForm">
+<div class="row">
+    <div class="col-xs-12 col-sm-6 col-md-3">
+        <div class="form-group form-group-xs">
+            <label for="txt-receivingno" class="col-xs-5 col-sm-4 control-label required-left text-muted">Receiving No</label>
+            <div class="col-xs-7 col-sm-8">
+                <input type="text" id="txt-receivingno" class="form-control" />
+
+                 <input type="hidden" value="@processId" class="form-control" id="txtProcessId" />
+            </div>
+
+        </div>
+        <div class="form-group form-group-xs _criteria">
+            <label for="txt-headertext" class="col-xs-5 col-sm-4 control-label required-left text-muted">Header Text</label>
+            <div class="col-xs-7 col-sm-8">
+                <input type="text" id="txt-headertext" class="form-control" />
+            </div>
+        </div>
+
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-3">
+        <div class="form-group form-group-xs">
+            <label for="txtdateinput-receivingdate" class="col-xs-5 col-sm-4 control-label required-left text-muted">Receving Date</label>
+            <div class="col-xs-7 col-sm-8">
+                @Html.DateInputBox("receivingdate")
+            </div>
+        </div>
+        <div class="form-group form-group-xs _criteria">
+            <label class="col-xs-5 col-sm-4 control-label text-muted">
+                Status</label>
+            <div class="col-xs-7 col-sm-8">
+                @Html.DropDownList("txt-status", ReceivingListController.GRSASelectList, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+       <div class="col-xs-12 col-sm-6 col-md-3">
+        <div class="form-group form-group-xs">
+            <label for="txt-pono" class="col-xs-5 col-sm-4 control-label required-left text-muted">PO No</label>
+            <div class="col-xs-7 col-sm-8">
+                <input type="text" id="txt-pono" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group form-group-xs _criteria">
+            <label for="txt-sapdocno" class="col-xs-5 col-sm-4 control-label required-left text-muted" style="display:none">SAP Doc No</label>
+            <div class="col-xs-7 col-sm-8">
+                <input type="text" id="txt-sapdocno" class="form-control" style="display:none" />
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-3">
+        <div class="form-group form-group-xs">
+            <label for="txt-vendor" class="col-xs-5 col-sm-4 control-label required-left text-muted">Vendor</label>
+            <div class="col-xs-7 col-sm-8">
+                <input type="text" id="txt-vendor" class="form-control" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" style="margin-bottom: 10px;">
+    <div class="col-md-12" style="margin-top: 5px;">
+    </div>
+    <div class="col-md-12 text-right">
+        <div class="form-group-xs _criteria">
+           <button type="button" class="btn btn-primary btn-xs btn-std" id="btnToggleDetail" onclick="javascript:detailGrid()">Show Detail</button>
+            <button id="btnSearch" type="button" class="btn btn-primary btn-xs btn-std" onclick="javascript:searchData(1)">Search</button>
+            <button type="reset" class="btn btn-default btn-xs btn-std" onclick="javascript:clearData()">Clear</button>
+        </div>
+    </div>
+</div>
+
+</form>
+<script type="text/javascript">
+    function openPopupStatus() {
+        $("#txtsearchstatus").val('');
+        if ($("#status-popup").hasClass('open'))
+            $("#status-popup").removeClass('open')
+        else
+            $("#status-popup").addClass('open')
+    }
+
+    function onLookupSelectedStatus(value) {
+        $("#txtstatus").val(value);
+        closePopupStatus(); ;
+    }
+
+    $("#gridLookupStatus-checkAll").click(function () {
+        if ($("#gridLookupStatus-checkAll").is(":checked")) {
+            $(".gridLookupStatus-checkbox-body").prop('checked', true);
+        } else {
+            $(".gridLookupStatus-checkbox-body").prop('checked', false);
+        }
+    });
+
+    function closePopupStatus() {
+        $("#txtsearchstatus").val('');
+        $("#status-popup").removeClass('open')
+    }
+
+    function gridlookupStatusSelected(setValue) {
+        var result = '';
+        var cd = '';
+        if (($(".gridLookupStatus-checkbox-body:checked").length > 0) && (setValue == 'OK_STATUS')) {
+            for (i = 0; i < $(".gridLookupStatus-checkbox-body").length; i++) {
+                if ($(".gridLookupStatus-checkbox-body")[i].checked) {
+                    result = result + ((result != '') ? ';' : '') + $(".gridLookupStatus-checkbox-body")[i].dataset.value;
+                    cd = cd + ((cd != '') ? ';' : '') + $(".gridLookupStatus-checkbox-body")[i].dataset.cd;
+                }
+            }
+
+            $("#txtstatus").val(cd);
+            $("#txtstatusname").val(result);
+        }
+
+        if (setValue == 'CS') {
+            $(".gridLookupStatus-checkbox-body").prop('checked', false);
+            $("#txtstatus").val('');
+            $("#txtstatusname").val('');
+        }
+
+        closePopupStatus();
+    }
+
+
+</script>

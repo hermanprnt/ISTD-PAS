@@ -1,0 +1,669 @@
+﻿@using GPS.Models
+@using GPS.Models.Common
+@using GPS.Models.Master
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Paging pg = (Paging)ViewData["Paging"];
+    List<Vendor> _VendorCD = (List<Vendor>)ViewData["VendorCD"];
+}
+
+@section HeadScript{
+    <style>
+        .table > thead > tr > th
+        {
+            vertical-align: middle;
+        }
+        ._criteria
+        {
+            display: none;
+        }
+        .initial-hide
+        {
+            display: none;
+        }
+        .datepicker 
+        {
+            z-index: 9999999 !important;
+        }
+    </style>
+
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/datepicker.css")" />
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+}
+
+<div class="alert alert-danger" role="alert" style="display:none" id="alert-search"></div>
+<div class="alert alert-success" role="alert" style="display:none" id="success-search"></div>
+<div class="alert alert-warning" role="alert" style="display:none" id="warning-search"></div>
+<div class="alert alert-info" role="alert" style="display:none" id="info-search"></div>
+
+<form role="form" class="form-horizontal" id="searchForm" enctype="multipart/form-data" >
+    <div role="form" class="form-horizontal" id="searchForm">
+        <div class="row-fluid">
+            <div class="col-xs-12 col-sm-6 col-md-3">
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Material No</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <input id="txtMaterialNo" type="text" class="form-control" />
+                    </div>
+                </div>
+            </div>
+          
+            <div class="col-xs-12 col-sm-6 col-md-3">      
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Vendor</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <select id="ddlVendorCD" class="form-control">
+                                <option value="">None</option>
+                            @foreach (Vendor item in _VendorCD)
+                            {
+                                <option value="@item.VendorCd">@item.VendorCd - @item.VendorName</option> 
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-12 col-sm-6 col-md-3">
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Valid From</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <input id="dtValidFrom" type="text" class="form-control _datepicker" placeholder="dd.mm.yyyy" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-12 col-sm-6 col-md-3">
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-2 control-label text-muted">To</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <input id="dtValidTo" type="text" class="form-control _datepicker" disabled="disabled" value="31.12.9999" />
+                    </div>
+                </div>
+            </div>
+        </div>      
+        
+        <div class="row">
+            <div class="col-xs-6" style="margin-top: 5px;">
+            </div>
+            <div class="col-xs-6 text-right">
+                <div class="form-group-xs">        
+                    <button type="button" class="btn btn-primary btn-xs btndisable"  onclick="onGetData(1)">
+                        Search</button>        
+                    <button type="reset" class="btn btn-default btn-xs btndisable" id="btnnclear" onclick="onClear()">
+                        Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="text-center" style="margin-bottom: 3px;">
+        <hr id="hrsrc" style="margin: 0; padding: 0;" />       
+</div>
+<div>
+    <div id="divtable">
+        @Html.Partial("_ViewTable")
+    </div>   
+</div>
+
+@Html.Partial("_PopUpSourceList")
+
+@section BodyScript{
+    <script type="text/javascript">
+        //call modal
+        function showPopup() {                                                
+            $("#txtId").val("1");
+            $("#ddlAddMaterialNo").val("");
+	        $("#txtAddVendorCD").val("");   
+	        $("#dtAddValidFrom").val("");
+            
+            $("#sourceListModal").modal();
+            $("#ddlAddMaterialNo").attr('disabled', false);   
+        }
+
+        $(document).ready(function () {
+            $(".btn-edit").click(function () {
+                $("#edit-popup").modal();
+            });
+
+            $(".btn-delete").click(function () {
+                $("#delete-confirm").modal();
+            });
+
+            $("._datepicker").todatepicker();
+
+            //$("#btnUpload").attr("disabled", "disabled");
+
+             $("input[id^=cb-]").each(function(i,a){
+                a.checked = false;          
+            }); 
+
+            $(document).on("change", "#filexlsx", function (e) {
+                var excelFileList = e.target.files;
+                if (excelFileList.length == 0)
+                    $("#btnUpload").attr("disabled", "disabled");
+                else
+                    $("#btnUpload").removeAttr("disabled");
+            });
+
+            /* toggle show or hide searching criteria (that has class _criteria) */
+//            $("#lnsearch-toggle").click(function () {
+//                var _criteria = $("._criteria");
+//                _criteria.toggle(200, "linear");
+
+//                var text = $("#lnsearch-toggle").text();
+//                $("#lnsearch-toggle").text(text == "More search criteria" ? "Less search criteria" : "More search criteria");
+//            });
+            
+            var showDetail = 0;
+            $("#btnToggleDetail").click(function() {
+                if (showDetail > 0) {
+                    $("#btnToggleDetail").html('Show Detail');
+                    $(".initial-hide").hide();
+                    $("#displaytable").width(1277);
+                    showDetail = 0;
+                } //detail show
+                else {
+                    $("#btnToggleDetail").html('Hide Detail');
+                    $(".initial-hide").show();
+                    $("#displaytable").width(2500);
+                    showDetail = 1;
+                }
+            });
+
+            $('.btnclear').click(function() {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Content("~/SourceList/")",
+                    data: {
+                    
+                    },
+                    success: function(message) {
+                        //_search = "N";
+                        window.location = "/SourceList";
+                    },
+                    error: function(resultMessage) {
+                        /*alert("failed");*/
+                        //$.msgBox({ title: "Edit", type: "error", content: resultMessage });
+                    }
+                });
+            });
+        });
+
+        //getvalidate
+        function GetValidDate(date) {
+            if(date !=""){
+                date = date.split('.');
+                var date = date[2] + '-' + date[1] + '-' + date[0];
+            }
+            return date;
+        }
+
+        //onSaveChange 
+        function onSaveChange() {
+                                       
+            var datefrom = GetValidDate($("#dtAddValidFrom").val());
+	        $.ajax({
+		        type: "POST",
+		        url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
+		        data: {
+                    Number: $("#txtId").val(),
+		            MAT_NO : $("#ddlAddMaterialNo").val(),
+			        VENDOR_CD : $("#ddlAddVendorCD").val(),
+			        VALID_DT_FROM : datefrom
+			        
+		        },
+		        success: function(data){
+                    
+		            if(data.split('|')[0] == "Error") {
+		                $.messagebox.show(
+                            "Save SourList",
+                            data.split('|')[1],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+		            }
+		            else {
+
+		                $.messagebox.show(
+                            "Save SourList",
+                            data,
+                            "SUC",
+                            "SINGLE",
+                            "window.location.href='/SourceList'",
+                            ""
+                        )
+		            }
+                    
+		        }
+	        });
+        }
+
+        function onSearchCriteria(page) {
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+                data: {
+                    Criteria: $("#txtSearch").val(),
+                    Display: $("#recordPerPage").val(),
+                    Page: page
+                },
+                success: function(data){
+                    $("#searchingPaging").html(data);
+                }
+            });
+        }
+        
+        //for delete
+        function onDelete() {
+             DeleteSourceList();
+        }
+       
+        //for update
+        function showEdit() {
+            UpdateSourceList();
+        }
+
+        //get parameter for detail update delete
+        function GetSourceList() {
+            var ids=[];
+            $("input[id^=cb-]").each(function(i, a){
+                if (a.id!=null && a.id.length > 0 && a.checked) {
+                    ids.push($('#'+a.id).data('materialno') + "|" + $('#'+a.id).data('vendorcd'));
+                }
+            });
+            var h = ids.length;
+            var w = ids.join();
+            // alert(h  + ids.join());
+            return [h,w];
+        }
+
+        //CheckedAll SourceList
+        function onCekAll() {
+            if ($("#checkall").is(":checked")) 
+                $(".grid-checkbox-body").prop('checked', true);
+            else 
+                $(".grid-checkbox-body").prop('checked', false);
+        }
+
+        //Update SourceList
+        function UpdateSourceList() {
+            var mat_no = GetSourceList();
+            var count = mat_no[Object.getOwnPropertyNames(mat_no)[0]];
+            var value = mat_no[Object.getOwnPropertyNames(mat_no)[1]];
+            //alert(count);
+            if (count == 0){
+//                $("#alert-search").css("display", "inherit");
+//                $("#alert-search").html("Please select <strong> one record </strong> to be <strong> edited! </strong> ");
+                 $.messagebox.show(
+                    "Edit SourceList",
+                    "Please Select at Least One Record to be edit",
+                    "WRN",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+                return;
+            }
+            if (count > 1){
+                 //$("#alert-search").css("display", "inherit");
+                 //$("#alert-search").html("Please select <strong> one record </strong> only");
+                 $.messagebox.show(
+                    "Edit SourceList",
+                    "Please Select only One Record to be edit",
+                    "INF",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+                return;
+            }
+                                    
+            $.ajax({
+		        type: "POST",
+		        url: "@Html.Toyota().Page.GetActionUrl("GetSingleData")",
+		        data: {
+			        MAT_NO: value
+		        },
+		        success: function(data){                  
+                    $("#ddlAddMaterialNo").attr('disabled', true);                
+                
+                    Get_MatNo_Edit(data.MAT_NO);
+                    Get_VendorCD_Edit(data.VENDOR_CD);              
+			   
+                    $("#dtAddValidFrom").val(data.VALID_DT_FROM);
+		            $("#sourceListModal").modal();            
+
+		            }
+            });
+        }
+
+        $.fn.addOption = function (optText, optValue) {
+            var option = new Option(optText, optValue);
+            return this.append(option);
+        };
+
+        function Get_VendorCD_Edit(VENDOR_CD) {   
+            $.ajax({
+                type: "POST",
+                url: "@Url.Content("~/SourceList/GetListVendorCd")",        
+                success: function (resultMessage) {
+                    $('#ddlAddVendorCD').empty();
+                    if (resultMessage != "") {
+                        var rows = resultMessage.split('|');
+                        var cols = "";                
+                        for (i = 0; i < rows.length; i++) {
+                            if (rows[i] != '') 
+                            {
+                                cols = rows[i].split(';');        //TEXT                  , Value
+                                $('#ddlAddVendorCD').addOption(cols[0] + " - " + cols[1], cols[0]); 
+                            }
+                        } 
+                        $("#ddlAddVendorCD").val(VENDOR_CD);               
+                    }
+                    else {
+                        $('#ddlAddVendorCD').addOption("", "");
+                    }                              
+                }
+            });
+        }
+
+
+        function Get_MatNo_Edit(MAT_NO) {   
+            $.ajax({
+                type: "POST",
+                url: "@Url.Content("~/SourceList/GetListMatNo")",        
+                success: function (resultMessage) {
+                    $('#ddlAddMaterialNo').empty();
+                    if (resultMessage != "") {
+                        var rows = resultMessage.split('|');
+                        var cols = "";                
+                        for (i = 0; i < rows.length; i++) {
+                            if (rows[i] != '') 
+                            {
+                                cols = rows[i].split(';');        //TEXT                  , Value
+                                $('#ddlAddMaterialNo').addOption(cols[0] + " - " + cols[1], cols[0]); 
+                            }
+                        } 
+                        $("#ddlAddMaterialNo").val(MAT_NO);               
+                    }
+                    else {
+                        $('#ddlAddMaterialNo').addOption("", "");
+                    }                              
+                }
+            });
+        }
+
+        //Delete SourceList
+        function DeleteSourceList() {
+	        if($("input[id='checkall']:checked").val() != undefined)
+	        {
+		        //DeleteAllMaterial();
+	        }
+	        else
+	        {
+		        var mat_no = GetSourceList();
+		        var count = mat_no[Object.getOwnPropertyNames(mat_no)[0]];
+		        //var value = mat_no[Object.getOwnPropertyNames(mat_no)[1]];
+		        if (count == 0){
+//			        $("#alert-search").css("display", "inherit");
+//                    $("#alert-search").html("Please select <strong> one record </strong> to be <strong> deleted! </strong> ");
+                    $.messagebox.show(
+                        "Delete SourceList",
+                        "Please Select at Least One Record to be deleted",
+                        "WRN",
+                        "SINGLE",
+                        "",
+                        ""
+                    )    
+			        return;
+		        }
+                else
+		           $.messagebox.show(
+                        "Delete SourceList",
+                        "Are You Sure You Want to Delete this Item ?",
+                        "INF",
+                        "CONFIRM",
+                        "onYesDelete()",
+                        ""
+                    ) 
+	        }
+        }
+
+        function onYesDelete() {
+            var mat_no = GetSourceList();
+		    var value = mat_no[Object.getOwnPropertyNames(mat_no)[1]];
+		        
+            $.ajax({
+			    type:"POST",
+			    url:"@Html.Toyota().Page.GetActionUrl("DeleteSourceList")",
+			    data: {
+				    MAT_NO : value
+			    },
+			    success: function(data){
+                        
+                    if(data.split('|')[0] == "Error"){
+                        $.messagebox.show(
+                            "Delete SourceList",
+                            data.split('|')[1],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+                    else {
+                        window.location.href="/SourceList";
+
+                        $.messagebox.show(
+                            "Delete SourceList",
+                            data,
+                            "SUC",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    }
+
+//                        $("#info-search").css("display", "inherit");
+//                        $("#info-search").html("<strong>" + data + "</strong> with Material|Vendor <strong>" + value + "</strong> has been deleted");
+			    },
+			    error:function(x, t, e){
+				    alert(x.responseText);
+				    window.location.href="/SourceList";
+			    }
+		    });
+        }
+
+        //Get Date
+        function GetValidDate(date) {
+            if(date !=""){
+                date = date.split('.');
+                var date = date[1] + '-' + date[0] + '-' + date[2];
+            }
+            return date;
+        }
+
+        //Get Data to Grid
+        function onGetData(page)
+        {
+            $.disable_enable_button.disable(); 
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("onGetData")",
+                data: {
+                    Display: $("#cbodisplay").val(),
+                    Page:page,
+                    mat_no : $("#txtMaterialNo").val(),
+			        vendor_cd : $("#ddlVendorCD").val(),
+                    valid_from : $("#dtValidFrom").val(),
+                },
+                success: function (data) {
+                    $("#divtable").html(data);  
+                    $.disable_enable_button.enable();              
+                },
+                error:function (xhr, ajaxOptions, thrownError,data){
+                    alert(xhr.status);               
+                }
+            });
+        }
+        
+        function onClear() {
+            $("#txtMaterialNo").val(''),
+            $("#ddlVendorCD").val(''),
+            $("#dtValidFrom").val(''),
+            $("[id^=cb]").prop(false)
+            onGetData(1);           
+        } 
+
+        function DownloadTemplate() {
+            $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadTemplate")");
+        }
+
+        function onDownloadReport() {          
+            $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadReport")", {
+                data: {
+                    Display: $("#cbodisplay").val(),
+                    Page : @pg.PositionPage,
+                    mat_no : $("#txtMaterialNo").val(),
+			        vendor_cd : $("#ddlVendorCD").val(),
+			        valid_from : $("#dtValidFrom").val()
+                }
+            });
+        }
+    
+        //upload file XLS & xlsx
+        function UploadExcelFile(uploadElement) {
+            $.progressbox.show("Upload File", "Uploading...");
+            var uploadFileList = uploadElement.files;
+            if (uploadFileList.length > 0) {
+                for (idx = 0; idx < uploadFileList.length; idx++) {
+                    var currentFile = uploadFileList[idx];
+                    var isValid = ValidateExcel(currentFile);
+                    if (isValid) {
+                        var uploadFormData = new FormData();
+                        uploadFormData.append("excelFile", currentFile);
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/SourceList/UploadExcel",
+                            contentType: false,
+                            processData: false,
+                            data: uploadFormData,
+                            success: function (data) {
+                                if (data.toLowerCase().indexOf("error") !== -1) {
+                                    $.progressbox.hide();
+                                    //alert(data);
+                                    $.messagebox.show(
+                                        "Upload File",
+                                        data,
+                                        "ERR",
+                                        "SINGLE",
+                                        "",
+                                        ""
+                                    )
+                                }
+                                else {
+                                    $.progressbox.hide();
+                                    //$("#success-search").css("display", "inherit");
+                                    //$("#success-search").html("<strong>Successfully to upload data.</strong>");
+                                    $.messagebox.show(
+                                        "Upload File",
+                                        "Successfully to upload data.",
+                                        "SUC",
+                                        "SINGLE",
+                                        "window.location.href='/SourceList'",
+                                        ""
+                                    )
+                                }
+                               
+                                
+                            },
+                            error: function (data) {
+                                $.progressbox.hide();
+                                console.log(data);
+                            }
+                        });
+                    }
+                }
+            }
+
+        }
+
+        function ValidateExcel(currentFile) {
+            var validationMessage = "";
+
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: "/SourceList/GetSourceListUploadFileExtensions",
+                success: function (data) {
+                    if (data.toLowerCase().indexOf("error") === -1) {
+                        var allowedFileExtensions = JSON.parse(data.toLowerCase());
+                        var splittedName = currentFile.name.split(".");
+                        var currentFileExtension = splittedName[splittedName.length - 1];
+                        if ($.inArray("." + currentFileExtension, allowedFileExtensions) === -1) {
+                            validationMessage = "File extension: " + currentFileExtension + " is not allowed.";
+                            return;
+                        }
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+                    
+            if (validationMessage !== "")
+            {
+                alert(validationMessage);
+                return false;
+            }
+
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: "/SourceList/GetSourceListUploadFileSizeLimit",
+                success: function (data) {
+                    if (data.toLowerCase().indexOf("error") === -1) {
+                        validationMessage = "";
+
+                        var allowedFileSizeLimit = Math.round(Number(data) / 1000000 * 100) / 100;
+                        var currentFileSize = Math.round(currentFile.size / 1000000 * 100) / 100;
+                        if (currentFileSize > allowedFileSizeLimit) {
+                            validationMessage = "File size: " + currentFileSize.toString() + " is not allowed.";
+                            return;
+                        }
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+
+            if (validationMessage !== "")
+            {
+                alert(validationMessage);
+                return false;
+            }
+            return true;
+        }
+
+        function OnDownloadTemplate() {     
+            $.ajax({
+                type: "POST",
+                url: "@Html.Toyota().Page.GetActionUrl("CekTemplate")",        
+                success: function (data) {
+                    if(data == 'False') {
+                       $("#selected-info").modal();
+                       $("#infoModal").html('Template not found'); 
+                    }
+                    else {
+                        $.fileDownload("SourceList/DownloadTemplate/"); 
+                    }
+                }        
+            });
+        } 
+    </script>
+}

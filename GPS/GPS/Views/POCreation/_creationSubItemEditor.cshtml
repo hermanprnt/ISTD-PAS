@@ -1,0 +1,166 @@
+﻿@using GPS.CommonFunc.WebControl
+@using GPS.Controllers.PO
+@using GPS.ViewModels.PO
+@model POSubItemEditorViewModel
+
+<tr id="subrowadd-@Model.DataNo" class="roweditcurrent-@Model.GridPaging.DataName form-group-xs">
+    <td></td>
+    <td class="subitemedit-col-check hidden"></td>
+    @*<td class="not-in-pomanual"><input id="txt-subitemedit-prno-@Model.DataNo" type="text" readonly/></td>
+    <td class="not-in-pomanual"><input id="txt-subitemedit-pritemno-@Model.DataNo" type="text" readonly/></td>*@
+    <td><input id="txt-subitemedit-category-@Model.DataNo" class="form-control" type="text" readonly/></td>
+    <td colspan="2"><input id="txt-subitemedit-matdesc-@Model.DataNo" class="form-control" type="text"/></td>
+    <td><input id="txt-subitemedit-qty-@Model.DataNo" class="form-control" type="text"/></td>
+    <td>@Html.DropDownList("cmb-subitemedit-uom-" + Model.DataNo, POCreationController.UOMSelectList, new { @class = "form-control" })</td>
+    <td><input id="txt-subitemedit-price-@Model.DataNo" class="form-control" type="text"/></td>
+    <td><input id="txt-subitemedit-amount-@Model.DataNo" class="form-control" type="text" readonly/></td>
+    <td>@Html.Lookup("subitemedit-wbsno-" + Model.DataNo)</td>
+    <td>@Html.DropDownList("cmb-subitemedit-costcenter-" + Model.DataNo, POCreationController.GetCostCenterSelectList(Model.CurrentUser.RegistrationNumber), new { @class = "form-control" })</td>
+    <td>@Html.Lookup("subitemedit-glaccount-" + Model.DataNo)</td>
+    <td class="text-center subitemedit-col-action-@Model.DataNo">
+        <button id="btn-subitemedit-addnew-@Model.DataNo" class="btn btn-xs btn-primary"><i class="fa fa-save"></i></button>
+        <button id="btn-subitemedit-cancel-@Model.DataNo" class="btn btn-xs btn-danger"><i class="fa fa-remove"></i></button>
+    </td>
+</tr>
+
+<script id="script-subitemedit-@Model.DataNo" type="text/javascript">
+    $(document).ready(function () {
+
+        var processId = ViewData.Get("ProcessId"),
+            OnAjaxBegin = ViewData.Get("OnAjaxBegin"),
+            OnAjaxComplete = ViewData.Get("OnAjaxComplete"),
+            OnAjaxError = ViewData.Get("OnAjaxError");
+
+        function InitPrice() {
+            var qtySelector = "#txt-subitemedit-qty-@Model.DataNo",
+                priceSelector = "#txt-subitemedit-price-@Model.DataNo",
+                amountSelector = "#txt-subitemedit-amount-@Model.DataNo";
+
+            var qtyElement = $(qtySelector),
+                priceElement = $(priceSelector),
+                amountElement = $(amountSelector);
+
+            var GetAmount = function () {
+                var qty = $.FromPrice(qtyElement.valOrDefault()),
+                    price = $.FromPrice(priceElement.valOrDefault());
+                qtyElement.val($.AsPrice(qty));
+                priceElement.val($.AsPrice(price));
+                amountElement.val($.AsPrice(qty * price));
+            };
+
+            $(document).onOnce("keydown", qtySelector, $.NumericKey);
+            $(document).onOnce("keydown", priceSelector, $.NumericKey);
+            $(document).onOnce("keyup", qtySelector, GetAmount);
+            $(document).onOnce("keyup", priceSelector, GetAmount);
+        }
+
+        function InitSubItemLookup() {
+            var wbspopup = '@Html.LookupContainer("subitemedit-wbsno-" + Model.DataNo)';
+            var glaccountpopup = '@Html.LookupContainer("subitemedit-glaccount-" + Model.DataNo)';
+
+            if ($("body #popuplookup-subitemedit-wbsno-@Model.DataNo").length === 0) {
+                $("body").append(wbspopup);
+                $("body").append(glaccountpopup);
+            }
+
+            $("#lookup-subitemedit-wbsno-@Model.DataNo").lookup({
+                IsSingleSelection: true,
+                SelectedFormatter: function (selected) { return selected.Value; },
+                DataName: "wbsno",
+                LookupOpenUrl: "@POCreationController.Action.OpenWBSLookup",
+                LookupSearchUrl: "@POCreationController.Action.SearchWBSLookup",
+                OnBeginCallback: function () { OnAjaxBegin("Search WBS"); },
+                OnEndCallback: OnAjaxComplete
+            });
+
+            $("#lookup-subitemedit-glaccount-@Model.DataNo").lookup({
+                IsSingleSelection: true,
+                SelectedFormatter: function (selected) { return selected.Value; },
+                DataName: "glaccount",
+                LookupOpenUrl: "@POCreationController.Action.OpenGLAccountLookup",
+                LookupSearchUrl: "@POCreationController.Action.SearchGLAccountLookup",
+                OnBeginCallback: function () { OnAjaxBegin("Search WBS"); },
+                OnEndCallback: OnAjaxComplete
+            });
+        }
+
+        InitPrice();
+        InitSubItemLookup();
+
+        $(document).on("click", "#btn-subitemedit-addnew-@Model.DataNo", function (e) {
+
+            //OnAjaxBegin("Add Sub Item");
+            /*@*var nextDataNo = Number("@Model.DataNo") + 1;
+            $.ajax({
+                type: "POST",
+                url: "@POCreationController.Action.POSubItemEditorShow",
+                data: JSON.stringify({
+                    ProcessId: processId,
+                    PONo: "",
+                    POItemNo: "",
+                    SeqItemNo: "",
+                    DataNo: nextDataNo,
+                    DataName: "poitem",
+                    CurrentPage: 1,
+                    PageSize: Number("@PaginationViewModel.DefaultPageSize")
+                }),
+                contentType: "@CommonFormat.JsonMimeType",
+                success: function(data) {
+                    if (!data.ResponseType) {
+                        $("#subrowadd-@Model.DataNo").after(data);
+                        $("#txt-subitemedit-qty-" + nextDataNo).val("0");
+                        $("#txt-subitemedit-price-" + nextDataNo).val("0");
+                        $("#txt-subitemedit-amount-" + nextDataNo).val("0");
+                        $("#btn-subitemedit-addnew-@Model.DataNo").addClass("hidden");
+                        InitSubItemLookup();
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: function(data) {
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.responseText, "@ActionResponseViewModel.Error");
+                }
+            });*@*/
+
+            //ValidateAddItem();
+
+        });
+
+        $(document).on("click", "#btn-subitemedit-cancel-@Model.DataNo", function (e) {
+            var remainingSubItem = $("[id^=subrowadd-]");
+            var isSubItemOnlyOne = remainingSubItem.length === 1;
+            if (isSubItemOnlyOne) {
+                $.Clear([
+                    "#txt-subitemedit-matdesc-@Model.DataNo",
+                    "#txt-subitemedit-qty-@Model.DataNo",
+                    "#txt-subitemedit-uom-@Model.DataNo",
+                    "#txt-subitemedit-price-@Model.DataNo",
+                    "#cmb-subitemedit-costcenter-@Model.DataNo"
+                ]);
+
+                $.ClearLookup([
+                    "#lookup-subitemedit-wbsno-@Model.DataNo",
+                    "#lookup-subitemedit-glaccount-@Model.DataNo"
+                ]);
+            }
+            else {
+                var $thisElInfo = $(this).GetElementInfo();
+                var lastSubItemElInfo = $(remainingSubItem[remainingSubItem.length-1]).GetElementInfo();
+                var isLastRow = $thisElInfo.DataNo === lastSubItemElInfo.DataNo;
+                if (isLastRow) {
+                    var beforeThisRow = $(remainingSubItem[remainingSubItem.length-2]);
+                    beforeThisRow.find("[id^=btn-subitemedit-addnew-]").removeClass("hidden");
+                }
+
+                $("body #popuplookup-subitemedit-wbsno-@Model.DataNo").remove();
+                $("body #popuplookup-subitemedit-glaccount-@Model.DataNo").remove();
+                $("#subrowadd-@Model.DataNo").remove();
+                $("#script-subitemedit-@Model.DataNo").remove();
+            }
+        });
+    });
+
+    //# sourceURL=_creationSubItemEditor.cshtml
+</script>

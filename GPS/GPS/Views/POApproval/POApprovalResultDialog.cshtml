@@ -1,0 +1,26 @@
+﻿@using GPS.Models.PRPOApproval
+@{
+    ExecPOApprovalResultModel prApprovalResult = ViewBag.POApprovalResult;
+}
+
+<div class="modal-dialog modal-md" style="width:20%;max-height:45%">
+    <div class="modal-content">
+        <div class="modal-header">
+            <b>
+                <h4 class="modal-title">@prApprovalResult.ExecAction Information</h4>
+            </b>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Document Processed : @prApprovalResult.DocCount</label><br />
+                <label>Success : @prApprovalResult.Success</label><br />
+                <label>Fail : @prApprovalResult.Fail</label><br />
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="text-center">
+                <button id="btn-close-dialog" type="button" class="btn btn-primary btn-xs btn-std" data-dismiss="modal">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>

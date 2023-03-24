@@ -1,0 +1,2 @@
+﻿exec [dbo].[MRP_UPLOAD_NON_COMPONENT] @USER_ID,@PROCESS_ID
+

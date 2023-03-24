@@ -1,0 +1,57 @@
+@using System.Linq
+@using GPS.CommonFunc
+@using GPS.CommonFunc.WebControl
+@using GPS.Constants
+@using GPS.Controllers.Master
+@using GPS.Controllers.PO
+@using GPS.Models.PO
+@using GPS.ViewModels
+@model GenericViewModel<PRPOSubItem>
+
+    @if (Model.DataList.Any())
+    {
+        foreach (PRPOSubItem item in Model.DataList)
+        {
+            <tr id="expchildrow-@(Model.GridPaging.DataName + "-" + item.DataNo)" data-no="@item.DataNo" data-embedded="@item.AsEmbeddedData()">
+                <td class="not-in-pomanual" colspan="4"></td>
+                @*added : 20190722 : isid.rgl*@
+                @if (item.ActionOrigin == "1")
+                {
+                    <td></td>
+                }
+                @*end : 20190722 : isid.rgl*@
+
+
+                <td colspan="2">@item.MatDesc</td>
+                <td class="text-right">@item.Qty.ToStandardFormat()</td>
+                <td class="text-center">@item.UOM</td>
+                <td class="text-right">@item.PricePerUOM.ToStandardFormat()</td>
+                <td class="text-right">@item.PriceAmount.ToStandardFormat()</td>
+
+                @*added : 20190722 : isid.rgl*@
+                @if (item.ActionOrigin == "1")
+                {
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                }
+                @*end : 20190722 : isid.rgl*@
+
+                <td>@item.WBSNo</td>
+                <td class="text-center">@item.CostCenter</td>
+                <td class="text-center">@item.GLAccount</td>
+                <td class="text-center subitemedit-col-action">
+                    @if (!item.IsLocked)
+                    {
+                        <button id="btn-@Model.GridPaging.DataName-edit-@item.DataNo" class="btn btn-xs btn-primary hidden" data-embedded="@item.AsEmbeddedData()"><i class="fa fa-pencil"></i></button>
+                        <button id="btn-@Model.GridPaging.DataName-delete-@item.DataNo" class="btn btn-xs btn-danger hidden" data-embedded="@item.AsEmbeddedData()"><i class="fa fa-trash"></i></button>
+                    }
+                    else
+                    {
+                        <a class="ref" href="#"><i class="fa fa-lock" data-toggle="tooltip" title="Data imported from SAP or already used by GR"></i></a>
+                    }
+                </td>
+            </tr>
+        }
+    }

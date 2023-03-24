@@ -1,0 +1,244 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Models.Master
+@{
+    Tuple<List<ValuationClass>, int, string> GridData = ViewData["GridData"] != null ?
+                            (Tuple<List<ValuationClass>, int, string>)ViewData["GridData"] :
+                            new Tuple<List<ValuationClass>, int, string>(new List<ValuationClass>(), 0, "");
+
+    string errormessage = ViewData["Message"] != null ? ViewData["Message"].ToString() : String.Empty;
+}
+
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <div style="border: 1pt solid #ccc;">
+        <div id="tScrollHead" style="width: 98.5%; overflow: hidden;">
+            <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 1260px; max-width: 1260px !important;">
+                <thead>
+                    <tr>
+                        <th width="20px"></th>
+                        <th width="45px">Active</th>
+                        <th width="65px">Val. Class</th>
+                        <th width="95px">Description</th>
+                        <th width="215px">Area</th>
+                        <th width="85px">Procurement Type</th>
+                        <th width="65px">Purchasing Group</th>
+                        <th width="65px">PR Coordinator</th>
+                        <th width="65px">Mat. Group</th>
+                        <th class="_toggle-detail" width="90px">FD Check</th>
+                        <th class="_toggle-detail" width="150px">Calculation Scheme</th>
+                        <th class="_toggle-detail" width="90px;">Created By</th>
+                        <th class="_toggle-detail" width="80px;">Created Date</th>
+                        <th class="_toggle-detail" width="90px;">Changed By</th>
+                        <th class="_toggle-detail" width="80px;">Changed Date</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div id="tScrollBody" style="overflow: scroll; height: 355px;">
+                <table id="tblScroll" class="table table-striped table-bordered table-condensed table-fixed" style="width: 1260px; max-width: 1260px !important;">
+                    <tbody>
+                        @if ((GridData.Item1.Count() > 0) && (GridData.Item1 != null) && (errormessage == ""))
+                        {
+                            foreach (ValuationClass item in GridData.Item1)
+                            {
+                                <tr>
+                                    <td width="20px" class="text-center">
+                                        <input type="checkbox" class="check" name="checkdata[]" value="@item.VALUATION_CLASS-@item.PROCUREMENT_TYPE"/>
+                                    </td>
+                                    <td width="45px" class="text-center">
+                                        @if(@item.STATUS == "A") {
+                                            <a href="javascript:ActiveInactive('I', @item.VALUATION_CLASS)"><i class="fa fa-circle active" data-toggle="tooltip" title="Active"></i></a>
+                                        }
+                                        else {
+                                            <a href="javascript:ActiveInactive('A', @item.VALUATION_CLASS)"><i class="fa fa-circle inactive" data-toggle="tooltip" title="Inactive"></i></a>
+                                        }
+                                    </td>
+                                    <td width="65px" class="text-center">@item.VALUATION_CLASS</td>
+                                    <td width="95px" class="text-left">@item.VALUATION_CLASS_DESC</td>
+                                    <td width="215px" class="text-left">@item.AREA_DESC</td>
+                                    <td width="85px" class="text-left">@item.PROCUREMENT_DESC</td>
+                                    <td width="65px" class="text-center">@item.PURCHASING_GROUP_CD</td>
+                                    <td width="65px" class="text-center">@item.PR_COORDINATOR</td>
+                                    <td width="65px" class="text-center">@item.MATL_GROUP</td>
+                                    <td class="_toggle-detail text-left" width="90px">@item.FD_GROUP_DESC</td>
+                                    <td class="_toggle-detail text-left" width="150px">@item.CALCULATION_SCHEME_DESC</td>
+                                    <td class="_toggle-detail text-left" width="90px">@item.CREATED_BY</td>
+                                    <td class="_toggle-detail text-center" width="80px">@item.CREATED_DT.ToStandardFormat()</td>
+                                    <td class="_toggle-detail text-left" width="90px">@item.CHANGED_BY</td>
+                                    <td class="_toggle-detail text-center" width="80px">@item.CHANGED_DT.ToStandardFormat()</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="14" style="text-align:center">@CommonDisplayMessage.NoData</td>
+                            </tr>
+                        }
+                    </tbody>
+            </table>
+        </div>
+        <div>
+            <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                <tfoot>
+                    <tr>
+                        <td colspan="14">
+                            <div class="col-xs-8" style="margin-bottom: 20px;">
+                                @Html.Partial("_UIPaging")
+                            </div>
+                            <div class="col-xs-8 col-sm-4">
+                                @if ((GridData.Item1.Count() > 0) && (GridData.Item1 != null) && (errormessage == ""))
+                                {
+                                    <div id="prc-pagesize" class="form-inline text-right">
+                                        <label>
+                                            Page Size
+                                            <select class="cursor-1 page" onchange="javascript: SearchValuationClass(1, 1)" style="height:25px;">
+                                                <option>10</option>
+                                                <option>25</option>
+                                                <option>50</option>
+                                                <option>100</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var errormessage = "@errormessage";
+        var page = Number("@GridData.Item2");
+        var warningmessage = "@GridData.Item3";
+
+        if ((errormessage !== "") && ((page === 1) || (page === 0)) && (messagelife !== 0)) {
+            //$("#alert-search").css("display", "inherit");
+            //$("#alert-search").html(errormessage);
+            $.messagebox.show(
+                "Search Valuation Class",
+                errormessage,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+            messagelife--;
+        }
+
+        if ((warningmessage !== "") && ((page === 1) || (page === 0)) && (messagelife !== 0)) {
+            //$("#warning-search").css("display", "inherit");
+            //$("#warning-search").html(inquiryMsg);
+            $.messagebox.show(
+                "Search Valuation Class",
+                warningmessage,
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+            messagelife--;
+        }
+    })
+
+
+    $("#tScrollBody").scroll(function () {
+        $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+    });
+
+    var table = document.getElementById("dynamic-table");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+
+        function tableText(tableCell) {
+            var removeClass;
+            var addClass;
+            var dataSort;
+
+            if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+                if (tableCell.getAttribute("class").indexOf('sorting_asc') >= 0) {
+
+                    removeClass = 'sorting_asc';
+                    addClass = 'sorting_desc';
+                    dataSort = 'desc';
+
+                } else if (tableCell.getAttribute("class").indexOf('sorting_desc') >= 0) {
+
+                    removeClass = 'sorting_desc';
+                    addClass = 'sorting_none';
+                    dataSort = 'none';
+
+                } else {
+
+                    removeClass = 'sorting_none';
+                    addClass = 'sorting_asc';
+                    dataSort = 'asc';
+
+                }
+            }
+
+            //reset all
+            var tableReset = document.getElementById("dynamic-table");
+            if (tableReset != null) {
+                for (var i = 0; i < tableReset.rows.length; i++) {
+                    for (var j = 0; j < tableReset.rows[i].cells.length; j++) {
+
+                        if (tableReset.rows[i].cells[j].className.indexOf('sorting_asc') >= 0) {
+                            tableReset.rows[i].cells[j].classList.remove('sorting_asc');
+                            tableReset.rows[i].cells[j].classList.add('sorting');
+                            tableReset.rows[i].cells[j].dataset.sort = 'none';
+                        }
+
+                        if (tableReset.rows[i].cells[j].className.indexOf('sorting_desc') >= 0) {
+                            tableReset.rows[i].cells[j].classList.remove('sorting_desc');
+                            tableReset.rows[i].cells[j].classList.add('sorting');
+                            tableReset.rows[i].cells[j].dataset.sort = 'none';
+                        }
+
+                    }
+                }
+            }
+            // end
+
+            if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+                tableCell.classList.remove(removeClass);
+                tableCell.classList.add(addClass);
+                tableCell.dataset.sort = dataSort;
+
+                $.ajax({
+                    type: "GET",
+                    url: '@Html.Toyota().Page.GetActionUrl("GetPRInquirySort")',
+                    data: {
+                        field: tableCell.dataset.field,
+                        sort: dataSort
+                        },
+                    contentType: "application/json; charset=utf-8",
+                    success: function (result) {
+                        $("#tblScroll")
+                                .find('tbody')
+                                .html(
+                                    result
+                                );
+                    }
+                });
+        }
+    }
+
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip({ placement: 'right' });
+    });
+</script>

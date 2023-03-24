@@ -1,0 +1,228 @@
+﻿@using GPS.Models.Master
+@model IEnumerable<GPS.Models.Master.Quota>
+@using GPS.Models.Master
+@{
+    List<Quota> QuotaListDetail = (List<Quota>)ViewData["ListQuotaMaster"] != null ? (List<Quota>)ViewData["ListQuotaMaster"] : new List<Quota>();
+}
+
+<div class="row">       
+    <div class="col-xs-12 col-sm-6 text-left">       
+    </div>
+    <div class="col-xs-12 col-sm-6 text-right">
+       <div class="form-group form-group-xs" style="margin-bottom: 3px;"> 
+           @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("Quota", "lnk-downloadtemplate"))
+           {
+                <a href="javascript:OnDownloadTemplate()" id="lnk-downloadtemplate"><span style="font-family: Open Sans; font-size: 12px">Download Template</span></a>  
+           }
+           @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("Quota", "btn-upload"))
+           {
+               <input type="file" id="upfile" name="upfile" style="display: none" />                 
+               <button type="button" class="fa fa-upload btn btn-warning btn-xs btndisable" style="padding: 6px;" id="btn-upload" onclick="$('input[id=upfile]').click();">
+                    <span style="font-family: Open Sans; font-size: 12px">Upload</span>
+               </button>
+           } 
+           @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("Quota", "btn-download"))
+           {
+                 <button id="btn-download" style="padding: 6px;" class="fa fa-download btn btn-success btn-xs btndisable" onclick="onDownloadData()">
+                    <span style="font-family: Open Sans; font-size: 12px">Download</span>
+                 </button>     
+           }   
+           @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("Quota", "btn-generate"))
+           {
+                 <button type="button" style="padding: 3.5px;" id="btn-generate" onclick="onGenerateData()" class="btn btn-success btn-xs btndisable">
+                    Generate Quota</button> 
+           }
+       </div>
+    </div>    
+</div> 
+
+<div id="alert_box_upload" class="alert alert-danger alert-dismissable" style="display: none">
+    <button type="button" class="close" aria-hidden="true" onclick="$('#alert_box_upload').hide();">&times;</button>
+    <span id="alert_text_upload"></span>
+</div> 
+
+<div id="alert_box_message" class="alert alert-success alert-dismissable" onmouseover="$('#alert_box_message').hide();onSearchData(1);" style="display: none">   
+    <span id="alert_box_message">Upload data successfully</span>
+</div>
+
+<div class="row">  
+    <div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+        <div style="border: 1pt solid #ccc;">
+            <div id="tScrollHead" style="width: 98.65%; overflow: hidden;">
+                <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1280px;">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width:30px" class="text-center"></th>
+                            <th rowspan="2" style="width:240px" class="text-center">Division</th> 
+                            <th rowspan="2" style="width:150px" class="text-center">WBS No</th>                
+                            <th rowspan="2" style="width:100px" class="text-center">Type</th>
+                            <th rowspan="2" style="width:120px" class="text-center">Coordinator</th>
+                            <th rowspan="2" style="width:100px" class="text-center">Amount</th>
+                            <th rowspan="2" style="width:100px" class="text-center">Tolerance</th>
+                            <th colspan="2" style="width:200px" class="text-center">Created</th>
+                            <th colspan="2" style="width:200px" class="text-center">Changed</th>                       
+                        </tr>
+                        <tr>
+                            <th style="width:120px" class="text-center">By</th>
+                            <th style="width:100px" class="text-center">Date</th>
+                            <th style="width:120px" class="text-center">By</th>
+                            <th style="width:100px" class="text-center">Date</th>
+                        </tr>                  
+                    </thead>
+                </table>
+            </div>
+            <div id="tScrollBody" style="overflow: scroll; height: 270px;">
+                <table id="tblScroll" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1280px;">
+                    <tbody>
+                    @if ((QuotaListDetail.Count() > 0) && (QuotaListDetail != null))
+                    {
+                        int i = 0;
+                        foreach (var item in QuotaListDetail)
+                        { 
+                            <tr class="removed" id="row-@i">
+                                <td class="text-center" style="width:30px"><input type="checkbox" class="check checkadd-@i grid-checkbox grid-checkbox-body" + name="checkadd[]" id="chk-@i" data-div="@item.DIVISION_ID" data-type="@item.QUOTA_TYPE" value="@item.Number"/></td>
+                                <td class="text-left" id="tdivision-@i" style="width:240px">
+                                    <span>@item.DIVISION_NAME</span>
+                                    <span id="tdivisionid-@i" style="display:none">@item.DIVISION_ID</span>
+                                </td>            
+                                <td class="text-left col-@i" style="width:150px">
+                                    <span id="twbs-@i" class="text">@item.WBS_NO</span>               
+                                </td>                        
+                                <td class="text-left col-@i"  style="width:100px">
+                                    <span class="text ttype-@i">@item.TYPE_DESCRIPTION</span>
+                                <span id="ttypeid-@i" style="display:none">@item.QUOTA_TYPE</span>
+                                </td>  
+                                <td class="text-left col-@i" style="width:120px">
+                                    <span id="tordcoord-@i" class="text">@item.ORDER_COORD_NAME</span>
+                                    <span id="tordcoordid-@i" style="display:none">@item.ORDER_COORD</span>
+                                </td>
+                                <td class="text-right col-@i" style="width:100px">
+                                    <span class="text tammount-@i">@string.Format("{0:0,0}", item.QUOTA_AMOUNT)</span>
+                                </td> 
+                                 <td class="text-right col-@i" style="width:100px">
+                                    <span class="text tammounttol-@i">@string.Format("{0:0,0}", item.QUOTA_AMOUNT_TOL)</span>
+                                </td> 
+                                <td class="text-left col-@i" style="width:120px">
+                                    <span class="text tcreatedby-@i">@item.CREATED_BY</span>
+                                </td> 
+                                <td class="initial-hide text-center col-@i" style="width:100px">
+                                    <span class="text tcreateddate-@i">@item.CREATED_DT</span>
+                                </td>  
+                                <td class="initial-hide text-left col-@i" style="width:120px">
+                                    <span class="text tchangedby-@i">@item.CHANGED_BY</span>
+                                </td> 
+                                <td class="text-center col-@i" style="width:100px">
+                                    <span class="text tchangeddate-@i">@item.CHANGED_DT</span>
+                                </td>           
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="18" style="text-align: center">
+                            No data retrieved
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%">
+                    <tfoot>
+                        <tr>
+                            <td colspan="13">
+                                @Html.Partial("_QuotaPaging")
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>   
+    </div>
+</div> 
+
+<script type="text/javascript"> 
+   $(document).ready(function () {        
+        $('#upfile').val('');                                 
+   });  
+   
+   $("#tScrollBody").scroll(function () {
+       $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+   });
+
+    //.change(function () {
+    $('#upfile').on('change', function (e) {
+        var fileName = $('#upfile').val();  
+        var xls = fileName.match(/\.(xls?)$/i); 
+        //var xlsx = fileName.match(/\.(xlsx?)$/i);        
+        if (xls != null) {                             
+            //awal
+            var files = e.target.files;
+            if (files.length > 0) {
+                if (window.FormData !== undefined) {
+                    var data = new FormData();
+                    for (var x = 0; x < files.length; x++){
+                        data.append("file" + x, files[x]);
+                    }
+                
+                    $.progressbox.show("Upload", "Loading Data...");
+
+                    $.ajax({
+                    type: "POST",
+                    url: "@Url.Content("~/Quota/UploadFile")",
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    success: function(data) {
+                        $.progressbox.hide();
+                        var result = data.message.split('|'); 
+                        if (result[0] == 'Error'){
+                                //alert('Error occured when uploading,please view logging for detail');
+                                $('#alert_text_upload').html(result[1]);
+                                $('#alert_box_upload').show();
+                        }
+                        else if (result[0] == 'False'){
+                               $('#alert_text_upload').html('Error occured when uploading,please view logging for detail');
+                               $('#alert_box_upload').show();
+                            }
+                       else{                       
+                            //$('#alert_box_message').html(result[1]);
+                            $('#alert_box_message').show();   
+                            $('#upfile').val('');                                             
+                       }
+                    },
+                    error: function (xhr, status, p3, p4){
+                        var err = "Error " + " " + status + " " + p3 + " " + p4;
+                        if (xhr.responseText && xhr.responseText[0] == "{")
+                            err = JSON.parse(xhr.responseText).Message;
+                            console.log(err);
+                        }
+                    });                                  
+                } else {              
+                        $.messagebox.show(
+                            "Error",
+                            "This browser doesn't support HTML5 file uploads!",
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )  
+                    }
+                }
+            //akhir                                             
+        } 
+        else {       
+             $.messagebox.show(
+                "Error",
+                "Please select an excel file with format xls",
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )                         
+        }                             
+    }); 
+</script>

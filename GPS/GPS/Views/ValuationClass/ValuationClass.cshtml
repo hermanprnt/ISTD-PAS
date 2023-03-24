@@ -1,0 +1,155 @@
+﻿@using GPS.CommonFunc.WebControl
+@using GPS.Controllers.PR
+@using GPS.Controllers.Master
+@model  GPS.Models.Master.ValuationClass
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadScript{
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+    <style>
+        .initial-hide,
+        .moreinquiry {
+            display:none;
+        }
+
+        ._criteria {
+            display:none;
+        }
+
+        input, select, option {
+            font-size : 12px;
+        }
+
+        .form-group {
+            margin-bottom:10px;
+        }
+
+        .active {
+            color: green;
+        }
+
+        .inactive {
+            color: lightgrey;
+        }
+    </style>
+}
+
+@section BodyScript{
+    <!-- Dropzone file js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/dropzone.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/typeahead.jquery.js")"></script>
+
+    @Html.Partial("_ValuationClassScript")
+    <script>
+        $(document).ready(function () {
+            $("#lnsearch-toggle").click(function () {
+                var _criteria = $("._criteria");
+                _criteria.toggle(200, "linear");
+                var text = $("#lnsearch-toggle").text();
+                $("#lnsearch-toggle").text(text == "More Search Criteria" ? "Less Search Criteria" : "More Search Criteria");
+            });
+        });
+    </script>
+    }
+<div class="alert alert-danger" role="alert" style="display:none" id="alert-search"></div>
+<div class="alert alert-warning" role="alert" style="display:none" id="warning-search"></div>
+<div class="form-horizontal" id="searchForm">
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-5 col-sm-4 control-label text-muted">Valuation Class</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.TextBoxFor(m => m.VALUATION_CLASS, new {id = "valuation_class", @class = "form-control"})
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-5 col-sm-4 control-label text-muted">Purch. Group</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownListFor(m => m.PURCHASING_GROUP_CD, ValuationClassController.SelectPurchasing(), new {id = "purchasinggrp", @class = "cursor-1 form-control"})
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-5 col-sm-4 control-label text-muted">Description</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.TextBoxFor(m => m.VALUATION_CLASS_DESC, new {id = "valuationdesc", @class = "form-control"})
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-5 col-sm-4 control-label text-muted">FD Check</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownListFor(m => m.FD_GROUP_CD, ValuationClassController.SelectFD(), new {id = "fd", @class = "cursor-1 form-control"})
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-5 col-sm-4 control-label text-muted">Area</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.TextBoxFor(m => m.AREA_DESC, new {id = "area", @class = "form-control"})
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-5 col-sm-4 control-label text-muted">Calc. Schema</label>
+                <div class="col-xs-7 col-sm-8" id="cascade-wbs">
+                    @Html.DropDownListFor(m => m.CALCULATION_SCHEME_CD, ValuationClassController.SelectCalculation_Scheme(), new {id = "calculation_scheme", @class = "cursor-1 form-control"})
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+            <div class="form-group form-group-xs">
+                <label class="col-xs-5 col-sm-4 control-label text-muted">Proc. Type</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownListFor(m => m.PROCUREMENT_TYPE, PRInquiryController.SelectPRType(), new {id = "prtype", @class = "cursor-1 form-control"})
+                </div>
+            </div>
+            <div class="form-group form-group-xs _criteria">
+                <label class="col-xs-5 col-sm-4 control-label text-muted">PR Coordinator</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.TextBoxFor(m => m.PR_COORDINATOR, new {id = "coordinator", @class = "form-control"})
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="v-space"></div>
+    <div class="row">
+        <div class="col-sm-6 hidden-xs"></div>
+        <div class="col-xs-12 col-sm-6 text-right">
+            <div class="form-group-xs">
+                <button type="submit" id="btnsearch" name="btnsearch" class="btn btn-primary btn-search btn-xs btn-std btndisable" onclick="javascript:SearchValuationClass(1, 1)">Search</button>
+                <input type="reset" class="btn btn-default btnclear btn-xs btn-std btndisable" value="Clear" onclick="javascript: ClearCriteria()"/>
+                <span id="iscreate" class="hidden"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="v-space"></div>
+<div class="line-br"></div>
+<div class="row">
+    <div class="col-xs-6 text-right">
+        <button data-rel="tooltip" title="Hide filter" onclick="javascript:toggleSearch()" type="button" style="top: 6px;" class="ace-icon fa fa-angle-double-down btn btn-default btn-xs btn-tiny-down" id="toogle-search"></button>
+    </div>
+    <div class="col-xs-6 text-right">
+        <div class="form-group form-group-xs">
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("ValuationClass", "btn-add"))
+            {
+            <button type="button" class="btn btn-primary btnadd btn-xs btn-std btndisable" id ="btn-add" onclick="javascript:openPopup(0)">Add</button>
+            }
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("ValuationClass", "btn-edit"))
+            {
+            <button type="button" class="btn btn-primary btnedit btn-xs btn-std btndisable" id ="btn-edit" onclick="javascript:openPopup(1)">Edit</button>
+            }
+            <button type="button" class="btn btn-primary btn-xs btn-std btndisable" id="btnToggleDetail" onclick="javascript:detailGrid()">Show detail</button>
+        </div>
+    </div>
+</div>
+<div class="v-space"></div>
+<div class="row TableList">
+    @Html.Partial("_ValuationClassGrid")
+</div>
+
+@Html.ModalContainer("addedit-popup-container")
+
+@*<div id="addedit-popup-container" class="modal fade bs-example-modal-lg" width="100%" data-backdrop="static" data-keyboard="false"></div>*@

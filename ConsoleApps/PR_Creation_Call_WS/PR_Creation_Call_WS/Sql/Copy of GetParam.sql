@@ -1,0 +1,29 @@
+﻿SELECT DOCUMENT_TYPE DocumentType
+	,ACTION Action
+	,SYSTEM System
+	,TEST_RUN TestRun
+	,DOCUMENT_NO DocumentNo
+	,CLOSED Closed
+	,DOCUMENT_DT DocumentDate
+	,SUBMIT_DT SubmitDate
+	,REQUESTOR Requestor
+	,COMPANY_CD CompanyCode
+	,CURRENCY Currency
+	,CURRENCY_RATE CurrencyRate
+	,LINE_NO [LineNo]
+	,REFERENCE_NO ReferenceDocumentNo
+	,REFERENCE_LINE_NO ReferenceDocumentLineItemNo
+	,ITEM_CD ItemCode
+	,ITEM_DESCRIPTION ItemDescription
+	,PART_CATEGORY PartCategory
+	,INVENTORY_TYPE InventoryType
+	,MATERIAL_TYPE MaterialType
+	,SUPPLIER_CD SupplierCode
+	,ASSET_NO Asset
+	,WBS_ELEMENT WBSElement
+	,COST_CENTER_CD CostCenter
+	,TOTAL_AMOUNT TotalAmount
+	,QUANTITY Quantity
+	,UOM UOM
+FROM TB_H_FUND_COMMITMENT_REQUEST
+WHERE PROCESS_ID = @ProcessId

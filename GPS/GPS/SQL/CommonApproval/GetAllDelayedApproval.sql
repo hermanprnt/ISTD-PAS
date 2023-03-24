@@ -1,0 +1,1 @@
+﻿EXEC sp_PRApproval_AllDelayedApproval @REG_NO

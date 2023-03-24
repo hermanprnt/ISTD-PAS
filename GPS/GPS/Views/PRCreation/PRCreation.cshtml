@@ -1,0 +1,1060 @@
+﻿@using GPS.Controllers.Master
+@using GPS.Controllers.PR
+@using GPS.Constants.PR
+@using GPS.Models.Common
+@using GPS.Models.PR.PRCreation
+@using GPS.Models.PR.Common
+@model GPS.Models.PR.PRCreation.PRCreation
+@{ 
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "PR Creation";
+
+    List<SelectListItem> selectUrgentDoc = new List<SelectListItem>();
+    List<PRCommonList> PRType = ViewData["PRType"] != null ? (List<PRCommonList>)ViewData["PRType"] : new List<PRCommonList>();
+    List<UnitOfMeasure> UOM = ViewData["UOM"] == null ? new List<UnitOfMeasure>() : (List<UnitOfMeasure>)ViewData["UOM"];
+    
+    selectUrgentDoc.Add(new SelectListItem(){ Text = "No", Value = "N" });
+    selectUrgentDoc.Add(new SelectListItem(){ Text = "Yes", Value = "Y" });
+
+    string message = ViewData["Message"] == null ? "" : ViewData["Message"].ToString();
+    
+    Tuple<PRCreation, PRCreation, string, Int64> PR_HEADER =
+                        (Tuple<PRCreation, PRCreation, string, Int64>)ViewData["PR_H_TEMP_DATA"] != null ?
+                        (Tuple<PRCreation, PRCreation, string, Int64>)ViewData["PR_H_TEMP_DATA"] :
+                        new Tuple<PRCreation, PRCreation, string, Int64>
+                            (new PRCreation(), new PRCreation(), "0", 0);
+
+    Tuple<Dictionary<string, string[]>, List<string[]>, string, long, long, int, int, Tuple<string>> PR_ATTACHMENT =
+                             (Tuple<Dictionary<string, string[]>, List<string[]>, string, long, long, int, int, Tuple<string>>)ViewData["PR_TEMP_ATTACHMENT"] != null ?
+                             (Tuple<Dictionary<string, string[]>, List<string[]>, string, long, long, int, int, Tuple<string>>)ViewData["PR_TEMP_ATTACHMENT"] :
+                             new Tuple<Dictionary<string, string[]>, List<string[]>, string, long, long, int, int, Tuple<string>>
+                                 (new Dictionary<string, string[]>(), new List<string[]>(), "", 0, 0, 0, 0, new Tuple<string>(""));
+
+    int TOR = 0;
+    int SCH = 0;
+    int MEMO = 0;
+    int QUOT = 0;                             
+    if (PR_ATTACHMENT.Item1.Count > 0)
+    {
+        if (PR_ATTACHMENT.Item1.ContainsKey("TOR")) { TOR = 1; }
+        if (PR_ATTACHMENT.Item1.ContainsKey("SCH")) { SCH = 1; }
+        if (PR_ATTACHMENT.Item1.ContainsKey("MEMO")) { MEMO = 1; }
+    }
+
+    if (PR_ATTACHMENT.Item2 != null)
+    {
+        QUOT = PR_ATTACHMENT.Item2.Count();
+    }
+
+    string defaultPRType = PRType.Find(type => (type.DEFAULT_FLAG == "Y")) == null ? "" : PRType.Find(type => (type.DEFAULT_FLAG == "Y")).PROCUREMENT_TYPE;
+                      
+    string ID = PR_HEADER.Item3 == "0" ? PR_HEADER.Item4.ToString() : PR_HEADER.Item3;
+    int DIV = PR_HEADER.Item1 == null ? 0 : Convert.ToInt32(PR_HEADER.Item1.DIVISION_ID);
+
+}
+
+@section HeadScript
+{
+    <!-- Bootstrap Datepicker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/datepicker.css")" />
+    <!-- Daterange picker css -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+    
+    <style>
+        .helper,
+        .editinput,
+        ._criteria
+        {
+            display:none;
+        }
+
+        .table {
+            table-layout: fixed;
+        }
+
+        .table > tr > td {
+            vertical-align : middle;    
+        }
+
+        .table > thead > tr > th {
+            vertical-align : middle;    
+        }
+
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+          -webkit-appearance: none; 
+          margin: 0; 
+        }
+
+        ._link-disabled {
+            pointer-events: none;
+            cursor: default;
+            color:lightgray;
+        }
+
+        /*Overidding Common CSS*/
+        .custom-combo {
+            width:100% !important;
+        }
+
+        .custom-file {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom:10px;
+        }
+
+        .custom-button-grid {
+            padding-bottom:1px !important;
+            padding-top:1px !important;
+            border-width:2px !important;
+            height: 22px !important;
+        }
+
+        .custom-creation-datagrid {
+            vertical-align:middle !important;
+        }
+
+        .disabled-control {
+            background-color : #F2F2F2 !important;
+        }
+
+        .textarea {
+            height: 50px !important;
+        }
+
+        .ncp-theme .table th {
+            color: #fff;
+            background: #1e8c99;
+        }
+
+        /*.subitem > tr > td {
+            border: 1px solid #dddddd;
+        }*/
+
+        fieldset.additional {
+            border: 1px groove #ddd !important;
+            padding: 0 1.4em 1.4em 1.4em !important;
+        }
+
+        legend.additional {
+            font-size: 12px !important;
+            font-weight: bold !important;
+            text-align: left !important;
+            width:inherit; /* Or auto */
+            padding:0 10px; /* To give a bit of padding on the left and right */
+            border-bottom:none;
+        }
+    </style>
+}
+
+@section BodyScript
+{
+    <script src="@Url.Content("~/Content/Konva/konva.min.js")"></script>
+    <!-- Bootstrap Datepicker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+    <!-- Daterange picker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+    <!-- Dropzone file js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/dropzone.js")"></script>
+
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/typeahead.jquery.js")"></script>
+
+    @Html.Partial("_PartialCreationScript")
+    @Html.Partial("_Treeview")
+    <script type="text/javascript" id="Document-Ready-Creation">
+        var controllermessage = "";
+        $(document).ready(function () {
+            $("#aprtype").focus();
+            $("#astorage").addClass("mandatory");
+            $.Disable(["#amainasset"]);
+
+            //ViewData.Clear();
+            ViewData.Add("DefaultCurr", "@CurrencyController.GetDefaultCurrency()");
+
+            controllermessage = "@message.ToHtmlString()";
+
+            if (controllermessage === "") {
+                File = {
+                    TOR: {
+                        size: Number("@PR_ATTACHMENT.Item4.ToString()"),
+                        count: "@TOR",
+                        validext: "@PR_ATTACHMENT.Item3",
+                        max: Number("@PR_ATTACHMENT.Item7.ToString()")
+                    },
+                    SCH: {
+                        size: Number("@PR_ATTACHMENT.Item4.ToString()"),
+                        count: "@SCH",
+                        validext: "@PR_ATTACHMENT.Item3",
+                        max: Number("@PR_ATTACHMENT.Item7.ToString()")
+                    },
+                    MEMO: {
+                        size: Number("@PR_ATTACHMENT.Item4.ToString()"),
+                        count: "@MEMO",
+                        validext: "@PR_ATTACHMENT.Item3",
+                        max: Number("@PR_ATTACHMENT.Item7.ToString()")
+                    },
+                    QUOT: {
+                        size: Number("@PR_ATTACHMENT.Item5.ToString()"),
+                        count: "@QUOT",
+                        validext: "@PR_ATTACHMENT.Item3",
+                        max: Number("@PR_ATTACHMENT.Item6.ToString()")
+                    }
+                }
+
+                $("#division_id").val("@PR_HEADER.Item1.DIVISION_ID");
+                $("#org_id").val("@PR_HEADER.Item1.ORG_ID");
+                $("#position_level").val("@PR_HEADER.Item1.POSITION_LEVEL");
+                $("#aprno").val("@PR_HEADER.Item3");
+                $("#aproc").val("@PR_HEADER.Item4.ToString()");
+                $("#aplntno").val("@PR_HEADER.Item2.PLANT_CD");
+                $("#astorage").val("@PR_HEADER.Item2.SLOC_CD");
+                $("#adivision").val("@PR_HEADER.Item2.DIVISION_ID");
+                $("#apurchasing").val("@PR_HEADER.Item2.PR_COORDINATOR");
+                if ($("#adivision").val() != "0") {
+                    populateComboBox('costcenter');
+                }
+                $("#aprojectno").val("@PR_HEADER.Item2.PROJECT_NO");
+                $("#deliverydate").val("@PR_HEADER.Item2.DELIVERY_DATE");
+                $("#urgentpr").val("@PR_HEADER.Item2.URGENT_DOC");
+                $("#exp").val("@Html.Raw(PR_HEADER.Item2.PR_DESC)");
+
+                var pr_type = "@PR_HEADER.Item2.PR_TYPE";
+                if ((pr_type != "") && (pr_type != "0") && (pr_type != null)) $("#aprtype").val("@PR_HEADER.Item2.PR_TYPE");
+                else $("#aprtype").val("@defaultPRType");
+
+                $("#amainasset").val("@PR_HEADER.Item2.MAIN_ASSET_NO");
+                $("#anote").val("@Html.Raw((PR_HEADER.Item2.PR_NOTES ==null?"": PR_HEADER.Item2.PR_NOTES).Replace("\n", "<br />"))".replace(/<br \/>/g, '\n'));
+                $("#status").val("@PR_HEADER.Item2.PR_STATUS");
+
+                $("#acurr").val(ViewData.Get("DefaultCurr"));
+                onChangePRType();
+            }
+            else {
+                $.messagebox.show(
+                    "Error",
+                    "Error : " + controllermessage + ", Please Contact your Administrator",
+                    "ERR",
+                    "SINGLE",
+                    "window.location = '/PRInquiry'",
+                    ""
+                )
+            }
+
+            if (File.MEMO.count > 0) {
+                $(".appended-file-MEMO").show();
+                $("#MEMO").hide();
+                $("#urgentpr").val("Y");
+                $.Disable(["#urgentpr"]);
+            }
+            if (File.TOR.count > 0) {
+                $(".appended-file-TOR").show();
+                $("#TOR").hide();
+            }
+            if (File.SCH.count > 0) {
+                $(".appended-file-SCH").show();
+                $("#SCH").hide();
+            }
+            if (File.QUOT.count > 0) {
+                $(".appended-file-QUOT").show();
+                if (File.QUOT.count >= 5) $("#QUOT").hide();
+            }
+
+            if ($("#aprno").val() != '0') {
+                $.Disable(["#adivision", "#apurchasing", "#urgentpr", "#aprtype"]);
+                $.Disable([".btnsavehead"]);
+                $.Enable(["#amatdesc"]);
+            }
+
+            if ("@PR_HEADER.Item2.PR_STATUS" == "94")
+                $.Enable([".btnsavehead"]);
+
+            if ($('.isrow').length <= 0) {
+                $(".btnsubmithead").attr("disabled", "disabled");
+                $(".btnsavehead").attr("disabled", "disabled");
+                $(".btnsubmithead").attr("disabled", "disabled");
+            }
+            else {
+                $(".btnsubmithead").removeAttr("disabled");
+                if ($("#aprno").val() == '0') $(".btnsavehead").removeAttr("disabled");
+                $(".btnsubmithead").removeAttr("disabled");
+                //$("#aprtype").attr("disabled", "disabled");
+            }
+
+            $("#lnsearch-toggle").click(function () {
+                var _criteria = $("._criteria");
+                _criteria.toggle(200, "linear");
+                var text = $("#lnsearch-toggle").text();
+                $("#lnsearch-toggle").text(text == "More Input Field" ? "Less Input Field" : "More Input Field");
+            });
+
+            $("#MEMO").attr("disabled", "disabled");
+
+            $(function () {
+                $(".datepicker").datepicker({ minDate: new Date() });
+            });
+
+            $('.date-picker').datepicker({
+                autoclose: true,
+                todayHighlight: true,
+                startDate: new Date()
+            })
+			//show datepicker when clicking on the icon
+			.next().on(ace.click_event, function () {
+			    $(this).prev().focus();
+			});
+        })
+    </script>
+}
+
+<div class="alert alert-success" role="alert" style="display:none" id="alert-success"></div>
+<div class="alert alert-danger" role="alert" style="display:none" id="alert-error"></div>
+<div>
+    @Html.TextBoxFor(m => m.PR_NO, new {id = "aprno", style="display:none"})
+    @Html.TextBoxFor(m => m.PROCESS_ID, new {id = "aproc", style="display:none"})
+    @Html.TextBoxFor(m => m.ORG_ID, new {id = "org_id", style="display:none"})
+    @Html.TextBoxFor(m => m.POSITION_LEVEL, new {id = "position_level", style="display:none"})
+    @Html.TextBoxFor(m => m.DIVISION_ID, new {id = "division_id", style="display:none"})
+    @Html.TextBoxFor(m => m.PR_STATUS, new {id = "status", style="display:none"})
+    <form role="form" class="form-horizontal" id="Header-Creation-Form">
+        <div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-3">
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label required-left text-muted">
+                        Type
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <select tabindex="1" id="aprtype" class="cursor-1 custom-combo mandatory" style="width:100%;" onchange="javascript:onChangePRType()">
+                            @if ((PRType != null) && (PRType.Count > 0))
+                            {
+                                <option value="" class="cursor-1"></option>
+                                foreach (PRCommonList pt in PRType)
+                                {
+                                    <option class="cursor-1" id="@pt.PROCUREMENT_TYPE" data-nonmaterial_flag ="@pt.NON_MATERIAL_FLAG" value="@pt.PROCUREMENT_TYPE" >@pt.PROCUREMENT_DESC</option>
+                                }
+                            }
+                            else { 
+                                <option value="" class="cursor-1"></option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label required-left text-muted">
+                        Plant
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        @Html.DropDownListFor(
+                                    m => m.PLANT_CD, 
+                                    PlantController.PlantSelectList, 
+                                    new {
+                                        id = "aplntno",
+                                        TabIndex = "5",
+                                        @class = "cursor-1 custom-combo mandatory", 
+                                        onchange = "javascript:populateComboBox('sloc')" 
+                                   })
+                    </div>
+                </div>
+                <div class="form-group form-group-xs _criteria"> 
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                        Urgent PR
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        @Html.DropDownListFor(
+                                    m => m.URGENT_DOC,
+                                    selectUrgentDoc,
+                                    new { 
+                                        id = "urgentpr",
+                                        TabIndex = "9",
+                                        @class = "cursor-1 custom-combo",
+                                        onchange = "javascript:enableMemo()"
+                                    })
+                    </div>
+                </div>
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted" style="padding-top:0px">
+                        TOR
+	                </label>
+	                <div class="col-xs-8 col-sm-9 col-md-8">
+		                <input tabindex="13" type="file" value="" id="TOR" class="custom-file" onchange="javascript:validate('TOR')"/>
+		                <div class="appended-file-TOR" style="font-size:x-small;margin-top:5px;display:none">
+			                @if (TOR == 1)
+			                {
+						        <span class="remove-list-TOR" id="isrow-@PR_ATTACHMENT.Item1["TOR"][0]">
+                                    <a href="#" onclick="javascript:deleteFiles(@PR_ATTACHMENT.Item1["TOR"][0],'TOR','@PR_ATTACHMENT.Item1["TOR"][2]')">
+                                        <img width="12" height="15" src="@Url.Content("../Content/img/error.png")" title="Delete @PR_ATTACHMENT.Item1["TOR"][1]">
+                                    </a>
+							        <a href="#" onclick="javascript:downloadFile('@PR_ATTACHMENT.Item1["TOR"][2]','@ID')">
+                                        @PR_ATTACHMENT.Item1["TOR"][1]&nbsp;&nbsp;
+							        </a>
+						        </span>
+			                }
+		                </div>
+	                </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-3">
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">
+                        Description
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <div class="input-group pos-rel form-group-text" style="width: 100%;">
+                            @Html.TextBoxFor(
+                                    m => m.PR_DESC, 
+                                    new {
+                                        TabIndex = "2",
+                                        id = "exp",
+                                        @class = "form-control mandatory", 
+                                        maxlength="50"})
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label required-left text-muted">
+                        Storage
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8" id="cascade-sloc">
+                        @Html.Partial("~/Views/PRInquiry/" + PurchaseRequisitionPage._CascadeSloc + ".cshtml")
+                    </div>
+                </div>
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted" style="padding-top:0px">
+                        Memo
+                    </label>
+                    <div tabindex="8" class="col-xs-8 col-sm-9 col-md-8">
+                        <input type="file" value="" name="MEMO" id="MEMO" class="custom-file" onchange="javascript:validate('MEMO')"/>
+                        <div class="appended-file-MEMO" style="font-size:x-small;margin-top:5px;display:none">
+                            @if (MEMO == 1)
+                            {
+                                <span class="remove-list-MEMO" id="isrow-@PR_ATTACHMENT.Item1["MEMO"][0].ToString()">
+                                    <a href="#" onclick="javascript:deleteFiles(@PR_ATTACHMENT.Item1["MEMO"][0],'MEMO','@PR_ATTACHMENT.Item1["MEMO"][2]')">
+                                        <img width="15" height="15" src="@Url.Content("../Content/img/error.png")" title="Delete @PR_ATTACHMENT.Item1["MEMO"][1]">
+                                    </a>
+                                    <a href="#" onclick="javascript:downloadFile('@PR_ATTACHMENT.Item1["MEMO"][2]','@ID')">
+                                        @PR_ATTACHMENT.Item1["MEMO"][1]&nbsp;&nbsp;
+                                    </a>
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-xs _criteria">
+	                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted" style="padding-top:0px">
+                        Sch. Attachment
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <input tabindex="14" type="file" value="" name="SCH" id="SCH" class="custom-file" onchange="javascript:validate('SCH')"/>
+                        <div class="appended-file-SCH" style="font-size:x-small;margin-top:5px">
+                            @if (SCH == 1)
+                            {
+                                <span class="remove-list-SCH" id="isrow-@PR_ATTACHMENT.Item1["SCH"][0]">
+                                    <a href="#" onclick="javascript:deleteFiles(@PR_ATTACHMENT.Item1["SCH"][0],'SCH','@PR_ATTACHMENT.Item1["SCH"][2]')">
+                                        <img width="15" height="15" src="@Url.Content("../Content/img/error.png")" title="Delete @PR_ATTACHMENT.Item1["SCH"][1]">
+                                    </a>
+                                    <a href="#" onclick="javascript:downloadFile('@PR_ATTACHMENT.Item1["SCH"][2]','@ID')">
+                                        @PR_ATTACHMENT.Item1["SCH"][1]&nbsp;&nbsp;
+                                    </a>
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-3">
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label required-left text-muted">
+                        Coordinator
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        @Html.DropDownListFor(
+                                    m => m.PR_COORDINATOR, 
+                                    PRCheckerController.PRCheckerSelectList, 
+                                    new {
+                                        id = "apurchasing",
+                                        @tabindex = "3",
+                                        @class = "cursor-1 custom-combo mandatory",
+                                        onchange = "javascript:PRCoordinatorChecking()" 
+                                    })
+                    </div>
+                </div>
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                        Delivery Plan
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                            <div class="input-group">
+						    <span class="input-group-addon" style="cursor: pointer;padding:4px 10px;">
+							    <i class="fa fa-calendar bigger-110"></i>
+						    </span>
+						    <input tabindex="7" class="form-control date-picker mandatory" type="text" name="date-range-picker" id="deliverydate" data-date-format="dd.mm.yyyy"/>
+					    </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">
+                        Equipment No
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8 form-group-text">
+                        @Html.TextBoxFor(
+                                    m => m.MAIN_ASSET_NO, 
+                                    new {
+                                        id = "amainasset",
+                                        TabIndex = "11",
+                                        @class = "form-control",
+                                        maxlength="30",
+                                        @onchange="javascript:onChangeMainAssetNo()"
+                                    })
+                        <input type="text" style="display:none" id="aslocation">
+                        <input type="text" style="display:none" id="asclass">
+                    </div>
+                </div>
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted" >
+                        Quotation
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <input tabindex="15" type="file" value="" id="QUOT" class="custom-file" onchange="javascript:validate('QUOT')" />
+                        <div class="appended-file-QUOT" style="font-size:x-small;margin-top:5px;display:none">
+                            @if (QUOT > 0)
+                            {
+                                foreach (var q in PR_ATTACHMENT.Item2)
+                                {
+                                    <span class="remove-list-QUOT" id="isrow-@q[0]">
+                                        <a href="#" onclick="javascript:deleteFiles(@q[0],'QUOT','@q[2]')">
+                                            <img width="14" height="15" src="@Url.Content("../Content/img/error.png")" title="Delete @q[1]">
+                                        </a>
+                                        <a href="#" onclick="javascript:downloadFile('@q[2]','@ID')">
+                                            @q[1]&nbsp;&nbsp;
+                                        </a>
+                                    </span>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-3">
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted required-left">
+                        Division
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        @Html.DropDownListFor(
+                                    m => m.DIVISION_ID, 
+                                    DivisionController.GetDivisionList(), 
+                                    new {
+                                        id = "adivision", 
+                                        TabIndex = "4",
+                                        disabled = "disabled",
+                                        @class = "cursor-1 custom-combo", 
+                                        onchange = "javascript:populateComboBox('costcenter')" 
+                                    })
+                    </div>
+                </div>
+                <div class="form-group form-group-xs" id="memo-row">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                        Note
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <div class="input-group pos-rel" style="width: 100%;">
+                        @Html.TextAreaFor(
+                                    m => m.PR_NOTES, 
+                                    new {
+                                        id = "anote",
+                                        TabIndex = "8",
+                                        @class = "form-control textarea"
+                                    })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-xs _criteria">
+                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                        Project No
+                    </label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <div class="input-group pos-rel form-group-text" style="width: 100%;">
+                        @Html.TextBoxFor(
+                                    m => m.PROJECT_NO, 
+                                    new {
+                                        id = "aprojectno",
+                                        TabIndex = "15",
+                                        @class = "form-control",
+                                        maxlength="30" 
+                                    })
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="row">
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs">
+            <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">
+                <a id="lnsearch-toggle">More Input Field</a>
+            </label>
+            <div class="col-xs-8 col-sm-9 col-md-8">
+                <input style="visibility:hidden" />
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-8">
+            
+    </div>
+</div>
+
+<div class="text-center" style="margin-bottom: 3px;">
+    <hr id="hrsrc" style="margin:0;padding:0;" />
+</div>
+
+<div class="row">
+    <div class="col-xs-8 col-md-11">
+        <div class="form-group form-group-xs">
+            <button type="submit" name="submitPR" class="btn btn-xs btn-primary btnsubmithead btn-standard" onclick="javascript:SavePR('Submit', '1', '')">Submit</button>
+            <button type="submit" name="saveheader" class="btn btn-xs btn-primary btnsavehead btn-standard" onclick="javascript:SavePR('Save', '1', '')">Save as Draft</button>
+            <button type="submit" class="btn btn-xs btn-danger btncancelhead btn-standard" onclick="javascript: CancelCreation()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div class="row" id="PRDetail">
+    <div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+        <div style="border: 1pt solid #ccc;">
+            <div id="tScrollHead" style="width: 98.65%; overflow: hidden;">
+                <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1278px !important;">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width:30px"></th>
+                            <th class="text-center" style="display:none;width:50px">No</th>
+                            <th class="text-center" style="width:50px">Class</th>
+                            <th class="text-center control-label required-left text-muted" style="width:80px" >Category</th>
+                            <th class="text-center control-label text-muted" style="width:100px" >Material No</th>
+                            <th class="text-center control-label required-left text-muted" style="width:180px" >Item Description</th>
+                            <th class="text-center control-label required-left text-muted" style="width:50px" >QTY</th>
+                            <th class="text-center control-label required-left text-muted" style="width:70px" >UoM</th>
+                            <th class="text-center control-label required-left text-muted" style="width:70px" >Curr</th>
+                            <th class="text-center control-label required-left text-muted" style="width:90px" >Price</th>
+                            <th class="text-center control-label required-left text-muted" style="width:90px" >Amount</th>
+                            <th class="text-center control-label text-muted" style="width:165px" >WBS</th>
+                            <th class="text-center control-label text-muted" style="width:100px" >GL Account</th>
+                            <th class="text-center control-label text-muted" style="width:103px" >Cost Center</th>
+                            <th class="text-center" style="width:100px">Action</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div id="tScrollBody" style="overflow: scroll; height: 260px;">
+                <table id="addTable" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1278px !important;">
+                    <tbody id="add-grid">
+                        <tr id="empty-row" class="hidden"> <!--row to define column width, if deleted will make column size disorganized when edit-->
+                            <td style="width:30px"></td>
+                            <td style="display:none;width:50px"></td>
+                            <td style="width:50px"></td>
+                            <td style="width:80px" ></td>
+                            <td style="width:100px" ></td>
+                            <td style="width:180px" ></td>
+                            <td style="width:50px" ></td>
+                            <td style="width:70px" ></td>
+                            <td style="width:70px" ></td>
+                            <td style="width:90px" ></td>
+                            <td style="width:90px" ></td>
+                            <td style="width:165px" ></td>
+                            <td style="width:100px" ></td>
+                            <td style="width:103px" ></td>
+                            <td style="width:100px"></td>
+                        </tr>
+                        <tr id="addrow">
+                            <td class="text-center" id="collapse" style="width:30px">
+                                <div id="collapseitem" onclick="javascript:collapseItem('Y', '');" style="display:none">
+                                    <span id="icon-class" class="fa fa-minus-square-o" style="cursor: pointer;"></span>
+                                </div>
+                            </td>
+                            <td class="text-center" id="no" style="display:none; width:50px"></td>
+                            <td class="text-center" id ="class" style="width:50px"><label id="aclass"></label></td>
+                            <td id="row_col_1" style="width:80px">
+                                <div class="input-group pos-rel" style="width: 100%;">
+                                    <div id="lookupvalclass" class="input-group input-group-xs lookup">
+                                        <input id="aitemcat" class="form-control addinput" type="text" readonly="readonly" />
+                                        <input type="text" class="form-control addinput" id="avalitemtype" style="display:none" readonly="readonly"/>
+                                        <input type="text" class="form-control addinput" id="avaldesc" style="display:none" readonly="readonly"/>
+                                        <span class="input-group-btn">
+                                            <button id="valbutton" class="addinput custom-button-grid btn btn-warning btn-xs" type="button" onclick="javascript:getValClass(1)">&nbsp<i class="fa fa-search"></i>&nbsp</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td id="row_col_2" style="width:100px">
+                                <div class="input-group pos-rel" style="width: 100%;">
+                                    <div id="lookupmaterial" class="input-group input-group-xs lookup">
+                                        <input type="text" class="form-control addinput" id="amatno" readonly="readonly"/>
+                                        <input type="text" class="form-control addinput" id="acar" style="display:none" readonly="readonly"/>
+                                        <input type="text" class="form-control addinput" id="agrp" style="display:none" readonly="readonly"/>
+                                        <input type="text" class="form-control addinput" id="atype" style="display:none" readonly="readonly"/>
+                                        <input type="text" class="form-control addinput" id="aquotaflag" style="display:none" readonly="readonly"/>
+                                        <input id="apriceexist" class="form-control addinput" type="text" style="display:none" readonly="readonly" />
+                                        <span class="input-group-btn" style="cursor: pointer;">
+                                            <button id="matbutton" class="addinput custom-button-grid btn btn-warning btn-xs" type="button" onclick="javascript:getMaterial(1)">&nbsp<i class="fa fa-search"></i>&nbsp</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td id="row_col_3" style="width:180px">
+                                <div class="input-group pos-rel" style="width: 100%;">
+                                @Html.TextBoxFor(m => m.MAT_DESC, 
+                                                    new {
+                                                        id = "amatdesc", 
+                                                        @class = "addinput form-control matdesc", 
+                                                        maxlength="50"
+                                                    })
+                                </div>
+                            </td>
+                            <td id="row_col_4" style="width:50px">
+                                <div class="input-group pos-rel" style="width: 100%;">
+                                @Html.TextBoxFor(m => m.QTY, 
+                                                    new {
+                                                        id = "aqty", 
+                                                        @class = "addinput form-control",
+                                                        onkeyup = "GetAmount('item')", 
+                                                        onchange = "GetAmount('item')",
+                                                        type = "text",
+                                                        @Value = "0",
+                                                        @text = "0",
+                                                        onkeydown="javascript:$.NumericKey(event)"
+                                                    })
+                                <input type="text" id="ausedqty" style="display:none" readonly="readonly">
+                                </div>
+                            </td>
+                            <td id="row_col_5" style="width:70px">
+                                <select id="auom" class="cursor-1 custom-combo" style="width:100%;" onchange="javascript:onChangeUOM('item')">
+                                    @if ((UOM != null) && (UOM.Count > 0))
+                                    {
+                                        <option id="0" value="" class="cursor-1" data-calc_value="1"></option>
+                                        int i = 1;
+                                        foreach (UnitOfMeasure uom in UOM)
+                                        {
+                                            <option class="cursor-1" id="@i" data-calc_value ="@uom.CALC_VALUE" value="@uom.UNIT_OF_MEASURE_CD">@uom.UNIT_OF_MEASURE_CD</option>
+                                            i++;
+                                        }
+                                    }
+                                    else { 
+                                        <option id="0" value="" class="cursor-1" data-calc_value="1"></option>
+                                    }
+                                </select>
+                                <input type="text" class="form-control addinput" id="acalcvalue" value="1" style="display:none"/>
+                            </td>
+                            <td id="row_col_6" style="width:70px">
+                                @Html.DropDownListFor(m => m.CURR, CurrencyController.CurrencySelectList, new {id = "acurr", @class = "cursor-1 addinput custom-combo" })
+                            </td>
+                            <td id="row_col_7" style="width:90px">
+                                <div class="input-group pos-rel" style="width: 100%;">
+                                @Html.TextBoxFor(m => m.PRICE, 
+                                                    new {
+                                                        id = "aprice", 
+                                                        @class = "addinput form-control", 
+                                                        onchange = "GetAmount('item')",
+                                                        @Value = "0",
+                                                        type = "text",
+                                                        onkeydown="javascript:$.NumericKey(event)"
+                                                    })
+                                </div>
+                            </td>
+                            <td id="row_col_8" style="width:90px">
+                                <div class="input-group pos-rel" style="width: 100%;">
+                                @Html.TextBoxFor(m => m.AMOUNT, 
+                                                    new {
+                                                        id = "aamount", 
+                                                        @class = "addinput form-control custom-text", 
+                                                        @readonly="readonly",
+                                                        onkeydown="javascript:$.NumericKey(event)"
+                                                    })
+                                </div>
+                            </td>
+                            <td id="row_col_9" style="width:165px">
+                                <div class="input-group pos-rel" style="width: 100%;">
+                                    <div id="lookupwbsitem" class="input-group input-group-xs lookup">
+                                        <input type="text" class="form-control addinput" id="awbsno" readonly="readonly"/>
+                                        <span class="input-group-btn">
+                                            <button id="wbsbutton" class="addinput custom-button-grid btn btn-warning btn-xs" type="button" onclick="javascript:getWBS(1, 'item')">&nbsp<i class="fa fa-search"></i>&nbsp</button>
+                                        </span>
+                                        <input type="text" class="form-control addinput" id="awbsname" style="display:none" readonly="readonly">
+                                    </div>
+                                </div>
+                            </td>
+                            <td id="row_col_11" style="width:100px">
+                                <div class="input-group pos-rel" style="width: 100%;">
+                                    <div id="lookupglitem" class="input-group input-group-xs lookup">
+                                        <input type="text" class="form-control addinput" id="agl" readonly="readonly"/>
+                                        <span class="input-group-btn">
+                                            <button id="glbutton" class="addinput custom-button-grid btn btn-warning btn-xs" type="button" onclick="javascript:getGLAccount(1, 'item')">&nbsp<i class="fa fa-search"></i>&nbsp</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td id="row_col_10" style="width:103px">
+                                <div id="cascade-costcenter" class="cost">
+                                    @Html.Partial(PurchaseRequisitionPage._CascadeCostCenter)
+                                </div>
+                            </td>
+                            <td class="text-center" style="width:100px">
+                                <i class="fa fa-save btnsaveitem btn btn-xs btn-primary" onclick="javascript:SaveItem('Save', '1')"></i>
+                                <i class="fa fa-remove btncancelitem btn btn-xs btn-danger" onclick="javascript:CancelSaveItem()"></i>
+                            </td>
+                        </tr>
+                        <tr id="hiddenrow" class="hidden"></tr>
+                    </tbody>
+                    <tbody id="detail-grid-creation">
+                        @Html.Partial(PurchaseRequisitionPage._CreationItemGrid)
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center" style="margin-bottom: 3px;">
+    <hr id="hrsrc" style="margin:0;padding:0;" />
+</div>
+
+<div class="row" id="AdditionalForm" style="padding-top:15px">
+    <div class="col-xs-12 col-sm-6 col-md-3" id="item-dropdown">
+        @Html.Partial(PurchaseRequisitionPage._LookupItem)
+    </div>
+    <div id ="additional-editform">
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <fieldset class="additional ">
+                <legend class="additional">Additional</legend>
+                <form role="form" class="form-horizontal" id="additional-form">
+                    <div class="form-group form-group-xs">
+                        <label class="col-xs-4 col-sm-3 col-md-4 text-right">Delivery Date</label>
+                        <div class="col-xs-8 col-sm-9 col-md-8">
+                            <div class="input-group pos-rel" style="width: 100%;">
+					            <span class="input-group-addon" style="cursor: pointer;padding:4px 10px;">
+						            <i class="fa fa-calendar bigger-110"></i>
+					            </span>
+					            <input class="form-control date-picker" type="text" name="date-range-picker" id="adeliverydate" data-date-format="dd.mm.yyyy"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-xs">
+                        <label class="col-xs-4 col-sm-3 col-md-4 text-right">Vendor</label>
+                        <div class="col-xs-8 col-sm-9 col-md-8">
+                            <div class="input-group pos-rel" style="width: 100%;">
+                                <div id="lookupvendor" class="input-group input-group-xs lookup">
+                                    <input type="text" class="form-control addinput" id="avendor" readonly="readonly"/>
+                                    <span class="input-group-btn">
+                                        <button id="vendorbutton" class="addinput custom-button-grid btn btn-warning btn-xs" type="button" onclick="javascript:getVendor(1)">&nbsp<i class="fa fa-search"></i>&nbsp</button>
+                                    </span>
+                                </div>
+                                <input type="text" class="form-control addinput" id="avendorname" readonly="readonly" style="display:none"/>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-5">
+            <fieldset class="additional">
+                <legend class="additional">Asset</legend>
+                <form role="form" class="form-horizontal" id="asset-form">
+                    <div class="col-xs-15 col-sm-6 col-md-7">
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-3 col-sm-3 col-md-3 control-label text-right" style="padding-left: 0px;padding-right: 5px;">Asset No</label>
+                            <div class="col-xs-12 col-sm-10 col-md-9" style="padding-left: 0px;padding-right: 0px;">
+                                <div class="input-group pos-rel form-group-text" style="width: 100%">
+                                    <div id="lookupassetNo" class="input-group input-group-xs lookup" style="width: 100%">
+                                        <input type="text" class="form-control addinput" style="width: 50%" id="assetNo" readonly="readonly" />
+                                       
+                                        <label class="col-xs-1 col-sm-1 col-md-1 control-label text-right"> - </label>
+                                        
+
+                                        @Html.TextBoxFor(m => m.ASSET_NO,
+                                    new
+                                    {
+                                        id = "asubassetno",
+                                        @class = "addinput form-control numeric",
+                                        @style = "width: 25%;",
+                                        @maxlength = "2",
+                                        @pattern = "[0-9]",
+                                        @readonly = "readonly"
+                                    })
+
+                                        <span class="input-group-btn">
+                                            <button id="assetnobutton" class="addinput custom-button-grid btn btn-warning btn-xs" type="button" onclick="javascript:getAssetNo(1)">&nbsp<i class="fa fa-search"></i>&nbsp</button>
+                                        </span>
+                                    </div>
+                                    
+                                   
+                                </div>
+                               
+
+                            </div>
+                        </div>
+                        
+
+                         
+                        <div class="form-group form-group-xs">
+                            <label class ="col-xs-4 col-sm-3 col-md-3 text-right" style="padding-left: 0px;padding-right: 5px;">Class</label>
+                            <div class ="col-xs-8 col-sm-9 col-md-9" style="padding-left: 0px;padding-right: 0px;">
+                               @Html.TextBoxFor(m => m.ASSET_CLASS,
+                                                        new
+                                                        {
+                                                            id = "aassetclass",
+                                                            @class = "addinput form-control",
+                                                            @readonly = "readonly"
+                                                        })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-5">
+                        <div class="form-group form-group-xs">
+                            <label class ="col-xs-4 col-sm-3 col-md-4 text-right">Location</label>
+                            <div class ="col-xs-8 col-sm-9 col-md-8">
+                                <div id="lookupassetloc" class="input-group pos-rel lookup">
+                                    @Html.TextBoxFor(m => m.ASSET_LOCATION, 
+                                                        new {
+                                                            id = "aassetloc", 
+                                                            @class = "addinput form-control",
+                                                            @readonly = "readonly"
+                                                        })
+                                    @*<span class="input-group-btn">
+                                        <button id="assetlocbtn" class="addinput custom-button-grid btn btn-warning btn-xs" type="button" onclick="javascript:getAssetLoc()"><i class="fa fa-search"></i></button>
+                                    </span>*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class="col-xs-4 col-sm-3 col-md-4 text-right">Category</label>
+                            <div class="col-xs-8 col-sm-9 col-md-8">
+                                @Html.TextBoxFor(m => m.ASSET_CATEGORY_CD,
+                                                        new
+                                                        {
+                                                            id = "aassetcat",
+                                                            @class = "addinput form-control",
+                                                            @readonly = "readonly"
+                                                        })
+
+                            </div>
+                        </div>
+                    </div>
+            </form>
+        </fieldset>
+    </div>
+    </div>
+    <div id="additional-displaymode" style="display:none">
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <fieldset class="additional ">
+            <legend class="additional">Additional</legend>
+            <form role="form" class="form-horizontal" id="adddisplaymode">
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 text-right">Delivery Date</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <div class="input-group pos-rel" style="width: 100%;">
+                            <div class="input-group input-group-xs">
+					            <input class="form-control" type="text" name="date-range-picker" id="txtdeliverydate" disabled/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group form-group-xs">
+                    <label class="col-xs-4 col-sm-3 col-md-4 text-right">Vendor</label>
+                    <div class="col-xs-8 col-sm-9 col-md-8">
+                        <div class="input-group pos-rel" style="width: 100%;">
+                            <div class="input-group input-group-xs">
+                                <input type="text" class="form-control addinput" id="txtvendor" readonly="readonly"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            </fieldset>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-5">
+            <fieldset class="additional">
+            <legend class="additional">Asset</legend>
+                <form role="form" class="form-horizontal" id="assetdisplaymode">
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group form-group-xs">
+                            <label class ="col-xs-4 col-sm-3 col-md-4 text-right">Category</label>
+                            <div class ="col-xs-8 col-sm-9 col-md-8">
+                                @Html.TextBoxFor(m => m.ASSET_CATEGORY_CD, 
+                                                        new {
+                                                            id = "txtassetcat", 
+                                                            @class = "addinput form-control", 
+                                                            @readonly = "readonly"
+                                                        })
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class ="col-xs-4 col-sm-3 col-md-4 text-right">Class</label>
+                            <div class ="col-xs-8 col-sm-9 col-md-8">
+                                @Html.DropDownListFor(m => m.ASSET_CLASS, PRCreationController.SelectAssetClass(), new {id = "txtassetclass", @class = "cursor-1 addinput custom-combo", @readonly = "readonly", disabled = "disabled" })
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6">
+                        <div class="form-group form-group-xs">
+                            <label class ="col-xs-4 col-sm-3 col-md-4 text-right">Location</label>
+                            <div class ="col-xs-8 col-sm-9 col-md-8">
+                                <div class="input-group pos-rel" style="width: 100%;">
+                                    @Html.TextBoxFor(m => m.ASSET_LOCATION, 
+                                                        new {
+                                                            id = "txtassetloc", 
+                                                            @class = "addinput form-control", 
+                                                            @readonly = "readonly"
+                                                        })
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label class ="col-xs-4 col-sm-3 col-md-4 text-right">Asset No</label>
+                            <div class ="col-xs-8 col-sm-9 col-md-8">
+                                <div class="input-group pos-rel" style="width: 100%;">
+                                    @Html.TextBoxFor(m => m.ASSET_NO, 
+                                                        new {
+                                                            id = "txtassetno", 
+                                                            @class = "addinput form-control", 
+                                                            @readonly = "readonly" 
+                                                        })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
+    </div>
+</div>
+
+<div id="valclass-container" class="modal fade bs-example-modal-lg" width="100%" data-backdrop="static" data-keyboard="false"></div>
+<div id="material-container" class="modal fade bs-example-modal-lg" width="100%" data-backdrop="static" data-keyboard="false"></div>
+<div id="gl-container" class="modal fade bs-example-modal-lg" width="100%" data-backdrop="static" data-keyboard="false"></div>
+<div id="wbs-container" class="modal fade bs-example-modal-lg" width="100%" data-backdrop="static" data-keyboard="false"></div>
+<div id="vendor-container" class="modal fade bs-example-modal-lg" width="100%" data-backdrop="static" data-keyboard="false"></div>
+<div id="AssetNo-container" class="modal fade bs-example-modal-lg"  data-backdrop="static" data-keyboard="false"></div>
+
+<script>
+
+    $("#tScrollBody").scroll(function () {
+        $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+    });
+    
+    var table = document.getElementById("dynamic-table");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    //tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+</script>
+

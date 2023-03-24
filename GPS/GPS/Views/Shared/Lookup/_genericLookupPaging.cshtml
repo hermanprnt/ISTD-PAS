@@ -1,0 +1,155 @@
+﻿@using GPS.ViewModels
+@model PaginationViewModel
+
+@{
+    // Variable cache
+    var dataName = Model.DataName;
+    var dataCount = Model.TotalDataCount;
+
+    var pageIndex = Model.PageIndex;
+    var pageSize = Model.PageSize;
+    var pageCount = Model.TotalPageCount;
+
+    var pageRange = PaginationViewModel.PageRange;
+    var firstPageRange = (pageRange * 2) + 1;
+    var prevPageRange = pageIndex - pageRange;
+    var nextPageRange = pageIndex + pageRange;
+    var lastPageRange = pageCount - (pageRange * 2);
+
+    Int64 index = 0;
+    Int64 firstIndex = 0;
+    Int64 lastIndex = 0;
+}
+
+<style>
+    ._pagination-sm {
+        border-top-left-radius: 3px;
+        border-bottom-left-radius: 3px;
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+    }
+
+    ._pagination-disabled {
+        pointer-events: none;
+        cursor: default;
+    }
+</style>
+<div class="row @(dataCount == 0 ? "hidden" : String.Empty) ">
+    <div class="col-sm-12 text-left">
+        <ul class="pagination pagination-sm" style="margin-top: 0">
+            <li><a id="lnk-page-@dataName-first" href="javascript: void(0)" data-page="1">First</a></li>
+            <li><a id="lnk-page-@dataName-prev" href="javascript: void(0)" data-page="@(pageIndex - 1)">Prev</a></li>
+            @{
+                //// First index logic.
+                // Start pagination logic.
+                if (prevPageRange <= 1)
+                {
+                    firstIndex = 1;
+                }
+                // End pagination logic.
+                else if (prevPageRange >= lastPageRange && prevPageRange <= pageCount)
+                {
+                    firstIndex = (int)lastPageRange;
+                }
+                // Middle pagination logic.
+                else
+                {
+                    firstIndex = prevPageRange;
+                }
+
+                //// Last index logic.
+                // Start pagination logic.
+                if (nextPageRange <= firstPageRange)
+                {
+                    lastIndex = firstPageRange;
+                }
+                // End pagination logic.
+                else if (nextPageRange >= pageCount)
+                {
+                    lastIndex = (int)pageCount;
+                }
+                // Middle pagination logic.
+                else
+                {
+                    lastIndex = nextPageRange;
+                }
+    
+                index = (firstIndex <= 0) ? 1 : firstIndex;
+                while (index <= lastIndex && index <= pageCount)
+                {
+                    <li><a id="lnk-page-@dataName-@index" href="javascript: void(0)" data-page="@index">@index</a></li>
+                    index++;
+                }
+            }
+            <li><a id="lnk-page-@dataName-next" href="javascript: void(0)" data-page="@(pageIndex + 1)">Next</a></li>
+            <li><a id="lnk-page-@dataName-last" href="javascript: void(0)" data-page="@(pageCount)">Last</a></li>
+        </ul>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        // NOTE: converting razor var to js var to avoid js intellisense's "syntax error"
+        var pageIdx = Number("@pageIndex");
+        var pageCount = Number("@pageCount");
+        var dataCount = Number("@dataCount");
+
+        if (dataCount > 1 
+            && pageCount > 1) {
+            $("#lnk-page-@dataName-@pageIndex").parent().addClass("active");
+        }
+
+        if (dataCount === 0)
+        {
+            $("[id^=lnk-page-@dataName]").data("disabled",true);
+            $("[id^=lnk-page-@dataName]").addClass("_pagination-disabled");
+            $("[id^=lnk-page-@dataName]").css("color", "lightgray");
+        }
+        else 
+        {
+            if (pageIdx === 1)
+            {
+                $("#lnk-page-@dataName-first").data("disabled",true);
+                $("#lnk-page-@dataName-first").addClass("_pagination-disabled");
+                $("#lnk-page-@dataName-first").css("color", "lightgray");
+                $("#lnk-page-@dataName-prev").data("disabled",true);
+                $("#lnk-page-@dataName-prev").addClass("_pagination-disabled");
+                $("#lnk-page-@dataName-prev").css("color", "lightgray");
+            }
+            if (pageIdx >= pageCount)
+            {
+                $("#lnk-page-@dataName-next").data("disabled",true);
+                $("#lnk-page-@dataName-next").addClass("_pagination-disabled");
+                $("#lnk-page-@dataName-next").css("color", "lightgray");
+                $("#lnk-page-@dataName-last").data("disabled",true);
+                $("#lnk-page-@dataName-last").addClass("_pagination-disabled");
+                $("#lnk-page-@dataName-last").css("color", "lightgray");
+            }
+            if (pageIdx === 1 && pageIdx === pageCount)
+            {
+                $("[id^=lnk-page-@dataName]").data("disabled",true);
+                $("[id^=lnk-page-@dataName]").addClass("_pagination-disabled");
+                $("[id^=lnk-page-@dataName]").css("color", "lightgray");
+            }
+        }
+    });
+
+    $("[id^=lnk-page-@dataName-]").click(function (e) {
+        e.preventDefault();
+
+        if(!$(this).data("disabled")) {
+            var pageIndex = Number($(this).data("page"));
+            var pageSize = Number("@PaginationViewModel.DefaultPageSize");
+            var pageCount = Number($("[id^=total-page-@dataName-]").text());
+
+            var SearchResponseCallback = window["Search@(dataName)ResponseCallback"] || function (data) {
+                $("#data-container-@dataName").html(data);
+            };
+
+            if (pageIndex >= 1 || pageIndex <= pageCount) {
+                Search@(dataName)(pageIndex, pageSize, SearchResponseCallback);
+            }
+        }
+    });
+</script>

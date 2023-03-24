@@ -1,0 +1,16 @@
+﻿<div class="_user-notification">
+    <div class="panel panel-default">
+        <div class="panel-heading text-center">
+            <h2 class="panel-title"><a href="#">Notification panel</a></h2>
+        </div>
+        @*<div class="panel-body text-center">
+            <img alt="" src="@Html.Toyota().Page.PullUserPictureUrl(Html.Toyota().Page.User.Username)" class="img-rounded"/>
+        </div>*@
+        <ul class="nav _sidebar-menu">
+            <li><a href="@Html.Toyota().Page.GetControllerUrl("Message")"><i class="fa fa-envelope-o text-right"></i>Message<span class="badge pull-right">10</span></a></li>
+            <li><a href="@Html.Toyota().Page.GetControllerUrl("Worklist")"><i class="fa fa-slack text-right"></i>Worklist <span class="label label-warning">5</span><span class="badge pull-right">14</span></a></li>
+            <li><a href="@Html.Toyota().Page.GetControllerUrl("Email")"><i class="fa fa-envelope text-right"></i>Email<span class="badge pull-right">7</span></a></li>
+            <li><a href="@Html.Toyota().Page.GetControllerUrl("Event")"><i class="fa fa-calendar-o text-right"></i>Event</a></li>
+        </ul>
+    </div>
+</div>

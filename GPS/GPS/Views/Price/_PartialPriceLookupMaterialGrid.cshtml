@@ -1,0 +1,37 @@
+﻿@using GPS.Models.Master
+@{
+    List<MaterialPrice> lpr = ViewData["Material"] != "" ? (List<MaterialPrice>)ViewData["Material"] : new List<MaterialPrice>();
+}
+<div class="table-responsive">
+    <table id="LookUpTable-valclass" class="table table-striped table-bordered mat-lookup-table" width="100%">
+        <thead>
+            <tr>
+                <th class="text-center control-label text-muted" style="width:120px">Material No.</th>
+                <th class="text-center control-label text-muted" style="width:346px">Material Desc.</th>
+            </tr>
+        </thead>
+        <tbody id="bodylookup-matno">
+            @if (lpr.Count > 0)
+            {
+                foreach (MaterialPrice pr in lpr)
+                { 
+                    <tr style="cursor:pointer" onclick="javascript:moveMatno('@pr.MaterialNo', '@pr.MaterialDesc')">
+                        <td class="text-center">@pr.MaterialNo</td>
+					    <td class="text-left">@pr.MaterialDesc</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="text-center">No Material Data</td>
+                </tr> 
+            }
+        </tbody>
+    </table>
+</div>
+<div class="row">
+    <div class="col-xs-12" style="margin-bottom: 20px;">
+        @Html.Partial("_UIPaging")
+    </div>
+</div>

@@ -1,0 +1,342 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Controllers.PO
+@using GPS.ViewModels
+@using GPS.ViewModels.PO
+@using GPS.Core.ViewModel
+@using GPS.Models.Common
+@using GPS.Models.PRPOApproval
+@model POCreationViewModel
+@{
+    string PoCancelStatus = ViewData["PoCancelStatus"] != null ? ViewData["PoCancelStatus"].ToString() : "";
+    string PO_NO = (string)ViewData["CheckDocNoShow"];
+    string DOC_NO = string.Empty;
+    string DOC_TYPE = string.Empty;
+    string USER_TYPE = string.Empty;
+    POApproval poApproval = (POApproval)ViewData["POApproval"];
+    if (poApproval != null)
+    {
+        DOC_NO = poApproval.DocNo;
+        DOC_TYPE = "PO";
+        //USER_TYPE = poApproval.USER_TYPE;
+    }
+    else
+    {
+        DOC_NO = PO_NO;
+        DOC_TYPE = "PO";
+    }
+
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        /* ============================== Init: begin ============================== */
+
+        var itemDataName = ViewData.Get("ItemDataName"),
+            itemConditionDataName = "@Model.ItemConditionDataName",
+            poNo = "@Model.Header.PONo",
+            isCreation = ViewData.Get("IsCreation"),
+            OnAjaxBegin = ViewData.Get("OnAjaxBegin"),
+            OnAjaxComplete = ViewData.Get("OnAjaxComplete"),
+            OnAjaxError = ViewData.Get("OnAjaxError");
+
+        function EnableAllFeatures() {
+            $("#btnget-close").prop("disabled", false);
+            $("#cmb-" + itemConditionDataName).prop("disabled", false);
+
+            $("[id^=lnk-page-" + itemDataName + "-]").removeClass("_pagination-disabled");
+            $("#cmb-perpage-" + itemDataName).prop("disabled", false);
+        }
+
+        function DisableAllFeatures() {
+            $("#btnget-close").prop("disabled", true);
+            $("#cmb-" + itemConditionDataName).prop("disabled", true);
+
+            $("[id^=lnk-page-" + itemDataName + "-]").addClass("_pagination-disabled");
+            $("#cmb-perpage-" + itemDataName).prop("disabled", true);
+        }
+
+        function RefreshSLoc(dataName, plantCode, successCallback) {
+            $.progressbox.show($tdk.PageTitle, "Refresh SLoc");
+
+            $.ajax({
+                type: "POST",
+                url: "@CommonPage.RefreshSLocAction",
+                data: {
+                    dropdownId: dataName + "additional-sloc",
+                    plantCode: plantCode
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        var container = $("#" + dataName + "additional-sloc-container");
+                        container.html(data);
+                        if (!$("#cmb-" + dataName + "-additional").prop("disabled"))
+                            container.find("select").prop("disabled", true);
+                        successCallback();
+                    }
+                    else {
+                        $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                    }
+                },
+                complete: function () {
+                    $.progressbox.hide();
+                },
+                error: OnAjaxError
+            });
+        }
+
+        ViewData.Add("PONo", poNo);
+        ViewData.Add("RefreshSLoc", RefreshSLoc);
+
+        /* =============================== Init: end =============================== */
+
+        /* ============================ Condition: begin ============================ */
+
+        function RefreshItemMaterialListAction() {
+            $.ajax({
+                type: "POST",
+                url: "@POInquiryController.Action.RefreshItemMaterialList",
+                data: {
+                    dropdownId: itemConditionDataName,
+                    processId: undefined,
+                    poNo: poNo
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#container-" + itemConditionDataName).html(data);
+                    }
+                    else {
+                        $.messagebox.show(data.ResponseType, data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        }
+
+        $(document).onOnce("change", "#cmb-" + itemConditionDataName, function (e) {
+            OnAjaxBegin("Material change");
+            var splittedValue = $("#cmb-" + itemConditionDataName).valOrDefault().split(";");
+            $.ajax({
+                type: "POST",
+                url: "@POInquiryController.Action.GetItemConditionList",
+                data: {
+                    processId: undefined,
+                    poNo: poNo,
+                    poItemNo: splittedValue[1],
+                    seqItemNo: Number(splittedValue[2])
+                },
+                success: function (data) {
+                    if (!data.ResponseType) {
+                        $("#grid-" + itemConditionDataName).html(data);
+                    }
+                    else {
+                        $.messagebox.show(data.ResponseType, data.Message, data.ResponseType);
+                    }
+                },
+                complete: OnAjaxComplete,
+                error: OnAjaxError
+            });
+        });
+
+        /* ============================= Condition: end ============================= */
+
+        if (!isCreation) {
+            $("#cmb-" + itemConditionDataName + " option[value='']").remove();
+            $("#cmb-" + itemConditionDataName).trigger("change");
+        }
+    });
+
+    //# sourceURL=_inquiryGetPO.cshtml
+</script>
+
+<div class="modal-dialog modal-xxl" style="overflow-y:scroll !important; max-height:90%" >
+    <div class="modal-content">
+        <div class="modal-header">
+            <p class="modal-title">
+                Purchase Order @Model.Header.PONo
+            </p>
+        </div>
+        <div class="modal-body"> 
+            <div class="form-horizontal">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-3">
+                        <div class="form-group form-group-xs">
+                            <label for="txtget-purchasinggrp" class="col-xs-5 col-sm-4 control-label text-muted">Purch. Group</label>
+                            <div class="col-xs-7 col-sm-8">
+                                <input type="text" id="txtget-purchasinggrp" value="@Model.Header.PurchasingGroup" class="form-control" readonly/>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label for="txtget-currency" class="col-xs-5 col-sm-4 control-label text-muted">Currency</label>
+                            <div class="col-xs-3">
+                                <input type="text" id="txtget-currency" value="@Model.Header.Currency" class="form-control" readonly/>
+                            </div>
+                            <div class="col-xs-5">
+                                <input type="text" id="txtget-exchrate" value="@Model.Header.ExchangeRate.ToStandardFormat()" class="form-control" readonly/>
+                            </div>
+                        </div>
+                        @if (Model.Header.FlagAttachment == "0")
+                        {
+                            <div class="form-group form-group-xs">
+                                <label for="txtget-attachment" class="col-xs-5 col-sm-4 control-label text-muted">Attachment</label>
+                                @if (Model.AttachmentList.Any())
+                                {
+                                    <div class="col-xs-7 col-sm-8">
+                                        @foreach (Attachment att in Model.AttachmentList)
+                                        {
+                                            @Html.ActionLink(att.FILE_NAME_ORI.Length > 20 ? att.FILE_NAME_ORI.Substring(0, 20) + ". . ." : att.FILE_NAME_ORI, "DownloadAttachment", "POInquiry", new { docNo = att.DOC_NO, docSource = att.DOC_SOURCE, fileName = att.FILE_PATH, fileNameOri = att.FILE_NAME_ORI, docYear = att.DOC_YEAR }, new { id = "lnk-apprattachment-" + att.SEQ_NO, @class = "col-xs-7 col-sm-8 left-control-label" })
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="col-xs-7 col-sm-8 left-control-label">No Attachment</span>
+                                }
+                            </div>
+                        }                        
+                    </div>
+                    <div class="col-xs-12 col-sm-6">
+                        <div class="form-group form-group-xs">
+                            <label for="txtget-podesc" class="col-xs-5 col-sm-2 control-label text-muted">Description</label>
+                            <div class="col-xs-7 col-sm-10">
+                                <input type="text" id="txtget-podesc" value="@Model.Header.POHeaderText" class="form-control" readonly/>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label for="txtget-vendor" class="col-xs-5 col-sm-2 control-label text-muted">Vendor</label>
+                            <div class="col-xs-7 col-sm-10">
+                                <input type="text" id="txtget-vendor" value="@(Model.Header.VendorCode + " - " + Model.Header.VendorName)" class="form-control" readonly/>
+                            </div>
+                        </div>
+                        @if (Model.Header.FlagAttachment == "0")
+                        {
+                            <div class="form-group form-group-xs">
+                                <label for="txtget-quotation" class="col-xs-5 col-sm-2 control-label text-muted">Quotation</label>
+                                @if (Model.QuotationList.Any())
+                                {
+                                    <div class="col-xs-7 col-sm-8">
+                                        @foreach (Attachment att in Model.QuotationList)
+                                        {
+                                            @Html.ActionLink(att.FILE_NAME_ORI.Length > 20 ? att.FILE_NAME_ORI.Substring(0, 20) + ". . ." : att.FILE_NAME_ORI, "DownloadAttachment", "POInquiry", new { docNo = att.DOC_NO, docSource = att.DOC_SOURCE, fileName = att.FILE_PATH, fileNameOri = att.FILE_NAME_ORI, docYear = att.DOC_YEAR }, new { id = "lnk-apprattachment-" + att.SEQ_NO, @class = "col-xs-7 col-sm-6 left-control-label" })
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="col-xs-7 col-sm-10 left-control-label">No Attachment</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-3">
+                        <div class="form-group form-group-xs">
+                            <label for="txtget-documentdate" class="col-xs-5 col-sm-4 control-label text-muted">Total Item</label>
+                            <div class="col-xs-7 col-sm-8">
+                                <input type="text" id="txtget-documentdate" style="text-align: right;" value="@Model.ItemList.DataList.Count" class="form-control" disabled/>
+                            </div>
+                        </div>
+                        <div class="form-group form-group-xs">
+                            <label for="txtget-status" class="col-xs-5 col-sm-4 control-label text-muted">Total Amount</label>
+                            <div class="col-xs-7 col-sm-8">
+                                <input type="text" id="txtget-status" style="text-align: right;" value="@Model.ItemList.DataList.Sum(item => item.PriceAmount).ToStandardFormat()" class="form-control" readonly/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="v-space"></div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a id="tab-@Model.POItemDataName" tabindex="14" data-toggle="tab" href="#@Model.POItemDataName">PO Item</a>
+                            </li>
+                            <li>
+                                <a id="tab-@Model.ItemConditionDataName" tabindex="15" data-toggle="tab" href="#@Model.ItemConditionDataName">Conditions</a>
+                            </li>
+                            @if ((Model.Header.POStatusCode != PoCancelStatus) && (PoCancelStatus != ""))
+                            {
+                                <li>
+                                    <a id="tab-@Model.ApprovalList.GridPaging.DataName" tabindex="15" data-toggle="tab" href="#@Model.ApprovalList.GridPaging.DataName">Approval</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li>
+                                    <a id="tab-worklist-history" tabindex="15" data-toggle="tab" href="#worklist-history">Approval History</a>
+                                </li>
+                            }
+                        </ul>
+                        <div class="tab-content">
+                            <div id="@Model.POItemDataName" class="tab-pane fade active in">
+                                <div class="v-space"></div>
+                                <div id="grid-@Model.POItemDataName">
+                                    @Html.Partial(POCommonController.Partial.CommonItemGrid, Model.ItemList)
+                                </div>
+                            </div>
+                            <div id="@Model.ItemConditionDataName" class="tab-pane fade">
+                                <div class="form-group form-group-xs">
+                                    <div class="col-xs-12">
+                                        <div class="col-xs-1">
+                                            <label for="cmb-@Model.ItemConditionDataName" class="control-label text-muted">Condition for</label>
+                                        </div>
+                                        <div id="container-@Model.ItemConditionDataName" class="col-xs-3">
+                                            @Html.DropDownList("cmb-" + Model.ItemConditionDataName, POInquiryController.GetPOItemSelectList(Model.ItemList.DataList), new { tabindex = "16", @class = "form-control" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="v-space"></div>
+                                <div id="grid-@Model.ItemConditionDataName"></div>
+                            </div>
+                            <div id="@Model.ApprovalList.GridPaging.DataName" class="tab-pane fade">
+                                <div class="v-space"></div>
+                                <div id="grid-@Model.ApprovalList.GridPaging.DataName">
+                                    @Html.Partial(POInquiryController.Partial.InquiryApproval, Model.ApprovalList)
+                                </div>
+                            </div>
+                            <div id="worklist-history" class="tab-pane fade">
+                                <div class="v-space"></div>
+                                <div id="grid-worklist-history">
+                                    @Html.Partial(POInquiryController.Partial.WorklistHistory, Model.ApprovalHistory)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="clear:both;padding-bottom: 5px;padding-top: 5px;">
+            <div id="notice-container-" class="form-horizontal row-fluid" style="background-color:#F9F9F9;float:left;width:50%;border:0.1em solid #DDD;">
+                 @Html.Partial(POInquiryController.Partial.InquiryNotice)
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div class="btn-group-xs text-right">
+                <button id="btnget-close" type="button" tabindex="17" class="btn btn-danger btn-std" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        docNo = '@DOC_NO';
+        docType = '@DOC_TYPE';
+        userType = '@USER_TYPE';
+
+        @*var errormessage = "@errormessage";
+        if (errormessage !== "") {
+            $("#alert-detail").css("display", "inherit");
+            $("#alert-detail").html(errormessage);
+        }*@
+    })
+
+    $("#tScrollBodyItem").scroll(function () {
+        $("#tScrollHeadItem").scrollLeft($("#tScrollBodyItem").scrollLeft());
+    });
+
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip({ placement: 'right' });
+    });
+</script>

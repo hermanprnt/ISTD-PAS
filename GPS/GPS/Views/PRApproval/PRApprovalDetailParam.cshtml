@@ -1,0 +1,147 @@
+﻿@using System
+@using GPS.Constants
+@using GPS.Constants.PRPOApproval
+@using GPS.Core.ViewModel
+@using GPS.Models.PRPOApproval
+@using GPS.ViewModels
+@{
+    PRApproval prApproval = (PRApproval)ViewData["PRApproval"];
+}
+
+@Html.Hidden("usertype-detail-value", prApproval.USER_TYPE)
+<div class="form-horizontal row-fluid">
+    <div class="row" style="padding-left:5px;">
+        <div class="col-xs-12 col-sm-6 col-md-2">
+            <div class="form-group form-group-xs" style="margin-bottom: 0px;">
+                <label for="txt-docno-detail" class="col-xs-5 col-sm-5 control-label text-muted">Doc No</label>
+                <div class="col-xs-7 col-sm-7">
+                    @Html.TextBox("txt-docno-detail", prApproval.DOC_NO, new { @readonly = "readonly", @class = "form-control" })
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs" style="margin-bottom: 0px;">
+                <label for="txt-docdt-detail" class="col-xs-5 col-sm-3 control-label text-muted">Description</label>
+                <div class="col-xs-7 col-sm-9">
+                    @Html.TextBox("txt-docdesc-detail", prApproval.DOC_DESC, new { @readonly = "readonly", @class = "form-control" })
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-2">
+            <div class="form-group form-group-xs" style="margin-bottom: 0px;">
+                <label for="txt-docdt-detail" class="col-xs-5 col-sm-5 control-label text-muted">Doc Date</label>
+                <div class="col-xs-7 col-sm-7">
+                    @Html.TextBox("txt-docdt-detail", prApproval.DOC_DT != DateTime.MinValue ? prApproval.DOC_DT.ToString(CommonFormat.Date) : "", new { @readonly = "readonly", @class = "form-control" })
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="form-group form-group-xs" style="margin-bottom: 0px;">
+                <label for="txt-docdt-detail" class="col-xs-5 col-sm-3 control-label text-muted">Division</label>
+                <div class="col-xs-7 col-sm-9">
+                    @Html.TextBox("txt-division-detail", prApproval.DIVISION_NAME, new { @readonly = "readonly", @class = "form-control" })
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr  style="margin-top: 5px;margin-bottom: 5px;"/>
+    @{
+        if (prApproval.DOC_TYPE == "PR")
+        {
+            <div class="row">
+                <div class="col-xs-12 btn-group-xs">
+                    @if ((HttpContext.Current.Session["btndetail_approve"] ==null?false: (bool)HttpContext.Current.Session["btndetail_approve"]))
+                    {
+                        <button id="btn-approve-detail" class="btn btn-primary btn-xs text-right" type="button">Approve</button>
+                        <button id="btn-reject-detail" class="btn btn-danger btn-xs text-right" type="button">Reject</button>
+                    }
+                    @if ((HttpContext.Current.Session["btn_edit_detail"] == null ? false : (bool)HttpContext.Current.Session["btn_edit_detail"]))
+                    {
+                        <button id="btn-edit" tabindex="15" class="btn btn-primary btn-xs" onclick="javascript:EditPRApprovalDetail('@prApproval.DOC_NO')">Edit</button>
+                    }
+                        <button id="btn-close-detail" type="button" class="btn btn-danger btn-xs text-right" data-dismiss="modal" style="float:right;font-size: 11px;">Close</button>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<script type="text/javascript">
+    function CloseInfoWhenNotItemLeft()
+    {
+        var remainItem = 0;
+        $("#table-@PRPOApprovalPage.PRApprovalDetailGrid [id^=chk-approval-detail-]:checkbox").each(function () {
+            remainItem = remainItem + 1;
+        });
+
+        if (remainItem <= 0) {
+            $("#btn-close-detail").trigger("click");
+        }
+    }
+
+    $("#btn-approve-detail").click(function (e) {
+        // Get selected item.
+        var checkedVals = 0;
+        checkedVals = $("[id^=chk-approval-detail-]:checkbox:checked", "#table-@PRPOApprovalPage.PRApprovalDetailGrid").map(function () {
+            return { docno: $(this).data("docno"), itemno: $(this).data("itemno") };
+        }).get();
+        if (checkedVals.length > 0) {
+            ApprovePRApprovalDetail(function (data) {
+                if (!data.ResponseType) {
+                    $("#dialog-container").html(data);
+                    //$("#dialog-container").modal();
+
+                    resetDetailSelection();
+
+                    SearchPRApprovalDetail(undefined, undefined, function (data) {
+                        $("#data-container-@PRPOApprovalPage.PRApprovalDetail").html(data);
+
+                        $("#dialog-container").modal();
+                        $("#dialog-container").on("hidden.bs.modal", CloseInfoWhenNotItemLeft);
+                    });
+
+                    SearchPRApproval(undefined, undefined, function (data) {
+                        $("#data-container-@PRPOApprovalPage.PRApproval").html(data);
+                        $("#data-container-HomeWorklist").html(data); //home
+                    });
+                }
+                else {
+                    $.messagebox.show("@ActionResponseViewModel.Error", data.Message, data.ResponseType);
+                }
+            });
+        }
+        else {
+            $.messagebox.show("@ActionResponseViewModel.Warning", "Please select at least one record to be approved.", "@ActionResponseViewModel.Warning");
+        }
+    });
+    $("#btn-reject-detail").click(function (e) {
+        // Get selected item.
+        var checkedVals = 0;
+        checkedVals = $("[id^=chk-approval-detail-]:checkbox:checked", "#table-@PRPOApprovalPage.PRApprovalDetailGrid").map(function () {
+            return { docno: $(this).data("docno"), itemno: $(this).data("itemno") };
+        }).get();
+        if (checkedVals.length > 0) {
+            RejectPRApprovalDetail(function (data) {
+                $("#dialog-container").html(data);
+                //$("#dialog-container").modal();
+
+                resetDetailSelection();
+
+                SearchPRApprovalDetail(undefined, undefined, function (data) {
+                    $("#data-container-@PRPOApprovalPage.PRApprovalDetail").html(data);
+
+                    $("#dialog-container").modal();
+                    $("#dialog-container").on("hidden.bs.modal", CloseInfoWhenNotItemLeft);
+                });
+
+                SearchPRApproval(undefined, undefined, function (data) {
+                    $("#data-container-@PRPOApprovalPage.PRApproval").html(data);
+                    $("#data-container-HomeWorklist").html(data); //home
+                });
+            });
+        }
+        else {
+            ShowMessage($("#alert-container-@PRPOApprovalPage.PRApprovalDetail"), "Please select at least one record to be rejected.", "WRN");
+        }
+    });
+</script>

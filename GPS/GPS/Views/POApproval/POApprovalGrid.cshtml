@@ -1,0 +1,225 @@
+﻿@using GPS.CommonFunc
+@using GPS.Constants
+@using GPS.Constants.PRPOApproval
+@using GPS.Core.ViewModel
+@using GPS.Models.PRPOApproval
+@using GPS.ViewModels
+@{
+    PaginationViewModel paginationViewModel = (PaginationViewModel)ViewData["POApprovalPage"];
+}
+
+<div class="table-responsive col-xs-12 col-sm-12" style="overflow: hidden;">
+    <div style="border: 1pt solid #ccc;">
+        <div id="tScrollHead" style="width: 98.65%; overflow: hidden;">
+            <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1820px;">
+                <thead>
+                    <tr>
+                        <th width="20px"><input id="chk-all" type="checkbox" /></th>
+                        <th width="20px" class="sorting" data-field="URGENT" data-sort="none"><span style="font-weight:900;">!</span></th>
+                        <th width="20px" class="sorting" data-field="ATTACHMENT" data-sort="none"><span style="font-weight:900;">A</span></th>
+                        <th width="70px" class="sorting" data-field="PO" data-sort="none">PO No</th>
+                        <th width="180px" class="sorting" data-field="DESC" data-sort="none">Description</th>
+                        <th width="65px" class="sorting" data-field="DATE" data-sort="none">Doc. Date</th>
+                        <th width="250px" class="sorting" data-field="VENDOR" data-sort="none">Vendor</th>
+                        <th width="30px" class="sorting" data-field="CURR" data-sort="none">Curr</th>
+                        <th width="80px" class="sorting" data-field="AMOUNT" data-sort="none">Amount</th>
+                        <th width="90px" class="sorting" data-field="STATUS" data-sort="none">Status</th>
+                        <th width="60px" class="sorting" data-field="PURCH" data-sort="none">Purch. Group</th>
+                        <th class="_toggle-detail" width="100px">Created By</th>
+                        <th class="_toggle-detail" width="165px">Created Date</th>
+                        <th class="_toggle-detail" width="100px">Changed By</th>
+                        <th class="_toggle-detail" width="165px">Changed Date</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div id="tScrollBody" style="overflow: scroll; height: 270px;">
+            <table id="table-@PRPOApprovalPage.POApprovalGrid" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1820px;">
+                <tbody>
+                    @Html.Partial("POApprovalGridBody")
+                </tbody>
+            </table>
+        </div>
+        <div>
+            @Html.Partial(CommonPage.GridPagination, paginationViewModel)
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        /// Cannot get updated pageindex in bindHeaderCheck, In bindHeaderCheck pageindex = previous pageindex
+        ViewData.Add("Page", "@paginationViewModel.PageIndex");
+        ViewData.Add("PageSize", "@paginationViewModel.PageSize");
+
+        removeDetailMainList("");
+        bindHeaderCheck();
+        setSortSymbol();
+    });
+
+    /////// Header Populate Data Methods
+    var bindHeaderCheck = function BindHeaderCheck() {
+        var page = ViewData.Get("Page");
+
+        headerSelectionMode = $("#header-selection-mode").val();
+        docNoCount = parseInt($("#docno-count-value").val(), 10);
+        docNoList = $("#docno-list-value").val();
+
+        if (docNoCount == Number("@paginationViewModel.TotalDataCount") && Number("@paginationViewModel.TotalDataCount") > 0) {
+            headerSelectionMode = "EXC";
+            docNoList = "";
+            $("#chk-all").prop("checked", true);
+        }
+        else if (docNoCount == 0) {
+            headerSelectionMode = "INC";
+            docNoList = "";
+            $("#chk-all").prop("checked", false);
+        }
+        else {
+            $("#chk-all").prop("checked", false);
+        }
+
+        $("#header-selection-mode").val(headerSelectionMode);
+        $("#docno-count-value").val(docNoCount)
+        $("#docno-list-value").val(docNoList);
+
+        switch (headerSelectionMode.toUpperCase()) {
+            case "INC":
+                $("[id^=chk-approval-]", "#table-@PRPOApprovalPage.POApprovalGrid").each(function (idx) {
+                    if (docNoList.indexOf($(this).data("docno")) != -1)
+                        $(this).prop("checked", true);
+                    else
+                        $(this).prop("checked", false);
+                });
+                break;
+            case "EXC":
+                if (ViewData.Get("CheckAllPage") != page) $("#chk-all").prop("checked", false);
+                else $("#chk-all").prop("checked", true);
+
+                $("[id^=chk-approval-]", "#table-@PRPOApprovalPage.POApprovalGrid").each(function (idx) {
+                    var dataNo = parseInt($(this).attr('id').substring($(this).attr('id').indexOf("#chk-approval-") + "#chk-approval-".length, $(this).attr('id').length));
+                    if (dataNo >= (((parseInt(ViewData.Get("CheckAllPage")) - 1) * parseInt("@paginationViewModel.PageSize")) + 1) && dataNo <= (parseInt(ViewData.Get("CheckAllPage")) * parseInt("@paginationViewModel.PageSize"))) {
+                        if (docNoList.indexOf($(this).data("docno")) != -1)
+                            $(this).prop("checked", false);
+                        else
+                            $(this).prop("checked", true);
+                    }
+                });
+                break;
+        }
+    }
+
+    $("#chk-all").change(function (e) {
+        // Reset Header
+        var chkAll = this;
+
+        if (chkAll.checked) {
+            headerSelectionMode = "EXC";
+            docNoCount = @(paginationViewModel.TotalDataCount)
+            docNoList = "";
+
+            if (ViewData.Get("CheckAllPage") == undefined || ViewData.Get("CheckAllPage") == "" || ViewData.Get("CheckAllPage") != ViewData.Get("Page"))
+                ViewData.Add("CheckAllPage", ViewData.Get("Page"));
+        }
+        else {
+            headerSelectionMode = "INC";
+            docNoCount = 0;
+            docNoList = "";
+        }
+
+        $("#header-selection-mode").val(headerSelectionMode);
+        $("#docno-count-value").val(docNoCount);
+        $("#docno-list-value").val(docNoList);
+
+        // Reset Detail
+        docItemNoMainList = "";
+        $("#docitemno-main-list-value").val(docItemNoMainList);
+        bindHeaderCheck();
+        removeDetailMainList($(this).data("docno"));
+    });
+    ///////// End Header Populate Data Methods
+
+    $("#tScrollBody").scroll(function () {
+        $("#tScrollHead").scrollLeft($("#tScrollBody").scrollLeft());
+    });
+
+    var table = document.getElementById("dynamic-table");
+    if (table != null) {
+        for (var i = 0; i < table.rows.length; i++) {
+            for (var j = 0; j < table.rows[i].cells.length; j++) {
+                table.rows[i].cells[j].onclick = function () {
+                    tableText(this);
+                    sorting_execute = '1';
+                };
+            }
+        }
+    }
+
+    function tableText(tableCell) {
+        var removeClass;
+        var addClass;
+        var dataSort;
+        
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            if (tableCell.getAttribute("class").indexOf('sorting_asc') >= 0) {
+
+                removeClass = 'sorting_asc';
+                addClass = 'sorting_desc';
+                dataSort = 'DESC';
+
+            } else if (tableCell.getAttribute("class").indexOf('sorting_desc') >= 0) {
+
+                removeClass = 'sorting_desc';
+                addClass = 'sorting_none';
+                dataSort = 'none';
+
+            } else {
+
+                removeClass = 'sorting_none';
+                addClass = 'sorting_asc';
+                dataSort = 'ASC';
+
+            }
+        }
+        
+        //reset all
+        var tableReset = document.getElementById("dynamic-table");
+        if (tableReset != null) {
+            for (var i = 0; i < tableReset.rows.length; i++) {
+                for (var j = 0; j < tableReset.rows[i].cells.length; j++) {
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_asc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_asc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                    if (tableReset.rows[i].cells[j].className.indexOf('sorting_desc') >= 0) {
+                        tableReset.rows[i].cells[j].classList.remove('sorting_desc');
+                        tableReset.rows[i].cells[j].classList.add('sorting');
+                        tableReset.rows[i].cells[j].dataset.sort = 'none';
+                    }
+
+                }
+            }
+        }
+        // end
+
+        $("#chk-all").prop("checked", false);
+        $("[id^=chk-approval-]").prop("checked", false);
+        $("#docno-count-value").val(0);
+        $("#docno-list-value").val("");
+
+        var orderby = tableCell.dataset.field + '|' + dataSort;
+        var page = $('.pagination > li.active > a').html();
+        var pagesize = $("#cmb-perpage-POApproval").val();
+        var param = GetPOApprovalParameter(orderby, page, pagesize);
+        if (tableCell.getAttribute("class").indexOf('sorting') >= 0) {
+            tableCell.classList.remove(removeClass);
+            tableCell.classList.add(addClass);
+            tableCell.dataset.sort = dataSort;
+
+            SortGrid(param);
+        }
+    }
+</script>
