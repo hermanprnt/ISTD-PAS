@@ -1,0 +1,103 @@
+﻿@using GPS.Controllers.Master
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadScript {
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+
+    <!-- NOTE: moment.js is referenced by daterangepicker -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+}
+
+<div class="hidden-xs">
+    <form role="form" class="form-horizontal" id="searchForm" method="post" action="javascript: onGetData(1)">
+        <div class="row">
+            <div class="col-xs-12 col-sm-3 col-md-3">
+                <div class="form-group form-group-xs">
+                    <div class="col-xs-4 col-sm-4 text-right">
+                        <label class="control-label text-muted">Cost Center</label>
+                    </div>
+                    <div class="col-xs-8 col-sm-8">
+                        <input type="text" id="txt-costcenter" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-4 col-md-4">
+                <div class="form-group form-group-xs">
+                    <div class="col-xs-6 col-sm-6 text-right">
+                        <label class="control-label text-muted">Division</label>
+                    </div>
+                    <div class="col-xs-6 col-sm-6">
+                        @Html.DropDownList("cmb-division", DivisionController.GetDivisionList(), new { @class = "cursor-1", @style = "width:100%;" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-12 col-sm-5 col-md-5"> </div>
+        </div>
+        <div class="v-space"></div>
+        <div class="row">
+            <div class="col-sm-6">
+            </div>
+            <div class="col-xs-12 col-sm-6 text-right">
+                <button type="submit" class="btn btn-primary btn-xs btn-std btndisable" onclick="">Search</button>
+                <button type="button" class="btn btn-default btn-xs btn-std btndisable" onclick="onClear()">Clear</button>
+            </div>
+        </div>
+    </form>
+    <div class="v-space"></div>
+    <div class="line-br"></div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-6">
+            <button type="button" onclick=" onAddData() " id="btn-add" class="btn btn-primary btn-xs btn-std btndisable">Add</button>
+            <button type="button" onclick=" onEditData() " id="btn-edit" class="btn btn-primary btn-xs btn-std btndisable">Edit</button>
+            <button type="button" onclick=" onDeleteData() " id="btn-delete" class="btn btn-danger btn-xs btn-std btndisable">Delete</button>
+        </div>
+        <div class="col-xs-12 col-sm-6 text-right">
+            <div class="btn-group">
+                <div class="form-group form-group-xs" style="margin-bottom: 3px;">
+
+                    <a href="javascript:OnDownloadTemplate()" id="lnk-download"><span style="font-family: Open Sans; font-size: 12px">Download Template</span></a>
+
+                    <input type="file" id="upfile" name="upfile" style="display: none" />
+
+                    <button id="btn-upload" style="padding: 6px;" class="btn btn-warning btn-xs btn-std btndisable" onclick="$('input[id=upfile]').click();">
+                        <span style="font-family: Open Sans; font-size: 12px">Upload</span>
+                    </button>
+
+
+                    <button type="button" id="btn-download" onclick="download()" class="btn btn-primary btn-xs btn-xs btndisable">Download</button>
+
+                    <button type="button" class="btn btn-primary btn-std btn-xs" id="btn-detail" onclick="javascript:detailGrid()">Show Detail</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divtable">
+        @Html.Partial("_Grid")
+    </div>
+    <div class="modal fade" id="basicModal" data-backdrop="static" data-keyboard="false">
+        @Html.Partial("_AddEditPopUp")
+    </div>
+</div>
+
+@Html.Partial("_PartialScript")
+@section BodyScript{
+    <script>
+    function download()
+    {
+     $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadReport")", {
+        data:
+        {
+              CostCenterCd: $("#txt-costcenter").val(),
+              Division: $("#cmb-division").val(),
+              recordPerPage: $("#cbodisplay").val(),
+              currentPage: 1
+        }
+     });
+    }
+    </script>
+}

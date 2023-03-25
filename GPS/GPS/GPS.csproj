@@ -208,6 +208,7 @@
     <Compile Include="Controllers\Home\LogMonitoringDetailController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\MasterGlAccount\MasterGLAccountController.cs" />
+    <Compile Include="Controllers\Master\MasterAgreementController.cs" />
     <Compile Include="Controllers\Master\BudgetControlController.cs" />
     <Compile Include="Controllers\Master\CalculationMappingController.cs" />
     <Compile Include="Controllers\Master\BudgetConfigController.cs" />
@@ -2387,6 +2388,11 @@
     <Content Include="Views\PRInquiry\_NoticeMessage.cshtml" />
     <Content Include="Views\POInquiry\_Notice.cshtml" />
     <Content Include="Views\POInquiry\_NoticeMessage.cshtml" />
+    <Content Include="Views\MasterAgreement\MasterAgreement.cshtml" />
+    <Content Include="Views\MasterAgreement\_PartialScript.cshtml" />
+    <Content Include="Views\MasterAgreement\_AddEditPopUp.cshtml" />
+    <Content Include="Views\MasterAgreement\_Grid.cshtml" />
+    <Content Include="Views\MasterAgreement\_Paging.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Report\PO\UrgentSPK.rdlc" />

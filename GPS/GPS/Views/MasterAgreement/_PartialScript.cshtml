@@ -1,0 +1,288 @@
+﻿<script type="text/javascript">        
+    $(document).ready(function () {
+        onClear();
+    });
+
+    function detailGrid() {
+        if ($tdk.isDetail > 0) {
+            $("#btn-detail").html('Show Detail');
+            $("._toggle-detail").hide();
+            $tdk.isDetail = 0;
+            $("#dynamic-table").css("width", "100%");
+            $("#tblScroll").css("width", "100%");
+        }
+        else {
+            $("#btn-detail").html('Hide Detail');
+            $("._toggle-detail").show();
+            $tdk.isDetail = 1;
+            $("#dynamic-table").css("width", "1270px");
+            $("#tblScroll").css("width", "1270px");
+        }
+    }
+
+    /*Checkbox all*/   
+    function onCekAll() { 
+        if ($("#checkall").is(":checked")) {
+                $(".grid-checkbox-body").prop('checked', true);
+            } else {
+                $(".grid-checkbox-body").prop('checked', false);
+            }
+    }
+
+    function GetSelectedGrid() {
+        var ids = [];
+        $("input[id^=cb-]").each(function (i, a) {
+            if (a.id != null && a.id.length > 0 && a.checked) {
+                ids.push({                
+                    cc_cd: $('#' + a.id).data('cc_cd'),
+                    valfr_cd: $('#' + a.id).data('valfr_cd'),
+                    valto_cd: $('#' + a.id).data('valto_cd')
+                });
+            }
+        });
+        return ids;
+    }
+
+    $.fn.addOption = function (optText, optValue) {
+        var option = new Option(optText, optValue);
+        return this.append(option);
+    };
+</script>
+<script type="text/javascript" id="Search">
+    function onGetData(page) {
+        $.disable_enable_button.disable();
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val(),
+                Page: page,
+                Division: $("#cmb-division").val(),
+                CostCenter: $("#txt-costcenter").val()
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+                $.disable_enable_button.enable();
+            }
+        });
+    }
+
+    function onClear() {
+        $("#cmb-division").val('');
+        $("#txt-costcenter").val('');
+
+        $("input[id^=cb-]").each(function (i, a) {
+            a.checked = false;
+        });
+        ClearGrid(1);
+    }
+
+    function ClearGrid(page) {
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+                data: {
+                    Display: $("#cbodisplay").val(),
+                    Page: page,
+                    CostGroup: 'NULLSTATE',
+                    CostCenter: 'NULLSTATE'
+                },
+                success: function (data) {
+                    $("#divtable").html(data);
+                }
+        });
+    }
+</script>
+
+<script type="text/javascript" id="savedelete">
+    function onAddData() {
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagEditAdd")",
+            data: {
+                flag: '0',
+                Key: null
+            },
+            success: function (data) {
+                $("#basicModal").html(data);
+                $("#basicModal").modal();
+            }
+        });
+    }
+
+    function onEditData() {
+        if ($(".grid-checkbox-body:checked").length == 0)
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else if ($(".grid-checkbox-body:checked").length > 1)
+            //$("#selected-more-confirm").modal();
+            $.messagebox.show(
+                "Warning",
+                "Please Select only One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else {
+            var selectedData = GetSelectedGrid();
+
+            $.ajax({
+                type: "post",
+                url: "@Html.Toyota().Page.GetActionUrl("IsFlagEditAdd")",
+                data: {
+                    flag: '1',
+                    costCenterCode: selectedData[0].cc_cd,
+                    ValidFrom: selectedData[0].valfr_cd
+                },
+                success: function (data) {
+                    $("#basicModal").html(data);
+                    $.Disable(["#txtedit-costcenter"]);
+                    $("#txtedit-validdate").attr("disabled", "disabled");
+                    $("#txtedit-validdate").css("background-color", "grey");
+
+                    $("#basicModal").modal();
+                }
+            });
+        }
+    }
+
+    function onSaveData() {
+        var costCenter = $("#txtedit-costcenter").val();
+        var desc = $("#txtedit-description").val();
+        var division = $("#cmbedit-division").val();
+        var respperson = $("#txtedit-respperson").val();
+        var validdate = $("#txtedit-validdate").parsedaterange();
+
+        var isValid = $.ValidateMandatory(["#txtedit-costcenter", "#txtedit-description", "#txtedit-respperson", "#txtedit-validdate"]);
+        if (!isValid) return;
+
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
+            data: {
+                flag: $("#txtEdit").val(),
+                costCenterCode: costCenter,
+                description: desc,
+                division: division,
+                respperson: respperson,
+                validfrom: validdate.From,
+                validto: validdate.To
+            },
+            success: function (data) {
+                var result = data.message.split('|');
+                if (result[0] == 'True') {
+                    $.messagebox.show(
+                    "Info",
+                    result[1],
+                    "SUC",
+                    "SINGLE",
+                    "OkInfoSave()",
+                    ""
+                    )
+                }
+                else {
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            }
+        });
+    }
+
+    function onDeleteData() {
+        if ($(".grid-checkbox-body:checked").length === 0)
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be deleted",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else
+            $.messagebox.show(
+               "Confirmation",
+               "Are You Sure You Want to Delete this Item ?",
+               "INF",
+               "CONFIRM",
+               "onYesDelete()",
+               ""
+           )
+    }
+
+    function onYesDelete() {
+        var selectedData = GetSelectedGrid();
+        var keyArray = [];
+        for (var i = 0; i < selectedData.length; i++) {
+            keyArray.push(selectedData[i].cc_cd + ";" + selectedData[i].valfr_cd + ";" + selectedData[i].valto_cd);
+        }
+        var selectedKey = keyArray.join(",");
+
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("DeleteData")",
+            data: {
+                Key: selectedKey
+            },
+            success: function (data) {
+                var result = data.split('|');
+                if (result[0] == 'True') {
+                    $.messagebox.show(
+                       "Info",
+                       result[1],
+                       "SUC",
+                       "SINGLE",
+                       "",
+                       ""
+                   )
+                    onGetData(1);
+                }
+                else if (result[0] == 'Error') {
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            }
+        });
+    }
+</script>
+<script type="text/javascript" id="upload">
+    function OnDownloadTemplate() {     
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("CekTemplate")",        
+            success: function (data) {
+                if(data == 'False'){
+                     $.messagebox.show(
+                        "Error",
+                        "Template Not Found",
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                 }
+                 else {
+                     $.fileDownload("CostCenter/DownloadTemplate/"); 
+                 }
+             }        
+        });
+    }
+</script>
