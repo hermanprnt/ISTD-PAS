@@ -315,6 +315,14 @@ namespace GPS.Controllers.Master
         #endregion
 
         #region ark.herman 23/3/2023
+        public static SelectList GetStatusList()
+        {
+            return MasterAgreementRepository.Instance
+                .GetSTSAgreement()
+                .AsSelectList(div => div.SYSTEM_CD + " - " + div.SYSTEM_VALUE,
+                    div => div.SYSTEM_CD);
+        }
+
 
         #endregion
     }

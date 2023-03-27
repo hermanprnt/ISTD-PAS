@@ -279,6 +279,8 @@
     <Compile Include="Models\GLACCOUNT\masterGLAccount.cs" />
     <Compile Include="Models\GLACCOUNT\MasterGlAccountRepo.cs" />
     <Compile Include="Models\Master\BudgetConfig.cs" />
+    <Compile Include="Models\Master\MasterAgreement.cs" />
+    <Compile Include="Models\Master\MasterAgreementRepository.cs" />
     <Compile Include="Models\PO\POMonitoring.cs" />
     <Compile Include="Models\PRPOApproval\CommonApprovalVendorAssignment.cs" />
     <Compile Include="Models\CommonDownload.cs" />
@@ -578,6 +580,7 @@
     <Content Include="SQL\Master\BudgetConfig\SaveUploadedData.sql" />
     <Content Include="SQL\Master\BudgetControl\getFiscalYear.sql" />
     <Content Include="SQL\Master\CostCenter\SaveUploadedData.sql" />
+    <Content Include="SQL\Master\GetSTSAgreement.sql" />
     <Content Include="SQL\Master\GetAllDivisionCombo.sql" />
     <Content Include="SQL\Master\GetAllPOStatus.sql" />
     <Content Include="SQL\Master\GetAllPurchasingGroup.sql" />
@@ -2393,6 +2396,7 @@
     <Content Include="Views\MasterAgreement\_AddEditPopUp.cshtml" />
     <Content Include="Views\MasterAgreement\_Grid.cshtml" />
     <Content Include="Views\MasterAgreement\_Paging.cshtml" />
+    <Content Include="Views\MasterAgreement\_AddEditPopUp2.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Report\PO\UrgentSPK.rdlc" />
