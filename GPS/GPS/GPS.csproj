@@ -597,6 +597,14 @@
     <Content Include="SQL\Master\get_ItemClass.sql" />
     <Content Include="SQL\Master\get_MatGroup.sql" />
     <Content Include="SQL\Master\get_PRCoordinator.sql" />
+    <Content Include="SQL\Master\MasterAgreement\CountData.sql" />
+    <Content Include="SQL\Master\MasterAgreement\DeleteData.sql" />
+    <Content Include="SQL\Master\MasterAgreement\GetData.sql" />
+    <Content Include="SQL\Master\MasterAgreement\GetList.sql" />
+    <Content Include="SQL\Master\MasterAgreement\GetListAll.sql" />
+    <Content Include="SQL\Master\MasterAgreement\GetSelectedData.sql" />
+    <Content Include="SQL\Master\MasterAgreement\SaveData.sql" />
+    <Content Include="SQL\Master\MasterAgreement\SaveUploadedData.sql" />
     <Content Include="SQL\Master\Material\GetMaterialImageInfo.sql" />
     <Content Include="SQL\Master\Message\GetById.sql" />
     <Content Include="SQL\Master\Price\call_saveUpload.sql" />

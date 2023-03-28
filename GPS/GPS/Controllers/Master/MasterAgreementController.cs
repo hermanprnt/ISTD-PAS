@@ -323,6 +323,36 @@ namespace GPS.Controllers.Master
                     div => div.SYSTEM_CD);
         }
 
+        /// <summary>
+        /// INSERT DATA TO TB_M_AGREEMENT_NO
+        /// </summary>
+        public ActionResult SaveData(String flag, String vendorcd, String vendornm, String purchasinggrp, String buyer, String agreementno, String startdate, String expdate,String status,String nextaction)
+        {
+            startdate = conversiDate(startdate);
+            expdate = conversiDate(expdate);
+            //String message = "";
+            String message = MasterAgreementRepository.Instance.SaveData(flag, vendorcd, vendornm, purchasinggrp, buyer, agreementno, startdate, expdate,status,nextaction, this.GetCurrentUsername());
+
+            return new JsonResult { Data = new { message } };
+        }
+
+
+
+
+        protected string conversiDate(string tgl)
+        {
+            string result = "";
+            string[] dt = null;
+
+            if (tgl != "")
+            {
+                dt = tgl.Split('.');
+                tgl = dt[2] + "-" + dt[1] + "-" + dt[0];
+
+                result = tgl;
+            }
+            return result;
+        }
 
         #endregion
     }

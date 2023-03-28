@@ -42,6 +42,39 @@ namespace GPS.Models.Master
         }
 
 
+        public String SaveData(String flag, String vendorcd, String vendornm, String purchasinggrp, String buyer, String agreementno, String startdate, String expdate, String status, String nextaction, String uid)
+        {
+            string result = "";
+            try
+            {
+                IDBContext db = DatabaseManager.Instance.GetContext();
+                dynamic args = new
+                {
+                    Flag = flag,
+                    VendorCode = vendorcd,
+                    VendorName = vendornm,
+                    PurchasingGrp = purchasinggrp,
+                    Buyer = buyer,
+                    Agreementno = agreementno,
+                    Startdate = startdate,
+                    Expdate = expdate,
+                    Status = status,
+                    Nextaction = nextaction,
+                    UId = uid,
+
+                };
+
+                result = db.SingleOrDefault<string>("Master/MasterAgreement/SaveData", args);
+                db.Close();
+            }
+            catch (Exception ex)
+            {
+                result = "Error| " + Convert.ToString(ex.Message);
+            }
+
+            return result;
+        }
+
 
         #endregion
 
@@ -66,7 +99,7 @@ namespace GPS.Models.Master
             };
 
             IEnumerable<CostCenter> result = db.Fetch<CostCenter>("Master/CostCenter/GetData", args);
-            
+
             db.Close();
             return result;
         }
@@ -92,7 +125,7 @@ namespace GPS.Models.Master
             try
             {
                 IDBContext db = DatabaseManager.Instance.GetContext();
-                
+
                 foreach (String data in Key.Split(','))
                 {
                     String[] cols = data.Split(';');
@@ -101,7 +134,7 @@ namespace GPS.Models.Master
 
                     result = db.SingleOrDefault<string>("Master/CostCenter/DeleteData", new { CostCenterCode = cols[0], ValidFrom = cols[1], ValidTo = cols[2], UId = uid });
                 }
-                db.Close(); 
+                db.Close();
             }
             catch (Exception ex)
             {
@@ -111,36 +144,9 @@ namespace GPS.Models.Master
             return result;
         }
 
-        public String SaveData(String flag, String costCenterGroupCode, String costCenterCode, String description, String Division, String RespPerson, String validFrom, String validTo, String uid)
-        {
-            string result = "";            
-            try
-            {
-                IDBContext db = DatabaseManager.Instance.GetContext();
-                dynamic args = new
-                {
-                    Flag = flag,
-                    CostCenterCode = costCenterCode,
-                    Description = description,
-                    Division,
-                    RespPerson,
-                    UId = uid,
-                    ValidFrom = validFrom,
-                    ValidTo = validTo
-                };
-               
-                result = db.SingleOrDefault<string>("Master/CostCenter/SaveData", args);
-                db.Close();               
-            }
-            catch (Exception ex)
-            {
-                result = "Error| " + Convert.ToString(ex.Message);
-            }
 
-            return result;
-        }
 
-        public CostCenter GetSelectedData(String costCenterCode,String ValidFrom)
+        public CostCenter GetSelectedData(String costCenterCode, String ValidFrom)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();
 
@@ -199,7 +205,7 @@ namespace GPS.Models.Master
                 Length = recordPerPage,
                 CostCenter = CostCenterCd,
                 Division = Division,
-                
+
                 //CreateBy = createdBy,
                 //CreateDate = createdDt,
                 //ChangeBy = changedBy,

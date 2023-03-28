@@ -154,13 +154,20 @@
     }
 
     function onSaveData() {
-        var costCenter = $("#txtedit-costcenter").val();
-        var desc = $("#txtedit-description").val();
-        var division = $("#cmbedit-division").val();
-        var respperson = $("#txtedit-respperson").val();
-        var validdate = $("#txtedit-validdate").parsedaterange();
+        var vendorcd = $("#txtedit-vendorcd").val();
+        var vendornm = $("#txtedit-vendornm").val();
+        var purchasinggrp = $("#txtedit-purchasinggrp").val();
+        var buyer = $("#txtedit-buyer").val();
+        var agreementno = $("#txtedit-agreementno").val();
+        var startdate = $("#txtedit-startdate").parsedate;
+        var expdate = $("#txtedit-expdate").parsedate;
+        var status = $("#cmbedit-status").val;
+        var nextaction = $("#txtedit-nextaction").val();
+      
 
-        var isValid = $.ValidateMandatory(["#txtedit-costcenter", "#txtedit-description", "#txtedit-respperson", "#txtedit-validdate"]);
+
+
+        var isValid = $.ValidateMandatory(["#txtedit-vendorcd", "#txtedit-vendorcd"]);
         if (!isValid) return;
 
         $.ajax({
@@ -168,12 +175,15 @@
             url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
             data: {
                 flag: $("#txtEdit").val(),
-                costCenterCode: costCenter,
-                description: desc,
-                division: division,
-                respperson: respperson,
-                validfrom: validdate.From,
-                validto: validdate.To
+                vendorcd: vendorcd,
+                vendornm: vendornm,
+                purchasinggrp: purchasinggrp,
+                buyer: buyer,
+                agreementno: agreementno,
+                startdate: startdate,
+                expdate: expdate,
+                status: status,
+                nextaction:nextaction
             },
             success: function (data) {
                 var result = data.message.split('|');
