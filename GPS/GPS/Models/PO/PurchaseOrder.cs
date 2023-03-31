@@ -16,6 +16,7 @@ namespace GPS.Models.PO
         {
             get { return VendorCode + (String.IsNullOrEmpty(VendorName) ? String.Empty : " - " + VendorName); }
         }
+        public String DD_STATUS { get; set; }
         public String VendorCode { get; set; }
         public String VendorName { get; set; }
         public String VendorAddress { get; set; }

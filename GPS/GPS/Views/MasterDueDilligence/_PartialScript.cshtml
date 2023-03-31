@@ -1,5 +1,6 @@
 ﻿<script type="text/javascript">
     $(document).ready(function () {
+        $("#txt-dddate").todaterangepicker();
         onClear();
     });
 
@@ -158,18 +159,18 @@
     function onSaveData() {
         var vendorcd = $("#txtedit-vendorcd").val();
         var vendornm = $("#txtedit-vendornm").val();
-        var purchasinggrp = $("#txtedit-purchasinggrp").val();
-        var buyer = $("#txtedit-buyer").val();
-        var agreementno = $("#txtedit-agreementno").val();
-        var startdate = $("#txtedit-startdate").val();
-        var expdate = $("#txtedit-expdate").val();
         var status = $("#cmbedit-status").val();
-        var nextaction = $("#txtedit-nextaction").val();
+        var plan = $("#cmbedit-plan").val();
+        var vldddfrom = $("#txtedit-vldddfrom").val();
+        var vldddto = $("#txtedit-vldddto").val();
+        var agreementno = $("#txtedit-agreementno").val();
+        var vldagreementfrom = $("#txtedit-vldagreementfrom").val();
+        var vldagreementto = $("#txtedit-vldagreementto").val();
+         
 
 
 
-
-        var isValid = $.ValidateMandatory(["#txtedit-vendorcd", "#txtedit-vendorcd"]);
+        var isValid = $.ValidateMandatory(["#txtedit-vendorcd", "#txtedit-vendornm"]);
         if (!isValid) return;
 
         $.ajax({
@@ -179,13 +180,13 @@
                 flag: $("#txtEdit").val(),
                 vendorcd: vendorcd,
                 vendornm: vendornm,
-                purchasinggrp: purchasinggrp,
-                buyer: buyer,
-                agreementno: agreementno,
-                startdate: startdate,
-                expdate: expdate,
                 status: status,
-                nextaction:nextaction
+                plan,
+                vldddfrom,
+                vldddto,
+                agreementno,
+                vldagreementfrom,
+                vldagreementto
             },
             success: function (data) {
                 var result = data.message.split('|');

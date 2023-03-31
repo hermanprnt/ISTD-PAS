@@ -4,6 +4,7 @@ namespace GPS.Models.Master
 {
     public class MasterAgreement
     {
+        public String Number { get; set; }
         public String VENDOR_CODE { get; set; }
         public String VENDOR_NAME { get; set; }
         public String PURCHASING_GROUP { get; set; }
@@ -13,6 +14,7 @@ namespace GPS.Models.Master
         public String EXP_DATE { get; set; }
         public String STATUS { get; set; }
         public String NEXT_ACTION { get; set; }
+        public String BG_COLOR { get; set; }
     }
     public class StatusAgreement
     {

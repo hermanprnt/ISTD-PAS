@@ -6,7 +6,7 @@ using Toyota.Common.Web.Platform;
 
 namespace GPS.Models.Master
 {
-    public class MasterAgreementRepository
+    public class MasterDueDilligenceRepository
     {
         public sealed class SqlFile
         {
@@ -19,15 +19,15 @@ namespace GPS.Models.Master
             #endregion
         }
 
-        private MasterAgreementRepository() { }
-        private static MasterAgreementRepository instance = null;
-        public static MasterAgreementRepository Instance
+        private MasterDueDilligenceRepository() { }
+        private static MasterDueDilligenceRepository instance = null;
+        public static MasterDueDilligenceRepository Instance
         {
-            get { return instance ?? (instance = new MasterAgreementRepository()); }
+            get { return instance ?? (instance = new MasterDueDilligenceRepository()); }
         }
 
         #region Ark.Herman
-        public IEnumerable<StatusAgreement> GetSTSAgreement(String noReg = "")
+        public IEnumerable<StatusAgreement> GetSTSDueDilligence(String noReg = "")
         {
             IDBContext db = DatabaseManager.Instance.GetContext();
 
@@ -36,13 +36,13 @@ namespace GPS.Models.Master
                 NO_REG = noReg
             };
 
-            IEnumerable<StatusAgreement> result = db.Fetch<StatusAgreement>("Master/GetSTSAgreement", args);
+            IEnumerable<StatusAgreement> result = db.Fetch<StatusAgreement>("Master/GetSTSDueDilligence", args);
 
             db.Close();
             return result;
         }
 
-        public IEnumerable<MasterAgreement> GetListData(string VendorCode, string VendorName, string AgreementNo, string Status, int start, int length)
+        public IEnumerable<MasterDueDilligence> GetListData(string VendorCode, string VendorName, string AgreementNo, string Status, int start, int length)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();
             dynamic args = new
@@ -55,13 +55,14 @@ namespace GPS.Models.Master
                 Length = length
             };
 
-            IEnumerable<MasterAgreement> result = db.Fetch<MasterAgreement>("Master/MasterAgreement/GetData", args);
+            IEnumerable<MasterDueDilligence> result = db.Fetch<MasterDueDilligence>("Master/MasterDueDilligence/GetData", args);
 
             db.Close();
             return result;
         }
 
-        public String SaveData(String flag, String vendorcd, String vendornm, String purchasinggrp, String buyer, String agreementno, String startdate, String expdate, String status, String nextaction, String uid)
+        public String SaveData(String flag, String vendorcd, String vendornm, String status,String plan, String vldddfrom,
+            String vldddto, String agreementno, String vldagreementfrom, String vldagreementto, String uid)
         {
             string result = "";
             try
@@ -70,20 +71,19 @@ namespace GPS.Models.Master
                 dynamic args = new
                 {
                     Flag = flag,
-                    VendorCode = vendorcd,
-                    VendorName = vendornm,
-                    PurchasingGrp = purchasinggrp,
-                    Buyer = buyer,
-                    Agreementno = agreementno,
-                    Startdate = startdate,
-                    Expdate = expdate,
-                    Status = status,
-                    Nextaction = nextaction,
-                    UId = uid,
-
+                    vendorcd,
+                    plan,
+                    vendornm,
+                    status,
+                    vldddfrom,
+                    vldddto,
+                    agreementno,
+                    vldagreementfrom,
+                    vldagreementto,
+                    uid
                 };
 
-                result = db.SingleOrDefault<string>("Master/MasterAgreement/SaveData", args);
+                result = db.SingleOrDefault<string>("Master/MasterDueDilligence/SaveData", args);
                 db.Close();
             }
             catch (Exception ex)
@@ -96,17 +96,17 @@ namespace GPS.Models.Master
         public int CountData(string VendorCode, string VendorName, string AgreementNo, string Status)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();
-            int result = db.SingleOrDefault<int>("Master/MasterAgreement/CountData", new { VendorCode, VendorName, AgreementNo, Status });
+            int result = db.SingleOrDefault<int>("Master/MasterDueDilligence/CountData", new { VendorCode, VendorName, AgreementNo, Status });
             db.Close();
 
             return result;
         }
 
-        public MasterAgreement GetSelectedData(String VendorCode)
+        public MasterDueDilligence GetSelectedData(String VendorCode)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();
 
-            var data = db.SingleOrDefault<MasterAgreement>("Master/MasterAgreement/GetSelectedData", new { VendorCode });
+            var data = db.SingleOrDefault<MasterDueDilligence>("Master/MasterDueDilligence/GetSelectedData", new { VendorCode });
             db.Close();
 
             return data;
@@ -123,7 +123,7 @@ namespace GPS.Models.Master
                 {
                     String[] cols = data.Split(';');
 
-                    result = db.SingleOrDefault<string>("Master/MasterAgreement/DeleteData", new { VendorCode = cols[0], UId = uid });
+                    result = db.SingleOrDefault<string>("Master/MasterDueDilligence/DeleteData", new { vendorcd = cols[0], uid });
                 }
                 db.Close();
             }

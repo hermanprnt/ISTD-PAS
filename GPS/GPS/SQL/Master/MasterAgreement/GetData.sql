@@ -1,22 +1,31 @@
 ﻿SELECT * FROM (
 	SELECT DISTINCT
-		   DENSE_RANK() OVER (ORDER BY mc.COST_CENTER_CD ASC, mc.RESP_PERSON ASC, mc.DIVISION_ID ASC, mc.VALID_DT_FROM, mc.VALID_DT_TO, mc.CREATED_DT DESC) AS Number,
-		   mc.COST_CENTER_CD AS CostCenterCd,
-		   mc.COST_CENTER_DESC AS CostCenterDesc,
-		   mc.RESP_PERSON AS RespPerson,
-		   CAST(mc.DIVISION_ID AS VARCHAR) + CASE WHEN(ISNULL(se.DIVISION_NAME, '') = '') THEN '' ELSE ' - ' + se.DIVISION_NAME END AS Division,
-		   [dbo].[fn_date_format] (mc.VALID_DT_FROM) AS ValidDtFrom,
-		   [dbo].[fn_date_format] (mc.VALID_DT_TO) AS ValidDtTo,
-		   mc.CREATED_BY AS CreatedBy,
-		   [dbo].[fn_date_format] (mc.CREATED_DT) AS CreatedDt,
-		   mc.CHANGED_BY AS ChangedBy,
-		   [dbo].[fn_date_format] (mc.CHANGED_DT) AS ChangedDt
-	FROM TB_M_COST_CENTER mc
-	LEFT JOIN TB_R_SYNCH_EMPLOYEE se ON mc.DIVISION_ID = se.DIVISION_ID
-		WHERE ((mc.DIVISION_ID = @Division 
-		  AND isnull(@Division, '') <> ''
-		  OR (isnull(@Division, '') = '')))
-		AND ((mc.COST_CENTER_CD LIKE '%' + @CostCenter + '%'
-		  AND isnull(@CostCenter, '') <> ''
-		  OR (isnull(@CostCenter, '') = '')))
+		   DENSE_RANK() OVER (ORDER BY mc.VENDOR_CODE ASC, mc.VENDOR_NAME) AS Number,
+		   mc.VENDOR_CODE,
+		   mc.VENDOR_NAME,
+		   mc.PURCHASING_GROUP,
+		   mc.BUYER,
+		   mc.AGREEMENT_NO,
+		   [dbo].[fn_date_format] (mc.START_DATE) AS START_DATE,
+		   [dbo].[fn_date_format] (mc.EXP_DATE) AS EXP_DATE,
+		   CASE
+				WHEN mc.EXP_DATE >= DATEADD(mm, 3, GETDATE()) THEN 'GREEN'
+				WHEN mc.EXP_DATE BETWEEN GETDATE() AND DATEADD(mm, 3, GETDATE())THEN 'YELLOW'
+			ELSE 'RED'
+			END AS BG_COLOR,
+		   mc.[STATUS],
+		   mc.NEXT_ACTION
+	FROM TB_M_AGREEMENT_NO mc
+		WHERE ((mc.[STATUS] = @Status
+		  AND isnull(@Status, '') <> ''
+		  OR (isnull(@Status, '') = '')))
+		AND ((mc.VENDOR_CODE LIKE '%' + @VendorCode + '%'
+		  AND isnull(@VendorCode, '') <> ''
+		  OR (isnull(@VendorCode, '') = '')))
+		AND ((mc.VENDOR_NAME LIKE '%' + @VendorName + '%'
+		  AND isnull(@VendorName, '') <> ''
+		  OR (isnull(@VendorName, '') = '')))
+		AND ((mc.AGREEMENT_NO LIKE '%' + @AgreementNo+ '%'
+		  AND isnull(@AgreementNo, '') <> ''
+		  OR (isnull(@AgreementNo, '') = '')))
 ) tbl WHERE tbl.Number >= @Start AND tbl.Number <= @Length

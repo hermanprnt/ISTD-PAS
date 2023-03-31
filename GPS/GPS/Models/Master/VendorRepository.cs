@@ -469,7 +469,8 @@ namespace GPS.Models.Master
                 .AsNumberedNameValueList(
                     data => data.Number,
                     data => data.VendorName,
-                    data => data.VendorCd)
+                    data => data.VendorCd,
+                    data => data.DD_STATUS)
                 .ToList();
         }
 

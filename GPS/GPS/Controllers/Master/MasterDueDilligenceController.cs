@@ -12,7 +12,7 @@ using System.Collections.Generic;
 
 namespace GPS.Controllers.Master
 {
-    public class MasterAgreementController : PageController
+    public class MasterDueDilligenceController : PageController
     {
         #region List Of Controller Method
         public sealed class Action
@@ -33,9 +33,9 @@ namespace GPS.Controllers.Master
         }
         #endregion
 
-        public MasterAgreementController()
+        public MasterDueDilligenceController()
         {
-            Settings.Title = "Master Agreement No Screen";
+            Settings.Title = "Master Due Dilligence Screen";
         }
 
         protected override void Startup()
@@ -49,19 +49,20 @@ namespace GPS.Controllers.Master
         #region ark.herman 23/3/2023
         public ActionResult IsFlagEditAdd(String flag, String VendorCode)
         {
+            ViewData["REG_NO"] = this.GetCurrentRegistrationNumber();
             ViewData["edit"] = flag;
-            ViewData["MasterAgreementData"] = flag == "0"
-                ? new MasterAgreement()
-                : MasterAgreementRepository.Instance.GetSelectedData(VendorCode);
+            ViewData["MasterDueDilligenceData"] = flag == "0"
+                ? new MasterDueDilligence()
+                : MasterDueDilligenceRepository.Instance.GetSelectedData(VendorCode);
 
             return PartialView("_AddEditPopUp");
         }
 
         private void Calldata(int Display, int Page, string VendorCode, string VendorName, string AgreementNo, string Status)
         {
-            Paging pg = new Paging(MasterAgreementRepository.Instance.CountData(VendorCode, VendorName, AgreementNo, Status), Page, Display);
+            Paging pg = new Paging(MasterDueDilligenceRepository.Instance.CountData(VendorCode, VendorName, AgreementNo, Status), Page, Display);
             ViewData["Paging"] = pg;
-            ViewData["ListMasterAgreement"] = MasterAgreementRepository.Instance.GetListData(VendorCode, VendorName, AgreementNo, Status, pg.StartData, pg.EndData);
+            ViewData["ListMasterDueDilligence"] = MasterDueDilligenceRepository.Instance.GetListData(VendorCode, VendorName, AgreementNo, Status, pg.StartData, pg.EndData);
         }
 
         [HttpPost]
@@ -74,12 +75,14 @@ namespace GPS.Controllers.Master
         /// <summary>
         /// INSERT DATA TO TB_M_AGREEMENT_NO
         /// </summary>
-        public ActionResult SaveData(String flag, String vendorcd, String vendornm, String purchasinggrp, String buyer, String agreementno, String startdate, String expdate,String status,String nextaction)
+        public ActionResult SaveData(String flag, String vendorcd, String vendornm, String status,String plan, String vldddfrom, String vldddto, String agreementno, String vldagreementfrom, String vldagreementto)
         {
-            startdate = conversiDate(startdate);
-            expdate = conversiDate(expdate);
+            vldddfrom = conversiDate(vldddfrom);
+            vldddto = conversiDate(vldddto);
+            vldagreementfrom = conversiDate(vldagreementfrom);
+            vldagreementto = conversiDate(vldagreementto);
             //String message = "";
-            String message = MasterAgreementRepository.Instance.SaveData(flag, vendorcd, vendornm, purchasinggrp, buyer, agreementno, startdate, expdate,status,nextaction, this.GetCurrentUsername());
+            String message = MasterDueDilligenceRepository.Instance.SaveData(flag, vendorcd, vendornm, status, plan,vldddfrom, vldddto, agreementno, vldagreementfrom, vldagreementto, this.GetCurrentUsername());
 
             return new JsonResult { Data = new { message } };
         }
@@ -90,7 +93,7 @@ namespace GPS.Controllers.Master
 
             try
             {
-                message = MasterAgreementRepository.Instance.DeleteData(key, this.GetCurrentUsername());
+                message = MasterDueDilligenceRepository.Instance.DeleteData(key, this.GetCurrentUsername());
             }
             catch (Exception e)
             {
@@ -104,10 +107,18 @@ namespace GPS.Controllers.Master
 
         public static SelectList GetStatusList()
         {
-            return MasterAgreementRepository.Instance
-                .GetSTSAgreement()
+            return MasterDueDilligenceRepository.Instance
+                .GetSTSDueDilligence()
                 .AsSelectList(div => div.SYSTEM_CD + " - " + div.SYSTEM_VALUE,
                     div => div.SYSTEM_VALUE);
+        }
+
+        public static SelectList PlantSelectList()
+        {
+            return PlantRepository.Instance
+                .GetPlantList()
+                .AsSelectList(plant => plant.PLANT_CD + " - " + plant.PLANT_NAME, plant => plant.PLANT_CD);
+
         }
 
         protected string conversiDate(string tgl)

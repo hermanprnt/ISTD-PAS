@@ -208,6 +208,7 @@
     <Compile Include="Controllers\Home\LogMonitoringDetailController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\MasterGlAccount\MasterGLAccountController.cs" />
+    <Compile Include="Controllers\Master\MasterDueDilligenceController.cs" />
     <Compile Include="Controllers\Master\MasterAgreementController.cs" />
     <Compile Include="Controllers\Master\BudgetControlController.cs" />
     <Compile Include="Controllers\Master\CalculationMappingController.cs" />
@@ -279,7 +280,9 @@
     <Compile Include="Models\GLACCOUNT\masterGLAccount.cs" />
     <Compile Include="Models\GLACCOUNT\MasterGlAccountRepo.cs" />
     <Compile Include="Models\Master\BudgetConfig.cs" />
+    <Compile Include="Models\Master\MasterDueDilligence.cs" />
     <Compile Include="Models\Master\MasterAgreement.cs" />
+    <Compile Include="Models\Master\MasterDueDilligenceRepository.cs" />
     <Compile Include="Models\Master\MasterAgreementRepository.cs" />
     <Compile Include="Models\PO\POMonitoring.cs" />
     <Compile Include="Models\PRPOApproval\CommonApprovalVendorAssignment.cs" />
@@ -580,6 +583,7 @@
     <Content Include="SQL\Master\BudgetConfig\SaveUploadedData.sql" />
     <Content Include="SQL\Master\BudgetControl\getFiscalYear.sql" />
     <Content Include="SQL\Master\CostCenter\SaveUploadedData.sql" />
+    <Content Include="SQL\Master\GetSTSDueDilligence.sql" />
     <Content Include="SQL\Master\GetSTSAgreement.sql" />
     <Content Include="SQL\Master\GetAllDivisionCombo.sql" />
     <Content Include="SQL\Master\GetAllPOStatus.sql" />
@@ -605,6 +609,14 @@
     <Content Include="SQL\Master\MasterAgreement\GetSelectedData.sql" />
     <Content Include="SQL\Master\MasterAgreement\SaveData.sql" />
     <Content Include="SQL\Master\MasterAgreement\SaveUploadedData.sql" />
+    <Content Include="SQL\Master\MasterDueDilligence\CountData.sql" />
+    <Content Include="SQL\Master\MasterDueDilligence\DeleteData.sql" />
+    <Content Include="SQL\Master\MasterDueDilligence\GetData.sql" />
+    <Content Include="SQL\Master\MasterDueDilligence\GetList.sql" />
+    <Content Include="SQL\Master\MasterDueDilligence\GetListAll.sql" />
+    <Content Include="SQL\Master\MasterDueDilligence\GetSelectedData.sql" />
+    <Content Include="SQL\Master\MasterDueDilligence\SaveData.sql" />
+    <Content Include="SQL\Master\MasterDueDilligence\SaveUploadedData.sql" />
     <Content Include="SQL\Master\Material\GetMaterialImageInfo.sql" />
     <Content Include="SQL\Master\Message\GetById.sql" />
     <Content Include="SQL\Master\Price\call_saveUpload.sql" />
@@ -2404,7 +2416,11 @@
     <Content Include="Views\MasterAgreement\_AddEditPopUp.cshtml" />
     <Content Include="Views\MasterAgreement\_Grid.cshtml" />
     <Content Include="Views\MasterAgreement\_Paging.cshtml" />
-    <Content Include="Views\MasterAgreement\_AddEditPopUp2.cshtml" />
+    <Content Include="Views\MasterDueDilligence\_AddEditPopUp.cshtml" />
+    <Content Include="Views\MasterDueDilligence\_Grid.cshtml" />
+    <Content Include="Views\MasterDueDilligence\_Paging.cshtml" />
+    <Content Include="Views\MasterDueDilligence\_PartialScript.cshtml" />
+    <Content Include="Views\MasterDueDilligence\MasterDueDilligence.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Report\PO\UrgentSPK.rdlc" />

@@ -1,9 +1,12 @@
 ﻿SELECT
-	COST_CENTER_CD CostCenterCd,
-    COST_CENTER_DESC CostCenterDesc,
-	RESP_PERSON RespPerson,
-	DIVISION_ID Division,
-	[dbo].[fn_date_format] (VALID_DT_FROM) ValidDtFrom,
-    [dbo].[fn_date_format] (VALID_DT_TO) ValidDtTo
-FROM TB_M_COST_CENTER
-WHERE COST_CENTER_CD = @CostCenterCode AND VALID_DT_FROM = @ValidFrom
+			mc.VENDOR_CODE,
+		   mc.VENDOR_NAME,
+		   mc.PURCHASING_GROUP,
+		   mc.BUYER,
+		   mc.AGREEMENT_NO,
+		   [dbo].[fn_date_format] (mc.START_DATE) AS START_DATE,
+		   [dbo].[fn_date_format] (mc.EXP_DATE) AS EXP_DATE,
+		   mc.[STATUS],
+		   mc.NEXT_ACTION
+	FROM TB_M_AGREEMENT_NO mc
+WHERE VENDOR_CODE = @VendorCode

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace GPS.Models.Common
 {
@@ -7,10 +8,12 @@ namespace GPS.Models.Common
         public const String NoProperty = "No";
         public const String NameProperty = "Name";
         public const String ValueProperty = "Value";
+        public const String BackgroundProperty = "Value";
 
         public Int32 No { get; private set; }
         public String Name { get; private set; }
         public String Value { get; private set; }
+        public String Background { get; private set; }
 
         public static NameValueItem Empty
         {
@@ -27,6 +30,14 @@ namespace GPS.Models.Common
             No = no;
             Name = name;
             Value = value;
+        }
+
+        public NameValueItem(Int32 no, String name, String value,String bg)
+        {
+            No = no;
+            Name = name;
+            Value = value;
+            Background = bg;
         }
 
         public NameValueItem(String name, String value) : this(0, name, value) { }

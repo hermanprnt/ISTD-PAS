@@ -34,9 +34,18 @@
             $("#txtVendorAttentionForm").val("@VendorData.Attention");
             $("#txtVendorPostalForm").val("@VendorData.Postal");
             $("#txtVendorCountryForm").val("@VendorData.Country");
+
+            $("#txtddattachment").val("@VendorData.ATTACHMENT");
+            $("#txtddstatus").val("@VendorData.DD_STATUS");
+            $("#txtddregister").val("@VendorData.VALID_DD_FROM");
+            $("#txtddexpired").val("@VendorData.VALID_DD_TO");
+
             $("#hiddenmail").val("@VendorData.Mail;");
 
-            if ("@edit" === "1") $.Disable(["#txtVendorCdForm"]);
+            if ("@edit" === "1") $.Disable(["#txtddattachment"]);
+            if ("@edit" === "1") $.Disable(["#txtddstatus"]);
+            if ("@edit" === "1") $.Disable(["#txtddregister"]);
+            if ("@edit" === "1") $.Disable(["#txtddexpired"]);
 
             var lmail = "@VendorData.Mail";
             if (lmail !== "" && lmail !== null)
@@ -78,11 +87,10 @@
                                 </div>
                             </div>
                             <div class="form-group form-group-xs _criteria">
-                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Purch. Org</label>
+                                <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">Plant</label>
                                 <div class="col-xs-8 col-sm-9 col-md-8">
                                     <div class="input-group pos-rel" style="width: 100%;">
                                         @Html.DropDownListFor(m => m.VendorPlant, PlantController.PlantSelectListByDivisionId(RegNo, PlantBefore), new { id = "txtVendorPlantForm", @class = "cursor-1 mandatory", @style = "width:100%", @tabindex = "3" })
-
                                     </div>
                                 </div>
                             </div>
@@ -243,35 +251,102 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                    @*add ark.herman 3/31/2023*@
+                    @if (edit == "1")
+                    {
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs _criteria">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">DD Attachment</label>
+                                    <div class="col-xs-8 col-sm-9 col-md-8">
+                                        <div class="input-group pos-rel" style="width: 100%;">
+                                            @Html.TextBoxFor(m => m.ATTACHMENT, new { id = "txtddattachment", @style = "width:100%", @tabindex = "16" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs _criteria">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">DD Status</label>
+                                    <div class="col-xs-8 col-sm-9 col-md-8">
+                                        @if (VendorData.DD_STATUS == "HIGH")
+                                        {
+                                            <div class="input-group pos-rel" style="width: 100%;">
+                                                @Html.TextBoxFor(m => m.DD_STATUS, new { id = "txtddstatus", @style = "width:100%;background-color: red", @tabindex = "17" })
+                                            </div>
+                                        }
+                                        else if (VendorData.DD_STATUS == "MEDIUM")
+                                        {
+                                            <div class="input-group pos-rel" style="width: 100%;">
+                                                @Html.TextBoxFor(m => m.DD_STATUS, new { id = "txtddstatus", @style = "width:100%;background-color: yellow", @tabindex = "17" })
+                                            </div>
+                                        }
+                                        else if (VendorData.DD_STATUS == "LOW")
+                                        {
+                                            <div class="input-group pos-rel" style="width: 100%;">
+                                                @Html.TextBoxFor(m => m.DD_STATUS, new { id = "txtddstatus", @style = "width:100%;background-color: lawngreen", @tabindex = "17" })
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="input-group pos-rel" style="width: 100%;">
+                                                @Html.TextBoxFor(m => m.DD_STATUS, new { id = "txtddstatus", @style = "width:100%", @tabindex = "17" })
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs _criteria">
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">DD Register</label>
+                                    <div class="col-xs-8 col-sm-9 col-md-8">
+                                        <div class="input-group pos-rel" style="width: 100%;">
+                                            @Html.TextBoxFor(m => m.VALID_DD_FROM, new { id = "txtddregister", @style = "width:100%", @tabindex = "18" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6">
+                                <div class="form-group form-group-xs _criteria">
 
-                <div class="row">
-                    <div class="modal-footer">
-                        <div class="col-xs-6"> </div>
-                        <div class="col-xs-6 text-right">
-                            <div class="form-group-xs">
-                                <button type="submit" class="btn btn-primary btn-xs" tabindex="16">Save</button>
-                                <button type="button" class="btn btn-danger btn-xs" id="btnCancel" data-dismiss="modal" tabindex="17">Close</button>
+                                    <label class="col-xs-4 col-sm-3 col-md-4 control-label text-muted">DD Expired</label>
+                                    <div class="col-xs-8 col-sm-9 col-md-8">
+                                        <div class="input-group pos-rel" style="width: 100%;">
+                                            @Html.TextBoxFor(m => m.VALID_DD_TO, new { id = "txtddexpired", @style = "width:100%", @tabindex = "19" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @*end add*@
+                    <div class="row">
+                        <div class="modal-footer">
+                            <div class="col-xs-6"> </div>
+                            <div class="col-xs-6 text-right">
+                                <div class="form-group-xs">
+                                    <button type="submit" class="btn btn-primary btn-xs" tabindex="16">Save</button>
+                                    <button type="button" class="btn btn-danger btn-xs" id="btnCancel" data-dismiss="modal" tabindex="17">Close</button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
     </form>
 </div>
 
 <script type="text/javascript">
-$(document).ready(function () {
-    $('.date-picker').datepicker({
-        autoclose: true,
-        todayHighlight: true
-    })
-    //show datepicker when clicking on the icon
-	.next().on(ace.click_event, function () {
-		$(this).prev().focus();
-	});       
-}); 
+    $(document).ready(function () {
+        $('.date-picker').datepicker({
+            autoclose: true,
+            todayHighlight: true
+        })
+            //show datepicker when clicking on the icon
+            .next().on(ace.click_event, function () {
+                $(this).prev().focus();
+            });
+    });
 </script>
 
 

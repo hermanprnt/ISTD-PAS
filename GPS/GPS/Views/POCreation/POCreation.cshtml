@@ -327,6 +327,8 @@
         }
 
         function InitExistingData() {
+
+          
             $("#txtedit-poheadertext").val($("<div />").html("@Model.Header.POHeaderText").text());
             $("#txtlookup-vendor").val("@(String.IsNullOrEmpty(Model.Header.VendorCode) ? String.Empty : Model.Header.VendorCode + " - " + Model.Header.VendorName)");
             $("#txtedit-exchangerate").val(Number("@Model.Header.ExchangeRate"));
@@ -584,7 +586,7 @@
                 }
             });
         }
-        else{
+        else {
             $("#lookup-vendor").lookup({
                 IsSingleSelection: true,
                 LookupOpenUrl: "@POCreationController.Action.OpenCreationVendorLookup?PurchGroup="+$("#cmbedit-purchasinggroup").val()+"", // add 20200123
@@ -1183,7 +1185,7 @@
                         });
                     });
 
-                    console.log(subItemList);
+                    console.log(subItemList,'here');
 
                     var vendor = ViewData.Get("VendorInfo");
                     OnAjaxBegin("Save Sub Item");

@@ -5,38 +5,53 @@
 @using GPS.ViewModels.Lookup
 @model LookupViewModel<NameValueItem>
 
-<table class="table table-striped table-bordered table-condensed">
-    <thead>
-        <tr>
-            <th class="col-check" width="10%" rowspan="2"></th>
-            <th width="90%" colspan="2">@Model.Title</th>
-        </tr>
-        <tr>
-            <th width="20%">Code</th>
-            <th width="70%">Name</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.DataList.Any())
-        {
-            foreach (NameValueItem item in Model.DataList)
+    <table class="table table-striped table-bordered table-condensed">
+        <thead>
+            <tr>
+                <th class="col-check" width="10%" rowspan="2"></th>
+                <th width="90%" colspan="2">@Model.Title</th>
+            </tr>
+            <tr>
+                <th width="20%">Code</th>
+                <th width="70%">Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.DataList.Any())
             {
-                <tr data-key="@item.Value" data-value="@item.AsEmbeddedData()">
-                    <td class="col-check text-center" width="10%">
-                        <input id="chk-@Model.GridPaging.DataName-@item.No" type="checkbox" data-key="@item.Value" data-value="@item.AsEmbeddedData()"/>
-                    </td>
-                    <td class="text-center" width="20%">@item.Value</td>
-                    <td width="70%">@item.Name</td>
+                foreach (NameValueItem item in Model.DataList)
+                {
+                    <tr data-key="@item.Value" data-value="@item.AsEmbeddedData()">
+                        <td class="col-check text-center" width="10%">
+                            <input id="chk-@Model.GridPaging.DataName-@item.No" type="checkbox" data-key="@item.Value" data-value="@item.AsEmbeddedData()" />
+                        </td>
+                        <td class="text-center" width="20%">@item.Value</td>
+                        @if (item.Background == "HIGH")
+                        {
+                            <td width="70%" style="background-color:red">@item.Name</td>
+                        }
+                        else if (item.Background == "MEDIUM")
+                        {
+                            <td width="70%" style="background-color:yellow">@item.Name</td>
+                        }
+                        else if (item.Background == "LOW")
+                        {
+                            <td width="70%" style="background-color:lawngreen">@item.Name</td>
+                        }
+                        else
+                        {
+                            <td width="70%">@item.Name</td>
+                        }
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="text-center">@CommonDisplayMessage.NoData</td>
                 </tr>
             }
-        }
-        else
-        {
-            <tr>
-                <td colspan="3" class="text-center">@CommonDisplayMessage.NoData</td>
-            </tr>
-        }
-    </tbody>
-</table>
-<div class="v-space"></div>
-@Html.Partial(LookupPage.GenericLookupPaging, Model.GridPaging)
+        </tbody>
+    </table>
+    <div class="v-space"></div>
+    @Html.Partial(LookupPage.GenericLookupPaging, Model.GridPaging)

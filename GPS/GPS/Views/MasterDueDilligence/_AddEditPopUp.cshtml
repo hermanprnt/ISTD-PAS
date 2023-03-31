@@ -2,9 +2,12 @@
 @using GPS.Controllers.Master
 @using GPS.Models.Master
 @{
-    MasterAgreement data = ViewData["MasterAgreementData"] == null ? new MasterAgreement() : (MasterAgreement)ViewData["MasterAgreementData"];
+    MasterDueDilligence data = ViewData["MasterDueDilligenceData"] == null ? new MasterDueDilligence() : (MasterDueDilligence)ViewData["MasterDueDilligenceData"];
+    string RegNo = ViewData["REG_NO"] == null ? "" : (string)ViewData["REG_NO"];
+
+
     string edit = (string)ViewData["edit"];
-    string title = " Master Agreement";
+    string title = " Master Due Dilligence";
     if (edit == "1")
     {
         title = "Edit" + title;
@@ -31,7 +34,19 @@
                                     <label class="control-label text-muted">Vendor Code</label>
                                 </div>
                                 <div class="col-xs-7 col-sm-8">
-                                    <input type="text" id="txtedit-vendorcd" class="form-control mandatory" maxlength="10" value="@data.VENDOR_CODE" style="background-color:green;"/>
+                                    <input type="text" id="txtedit-vendorcd" class="form-control mandatory" maxlength="10" autocomplete="off" value="@data.VENDOR_CODE" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-6 col-md-6">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Vendor Plant</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    @Html.DropDownList("cmbedit-plan", MasterDueDilligenceController.PlantSelectList(), new { @class = "cursor-1", @style = "width:100%;" })
                                 </div>
                             </div>
                         </div>
@@ -43,7 +58,7 @@
                                     <label class="control-label text-muted">Vendor Name</label>
                                 </div>
                                 <div class="col-xs-7 col-sm-8">
-                                    <input type="text" id="txtedit-vendornm" class="form-control mandatory" maxlength="50" value="@data.VENDOR_NAME" />
+                                    <input type="text" id="txtedit-vendornm" class="form-control mandatory" maxlength="50" autocomplete="off" value="@data.VENDOR_NAME" />
                                 </div>
                             </div>
                         </div>
@@ -52,10 +67,10 @@
                         <div class="col-xs-12 col-sm-6 col-md-6">
                             <div class="form-group form-group-xs">
                                 <div class="col-xs-5 col-sm-4 text-right">
-                                    <label class="control-label text-muted">Purchasing Group</label>
+                                    <label class="control-label text-muted">Due Dilligence Status</label>
                                 </div>
                                 <div class="col-xs-7 col-sm-8">
-                                    <input type="text" id="txtedit-purchasinggrp" class="form-control mandatory" maxlength="8" value="@data.PURCHASING_GROUP" />
+                                    @Html.DropDownList("cmbedit-status", MasterDueDilligenceController.GetStatusList(), new { @class = "cursor-1", @style = "width:100%;" })
                                 </div>
                             </div>
                         </div>
@@ -64,38 +79,11 @@
                         <div class="col-xs-12 col-sm-6 col-md-6">
                             <div class="form-group form-group-xs">
                                 <div class="col-xs-5 col-sm-4 text-right">
-                                    <label class="control-label text-muted">Buyer</label>
-                                </div>
-                                <div class="col-xs-7 col-sm-8">
-                                    <input type="text" id="txtedit-buyer" class="form-control mandatory" maxlength="8" value="@data.BUYER" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-6 col-md-6">
-                            <div class="form-group form-group-xs">
-                                <div class="col-xs-5 col-sm-4 text-right">
-                                    <label class="control-label text-muted">Agreement No</label>
-                                </div>
-                                <div class="col-xs-7 col-sm-8">
-                                    <input type="text" id="txtedit-agreementno" class="form-control mandatory" maxlength="8" value="@data.AGREEMENT_NO" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    @* date *@
-
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-6 col-md-6">
-                            <div class="form-group form-group-xs">
-                                <div class="col-xs-5 col-sm-4 text-right">
-                                    <label class="control-label text-muted">Start Date</label>
+                                    <label class="control-label text-muted">Due Dilligence From</label>
                                 </div>
                                 <div class="col-xs-7 col-sm-8">
                                     <div class="input-group" style="cursor: pointer;">
-                                        <input class="form-control date-picker" type="text" name="date-range-picker" id="txtedit-startdate" data-date-format="dd.mm.yyyy" value="@data.START_DATE"/>
+                                        <input class="form-control date-picker" type="text" name="date-range-picker" id="txtedit-vldddfrom" data-date-format="dd.mm.yyyy" autocomplete="off" value="@data.VALID_DD_FROM" />
                                         <span class="input-group-addon"><i class="fa fa-calendar bigger-110"></i></span>
                                     </div>
                                 </div>
@@ -106,27 +94,44 @@
                         <div class="col-xs-12 col-sm-6 col-md-6">
                             <div class="form-group form-group-xs">
                                 <div class="col-xs-5 col-sm-4 text-right">
-                                    <label class="control-label text-muted">Expired Date</label>
+                                    <label class="control-label text-muted">Due Dilligence To</label>
                                 </div>
                                 <div class="col-xs-7 col-sm-8">
                                     <div class="input-group" style="cursor: pointer;">
-                                        <input class="form-control date-picker" type="text" name="date-range-picker" id="txtedit-expdate" data-date-format="dd.mm.yyyy"value="@data.EXP_DATE" />
+                                        <input class="form-control date-picker" type="text" name="date-range-picker" id="txtedit-vldddto" data-date-format="dd.mm.yyyy"  autocomplete="off" value="@data.VALID_DD_TO" />
                                         <span class="input-group-addon"><i class="fa fa-calendar bigger-110"></i></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    @* date *@
+
 
                     <div class="row">
                         <div class="col-xs-12 col-sm-6 col-md-6">
                             <div class="form-group form-group-xs">
                                 <div class="col-xs-5 col-sm-4 text-right">
-                                    <label class="control-label text-muted">Status</label>
+                                    <label class="control-label text-muted ">Agreement No</label>
                                 </div>
                                 <div class="col-xs-7 col-sm-8">
-                                    @Html.DropDownList("cmbedit-status", MasterAgreementController.GetStatusList(), new { @class = "cursor-1", @style = "width:100%;" })
+                                    <input type="text" id="txtedit-agreementno" class="form-control mandatory" autocomplete="off" value="@data.AGREEMENT_NO" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-6 col-md-6">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Valid Agreement From</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <div class="input-group" style="cursor: pointer;">
+                                        <input class="form-control date-picker" type="text" name="date-range-picker" id="txtedit-vldagreementfrom" data-date-format="dd.mm.yyyy"  autocomplete="off" value="@data.VALID_AGREEMENT_NO_FROM" />
+                                        <span class="input-group-addon"><i class="fa fa-calendar bigger-110"></i></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -135,19 +140,17 @@
                         <div class="col-xs-12 col-sm-6 col-md-6">
                             <div class="form-group form-group-xs">
                                 <div class="col-xs-5 col-sm-4 text-right">
-                                    <label class="control-label text-muted ">Next Action</label>
+                                    <label class="control-label text-muted">Valid Agreement To</label>
                                 </div>
                                 <div class="col-xs-7 col-sm-8">
-                                    <input type="text" id="txtedit-nextaction" class="form-control mandatory" value="@data.VENDOR_NAME" />
+                                    <div class="input-group" style="cursor: pointer;">
+                                        <input class="form-control date-picker" type="text" name="date-range-picker" id="txtedit-vldagreementto" data-date-format="dd.mm.yyyy" autocomplete="off" value="@data.VALID_AGREEMENT_NO_TO" />
+                                        <span class="input-group-addon"><i class="fa fa-calendar bigger-110"></i></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
-
-
-
-
                 </div>
             </div>
             <div class="modal-footer">
@@ -164,9 +167,12 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        $("#txtedit-startdate").todatepicker();
-        $("#txtedit-expdate").todatepicker();
-        $("#cmbedit-status").val("@data.STATUS");
+        $("#txtedit-vldddfrom").todatepicker();
+        $("#txtedit-vldddto").todatepicker();
+        $("#txtedit-vldagreementfrom").todatepicker();
+        $("#txtedit-vldagreementto").todatepicker();
+        $("#cmbedit-status").val("@data.DD_STATUS");
+        $("#cmbedit-plan").val("@data.VENDOR_PLANT");
     });
 </script>
 
