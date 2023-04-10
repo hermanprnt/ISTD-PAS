@@ -17,18 +17,7 @@ namespace GPS.Controllers.Master
         #region List Of Controller Method
         public sealed class Action
         {
-            public const String _getdata = "/BudgetConfig/GetData";
-            public const String _updatedata = "/BudgetConfig/UpdateData";
-
-            public const String _getLookupWBSGrid = "/BudgetConfig/getLookupWBSGrid";
-            public const String _getLookupWBSPage = "/BudgetConfig/getLookupWBSPage";
-
-            public const String _SaveEditDeleteData = "/BudgetConfig/SaveEditDeleteData";
-            public const String _DeleteData = "/BudgetConfig/DeleteData";
-
-            public const String _CheckTemplate = "/BudgetConfig/CheckTemplate";
-
-            public const String _UploadFile = "/BudgetConfig/UploadFile";
+            
 
         }
         #endregion
@@ -107,7 +96,7 @@ namespace GPS.Controllers.Master
             return MasterAgreementRepository.Instance
                 .GetSTSAgreement()
                 .AsSelectList(div => div.SYSTEM_CD + " - " + div.SYSTEM_VALUE,
-                    div => div.SYSTEM_VALUE);
+                    div => div.SYSTEM_CD);
         }
 
         protected string conversiDate(string tgl)

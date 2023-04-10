@@ -38,10 +38,15 @@
                         {
                             <td width="70%" style="background-color:lawngreen">@item.Name</td>
                         }
-                        else
+                        else if (item.Background == "BY PASS")
                         {
                             <td width="70%">@item.Name</td>
                         }
+                        else
+                        {
+                            <td width="70%" style="background-color:grey">@item.Name</td>
+                        }
+                        <td hidden>@item.Background</td>
                     </tr>
                 }
             }

@@ -65,7 +65,6 @@
             },
             success: function (data) {
                 $("#divtable").html(data);
-                console.table('data',data);
                 $.disable_enable_button.enable();
             }
         });
@@ -157,20 +156,16 @@
     }
 
     function onSaveData() {
-        var vendorcd = $("#txtedit-vendorcd").val();
+        
+        var vendorcd = $("#cmb-vendorcode").val();
+        //var vendorcd = $("#txtedit-vendorcd").val();
         var vendornm = $("#txtedit-vendornm").val();
         var status = $("#cmbedit-status").val();
-        var plan = $("#cmbedit-plan").val();
         var vldddfrom = $("#txtedit-vldddfrom").val();
         var vldddto = $("#txtedit-vldddto").val();
-        var agreementno = $("#txtedit-agreementno").val();
-        var vldagreementfrom = $("#txtedit-vldagreementfrom").val();
-        var vldagreementto = $("#txtedit-vldagreementto").val();
          
 
-
-
-        var isValid = $.ValidateMandatory(["#txtedit-vendorcd", "#txtedit-vendornm"]);
+        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-vendornm"]);
         if (!isValid) return;
 
         $.ajax({
@@ -181,12 +176,8 @@
                 vendorcd: vendorcd,
                 vendornm: vendornm,
                 status: status,
-                plan,
                 vldddfrom,
-                vldddto,
-                agreementno,
-                vldagreementfrom,
-                vldagreementto
+                vldddto
             },
             success: function (data) {
                 var result = data.message.split('|');
@@ -214,6 +205,11 @@
                 }
             }
         });
+    }
+
+    function OkInfoSave() {
+        $("#basicModal").modal('hide');
+        onGetData(1);
     }
 
     function onDeleteData() {

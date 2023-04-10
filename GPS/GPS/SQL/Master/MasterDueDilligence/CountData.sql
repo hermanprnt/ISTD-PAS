@@ -10,8 +10,5 @@
 		AND ((mc.VENDOR_NAME LIKE '%' + @VendorName + '%'
 		  AND isnull(@VendorName, '') <> ''
 		  OR (isnull(@VendorName, '') = '')))
-		AND ((mc.AGREEMENT_NO LIKE '%' + @AgreementNo+ '%'
-		  AND isnull(@AgreementNo, '') <> ''
-		  OR (isnull(@AgreementNo, '') = '')))
 )a
 

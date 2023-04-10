@@ -609,6 +609,7 @@
     <Content Include="SQL\Master\MasterAgreement\GetSelectedData.sql" />
     <Content Include="SQL\Master\MasterAgreement\SaveData.sql" />
     <Content Include="SQL\Master\MasterAgreement\SaveUploadedData.sql" />
+    <Content Include="SQL\Master\MasterDueDilligence\GetVendorSelected.sql" />
     <Content Include="SQL\Master\MasterDueDilligence\CountData.sql" />
     <Content Include="SQL\Master\MasterDueDilligence\DeleteData.sql" />
     <Content Include="SQL\Master\MasterDueDilligence\GetData.sql" />

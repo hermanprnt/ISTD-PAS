@@ -10,23 +10,19 @@ BEGIN
 	        [DD_STATUS] ,
 	        [VALID_DD_FROM] ,
 	        [VALID_DD_TO] ,
-	        [AGREEMENT_NO] ,
-	        [VALID_AGREEMENT_NO_FROM],
-	        [VALID_AGREEMENT_NO_TO],
+			 [DD_ATTACHMENT] ,
 	        [CREATED_BY] ,
 	        [CREATED_DT] ,
 	        [CHANGED_BY] ,
 	        [CHANGED_DT] 
         )
     VALUES  ( @vendorcd,
-              @plan,
+              'test plan',
               @vendornm,
 			  @status,
 			  @vldddfrom,
               @vldddto,
-              @agreementno,
-			  @vldagreementfrom,
-			  @vldagreementto,
+              'test attach',
               @uid,
               GETDATE(),
               NULL,
@@ -44,14 +40,12 @@ ELSE
 BEGIN
     UPDATE dbo.TB_M_DUE_DILLIGENCE
     SET [VENDOR_CODE] = @vendorcd,
-	        [VENDOR_PLANT] = @plan,
+	        [VENDOR_PLANT] = 'test edit plan',
 	        [VENDOR_NAME] =@vendornm,
 	        [DD_STATUS] =@status,
 	        [VALID_DD_FROM] =@vldddfrom,
 	        [VALID_DD_TO] =@vldddto,
-	        [AGREEMENT_NO] =@agreementno,
-	        [VALID_AGREEMENT_NO_FROM] =@vldagreementfrom,
-	        [VALID_AGREEMENT_NO_TO] = @vldagreementto,
+	        [DD_ATTACHMENT] ='test edit attachment',
         CHANGED_BY = @uid,
         CHANGED_DT = GETDATE()
     WHERE VENDOR_CODE = @vendorcd

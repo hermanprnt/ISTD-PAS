@@ -62,7 +62,7 @@ namespace GPS.Models.Master
         }
 
         public String SaveData(String flag, String vendorcd, String vendornm, String status,String plan, String vldddfrom,
-            String vldddto, String agreementno, String vldagreementfrom, String vldagreementto, String uid)
+            String vldddto,  String uid)
         {
             string result = "";
             try
@@ -77,9 +77,6 @@ namespace GPS.Models.Master
                     status,
                     vldddfrom,
                     vldddto,
-                    agreementno,
-                    vldagreementfrom,
-                    vldagreementto,
                     uid
                 };
 
@@ -110,6 +107,18 @@ namespace GPS.Models.Master
             db.Close();
 
             return data;
+        }
+
+        public MasterDueDilligence GetVendorSelected(string param)
+        {
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            dynamic args = new
+            {
+                param = param
+            };
+            MasterDueDilligence result = db.SingleOrDefault<MasterDueDilligence>("Master/MasterDueDilligence/GetVendorSelected", args);
+            db.Close();
+            return result;
         }
 
         public String DeleteData(String Key, String uid)

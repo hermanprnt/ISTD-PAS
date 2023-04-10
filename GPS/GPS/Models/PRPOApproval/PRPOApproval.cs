@@ -159,6 +159,7 @@ namespace GPS.Models.PRPOApproval
     public class POApproval
     {
         public Int32 DataNo { get; set; }
+        public String DD_STATUS { get; set; }
         public String DocNo { get; set; }
         public String DocDesc { get; set; }
         public String Currency { get; set; }

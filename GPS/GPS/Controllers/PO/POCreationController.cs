@@ -19,6 +19,7 @@ using GPS.ViewModels.PO;
 using NameValueItem = GPS.Models.Common.NameValueItem;
 using System.Linq;
 using System.IO;
+using System.Diagnostics;
 
 namespace GPS.Controllers.PO
 {
@@ -115,6 +116,7 @@ namespace GPS.Controllers.PO
             execModel.CurrentUserName = this.GetCurrentUserFullName();
             execModel.ModuleId = ModuleId.PurchaseOrder;
             execModel.FunctionId = FunctionId.POCreation;
+           
 
             String processId = execModel.ProcessId = creationRepo.Initial(execModel, String.Empty);
             var viewModel = new POCreationViewModel();
@@ -1074,13 +1076,15 @@ namespace GPS.Controllers.PO
         {
             try
             {
+
+                
                 var execModel = new ExecProcedureModel();
                 execModel.CurrentUser = this.GetCurrentUsername();
                 execModel.CurrentRegNo = this.GetCurrentRegistrationNumber();
                 execModel.ModuleId = ModuleId.PurchaseOrder;
                 execModel.FunctionId = FunctionId.POCreation;
                 execModel.ProcessId = viewModel.ProcessId;
-
+            
                 creationRepo.SaveHeaderTemp(execModel, viewModel);
                 return Json(new ActionResponseViewModel { ResponseType = ActionResponseViewModel.Success, Message = "PO Header is silently saved." });
             }

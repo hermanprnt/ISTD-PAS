@@ -64,21 +64,21 @@
                                         {
                                             <td class="text-center" style="width: 80px;background-color: lawngreen">@item.EXP_DATE</td>
                                         }
-                                        @if (item.STATUS == "FINISHED")
+                                        @if (item.STATUS == "1")
                                         {
-                                            <td class="text-left" style="width: 130px;background-color: lawngreen">@item.STATUS</td>
+                                            <td class="text-left" style="width: 130px;background-color: lawngreen">FINISHED</td>
                                         }
-                                        else if (item.STATUS == "NON AKTIF")
+                                        else if (item.STATUS == "2")
                                         {
-                                            <td class="text-left" style="width: 130px;background-color: grey">@item.STATUS</td>
+                                            <td class="text-left" style="width: 130px;background-color: grey">NON AKTIF</td>
                                         }
-                                        else if (item.STATUS == "AKAN HABIS")
+                                        else if (item.STATUS == "3")
                                         {
-                                            <td class="text-left" style="width:130px;background-color:yellow">@item.STATUS</td>
+                                            <td class="text-left" style="width:130px;background-color:yellow">AKAN HABIS</td>
                                         }
                                         else
                                         {
-                                            <td class="text-left" style="width: 130px">@item.STATUS</td>
+                                            <td class="text-left" style="width: 130px">ON PROGRESS</td>
                                         }
                                         <td class="text-left" style="width:100px">@item.NEXT_ACTION</td>
                                     </tr>

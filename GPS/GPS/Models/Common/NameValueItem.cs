@@ -8,7 +8,7 @@ namespace GPS.Models.Common
         public const String NoProperty = "No";
         public const String NameProperty = "Name";
         public const String ValueProperty = "Value";
-        public const String BackgroundProperty = "Value";
+        public const String BackgroundProperty = "BgValue";
 
         public Int32 No { get; private set; }
         public String Name { get; private set; }

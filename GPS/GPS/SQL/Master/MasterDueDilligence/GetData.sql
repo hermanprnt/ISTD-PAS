@@ -6,14 +6,12 @@
 		mc.VENDOR_NAME,
 		mc.DD_STATUS,
 		CASE 
-			WHEN DD_STATUS = 'HIGH' THEN 'RED'
-			WHEN DD_STATUS = 'MEDIUM' THEN 'YELLOW'
-			WHEN DD_STATUS = 'LOW' THEN 'GREEN'
+			WHEN DD_STATUS = '1' THEN 'RED'
+			WHEN DD_STATUS = '2' THEN 'YELLOW'
+			WHEN DD_STATUS = '3' THEN 'GREEN'
 		ELSE 'BLUE'
 		END AS BG_COLOR,
-		[dbo].[fn_date_format] (mc.VALID_AGREEMENT_NO_FROM) AS VALID_AGREEMENT_NO_FROM,
-		[dbo].[fn_date_format] (mc.VALID_AGREEMENT_NO_TO) AS VALID_AGREEMENT_NO_TO,
-		mc.AGREEMENT_NO,
+		mc.DD_ATTACHMENT,
 		[dbo].[fn_date_format] (mc.VALID_DD_FROM) AS VALID_DD_FROM,
 		[dbo].[fn_date_format] (mc.VALID_DD_TO) AS VALID_DD_TO,
 		mc.DELETION,
@@ -31,7 +29,4 @@ FROM TB_M_DUE_DILLIGENCE mc
 		AND ((mc.VENDOR_NAME LIKE '%' + @VendorName + '%'
 		  AND isnull(@VendorName, '') <> ''
 		  OR (isnull(@VendorName, '') = '')))
-		AND ((mc.AGREEMENT_NO LIKE '%' + @AgreementNo+ '%'
-		  AND isnull(@AgreementNo, '') <> ''
-		  OR (isnull(@AgreementNo, '') = '')))
 ) tbl WHERE tbl.Number >= @Start AND tbl.Number <= @Length

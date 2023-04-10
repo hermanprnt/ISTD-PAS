@@ -9,6 +9,8 @@ using System.IO;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using System.Collections.Generic;
+using GPS.Core.ViewModel;
+using GPS.Core;
 
 namespace GPS.Controllers.Master
 {
@@ -17,18 +19,7 @@ namespace GPS.Controllers.Master
         #region List Of Controller Method
         public sealed class Action
         {
-            public const String _getdata = "/BudgetConfig/GetData";
-            public const String _updatedata = "/BudgetConfig/UpdateData";
-
-            public const String _getLookupWBSGrid = "/BudgetConfig/getLookupWBSGrid";
-            public const String _getLookupWBSPage = "/BudgetConfig/getLookupWBSPage";
-
-            public const String _SaveEditDeleteData = "/BudgetConfig/SaveEditDeleteData";
-            public const String _DeleteData = "/BudgetConfig/DeleteData";
-
-            public const String _CheckTemplate = "/BudgetConfig/CheckTemplate";
-
-            public const String _UploadFile = "/BudgetConfig/UploadFile";
+            
 
         }
         #endregion
@@ -71,18 +62,23 @@ namespace GPS.Controllers.Master
             Calldata(Display, Page, VendorCode, VendorName, AgreementNo, Status);
             return PartialView("_Grid");
         }
+       
+
+        public JsonResult GetVendorOnChange(string vendor)
+        {
+            return Json(MasterDueDilligenceRepository.Instance.GetVendorSelected(vendor));
+        }
 
         /// <summary>
         /// INSERT DATA TO TB_M_AGREEMENT_NO
         /// </summary>
-        public ActionResult SaveData(String flag, String vendorcd, String vendornm, String status,String plan, String vldddfrom, String vldddto, String agreementno, String vldagreementfrom, String vldagreementto)
+        [HttpPost]
+        public ActionResult SaveData(String flag, String vendorcd, String vendornm, String status,String plan, String vldddfrom, String vldddto)
         {
             vldddfrom = conversiDate(vldddfrom);
             vldddto = conversiDate(vldddto);
-            vldagreementfrom = conversiDate(vldagreementfrom);
-            vldagreementto = conversiDate(vldagreementto);
             //String message = "";
-            String message = MasterDueDilligenceRepository.Instance.SaveData(flag, vendorcd, vendornm, status, plan,vldddfrom, vldddto, agreementno, vldagreementfrom, vldagreementto, this.GetCurrentUsername());
+            String message = MasterDueDilligenceRepository.Instance.SaveData(flag, vendorcd, vendornm, status, plan,vldddfrom, vldddto,this.GetCurrentUsername());
 
             return new JsonResult { Data = new { message } };
         }
@@ -110,7 +106,7 @@ namespace GPS.Controllers.Master
             return MasterDueDilligenceRepository.Instance
                 .GetSTSDueDilligence()
                 .AsSelectList(div => div.SYSTEM_CD + " - " + div.SYSTEM_VALUE,
-                    div => div.SYSTEM_VALUE);
+                    div => div.SYSTEM_CD);
         }
 
         public static SelectList PlantSelectList()
