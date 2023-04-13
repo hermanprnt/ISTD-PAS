@@ -133,7 +133,7 @@
 
                     $.ajax({
                         type: "POST",
-                        url: "@Url.Content("~/CostCenter/UploadFile")",
+                        url: "@Url.Content("~/MasterAgreement/UploadFile")",
                         contentType: false,
                         processData: false,
                         data: data,
@@ -152,7 +152,7 @@
                             }
                             else if (result[0] == 'Success') {
                                 $('#upfile').val('');
-                                window.location = "CostCenter/DownloadUploadedResult?path=" + result[1];
+                                window.location = "MasterAgreement/DownloadUploadedResult?path=" + result[1];
                                 onGetData(1);
                             }
                         },

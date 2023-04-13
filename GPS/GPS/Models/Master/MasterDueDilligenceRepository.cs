@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Web.Mvc;
 using Toyota.Common.Database;
 using Toyota.Common.Web.Platform;
@@ -42,14 +43,15 @@ namespace GPS.Models.Master
             return result;
         }
 
-        public IEnumerable<MasterDueDilligence> GetListData(string VendorCode, string VendorName, string AgreementNo, string Status, int start, int length)
+        public IEnumerable<MasterDueDilligence> GetListData(string VendorCode, string VendorName, string DateFrom, string DateTo, string Status, int start, int length)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();
             dynamic args = new
             {
                 VendorCode,
                 VendorName,
-                AgreementNo,
+                DateFrom,
+                DateTo,
                 Status,
                 Start = start,
                 Length = length
@@ -60,6 +62,15 @@ namespace GPS.Models.Master
             db.Close();
             return result;
         }
+        public int CountData(string VendorCode, string VendorName, string DateFrom, string DateTo, string Status)
+        {
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            int result = db.SingleOrDefault<int>("Master/MasterDueDilligence/CountData", new { VendorCode, VendorName, DateFrom, DateTo, Status });
+            db.Close();
+
+            return result;
+        }
+
 
         public String SaveData(String flag, String vendorcd, String vendornm, String status,String plan, String vldddfrom,
             String vldddto,  String uid)
@@ -90,10 +101,23 @@ namespace GPS.Models.Master
 
             return result;
         }
-        public int CountData(string VendorCode, string VendorName, string AgreementNo, string Status)
+
+        public string SaveUploadedData(MasterDueDilligence param, string username)
         {
+            param.VALID_DD_FROM = conversiDate(param.VALID_DD_FROM);
+
             IDBContext db = DatabaseManager.Instance.GetContext();
-            int result = db.SingleOrDefault<int>("Master/MasterDueDilligence/CountData", new { VendorCode, VendorName, AgreementNo, Status });
+            dynamic args = new
+            {
+                vendorCd = param.VENDOR_CODE,
+                dd_Status = param.DD_STATUS,
+                dd_from = param.VALID_DD_FROM,
+
+                //ValidDtFrom = conversiDate(param.ValidDtFrom),
+                UId = username
+            };
+
+            string result = db.SingleOrDefault<string>("Master/MasterDueDilligence/SaveUploadedData", args);
             db.Close();
 
             return result;

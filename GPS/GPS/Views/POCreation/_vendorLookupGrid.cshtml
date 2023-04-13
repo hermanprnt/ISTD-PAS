@@ -26,19 +26,19 @@
                             <input id="chk-@Model.GridPaging.DataName-@item.No" type="checkbox" data-key="@item.Value" data-value="@item.AsEmbeddedData()" />
                         </td>
                         <td class="text-center" width="20%">@item.Value</td>
-                        @if (item.Background == "HIGH")
+                        @if (item.Background == "1")
                         {
                             <td width="70%" style="background-color:red">@item.Name</td>
                         }
-                        else if (item.Background == "MEDIUM")
+                        else if (item.Background == "2")
                         {
                             <td width="70%" style="background-color:yellow">@item.Name</td>
                         }
-                        else if (item.Background == "LOW")
+                        else if (item.Background == "3")
                         {
                             <td width="70%" style="background-color:lawngreen">@item.Name</td>
                         }
-                        else if (item.Background == "BY PASS")
+                        else if (item.Background == "4")
                         {
                             <td width="70%">@item.Name</td>
                         }
@@ -46,7 +46,6 @@
                         {
                             <td width="70%" style="background-color:grey">@item.Name</td>
                         }
-                        <td hidden>@item.Background</td>
                     </tr>
                 }
             }

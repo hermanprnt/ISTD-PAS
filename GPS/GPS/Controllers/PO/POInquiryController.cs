@@ -23,6 +23,7 @@ using iTextSharp.text;
 using iTextSharp.text.pdf;
 using System.Diagnostics;
 using GPS.Models.PRPOApproval;
+using GPS.Models.Master;
 
 namespace GPS.Controllers.PO
 {
@@ -549,6 +550,7 @@ namespace GPS.Controllers.PO
                 downloadEngine.WriteCellValue(Hrow, 9, styleNormal, item.POStatus);
                 downloadEngine.WriteCellValue(Hrow, 10, styleCenter, item.HasSPK ? "Yes" : "No");
                 downloadEngine.WriteCellValue(Hrow, 11, styleCenter, item.POStatusCode == POStatus.Posting || item.POStatusCode == POStatus.Released ? "Yes" : "No");
+                downloadEngine.WriteCellValue(Hrow, 12, styleCenter, item.GovRelated);
                 row++;
             }
 
@@ -880,6 +882,17 @@ namespace GPS.Controllers.PO
             }
             //return Json(result, JsonRequestBehavior.AllowGet);
             return Json(result);
+        }
+
+        public static SelectList GovRelatedSelectList
+        {
+            get
+            {
+                return POInquiryRepository.Instance
+                    .GetGovRelatedList()
+                    .AsSelectList(pc => pc.Value,
+                        pc => pc.Value);
+            }
         }
     }
 }   

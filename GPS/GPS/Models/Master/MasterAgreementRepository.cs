@@ -102,6 +102,29 @@ namespace GPS.Models.Master
             return result;
         }
 
+        public string SaveUploadedData(MasterAgreement param, string username)
+        {
+            param.START_DATE = conversiDate(param.START_DATE);
+            param.EXP_DATE = conversiDate(param.EXP_DATE);
+
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            dynamic args = new
+            {
+                vendorCd = param.VENDOR_CODE,
+                purchasingGroup = param.PURCHASING_GROUP,
+                buyer = param.BUYER,
+                agreementNo = param.AGREEMENT_NO,
+                startDate = param.START_DATE,
+                expDate = param.EXP_DATE,
+                nextAction = param.NEXT_ACTION,
+                UId = username
+            };
+
+            string result = db.SingleOrDefault<string>("Master/MasterAgreement/SaveUploadedData", args);
+            db.Close();
+
+            return result;
+        }
         public MasterAgreement GetSelectedData(String VendorCode)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();

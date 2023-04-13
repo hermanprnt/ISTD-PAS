@@ -1,36 +1,56 @@
-﻿DECLARE @@MSG VARCHAR(MAX) = '',
-	    @@EXISTS_VALID_FROM DATE
+﻿DECLARE @@MSG VARCHAR(8000) = '',
+		@@VENDOR_NM VARCHAR(50),
+		@@VENDOR_PLANT VARCHAR(50),
+		@@VALID_DD_TO DATETIME,
+		@@STATUS VARCHAR(1)
 
-IF(ISNULL(@Division, '') <> '')
+----------------------START OPERATION------------------------
+IF(ISNULL(@vendorCd, '') <> '')
 BEGIN
-	IF NOT EXISTS(SELECT 1 from TB_R_SYNCH_EMPLOYEE WHERE DIVISION_ID = @Division)
+	IF NOT EXISTS(SELECT 1 from TB_M_VENDOR WHERE VENDOR_CD = @vendorCd)
 	BEGIN
-		SET @@MSG = 'Division ID ' + @Division + ' is not registered yet in TB_R_SYNCH_EMPLOYEE'
+		SET @@MSG = 'Vendor Code ' + @vendorCd + ' is not registered yet in TB_M_VENDOR'
 		SELECT @@MSG
 		RETURN;
 	END
+	ELSE
+	BEGIN
+		SELECT 
+			@@VENDOR_NM = VENDOR_NAME,
+			@@VENDOR_PLANT = VENDOR_PLANT
+		FROM TB_M_VENDOR WHERE VENDOR_CD = @vendorCd
+	END
 END
 
-IF NOT EXISTS(SELECT 1 FROM TB_M_COST_CENTER WHERE COST_CENTER_CD = @CostCenterCd)
+
+
+
+IF NOT EXISTS(SELECT 1 FROM TB_M_AGREEMENT_NO WHERE VENDOR_CODE = @vendorCd)
 BEGIN
-	INSERT INTO dbo.TB_M_COST_CENTER
-		(COST_CENTER_CD,
-         COST_CENTER_DESC,
-		 DIVISION_ID,
-		 RESP_PERSON,
-         VALID_DT_FROM,
-         VALID_DT_TO,
-         CREATED_BY,
-         CREATED_DT,
+	INSERT INTO dbo.TB_M_AGREEMENT_NO
+		(VENDOR_CODE,
+		 VENDOR_NAME,
+		 PURCHASING_GROUP,
+		 BUYER,
+		 AGREEMENT_NO,
+		 START_DATE,
+		 EXP_DATE,
+		 STATUS,
+		 NEXT_ACTION,
+		 CREATED_BY,
+		 CREATED_DT,
          CHANGED_BY,
          CHANGED_DT)
     VALUES
-		(@CostCenterCd,
-         @CostCenterDesc,
-	     @Division,
-	     @RespPerson,
-         @ValidDtFrom,
-         '9999-12-31',
+		(@vendorCd,
+	     @@VENDOR_NM,
+		 @purchasingGroup,
+		 @buyer,
+		 @agreementNo,
+		 @startDate,
+		 @expDate,
+		 '1',
+		 @nextAction,
          @UId,
          GETDATE(),
          NULL,
@@ -38,50 +58,10 @@ BEGIN
 END
 ELSE
 BEGIN
-	SELECT @@EXISTS_VALID_FROM = VALID_DT_FROM FROM TB_M_COST_CENTER WHERE COST_CENTER_CD = @CostCenterCd
-	IF(@@EXISTS_VALID_FROM < CAST(@ValidDtFrom AS DATE))
-	BEGIN
-		IF(CAST(DATEADD(DAY, -1, CAST(@ValidDtFrom AS DATE)) AS DATETIME) < @@EXISTS_VALID_FROM)
-		BEGIN
-			SELECT 'Fail to add Cost Center, because duplicate entries.'
-			RETURN;
-		END
-		ELSE
-		BEGIN
-			UPDATE TB_M_COST_CENTER 
-				SET VALID_DT_TO = DATEADD(DAY, -1, CAST(@ValidDtFrom AS DATE)),
-				    CHANGED_BY = @UId,
-                    CHANGED_DT = GETDATE()
-				WHERE VALID_DT_TO = '9999-12-31' and COST_CENTER_CD = @CostCenterCd
-
-				INSERT INTO dbo.TB_M_COST_CENTER
-					(COST_CENTER_CD,
-					 COST_CENTER_DESC,
-					 DIVISION_ID,
-					 RESP_PERSON,
-					 VALID_DT_FROM,
-					 VALID_DT_TO,
-					 CREATED_BY,
-					 CREATED_DT,
-					 CHANGED_BY,
-					 CHANGED_DT)
-				VALUES
-					(@CostCenterCd,
-					 @CostCenterDesc,
-					 @Division,
-					 @RespPerson,
-					 @ValidDtFrom,
-					 '9999-12-31',
-					 @UId,
-					 GETDATE(),
-					 NULL,
-					 NULL)
-		END
-	END
-	ELSE
-	BEGIN
-		SELECT 'Fail to add Cost Center, because duplicate entries.'
-		RETURN;
-	END
+	
+SELECT 'SUCCESS'
+	
 END
+
+
 SELECT 'SUCCESS'

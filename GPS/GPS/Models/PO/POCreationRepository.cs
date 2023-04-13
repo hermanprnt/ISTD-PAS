@@ -652,6 +652,7 @@ namespace GPS.Models.PO
                 sqlSelect.Parameters.Add("@poNote8", SqlDbType.VarChar).Value = poNoteArray[7];
                 sqlSelect.Parameters.Add("@poNote9", SqlDbType.VarChar).Value = poNoteArray[8];
                 sqlSelect.Parameters.Add("@poNote10", SqlDbType.VarChar).Value = poNoteArray[9];
+                sqlSelect.Parameters.Add("@govRelated", SqlDbType.VarChar).Value = viewModel.GOVERNMENT_RELATED == null ? "" : viewModel.GOVERNMENT_RELATED;
                 sqlSelect.Parameters.Add("@vendor", SqlDbType.VarChar).Value = viewModel.Vendor == null ? "" : viewModel.Vendor;
                 sqlSelect.Parameters.Add("@vendorName", SqlDbType.VarChar).Value = viewModel.VendorName;
                 sqlSelect.Parameters.Add("@vendorAddress", SqlDbType.VarChar).Value = viewModel.VendorAddress==null?"":viewModel.VendorAddress;

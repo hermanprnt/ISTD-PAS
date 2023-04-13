@@ -45,6 +45,8 @@ namespace GPS.Models.PRPOApproval
         public String CurrentUser { get; set; }
         public String CurrentUserRegNo { get; set; }
         public String UserType { get; set; }
+        public String GovRelate { get; set; }
+
     }
 
     /// <summary>
@@ -158,6 +160,7 @@ namespace GPS.Models.PRPOApproval
     /// </summary> 
     public class POApproval
     {
+        public String GovRelate { get; set; }
         public Int32 DataNo { get; set; }
         public String DD_STATUS { get; set; }
         public String DocNo { get; set; }

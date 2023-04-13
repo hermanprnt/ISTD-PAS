@@ -7,6 +7,7 @@ namespace GPS.Models.PO
 {
     public class PurchaseOrder
     {
+        public String GovRelated { get; set; }
         public String CurrentUserNoReg { get; set; }
         public String ProcessId { get; set; }
         public Int32 DataNo { get; set; }

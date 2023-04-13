@@ -12,5 +12,6 @@ namespace GPS.ViewModels.PO
         public String POHeaderText { get; set; }
         public String PRNo { get; set; }
         public String ProcChannel { get; set; }
+        public String GovRelate { get; set; }
     }
 }

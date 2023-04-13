@@ -49,22 +49,21 @@
         <td class="text-center">@item.PODate.ToStandardFormat()</td>
         <td class="text-center">@item.PurchasingGroup</td>
 
-        @if (item.DD_STATUS == "HIGH")
+        @if (item.DD_STATUS == "1")
         {
             <td class="text-left" style="background-color:red">@item.Vendor</td>
         }
-        else if (item.DD_STATUS == "MEDIUM")
+        else if (item.DD_STATUS == "2")
         {
             <td class="text-left" style="background-color:yellow">@item.Vendor</td>
         }
-        else if (item.DD_STATUS == "LOW")
+        else if (item.DD_STATUS == "3")
         {
             <td class="text-left" style="background-color:lawngreen">@item.Vendor</td>
         }
-        else if (item.DD_STATUS == "BY PASS")
+        else if (item.DD_STATUS == "4")
         {
             <td class="text-left">@item.Vendor</td>
-         
         }
         else
         {
@@ -106,6 +105,7 @@
                 <img id="img-pdf-@item.DataNo" tabindex="15" data-pono="@item.PONo" data-podate="@item.PODate.Year.ToString()" src="@Url.Content("~/Content/img/pdf_icon.png")" />
             }
         </td>
+        <td class="text-center">@item.GovRelated</td>
         <td class="col-hidden hidden">
             @if ((item.CancelBy != "") && (item.CancelBy != null))
             {

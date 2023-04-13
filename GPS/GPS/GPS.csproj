@@ -2164,6 +2164,8 @@
     <Content Include="Content\Download\Template\COST_CENTER.xls" />
     <Content Include="Content\Download\Template\ASSET.xls" />
     <None Include="Content\Download\ProcurementTrackingHeader.xls" />
+    <Content Include="Content\Download\Template\DueDilligentTemplate.xls" />
+    <Content Include="Content\Download\Template\MasterAgreementUploadTemplate.xls" />
     <None Include="Content\Download\Template\Material.xls" />
     <Content Include="Views\GRCreation\GRCreation.cshtml" />
     <Content Include="Views\GRCreation\_POData.cshtml" />

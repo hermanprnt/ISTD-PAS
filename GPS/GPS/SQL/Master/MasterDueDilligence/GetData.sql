@@ -1,4 +1,17 @@
-﻿SELECT * FROM (
+﻿
+DECLARE 
+@@From datetime
+,@@To datetime
+
+
+IF(@DateFrom <> '' AND @DateTo <> '')
+BEGIN
+	set @@From = (select CONVERT(DATETIME,@DateFrom , 104))
+	set @@To = (select CONVERT(DATETIME,@DateTo , 104))	
+END
+
+
+SELECT * FROM (
 	SELECT DISTINCT
 		DENSE_RANK() OVER (ORDER BY mc.VENDOR_CODE ASC, mc.VENDOR_NAME) AS Number,
 		mc.VENDOR_CODE,
@@ -29,4 +42,10 @@ FROM TB_M_DUE_DILLIGENCE mc
 		AND ((mc.VENDOR_NAME LIKE '%' + @VendorName + '%'
 		  AND isnull(@VendorName, '') <> ''
 		  OR (isnull(@VendorName, '') = '')))
+		  AND ((mc.VALID_DD_FROM >= @@From
+		  AND isnull(@@From, '') <> ''
+		  OR (isnull(@@From, '') = '')))
+		  AND ((mc.VALID_DD_TO <= @@To
+		  AND isnull(@@To, '') <> ''
+		  OR (isnull(@@To, '') = '')))
 ) tbl WHERE tbl.Number >= @Start AND tbl.Number <= @Length

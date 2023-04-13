@@ -3,8 +3,6 @@
 @using GPS.Models.Master
 @{
     MasterDueDilligence data = ViewData["MasterDueDilligenceData"] == null ? new MasterDueDilligence() : (MasterDueDilligence)ViewData["MasterDueDilligenceData"];
-    string RegNo = ViewData["REG_NO"] == null ? "" : (string)ViewData["REG_NO"];
-
 
     string edit = (string)ViewData["edit"];
     string title = " Master Due Dilligence";
@@ -34,8 +32,14 @@
                                     <label class="control-label text-muted">Vendor Code</label>
                                 </div>
                                 <div class="col-xs-7 col-sm-8">
-                                    @Html.DropDownList("cmb-vendorcode", VendorController.VendorSelectList, new { tabindex = "5", @class = "form-control" })
-                                    @*<input type="text" id="txtedit-vendorcd" class="form-control mandatory" maxlength="10" autocomplete="off" value="@data.VENDOR_CODE" />*@
+                                    @if (edit == "1")
+                                    {
+                                        @Html.DropDownList("cmb-vendorcode", VendorController.VendorSelectList, new { tabindex = "1", @class = "form-control" , Enabled = false})
+                                    }
+                                    else
+                                    {
+                                        @Html.DropDownList("cmb-vendorcode", VendorController.VendorSelectList, new { tabindex = "1", @class = "form-control" })
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -126,8 +130,10 @@
     $(document).ready(function () {
         $("#txtedit-vldddfrom").todatepicker();
         $("#txtedit-vldddto").todatepicker();
-        ////$("#cmbedit-status").val("@data.DD_STATUS");
-        ////$("#cmbedit-plan").val("@data.VENDOR_PLANT");
+        $("#cmbedit-status").val("@data.DD_STATUS");
+
+
+        $("#cmb-vendorcode").val("@data.VENDOR_CODE");
 
         $("#cmb-vendorcode").change(function () {
             var vendor = $(this).val();
@@ -162,11 +168,9 @@
                     $("#txtedit-vldddto").val(dateAfterAdd.toLocaleDateString('en-GB').replaceAll("/", "."));
                 } else if ($("#cmbedit-status").val() == '2') {
                     const dateAfterAdd = addTwoYear(dateHasilArray);
-                    //console.log(dateAfterAdd);
                     $("#txtedit-vldddto").val(dateAfterAdd.toLocaleDateString('en-GB').replaceAll("/", "."));
                 } else if ($("#cmbedit-status").val() == '3' || $("#cmbedit-status").val() == '4') {
                     const dateAfterAdd = addThreeYear(dateHasilArray);
-                    //console.log(dateAfterAdd);
                     $("#txtedit-vldddto").val(dateAfterAdd.toLocaleDateString('en-GB').replaceAll("/", "."));
                 } else {
 

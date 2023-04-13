@@ -327,11 +327,11 @@
         }
 
         function InitExistingData() {
-            if ("@Model.Header.DD_STATUS" === "HIGH") {
+            if ("@Model.Header.DD_STATUS" === "1") {
                 document.getElementById('txtlookup-vendor').style.backgroundColor = 'red';
-            } else if ("@Model.Header.DD_STATUS" === "MEDIUM") {
+            } else if ("@Model.Header.DD_STATUS" === "2") {
                 document.getElementById('txtlookup-vendor').style.backgroundColor = 'yellow';
-            } else if ("@Model.Header.DD_STATUS" === "LOW") {
+            } else if ("@Model.Header.DD_STATUS" === "3") {
                 document.getElementById('txtlookup-vendor').style.backgroundColor = 'lawngreen';
             };
             $("#txtedit-poheadertext").val($("<div />").html("@Model.Header.POHeaderText").text());
@@ -627,11 +627,11 @@
                             Fax: ""
                         });
                         var vendor = ViewData.Get("VendorInfo");
-                        if (vendor.Background === "HIGH") {
+                        if (vendor.Background === "1") {
                             document.getElementById('txtlookup-vendor').style.backgroundColor = 'red';
-                        } else if (vendor.Background === "MEDIUM") {
+                        } else if (vendor.Background === "2") {
                             document.getElementById('txtlookup-vendor').style.backgroundColor = 'yellow';
-                        } else if (vendor.Background === "LOW") {
+                        } else if (vendor.Background === "3") {
                             document.getElementById('txtlookup-vendor').style.backgroundColor = 'lawngreen';
                         }
 
@@ -1356,6 +1356,17 @@
             });
         });
 
+        /*const checkbox = */
+        document.getElementById('chkbox-govrelated').addEventListener('change', (event) => { 
+        //checkbox.addEventListener('change', (event) => {
+            if (event.currentTarget.checked) {
+                //alert('hey');
+                SilentSavePOHeader();
+            } else {
+                SilentSavePOHeader();
+            }
+        })
+
         $(document).on("click", "#btn-subitemedit-cancel", function (e) {
             DisableAllFeatures();
             ResetSubItemEditedRowValue();
@@ -1383,6 +1394,7 @@
                 vendcode = "";
                 vendname = "";
             }
+            const cb = document.querySelector('#chkbox-govrelated');
             /*ended : 20190628 : isid.rgl*/
             return {
                 ProcessId: processId,
@@ -1404,7 +1416,8 @@
                 DeliveryAddress: $("#cmbedit-deliveryaddr").valOrDefault(),
                 SPKInfo: ViewData.Get("SPKInfo"),
                 OtherMail : $("#hiddenmail").val(),
-                SaveAsDraft: isSavedAsDraft
+                SaveAsDraft: isSavedAsDraft,
+                GOVERNMENT_RELATED: cb.checked
             };
         }
 
@@ -1469,9 +1482,9 @@
 
         $("#btnsave-draft").click(function (e) {
             SilentSavePOHeader();
-            var yes = document.getElementById("chkbox-govrelated");  
+            
             const cb = document.querySelector('#chkbox-govrelated');
-            console.log(cb.checked,'really?'); // false
+            //console.log(cb.checked,'really?'); 
            
             var isPOManual = $("#cmb-poitem-creationtype").valOrDefault() === "@POCreationType.Manual";
             if (!ValidatePOItem())
