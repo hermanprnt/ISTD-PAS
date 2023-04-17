@@ -1,4 +1,9 @@
-﻿IF(@Flag = '0')
+﻿DECLARE @@VENDORPLN VARCHAR(20)
+
+SELECT @@VENDORPLN = VENDOR_PLANT FROM TB_M_VENDOR WHERE VENDOR_CD = @vendorcd
+
+
+IF(@Flag = '0')
 BEGIN
 	IF NOT EXISTS(select 1 from TB_M_DUE_DILLIGENCE where VENDOR_CODE = @vendorcd)
 	begin --Begin Insert
@@ -17,7 +22,7 @@ BEGIN
 	        [CHANGED_DT] 
         )
     VALUES  ( @vendorcd,
-              'test plan',
+              @@VENDORPLN,
               @vendornm,
 			  @status,
 			  @vldddfrom,
@@ -40,7 +45,7 @@ ELSE
 BEGIN
     UPDATE dbo.TB_M_DUE_DILLIGENCE
     SET [VENDOR_CODE] = @vendorcd,
-	        [VENDOR_PLANT] = 'test edit plan',
+	        [VENDOR_PLANT] = @@VENDORPLN,
 	        [VENDOR_NAME] =@vendornm,
 	        [DD_STATUS] =@status,
 	        [VALID_DD_FROM] =@vldddfrom,

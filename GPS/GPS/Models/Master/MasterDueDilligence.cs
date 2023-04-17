@@ -9,6 +9,7 @@ namespace GPS.Models.Master
         public String VENDOR_PLANT { get; set; }
         public String VENDOR_NAME { get; set; }
         public String DD_STATUS { get; set; }
+        public String DD_ATTACHMENT { get; set; }
         public String VALID_DD_FROM { get; set; }
         public String VALID_DD_TO { get; set; }
         public String AGREEMENT_NO { get; set; }
