@@ -36,7 +36,7 @@ namespace GPS
                 ApplicationSettings.Instance.Security.SimulatedAuthenticatedUser = new User()
                 {
                     //Username = "danny.fahmi",
-                    //Username = "christian_gunawan",
+                    //Username = "christian_gunawan",   
                     Username = "tony_a",
                     Password = "toyota",
                     FirstName = "Anonymous",

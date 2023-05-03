@@ -64,7 +64,7 @@
             },
             success: function (data) {
                 $("#divtable").html(data);
-                console.table('data',data);
+                
                 $.disable_enable_button.enable();
             }
         });
@@ -166,8 +166,7 @@
         var status = $("#cmbedit-status").val();
         var nextaction = $("#txtedit-nextaction").val();
 
-
-
+        console.log(vendornm,'vendornm  ');
 
         var isValid = $.ValidateMandatory(["#txtedit-vendorcd", "#txtedit-vendorcd"]);
         if (!isValid) return;

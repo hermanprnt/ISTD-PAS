@@ -1,6 +1,6 @@
 ﻿
  UPDATE dbo.TB_M_DUE_DILLIGENCE
-    SET DELETION = 1,
+    SET DELETION = 'Y',
         CHANGED_BY = @uid,
         CHANGED_DT = GETDATE()
     WHERE VENDOR_CODE = @vendorcd
