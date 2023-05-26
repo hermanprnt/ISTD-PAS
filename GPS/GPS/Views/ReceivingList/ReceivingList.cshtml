@@ -146,6 +146,15 @@
         //link
         $("#txtdateinput-receivingdate").todaterangepicker();
         $("#matDocPostDate").todatepicker();
+
+        var curdate = new Date();
+        curdate.getDate();
+        curdate.setMonth(curdate.getMonth() - 1);
+
+        var dt = new Date();
+        dt.getDate();
+        $("#txtdateinput-receivingdate").val(("0" + curdate.getUTCDate()).slice(-2) + '.' + ("0" + (curdate.getUTCMonth() + 1).toString()).slice(-2) + '.' + curdate.getUTCFullYear() + " - " + ("0" + dt.getUTCDate()).slice(-2) + '.' + ("0" + (dt.getUTCMonth() + 1).toString()).slice(-2) + '.' + dt.getUTCFullYear());
+
         function OnAjaxBegin(title) {
             $.progressbox.show($tdk.PageTitle, title);
             DisableAllFeatures();

@@ -1,6 +1,8 @@
-﻿namespace GPS.Report.PO {
-    
-    
-    public partial class PODataSet {
+﻿namespace GPS.Report.PO
+{
+
+
+    public partial class PODataSet
+    {
     }
 }
