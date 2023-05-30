@@ -29,7 +29,7 @@ namespace GPS
         }
         private void BypassLogin(bool isBypass)
         {
-            if (isBypass)
+            if (isBypass)   
             {
                 ApplicationSettings.Instance.Security.IgnoreAuthorization = true;
                 ApplicationSettings.Instance.Security.SimulateAuthenticatedSession = true;

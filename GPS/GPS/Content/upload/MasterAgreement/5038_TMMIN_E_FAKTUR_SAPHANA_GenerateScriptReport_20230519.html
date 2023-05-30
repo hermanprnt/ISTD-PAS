@@ -1,0 +1,606 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<html>
+  <head>
+    <title>Save Scripts Report</title>
+  </head>
+  <body>
+    <p STYLE="font-family: Verdana, Arial, sans-serif; font-size: 14pt;">
+      <b>Save Scripts Report</b>
+    </p>
+    <p STYLE="font-family: Verdana, Arial, sans-serif; font-size: 10pt;">
+      <b>Report Date/Time:</b>5/19/2023 11:16 AM<br /></p>
+    <table border="1" cellpadding="7" cellspacing="0" STYLE="font-family: Verdana, Arial, sans-serif; font-size: 9pt;">
+      <tr style="background-color:Silver">
+        <th colspan="2" align="center">Name</th>
+        <th align="center">Result</th>
+        <th align="center">Message</th>
+      </tr>
+      <tr valign="top">
+        <td>
+          <img src="resources\ProgressSuccess.ico" />
+        </td>
+        <td>Getting the list of objects from 'TMMIN_E_FAKTUR_SAPHANA'.</td>
+        <td>Passed</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td>
+          <img src="resources\ProgressError.ico" />
+        </td>
+        <td>Preparing dbo.fn_ParseText2Table</td>
+        <td>Failed</td>
+        <td>Microsoft.SqlServer.Management.SqlScriptPublish.SqlScriptPublishException: An error occurred while scripting the objects. ---&gt; Microsoft.SqlServer.Management.Smo.PropertyCannotBeRetrievedException: Property TextHeader is not available for UserDefinedFunction '[dbo].[fn_ParseText2Table]'. This property may not exist for this object, or may not be retrievable due to insufficient access rights. The text is encrypted.
+   at Microsoft.SqlServer.Management.Smo.ScriptNameObjectBase.GetTextProperty(String requestingProperty, ScriptingPreferences sp, Boolean bThrowIfCreating)
+   at Microsoft.SqlServer.Management.Smo.ScriptNameObjectBase.BuildText(ScriptingPreferences sp)
+   at Microsoft.SqlServer.Management.Smo.ScriptNameObjectBase.GetTextForScript(ScriptingPreferences sp, String[] expectedObjectTypes, Boolean forceCheckNameAndManipulateIfRequired, ScriptHeaderType scriptHeaderType)
+   at Microsoft.SqlServer.Management.Smo.UserDefinedFunction.ScriptUDF(StringCollection queries, ScriptingPreferences sp, ScriptHeaderType scriptHeaderType)
+   at Microsoft.SqlServer.Management.Smo.UserDefinedFunction.ScriptCreate(StringCollection queries, ScriptingPreferences sp)
+   at Microsoft.SqlServer.Management.Smo.SqlSmoObject.ScriptCreateInternal(StringCollection query, ScriptingPreferences sp, Boolean skipPropagateScript)
+   at Microsoft.SqlServer.Management.Smo.ScriptMaker.ScriptCreateObject(Urn urn, ScriptingPreferences sp, ObjectScriptingType&amp; scriptType)
+   at Microsoft.SqlServer.Management.Smo.ScriptMaker.ScriptCreate(Urn urn, ScriptingPreferences sp, ObjectScriptingType&amp; scriptType)
+   at Microsoft.SqlServer.Management.Smo.ScriptMaker.ScriptCreateObjects(IEnumerable`1 urns)
+   at Microsoft.SqlServer.Management.Smo.ScriptMaker.ScriptUrns(List`1 orderedUrns)
+   at Microsoft.SqlServer.Management.Smo.ScriptMaker.DiscoverOrderScript(IEnumerable`1 urns)
+   at Microsoft.SqlServer.Management.Smo.ScriptMaker.ScriptWorker(List`1 urns, ISmoScriptWriter writer)
+   at Microsoft.SqlServer.Management.Smo.ScriptMaker.Script(Urn[] urns, ISmoScriptWriter writer)
+   at Microsoft.SqlServer.Management.SqlScriptPublish.SqlScriptGenerator.DoScript(ScriptOutputOptions outputOptions)
+   --- End of inner exception stack trace ---
+   at Microsoft.SqlServer.Management.SqlScriptPublish.GeneratePublishPage.worker_DoWork(Object sender, DoWorkEventArgs e)
+   at System.ComponentModel.BackgroundWorker.OnDoWork(DoWorkEventArgs e)
+   at System.ComponentModel.BackgroundWorker.WorkerThreadStart(Object argument)</td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_M_DTP_SETUP</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_M_FUNCTION</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_M_MESSAGE</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_M_MODULE</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_M_SYSTEM</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_CUSTOMER</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_CUSTOMER_20210813</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_CUSTOMER_20210907</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_CUSTOMER_20210907_MAR21</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_CUSTOMER_20210910_APR21</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_CUSTOMER_20211011</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_CUSTOMER_TMP</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_LOG_D</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_LOG_H</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_SAP_VAT_IN_STS</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_SAP_VAT_RESTITUSI</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_SUPPLIER</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_SUPPLIER_20180312_EFB_KARNEDY</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_IN_D</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_IN_D_20180312_EFB_KARNEDY</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_IN_H</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_IN_H_20180312_EFB_KARNEDY</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_IN_H_20211018</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_IN_H_20211018_1</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_D</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_D_20210813</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_D_20210907</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_D_20210907_MAR21</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_D_20210910_APR21</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_D_20210915</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_D_20211011</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_D_ALL_20210913</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_D_TMP</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_H</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_H_20210813</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_H_20210907</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_H_20210907_MAR21</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_h_20210910_APR21</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_H_20211011</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_R_VAT_OUT_H_TMP</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_CUSTOMER</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_CUSTOMER_SPD1</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_FI_TRANSACTION_H</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_FI_TRANSACTION_H_SPD1</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_INV_H</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_INV_POSTED_SAP</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_INV_TAX</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_MATERIAL</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_MATERIAL_SPD1</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SALES_COMPLETION_D</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SALES_COMPLETION_D_SPD1</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SALES_COMPLETION_H</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SALES_COMPLETION_H_SPD1</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SALES_D</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SALES_D_SPD1</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SALES_H</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SALES_H_SPD1</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SALES_OTH_INCOME_D</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SALES_OTH_INCOME_D_SPD1</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SALES_OTH_INCOME_H</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SALES_OTH_INCOME_H_SPD1</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SAP_DOC_NO</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SAP_VAT_RESTITUSI</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_SAP_VAT_RESTITUSI_1</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.TB_T_VAT_IN_D_UPLOAD_TEMP</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.TB_T_VAT_OUT_SAP</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.FN_DelimitedSplit8K</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.sp_GET_MESSAGE</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.sp_GET_PROCESS_ID</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.SP_INSERT_TEMP_VAT_OUT_SAP</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.SP_INSERT_TEMP_VAT_OUT_SAP_20150907</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.SP_INTERFACE_TAX_INV_FROM_ICS</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.SP_INTERFACE_TAX_INV_FROM_ICS_20150710</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.SP_INTERFACE_TAX_INV_FROM_ICS_20210210</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.SP_INTERFACE_TAX_INV_FROM_ICS_20210319</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.SP_INTERFACE_TAX_INV_FROM_ICS_RCS</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.SP_INTERFACE_TAX_INV_FROM_ICS_RCS_20210806</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.SP_INTERFACE_TAX_INV_FROM_ICS_TAMBATAM</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.SP_INTERFACE_TAX_INV_FROM_ICS_VIN</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.SP_INTERFACE_UNION_TAX_INV_FROM_ICS</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.SP_INTERFACE_UNION_TAX_INV_FROM_ICS_RCS</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.sp_Interface_VAT_IN_SAP_POSTED</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.sp_Interface_VAT_IN_SAP_POSTED_10AGUSTUS2015</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.sp_Interface_VAT_IN_SAP_POSTED_20150907</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.SP_InterfaceVAT_IN_fromIPPCSprocess</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.SP_VAT_OUT_PEB_DATA</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.SP_VAT_OUT_PEB_RECONCILE_DATA</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.sp_WRITE_LOG_DET</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.sp_WRITE_LOG_FINISH</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Preparing dbo.sp_WRITE_LOG_HED</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top">
+        <td> </td>
+        <td>Preparing dbo.sp_WRITE_LOG_START</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+      <tr valign="top" style="background-color:LightYellow">
+        <td> </td>
+        <td>Save to file</td>
+        <td>None</td>
+        <td> </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -4,6 +4,36 @@
         onClear();
     });
 
+
+    function onDownload() {
+            var orderby = null;
+            //if (ViewData.Get("OrderBy") !== undefined && ViewData.Get("OrderBy") !== null && ViewData.Get("OrderBy") !== "")
+            //    orderby = ViewData.Get("OrderBy");
+
+            $.progressbox.show($tdk.PageTitle, "Download File");
+
+            $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadHeader")", {
+                data: {
+                    Display: $("#cbodisplay").val(),
+                    Page: 1,
+                    VendorCode: $("#txt-vendorcode").val(),
+                    VendorName: $("#txt-vendorname").val(),
+                    DueDilDateRange: $("#txt-dddaterange").val(),
+
+                    Status: $("#cmb-status").val(),
+
+                },
+                successCallback: function (responseHtml, url) {
+                    $.progressbox.hide();
+                },
+                failCallback: function (responseHtml, url) {
+                    console.log(responseHtml);
+                    $.progressbox.hide();
+                    alert("A file download error has occured, please try again");
+                }
+            });
+    }
+
     function detailGrid() {
         if ($tdk.isDetail > 0) {
             $("#btn-detail").html('Show Detail');
@@ -49,7 +79,7 @@
 </script>
 <script type="text/javascript" id="Search">
     function onGetData(page) {
-       
+
         $.disable_enable_button.disable();
         $.ajax({
             type: "POST",
@@ -76,7 +106,7 @@
         $("#txt-vendorname").val('');
         $("#txt-vendorcode").val('');
         $("#txt-dddaterange").val('');
-        
+
         $("input[id^=cb-]").each(function (i, a) {
             a.checked = false;
         });
@@ -102,7 +132,7 @@
 
 <script type="text/javascript" id="savedelete">
     function onAddData() {
-        
+
         $.ajax({
             type: "post",
             url: "@Html.Toyota().Page.GetActionUrl("IsFlagEditAdd")",
@@ -139,7 +169,7 @@
                 ""
             )
         else {
-            
+
             var selectedData = GetSelectedGrid();
             $.ajax({
                 type: "post",
@@ -161,31 +191,52 @@
         }
     }
 
+
+
     function onSaveData() {
-        
         var vendorcd = $("#cmb-vendorcode").val();
-        //var vendorcd = $("#txtedit-vendorcd").val();
         var vendornm = $("#txtedit-vendornm").val();
         var status = $("#cmbedit-status").val();
         var vldddfrom = $("#txtedit-vldddfrom").val();
         var vldddto = $("#txtedit-vldddto").val();
-         
+        
+        var flag= $("#txtEdit").val();
+        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-vendornm", "#cmbedit-status", "#txtedit-vldddfrom", "#txtedit-vldddto"]);
+        if (!isValid) {
+            return;
+        }
+        if (window.FormData !== undefined) {
 
-        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-vendornm"]);
-        if (!isValid) return;
+            var fileUpload = $("#upload-ddFiles").get(0);
+            var files = fileUpload.files;
+
+            // Create FormData object
+            var fileData = new FormData();
+
+            // Looping over all files and add it to FormData object
+            for (var i = 0; i < files.length; i++) {
+                fileData.append(files[i].name, files[i]);
+            }
+
+            //// Adding one more more key to FormData object
+            fileData.append('vendorcd', vendorcd);
+            fileData.append('vendornm', vendornm);
+            fileData.append('status', status);
+            fileData.append('vldddfrom', vldddfrom);
+            fileData.append('vldddto', vldddto);
+            fileData.append('flag', flag);
+        }
+
+        $.progressbox.show("Save Data", "Loading Data...");
 
         $.ajax({
             type: "post",
+            contentType: false, // Not to set any content header
+            processData: false, // Not to process data
             url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
-            data: {
-                flag: $("#txtEdit").val(),
-                vendorcd: vendorcd,
-                vendornm: vendornm,
-                status: status,
-                vldddfrom,
-                vldddto
-            },
+            data: fileData,
             success: function (data) {
+                $.progressbox.hide();
                 var result = data.message.split('|');
                 if (result[0] == 'True') {
                     $.messagebox.show(
@@ -200,6 +251,7 @@
 
                 }
                 else {
+                    //$.progressbox.hide();
                     $.messagebox.show(
                         "Error",
                         result[1],

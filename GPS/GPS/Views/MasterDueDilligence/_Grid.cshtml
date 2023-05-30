@@ -20,11 +20,11 @@
                         <tr>
                             <th style="width:20px" class="grid-checkbox-col" rowspan="2"></th>
                             <th style="width:40px" rowspan="2">No</th>
-                            <th style="width:440px" colspan="3">Vendor</th>
+                            <th style="width:370px" colspan="3">Vendor</th>
                             <th style="width:150px" rowspan="2">Due Dilligence Status</th>
-                            <th style="width:150px" rowspan="2">Valid Due Dilligence From</th>
-                            <th style="width:150px" rowspan="2">Valid Due Dilligence To</th>
-                            <th style="width:150px" rowspan="2">Attachment Due Dilligence</th>
+                            <th style="width:100px" rowspan="2">Valid Due Dilligence From</th>
+                            <th style="width:100px" rowspan="2">Valid Due Dilligence To</th>
+                            <th style="width:70px" rowspan="2">Attachment Due Dilligence</th>
                             <th style="width:100px" rowspan="2">Deletion</th>
                             <th style="width:150px" rowspan="2">Created By</th>
                             <th style="width:150px" rowspan="2">Created Date</th>
@@ -33,7 +33,7 @@
                         </tr>
                         <tr>
                             <th style="width:100px">Code</th>
-                            <th style="width:170px">Plant</th>
+                            <th style="width:100px">Plant</th>
                             <th style="width:170px">Name</th>
                         </tr>
                     </thead>
@@ -47,41 +47,52 @@
                             {
                                 foreach (MasterDueDilligence item in ListMasterDueDilligence)
                                 {
-                                                <tr>
-                                                    <td class="text-center grid-checkbox-col" style="width:20px">
-                                                        <input id="cb-@item.Number" class="grid-checkbox grid-checkbox-body" type="checkbox" data-vendor_cd="@item.VENDOR_CODE" />
-                                                    </td>
-                                                    <td class="text-center" style="width:40px">@item.Number</td>
-                                                    <td class="text-center" style="width: 100px">@item.VENDOR_CODE</td>
-                                                    <td class="text-left" style="width: 170px">@item.VENDOR_PLANT</td>
-                                                    <td class="text-left" style="width:170px">@item.VENDOR_NAME</td>
+                                    <tr>
+                                        <td class="text-center grid-checkbox-col" style="width:20px">
+                                            <input id="cb-@item.Number" class="grid-checkbox grid-checkbox-body" type="checkbox" data-vendor_cd="@item.VENDOR_CODE" />
+                                        </td>
+                                        <td class="text-center" style="width:40px">@item.Number</td>
+                                        <td class="text-center" style="width: 100px">@item.VENDOR_CODE</td>
+                                        <td class="text-left" style="width: 100px">@item.VENDOR_PLANT</td>
+                                        <td class="text-left" style="width:170px">@item.VENDOR_NAME</td>
 
-                                                    @if (item.BG_COLOR == "RED")
-                                                    {
-                                                        <td class="text-center" style="width: 150px; background-color: red"></td>
-                                                    }
-                                                    else if (item.BG_COLOR == "YELLOW")
-                                                    {
-                                                        <td class="text-center" style="width: 150px; background-color: yellow"></td>
-                                                    }
-                                                    else if (item.BG_COLOR == "GREEN")
-                                                    {
-                                                        <td class="text-center" style="width: 150px; background-color: lawngreen"></td>
-                                                    }
-                                                    else
-                                                    {
-                                                        <td class="text-center" style="width: 150px; background-color: deepskyblue"></td>
-                                                    }
-                                                    <td class="text-center" style="width: 150px">@item.VALID_DD_FROM</td>
-                                                    <td class="text-center" style="width:150px;">@item.VALID_DD_TO</td>
-                                                    <td class="text-left" style="width: 150px">@item.DD_ATTACHMENT</td>
-                                                  
-                                                    <td class="text-center" style="width:100px">@item.DELETION</td>
-                                                    <td class="text-left" style="width: 150px">@item.CREATED_BY</td>
-                                                    <td class="text-left" style="width: 150px">@item.CREATED_DT</td>
-                                                    <td class="text-left" style="width: 150px">@item.CHANGED_BY</td>
-                                                    <td class="text-left" style="width: 150px">@item.CHANGED_DT</td>
-                                                </tr>
+                                        @if (item.BG_COLOR == "RED")
+                                        {
+                                            <td class="text-center" style="width: 150px; background-color: red"></td>
+                                        }
+                                        else if (item.BG_COLOR == "YELLOW")
+                                        {
+                                            <td class="text-center" style="width: 150px; background-color: yellow"></td>
+                                        }
+                                        else if (item.BG_COLOR == "GREEN")
+                                        {
+                                            <td class="text-center" style="width: 150px; background-color: lawngreen"></td>
+                                        }
+                                        else
+                                        {
+                                            <td class="text-center" style="width: 150px; background-color: deepskyblue"></td>
+                                        }
+                                        <td class="text-center" style="width: 100px">@item.VALID_DD_FROM</td>
+                                        <td class="text-center" style="width:100px;">@item.VALID_DD_TO</td>
+                                        @if (string.IsNullOrEmpty(item.DD_ATTACHMENT))
+                                        {
+                                            <td class="text-center" style="width: 70px">NO FILE</td>
+                                        }
+                                        else
+                                        {
+                                            <td class="text-center" style="width: 70px">
+                                                <a href="/MasterDueDilligence/DownloadFile?filePath=@item.DD_ATTACHMENT">
+                                                    <img src="/Content/img/file-complete-icon.png" style="width: 20px; height: 20px" title="Download" />
+                                                </a>
+                                            </td>
+                                        }
+
+                                        <td class="text-center" style="width:100px">@item.DELETION</td>
+                                        <td class="text-left" style="width: 150px">@item.CREATED_BY</td>
+                                        <td class="text-left" style="width: 150px">@item.CREATED_DT</td>
+                                        <td class="text-left" style="width: 150px">@item.CHANGED_BY</td>
+                                        <td class="text-left" style="width: 150px">@item.CHANGED_DT</td>
+                                    </tr>
                                 }
                             }
                             else
@@ -151,7 +162,7 @@
                             }
                             else if (result[0] == 'Success') {
                                 $('#upfile').val('');
-                                window.location = "DownloadUploadedResult?path=" + result[1];
+                                window.location = "MasterDueDilligence/DownloadUploadedResult?path=" + result[1];
                                 onGetData(1);
                             }
                         },

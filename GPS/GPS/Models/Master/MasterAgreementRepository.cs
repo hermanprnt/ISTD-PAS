@@ -61,7 +61,7 @@ namespace GPS.Models.Master
             return result;
         }
 
-        public String SaveData(String flag, String vendorcd, String vendornm, String purchasinggrp, String buyer, String agreementno, String startdate, String expdate, String status, String nextaction, String uid)
+        public String SaveData(String flag, String vendorcd, String vendornm, String purchasinggrp, String buyer, String agreementno, String startdate, String expdate, String status, String nextaction,String filename, String uid)
         {
             string result = "";
             try
@@ -80,6 +80,7 @@ namespace GPS.Models.Master
                     Status = status,
                     Nextaction = nextaction,
                     UId = uid,
+                    filename
 
                 };
 

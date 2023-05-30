@@ -521,6 +521,8 @@
     <Content Include="Content\Images\login\krw-office.jpg" />
     <Content Include="Content\Images\login\new-innova.jpg" />
     <Content Include="Content\Images\login\sienta.jpg" />
+    <Content Include="Content\img\downloadbutton.jpg" />
+    <Content Include="Content\img\file-complete-icon.png" />
     <Content Include="Content\img\under_construction.gif" />
     <Content Include="Content\js\list.min.js" />
     <Content Include="Content\Konva\konva.min.js" />
@@ -2166,6 +2168,7 @@
     <None Include="Content\Download\ProcurementTrackingHeader.xls" />
     <Content Include="Content\Download\Template\DueDilligentTemplate.xls" />
     <Content Include="Content\Download\Template\MasterAgreementUploadTemplate.xls" />
+    <Content Include="Content\Download\Template\DueDilligenceDownloadTemplete.xls" />
     <None Include="Content\Download\Template\Material.xls" />
     <Content Include="Views\GRCreation\GRCreation.cshtml" />
     <Content Include="Views\GRCreation\_POData.cshtml" />

@@ -9,6 +9,7 @@ using System.IO;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using System.Collections.Generic;
+using GPS.Models;
 
 namespace GPS.Controllers.Master
 {
@@ -63,14 +64,53 @@ namespace GPS.Controllers.Master
         /// <summary>
         /// INSERT DATA TO TB_M_AGREEMENT_NO
         /// </summary>
-        public ActionResult SaveData(String flag, String vendorcd, String vendornm, String purchasinggrp, String buyer, String agreementno, String startdate, String expdate,String status,String nextaction)
+        public ActionResult SaveData()
         {
+            string vendorcd = Request.Params[0];
+            string vendornm = Request.Params[1];
+            string purchasinggrp = Request.Params[2];
+            string buyer = Request.Params[3];
+            string agreementno = Request.Params[4];
+            string startdate = Request.Params[5];
+            string expdate = Request.Params[6];
+            string status = Request.Params[7];
+            string nextaction = Request.Params[8];
+            string flag = Request.Params[9];
+
+            var fileupload = Request.Files[0];
+            string AttachmentPath = SystemRepository.Instance.GetSingleData("UPATT", "MsAgreementAttachment").Value;
+
+            var filename = vendorcd + "_" + Path.GetFileName(fileupload.FileName);
+            string resultFilePath = Path.Combine("~", AttachmentPath + filename);
+            fileupload.SaveAs(Server.MapPath(resultFilePath));
+
             startdate = conversiDate(startdate);
             expdate = conversiDate(expdate);
             //String message = "";
-            String message = MasterAgreementRepository.Instance.SaveData(flag, vendorcd, vendornm, purchasinggrp, buyer, agreementno, startdate, expdate,status,nextaction, this.GetCurrentUsername());
+            String message = MasterAgreementRepository.Instance.SaveData(flag, vendorcd, vendornm, purchasinggrp, buyer, agreementno, startdate, expdate,status,nextaction, filename , this.GetCurrentUsername());
 
             return new JsonResult { Data = new { message } };
+        }
+
+        public ActionResult DownloadFile(string filePath)
+        {
+            string Attachment = SystemRepository.Instance.GetSingleData("UPATT", "MsAgreementAttachment").Value;
+            string fullName = Server.MapPath("~" + Attachment + filePath);
+            byte[] fileBytes = GetFile(fullName);
+            FileContentResult fileContentResult = new FileContentResult(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet);
+            fileContentResult.FileDownloadName = filePath;
+
+            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, filePath);
+        }
+
+        byte[] GetFile(string s)
+        {
+            FileStream fs = System.IO.File.OpenRead(s);
+            byte[] data = new byte[fs.Length];
+            int br = fs.Read(data, 0, data.Length);
+            if (br != fs.Length)
+                throw new System.IO.IOException(s);
+            return data;
         }
 
         public ActionResult DeleteData(String key)
@@ -304,17 +344,65 @@ namespace GPS.Controllers.Master
         public ActionResult CekTemplate()
         {
             string cektemplate = "";
-
             string filesTmp = HttpContext.Request.MapPath("~/Content/Download/Template/MasterAgreementUploadTemplate.xls");
             FileInfo FI = new FileInfo(filesTmp);
             if (FI.Exists)
                 cektemplate = "True";
             else
                 cektemplate = "False";
-
             return Json(cektemplate, JsonRequestBehavior.AllowGet);
         }
+        public void DownloadHeader(int Display, int Page, string VendorCode, string VendorName, string Status,string AgreementNo)
+        {
+            CommonDownload downloadEngine = CommonDownload.Instance;
+            string FileName = string.Format("AgreementNo {0:dd-MM-yyyy}.xls", DateTime.Now);
+            string filePath = HttpContext.Request.MapPath(downloadEngine.GetServerFilePath("MasterAgreementDownloadTemplete.xls"));
+            FileStream ftmp = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            var workbook = new HSSFWorkbook(ftmp);
 
+            Paging pg = new Paging(MasterAgreementRepository.Instance.CountData(VendorCode, VendorName, AgreementNo, Status), Page, Display);
+            var dataListDueDilligence = new List<MasterAgreement>(MasterAgreementRepository.Instance.GetListData(VendorCode, VendorName, AgreementNo, Status, pg.StartData, pg.EndData));
+
+            ISheet sheet; IRow Hrow; int row = 1;
+
+            IFont font = downloadEngine.GenerateFontExcel(workbook);
+            ICellStyle styleCenter = downloadEngine.GenerateStyleCenter(workbook, font);
+            ICellStyle styleLeft = downloadEngine.GenerateStyleLeft(workbook, font);
+            ICellStyle styleNormal = downloadEngine.GenerateStyleNormal(workbook, font);
+
+            sheet = workbook.GetSheetAt(0);
+
+            foreach (MasterAgreement item in dataListDueDilligence)
+            {
+                Hrow = sheet.CreateRow(row);
+                downloadEngine.WriteCellValue(Hrow, 0, styleNormal, item.Number);
+                downloadEngine.WriteCellValue(Hrow, 1, styleNormal, item.VENDOR_CODE);
+                downloadEngine.WriteCellValue(Hrow, 2, styleNormal, item.VENDOR_NAME);
+                downloadEngine.WriteCellValue(Hrow, 3, styleNormal, item.PURCHASING_GROUP);
+                downloadEngine.WriteCellValue(Hrow, 4, styleNormal, item.BUYER);
+                downloadEngine.WriteCellValue(Hrow, 5, styleNormal, item.AGREEMENT_NO);
+                downloadEngine.WriteCellValue(Hrow, 6, styleNormal, item.AN_ATTACHMENT);
+                downloadEngine.WriteCellValue(Hrow, 7, styleNormal, string.Format("{0:yyyy-MM-dd}", item.START_DATE));
+                downloadEngine.WriteCellValue(Hrow, 8, styleNormal, string.Format("{0:yyyy-MM-dd}", item.EXP_DATE));
+                downloadEngine.WriteCellValue(Hrow, 9, styleNormal, item.STATUS);
+                downloadEngine.WriteCellValue(Hrow, 10, styleNormal, item.NEXT_ACTION);
+                row++;
+            }
+            CreateExcelFile(FileName, ftmp, workbook);
+        }
+
+        private void CreateExcelFile(string FileName, FileStream ftmp, HSSFWorkbook workbook)
+        {
+            MemoryStream ms = new MemoryStream();
+            workbook.Write(ms);
+            ftmp.Close();
+            Response.BinaryWrite(ms.ToArray());
+            Response.ContentType = "application/ms-excel";
+            Response.AddHeader("content-disposition", String.Format("attachment;filename=\"{0}\"", FileName));
+            Response.AddHeader("Set-Cookie", "fileDownload=true; path=/");
+            Response.Flush();
+            Response.End();
+        }
         #endregion
     }
 }

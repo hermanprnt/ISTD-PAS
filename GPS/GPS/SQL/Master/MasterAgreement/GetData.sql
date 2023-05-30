@@ -30,6 +30,7 @@ SELECT * FROM (
 		   mc.PURCHASING_GROUP,
 		   mc.BUYER,
 		   mc.AGREEMENT_NO,
+		   mc.AN_ATTACHMENT,
 		   [dbo].[fn_date_format] (mc.START_DATE) AS START_DATE,
 		   [dbo].[fn_date_format] (mc.EXP_DATE) AS EXP_DATE,
 		   CASE

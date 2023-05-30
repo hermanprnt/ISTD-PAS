@@ -12,6 +12,7 @@ BEGIN
           EXP_DATE,
 		  STATUS,
 		  NEXT_ACTION,
+          AN_ATTACHMENT,
 		  CREATED_BY ,
           CREATED_DT ,
           CHANGED_BY ,
@@ -26,6 +27,7 @@ BEGIN
 			  @Expdate,
 			  @Status,
 			  @Nextaction,
+              @filename,
               @UId,
               GETDATE(),
               NULL,
@@ -50,6 +52,7 @@ BEGIN
         EXP_DATE = @Expdate,
         STATUS = @Status,
         NEXT_ACTION = @Nextaction,
+        AN_ATTACHMENT = @filename,
         CHANGED_BY = @UId,
         CHANGED_DT = GETDATE()
     WHERE VENDOR_CODE = @VendorCode

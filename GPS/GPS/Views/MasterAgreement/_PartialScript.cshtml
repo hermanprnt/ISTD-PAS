@@ -45,10 +45,37 @@
         var option = new Option(optText, optValue);
         return this.append(option);
     };
+
+    function onDownload() {
+        var orderby = null;
+        //if (ViewData.Get("OrderBy") !== undefined && ViewData.Get("OrderBy") !== null && ViewData.Get("OrderBy") !== "")
+        //    orderby = ViewData.Get("OrderBy");
+        console.log('tessss');
+        $.progressbox.show($tdk.PageTitle, "Download File");
+
+        $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadHeader")", {
+            data: {
+                Display: $("#cbodisplay").val(),
+                Page: 1,
+                VendorCode: $("#txt-vendorcode").val(),
+                VendorName: $("#txt-vendorname").val(),
+                Status: $("#cmb-status").val(),
+                AgreementNo: $("#txt- agreementno").val()
+            },
+            successCallback: function (responseHtml, url) {
+                $.progressbox.hide();
+            },
+            failCallback: function (responseHtml, url) {
+                console.log(responseHtml);
+                $.progressbox.hide();
+                alert("A file download error has occured, please try again");
+            }
+        });
+    }
 </script>
 <script type="text/javascript" id="Search">
     function onGetData(page) {
-       
+
         $.disable_enable_button.disable();
         $.ajax({
             type: "POST",
@@ -64,7 +91,7 @@
             },
             success: function (data) {
                 $("#divtable").html(data);
-                
+
                 $.disable_enable_button.enable();
             }
         });
@@ -99,7 +126,7 @@
 
 <script type="text/javascript" id="savedelete">
     function onAddData() {
-      
+
         $.ajax({
             type: "post",
             url: "@Html.Toyota().Page.GetActionUrl("IsFlagEditAdd")",
@@ -108,6 +135,7 @@
                 Key: null
             },
             success: function (data) {
+                document.getElementById("cmb-vendorcode").disabled = false;
                 $("#basicModal").html(data);
                 $("#basicModal").modal();
             }
@@ -148,7 +176,7 @@
                     //$.Disable(["#txtedit-costcenter"]);
                     //$("#txtedit-validdate").attr("disabled", "disabled");
                     //$("#txtedit-validdate").css("background-color", "grey");
-
+                    document.getElementById("cmb-vendorcode").disabled = true;
                     $("#basicModal").modal();
                 }
             });
@@ -156,7 +184,7 @@
     }
 
     function onSaveData() {
-        var vendorcd = $("#txtedit-vendorcd").val();
+        var vendorcd = $("#cmb-vendorcode").val();
         var vendornm = $("#txtedit-vendornm").val();
         var purchasinggrp = $("#txtedit-purchasinggrp").val();
         var buyer = $("#txtedit-buyer").val();
@@ -165,28 +193,48 @@
         var expdate = $("#txtedit-expdate").val();
         var status = $("#cmbedit-status").val();
         var nextaction = $("#txtedit-nextaction").val();
+        var flag = $("#txtEdit").val();
 
-        console.log(vendornm,'vendornm  ');
+        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-purchasinggrp", "#txtedit-buyer", "#txtedit-agreementno", "#txtedit-startdate", "#txtedit-expdate", "#cmbedit-status","#txtedit-nextaction"]);
 
-        var isValid = $.ValidateMandatory(["#txtedit-vendorcd", "#txtedit-vendorcd"]);
         if (!isValid) return;
+
+        if (window.FormData !== undefined) {
+
+            var fileUpload = $("#upload-anFiles").get(0);
+            var files = fileUpload.files;
+
+            // Create FormData object
+            var fileData = new FormData();
+
+            // Looping over all files and add it to FormData object
+            for (var i = 0; i < files.length; i++) {
+                fileData.append(files[i].name, files[i]);
+            }
+
+            //// Adding one more more key to FormData object
+            fileData.append('vendorcd', vendorcd);
+            fileData.append('vendornm', vendornm);
+            fileData.append('purchasinggrp', purchasinggrp);
+            fileData.append('buyer', buyer);
+            fileData.append('agreementno', agreementno);
+            fileData.append('startdate', startdate);
+            fileData.append('expdate', expdate);
+            fileData.append('status', status);
+            fileData.append('nextaction', nextaction);
+            fileData.append('flag', flag);
+        }
+
+        $.progressbox.show("Save Data", "Loading Data...");
 
         $.ajax({
             type: "post",
+            contentType: false, // Not to set any content header
+            processData: false, // Not to process data
             url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
-            data: {
-                flag: $("#txtEdit").val(),
-                vendorcd: vendorcd,
-                vendornm: vendornm,
-                purchasinggrp: purchasinggrp,
-                buyer: buyer,
-                agreementno: agreementno,
-                startdate: startdate,
-                expdate: expdate,
-                status: status,
-                nextaction:nextaction
-            },
+            data: fileData,
             success: function (data) {
+                $.progressbox.hide();
                 var result = data.message.split('|');
                 if (result[0] == 'True') {
                     $.messagebox.show(

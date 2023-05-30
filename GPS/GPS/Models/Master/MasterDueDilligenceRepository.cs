@@ -72,8 +72,8 @@ namespace GPS.Models.Master
         }
 
 
-        public String SaveData(String flag, String vendorcd, String vendornm, String status,String plan, String vldddfrom,
-            String vldddto,  String uid)
+        public String SaveData(String flag, String vendorcd, String vendornm, String status, String vldddfrom,
+            String vldddto, String fileUrl, String uid)
         {
             string result = "";
             try
@@ -83,12 +83,12 @@ namespace GPS.Models.Master
                 {
                     Flag = flag,
                     vendorcd,
-                    plan,
                     vendornm,
                     status,
                     vldddfrom,
                     vldddto,
-                    uid
+                    uid,
+                    fileUrl ,
                 };
 
                 result = db.SingleOrDefault<string>("Master/MasterDueDilligence/SaveData", args);

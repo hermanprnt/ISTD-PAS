@@ -15,6 +15,7 @@ namespace GPS.Models.Master
         public String STATUS { get; set; }
         public String NEXT_ACTION { get; set; }
         public String BG_COLOR { get; set; }
+        public String AN_ATTACHMENT { get; set; }
     }
     public class StatusAgreement
     {
