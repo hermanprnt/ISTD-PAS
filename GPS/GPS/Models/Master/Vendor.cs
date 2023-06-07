@@ -12,6 +12,9 @@ namespace GPS.Models.Master
         public String VendorCd { get; set; }
         public String VendorName { get; set; }
         public String VendorPlant { get; set; }
+        public String VENDOR_PLANT { get; set; }
+        public String AgreementStatus { get; set; }
+        public String EXP_DATE { get; set; }
         public String PurchGroup { get; set; }
         public String SAPVendorID { get; set; }
         public String PaymentMethodCd { get; set; }

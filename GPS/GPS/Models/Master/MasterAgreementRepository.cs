@@ -42,7 +42,8 @@ namespace GPS.Models.Master
             return result;
         }
 
-        public IEnumerable<MasterAgreement> GetListData(string VendorCode, string VendorName, string AgreementNo, string Status, int start, int length)
+        public IEnumerable<MasterAgreement> GetListData(string VendorCode, string VendorName, string AgreementNo, string Status,
+            int start, int length,string DateFrom,string DateTo)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();
             dynamic args = new
@@ -52,7 +53,9 @@ namespace GPS.Models.Master
                 AgreementNo,
                 Status,
                 Start = start,
-                Length = length
+                Length = length,
+                DateFrom,
+                DateTo
             };
 
             IEnumerable<MasterAgreement> result = db.Fetch<MasterAgreement>("Master/MasterAgreement/GetData", args);
@@ -60,8 +63,16 @@ namespace GPS.Models.Master
             db.Close();
             return result;
         }
+        public int CountData(string VendorCode, string VendorName, string AgreementNo, string Status, string DateFrom, string DateTo)
+        {
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            int result = db.SingleOrDefault<int>("Master/MasterAgreement/CountData", new { VendorCode, VendorName, AgreementNo, Status,DateFrom,DateTo });
+            db.Close();
 
-        public String SaveData(String flag, String vendorcd, String vendornm, String purchasinggrp, String buyer, String agreementno, String startdate, String expdate, String status, String nextaction,String filename, String uid)
+            return result;
+        }
+
+        public String SaveData(String flag, String vendorcd, String vendornm, String purchasinggrp, String buyer, String agreementno, String startdate, String expdate, String status, String nextaction,String filename,String amount, String uid)
         {
             string result = "";
             try
@@ -78,6 +89,7 @@ namespace GPS.Models.Master
                     Startdate = startdate,
                     Expdate = expdate,
                     Status = status,
+                    Amount = amount,
                     Nextaction = nextaction,
                     UId = uid,
                     filename
@@ -94,14 +106,7 @@ namespace GPS.Models.Master
 
             return result;
         }
-        public int CountData(string VendorCode, string VendorName, string AgreementNo, string Status)
-        {
-            IDBContext db = DatabaseManager.Instance.GetContext();
-            int result = db.SingleOrDefault<int>("Master/MasterAgreement/CountData", new { VendorCode, VendorName, AgreementNo, Status });
-            db.Close();
-
-            return result;
-        }
+      
 
         public string SaveUploadedData(MasterAgreement param, string username)
         {

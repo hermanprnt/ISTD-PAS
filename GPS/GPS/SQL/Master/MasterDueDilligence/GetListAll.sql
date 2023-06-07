@@ -1,1 +1,0 @@
-﻿EXEC sp_CostCenter_GetCostCenterList_All

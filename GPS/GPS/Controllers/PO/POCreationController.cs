@@ -130,13 +130,15 @@ namespace GPS.Controllers.PO
             viewModel.Header.PurchasingGroup = PurchasingGroupController.GetFirstPurchasingGroup(this.GetCurrentRegistrationNumber());
             viewModel.Header.Currency = String.IsNullOrEmpty(viewModel.Header.Currency) ? CurrencyController.GetDefaultCurrency() : viewModel.Header.Currency;
             viewModel.Header.SPKInfo = viewModel.Header.SPKInfo ?? new POSPKViewModel();
-
+            viewModel.PlantCode = SystemRepository.Instance.GetSingleData("POCR01", "PLANT_LIMIT").Value;
+            viewModel.AgreementStatus = SystemRepository.Instance.GetSingleData("AGR001", "AGREEMENT_LIMIT").Value;
             IList<PRPOItem> itemList = creationRepo.GetItemTemp(processId) ?? new List<PRPOItem>();
             var itemViewModel = new PRItemAdoptResultViewModel();
             itemViewModel.CurrentUser = viewModel.CurrentUser;
             itemViewModel.DataList = itemList;
             itemViewModel.GridPaging = PaginationViewModel.GetDefault(POCommonRepository.POItemDataName);
             viewModel.ItemList = itemViewModel;
+           
 
             Model = viewModel;
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GPS.Models.Master;
+using System;
 using System.ComponentModel;
 
 namespace GPS.Models.Common
@@ -14,6 +15,8 @@ namespace GPS.Models.Common
         public String Name { get; private set; }
         public String Value { get; private set; }
         public String Background { get; private set; }
+        public String VendorPlant { get; private set; }
+        public String AgreementStatus { get; private set; }
 
         public static NameValueItem Empty
         {
@@ -32,12 +35,14 @@ namespace GPS.Models.Common
             Value = value;
         }
 
-        public NameValueItem(Int32 no, String name, String value,String bg)
+        public NameValueItem(Int32 no, String name, String value,String bg,String vendorPlant,String status)
         {
             No = no;
             Name = name;
             Value = value;
             Background = bg;
+            VendorPlant = vendorPlant;
+            AgreementStatus = status;
         }
 
         public NameValueItem(String name, String value) : this(0, name, value) { }

@@ -1,4 +1,6 @@
-﻿IF(@Flag = '0')
+﻿
+
+IF(@Flag = '0')
 BEGIN
 	IF NOT EXISTS(select 1 from TB_M_AGREEMENT_NO where VENDOR_CODE = @VendorCode)
 	begin --Begin Insert
@@ -13,6 +15,7 @@ BEGIN
 		  STATUS,
 		  NEXT_ACTION,
           AN_ATTACHMENT,
+          AMOUNT,
 		  CREATED_BY ,
           CREATED_DT ,
           CHANGED_BY ,
@@ -28,6 +31,7 @@ BEGIN
 			  @Status,
 			  @Nextaction,
               @filename,
+              @Amount,
               @UId,
               GETDATE(),
               NULL,

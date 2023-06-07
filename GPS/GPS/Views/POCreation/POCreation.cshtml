@@ -11,7 +11,6 @@
 @model POCreationViewModel
 @{
     Layout = CommonPage.MainLayout;
-
 }
 
 
@@ -32,8 +31,12 @@
         var mydataname ="";
         var mydatano = "";
         var myExpanderRow = "";
-		var vendoredit = "";
+        var vendoredit = "";
+        var plantCodeLimit = "@Model.PlantCode";
+        var agreementStatus = "@Model.AgreementStatus";
         //end : 20190617 : isid.rgl
+        const agreementStatusArray = agreementStatus.split(",");
+        
 
         /* ============================== Init: begin ============================== */
 
@@ -600,19 +603,43 @@
                 OnEndCallback: OnAjaxComplete,
                 OnSearchButtonClick: function () { $.ClearLookup(["#lookup-vendor"]); },
                 OnRowSelected: function (selected) {
-                    if (selected.Background === null) {
-                        //to maintain previous vendor when error due dilligence not registered
+                    if (selected.Background === null && selected.VendorPlant === plantCodeLimit) {
                         var vendor = ViewData.Get("VendorInfo");
                         $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
                         $.messagebox.show(
                             "Error",
-                            "Has not been defined by due dilligence",
+                            "Has not been defined by master due dilligence",
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                    } else if (agreementStatusArray.includes(selected.AgreementStatus) === false) {
+                        var vendor = ViewData.Get("VendorInfo");
+                        $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
+                        $.messagebox.show(
+                            "Error",
+                            "Vendor agreement status must be [Finished] or [Expired Soon]",
                             "ERR",
                             "SINGLE",
                             "",
                             ""
                         );
                     }
+                    //if (selected.Background === null || selected.VendorPlant === plantCodeLimit || agreementStatusArray.includes(selected.AgreementStatus) === false
+                    //    || selected.Background === null || !plantCodeLimit || agreementStatusArray.includes(selected.AgreementStatus) === false) {
+                    //    //to maintain previous vendor when error due dilligence not registered
+                    //    var vendor = ViewData.Get("VendorInfo");
+                    //    $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
+                    //    $.messagebox.show(
+                    //        "Error",
+                    //        "Has not been defined by master due dilligence or master agreement",
+                    //        "ERR",
+                    //        "SINGLE",
+                    //        "",
+                    //        ""
+                    //    );
+                    //}
                     else {
                         ViewData.Add("VendorInfo", {
                             IsOneTimeVendor: false,
@@ -633,6 +660,8 @@
                             document.getElementById('txtlookup-vendor').style.backgroundColor = 'yellow';
                         } else if (vendor.Background === "3") {
                             document.getElementById('txtlookup-vendor').style.backgroundColor = 'lawngreen';
+                        } else if (vendor.Background === "4") {
+                            document.getElementById('txtlookup-vendor').style.backgroundColor = 'white';
                         }
 
                         SilentSavePOHeader();
@@ -1357,7 +1386,7 @@
         });
 
         /*const checkbox = */
-        document.getElementById('chkbox-govrelated').addEventListener('change', (event) => { 
+        document.getElementById('chkbox-govrelated').addEventListener('change', (event) => {
         //checkbox.addEventListener('change', (event) => {
             if (event.currentTarget.checked) {
                 //alert('hey');
@@ -1482,10 +1511,10 @@
 
         $("#btnsave-draft").click(function (e) {
             SilentSavePOHeader();
-            
+
             const cb = document.querySelector('#chkbox-govrelated');
-            //console.log(cb.checked,'really?'); 
-           
+            //console.log(cb.checked,'really?');
+
             var isPOManual = $("#cmb-poitem-creationtype").valOrDefault() === "@POCreationType.Manual";
             if (!ValidatePOItem())
                 $.messagebox.show("@ActionResponseViewModel.Error", isPOManual ? "Please add or save item first." : "PR isn't adopted yet.", "@ActionResponseViewModel.Error");

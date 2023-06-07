@@ -606,8 +606,6 @@
     <Content Include="SQL\Master\MasterAgreement\CountData.sql" />
     <Content Include="SQL\Master\MasterAgreement\DeleteData.sql" />
     <Content Include="SQL\Master\MasterAgreement\GetData.sql" />
-    <Content Include="SQL\Master\MasterAgreement\GetList.sql" />
-    <Content Include="SQL\Master\MasterAgreement\GetListAll.sql" />
     <Content Include="SQL\Master\MasterAgreement\GetSelectedData.sql" />
     <Content Include="SQL\Master\MasterAgreement\SaveData.sql" />
     <Content Include="SQL\Master\MasterAgreement\SaveUploadedData.sql" />
@@ -615,8 +613,6 @@
     <Content Include="SQL\Master\MasterDueDilligence\CountData.sql" />
     <Content Include="SQL\Master\MasterDueDilligence\DeleteData.sql" />
     <Content Include="SQL\Master\MasterDueDilligence\GetData.sql" />
-    <Content Include="SQL\Master\MasterDueDilligence\GetList.sql" />
-    <Content Include="SQL\Master\MasterDueDilligence\GetListAll.sql" />
     <Content Include="SQL\Master\MasterDueDilligence\GetSelectedData.sql" />
     <Content Include="SQL\Master\MasterDueDilligence\SaveData.sql" />
     <Content Include="SQL\Master\MasterDueDilligence\SaveUploadedData.sql" />

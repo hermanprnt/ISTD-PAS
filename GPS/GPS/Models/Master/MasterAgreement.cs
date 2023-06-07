@@ -13,9 +13,11 @@ namespace GPS.Models.Master
         public String START_DATE { get; set; }
         public String EXP_DATE { get; set; }
         public String STATUS { get; set; }
+        public String STATUS_STRING { get; set; }
         public String NEXT_ACTION { get; set; }
         public String BG_COLOR { get; set; }
         public String AN_ATTACHMENT { get; set; }
+        public String AMOUNT { get; set; }
     }
     public class StatusAgreement
     {

@@ -1,5 +1,6 @@
 ﻿<script type="text/javascript">
     $(document).ready(function () {
+        $("#txt-expdaterange").todaterangepicker();
         onClear();
     });
 
@@ -87,6 +88,7 @@
                 VendorName: $("#txt-vendorname").val(),
                 AgreementNo: $("#txt-agreementno").val(),
                 Status: $("#cmb-status").val(),
+                ExpDate: $("#txt-expdaterange").val(),
 
             },
             success: function (data) {
@@ -97,10 +99,25 @@
         });
     }
 
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : event.keyCode;
+        if (charCode != 46 && charCode > 31
+            && (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+
+
+    $(document).on('keyup', '.masking', function () {
+        var x = $(this).val();
+        $(this).val(x.toString().replace(/,/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+    });
+
     function onClear() {
         $("#cmb-division").val('');
         $("#txt-costcenter").val('');
-
+        $("#txt-expdaterange").val('');
         $("input[id^=cb-]").each(function (i, a) {
             a.checked = false;
         });
@@ -138,6 +155,7 @@
                 document.getElementById("cmb-vendorcode").disabled = false;
                 $("#basicModal").html(data);
                 $("#basicModal").modal();
+                $("#txtedit-status").val('2 - On Progress');
             }
         });
     }
@@ -177,6 +195,7 @@
                     //$("#txtedit-validdate").attr("disabled", "disabled");
                     //$("#txtedit-validdate").css("background-color", "grey");
                     document.getElementById("cmb-vendorcode").disabled = true;
+                    document.getElementById("txtedit-amount").disabled = true;
                     $("#basicModal").modal();
                 }
             });
@@ -191,16 +210,20 @@
         var agreementno = $("#txtedit-agreementno").val();
         var startdate = $("#txtedit-startdate").val();
         var expdate = $("#txtedit-expdate").val();
-        var status = $("#cmbedit-status").val();
+        var status = $("#txtedit-status").val();
         var nextaction = $("#txtedit-nextaction").val();
+        var amount = $("#txtedit-amount").val();
+        var txtFile = $("#upload-anFiles").val();
         var flag = $("#txtEdit").val();
+        
 
-        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-purchasinggrp", "#txtedit-buyer", "#txtedit-agreementno", "#txtedit-startdate", "#txtedit-expdate", "#cmbedit-status","#txtedit-nextaction"]);
+
+        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-purchasinggrp", "#txtedit-buyer", "#txtedit-agreementno", "#txtedit-startdate","#txtedit-nextaction"]);
 
         if (!isValid) return;
 
         if (window.FormData !== undefined) {
-
+            console.log('masuk sini');
             var fileUpload = $("#upload-anFiles").get(0);
             var files = fileUpload.files;
 
@@ -222,7 +245,10 @@
             fileData.append('expdate', expdate);
             fileData.append('status', status);
             fileData.append('nextaction', nextaction);
+            fileData.append('amount',amount);
+            fileData.append('txtFile', txtFile)
             fileData.append('flag', flag);
+
         }
 
         $.progressbox.show("Save Data", "Loading Data...");
@@ -260,6 +286,11 @@
                 }
             }
         });
+    }
+
+    function OkInfoSave() {
+        $("#basicModal").modal('hide');
+        onGetData(1);
     }
 
     function onDeleteData() {

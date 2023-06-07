@@ -1,11 +1,20 @@
 ﻿DECLARE @@VENDORPLN VARCHAR(20)
 DECLARE @@SAP_VENDOR_CD VARCHAR(20)
 DECLARE @@DELETION VARCHAR(20)
+DECLARE @@ACTION VARCHAR(20)
 
 SELECT @@VENDORPLN = VENDOR_PLANT
 	,@@SAP_VENDOR_CD = SAP_VENDOR_ID
 FROM TB_M_VENDOR WHERE VENDOR_CD = @vendorcd
 
+IF(@Flag = '0')
+BEGIN
+	SET @@ACTION = 'INSERT'
+END
+ELSE 
+BEGIN
+	SET @@ACTION = 'UPDATE'
+END
 
 IF(@Flag = '0')
 BEGIN
@@ -39,7 +48,7 @@ BEGIN
               NULL,
               NULL
             )
-         
+    
 		 SELECT 'True|Save Successfully'
     END
     ELSE IF EXISTS(SELECT 1 FROM TB_M_DUE_DILLIGENCE WHERE VENDOR_CODE = @vendorcd AND DELETION = 'Y') 
@@ -81,3 +90,29 @@ BEGIN
 
 	SELECT 'True|Edit Successfully'
 END
+
+	--insert tb h
+	INSERT INTO dbo.TB_H_DUE_DILLIGENCE
+        ( 
+            [VENDOR_CODE] ,
+	        [VENDOR_PLANT] ,
+	        [VENDOR_NAME] ,
+	        [DD_STATUS] ,
+	        [VALID_DD_FROM] ,
+	        [VALID_DD_TO] ,
+			 [ACTION] ,
+			 [SAP_VENDOR_ID],
+	        [CREATED_BY] ,
+	        [CREATED_DT] 
+        )
+    VALUES  ( @vendorcd,
+              @@VENDORPLN,
+              @vendornm,
+			  @status,
+			  @vldddfrom,
+              @vldddto,
+              @@ACTION,
+			  @@SAP_VENDOR_CD,
+              @uid,
+              GETDATE()
+            )

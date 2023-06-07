@@ -11,12 +11,12 @@ namespace GPS.ViewModels.PO
         public User CurrentUser { get; set; }
         public String ProcessId { get; set; }
         public String Operation { get; set; }
-
+        public String PlantCode { get; set; }
         public String PRItemDataName { get; set; }
         public String POItemDataName { get; set; }
         public String SubItemDataName { get; set; }
         public String ItemConditionDataName { get; set; }
-
+        public String AgreementStatus { get; set; }
         public PurchaseOrder Header { get; set; }
         public PRItemAdoptResultViewModel ItemList { get; set; }
         public IList<Attachment> AttachmentList { get; set; }

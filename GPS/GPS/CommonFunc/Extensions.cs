@@ -43,9 +43,9 @@ namespace GPS.CommonFunc
             return dataList.Select(data => new NameValueItem(noSelector(data), nameSelector(data), valueSelector(data)));
         }
 
-        public static IEnumerable<NameValueItem> AsNumberedNameValueList<T>(this IEnumerable<T> dataList, Func<T, Int32> noSelector, Func<T, String> nameSelector, Func<T, String> valueSelector, Func<T, String> bgSelector) where T : class
+        public static IEnumerable<NameValueItem> AsNumberedNameValueList<T>(this IEnumerable<T> dataList, Func<T, Int32> noSelector, Func<T, String> nameSelector, Func<T, String> valueSelector, Func<T, String> bgSelector, Func<T, String> plantSelector, Func<T, String> stsSelector) where T : class
         {
-            return dataList.Select(data => new NameValueItem(noSelector(data), nameSelector(data), valueSelector(data), bgSelector(data)));
+            return dataList.Select(data => new NameValueItem(noSelector(data), nameSelector(data), valueSelector(data), bgSelector(data),plantSelector(data), stsSelector(data)));
         }
 
         public static IEnumerable<NameValueItem> AsAutoNumberedNameValueList<T>(this IEnumerable<T> dataList, Func<T, String> nameSelector, Func<T, String> valueSelector) where T : class

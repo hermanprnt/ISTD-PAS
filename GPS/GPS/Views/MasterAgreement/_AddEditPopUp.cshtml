@@ -4,6 +4,7 @@
 @{
     MasterAgreement data = ViewData["MasterAgreementData"] == null ? new MasterAgreement() : (MasterAgreement)ViewData["MasterAgreementData"];
     string edit = (string)ViewData["edit"];
+    string AddMonth = (string)ViewData["DOC_STS"];
     string title = " Master Agreement";
     if (edit == "1")
     {
@@ -13,6 +14,7 @@
     {
         title = "Add" + title;
     }
+    Html.Hidden("AddMonth");
 }
 
 <div class="modal-dialog" style="width:600px">
@@ -24,30 +26,7 @@
             <div class="modal-body">
                 <input type="hidden" id="txtEdit" value="@edit" />
                 <div class="form-horizontal">
-                    @*<div class="row">
-            <div class="col-xs-12 col-sm-6 col-md-6">
-                <div class="form-group form-group-xs">
-                    <div class="col-xs-5 col-sm-4 text-right">
-                        <label class="control-label text-muted">Vendor Code</label>
-                    </div>
-                    <div class="col-xs-7 col-sm-8">
-                        <input type="text" id="txtedit-vendorcd" class="form-control mandatory" maxlength="10" value="@data.VENDOR_CODE" autocomplete="off"/>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12 col-sm-6 col-md-6">
-                <div class="form-group form-group-xs">
-                    <div class="col-xs-5 col-sm-4 text-right">
-                        <label class="control-label text-muted">Vendor Name</label>
-                    </div>
-                    <div class="col-xs-7 col-sm-8">
-                        <input type="text" id="txtedit-vendornm" class="form-control mandatory" maxlength="50" value="@data.VENDOR_NAME" autocomplete="off"/>
-                    </div>
-                </div>
-            </div>
-        </div>*@
+
                     <div class="row">
                         <div class="col-xs-10 col-sm-10 col-md-10">
                             <div class="form-group form-group-xs">
@@ -115,6 +94,18 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Amount</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txtedit-amount" class="form-control" maxlength="50" value="@data.AMOUNT" autocomplete="off" onkeypress="return isNumberKey(event)"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
 
                     <div class="row">
@@ -156,7 +147,8 @@
                                     <label class="control-label text-muted">Status</label>
                                 </div>
                                 <div class="col-xs-7 col-sm-8">
-                                    @Html.DropDownList("cmbedit-status", MasterAgreementController.GetStatusList(), new { @class = "cursor-1", @style = "width:100%;" })
+                                    @*@Html.DropDownList("cmbedit-status", MasterAgreementController.GetStatusList(), new { @class = "cursor-1", @style = "width:100%;" })*@
+                                    <input type="text" id="txtedit-status" class="form-control" maxlength="50" value="@data.STATUS" autocomplete="off" disabled />
                                 </div>
                             </div>
                         </div>
@@ -168,7 +160,7 @@
                                     <label class="control-label text-muted ">Next Action</label>
                                 </div>
                                 <div class="col-xs-7 col-sm-8">
-                                    <input type="text" id="txtedit-nextaction" class="form-control" value="@data.VENDOR_NAME" autocomplete="off" />
+                                    <input type="text" id="txtedit-nextaction" class="form-control" value="@data.NEXT_ACTION" autocomplete="off" />
                                 </div>
                             </div>
                         </div>
@@ -180,7 +172,7 @@
                                     <label class="control-label text-muted">Attachement Master Agreement</label>
                                 </div>
                                 <div class="col-xs-7 col-sm-8">
-                                    <input type="file" id="upload-anFiles" name="upload-anFiles" class="form-control" required="required"><br />
+                                    <input type="file" id="upload-anFiles" name="upload-anFiles" class="form-control"><br />
                                 </div>
                             </div>
                         </div>
@@ -201,10 +193,13 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
+        $("#AddMonth").val('@AddMonth');
         $("#txtedit-startdate").todatepicker();
         $("#txtedit-expdate").todatepicker();
-        $("#cmbedit-status").val("@data.STATUS");
+        ////$("#cmbedit-status").val("@data.STATUS");
         $("#cmb-vendorcode").val("@data.VENDOR_CODE");
+
+     
 
         $("#cmb-vendorcode").change(function () {
             var vendor = $(this).val();
@@ -225,6 +220,51 @@
                 }
             });
         });
+
+        $("#txtedit-expdate").change(function () {
+            var expdate = $("#txtedit-expdate").val();
+            var getdate = new Date().toISOString();
+
+            var newDatePlus3Month = null;
+            var expDateFromArray = null;
+
+            newDatePlus3Month = addMonths(new Date, 3);
+
+            const myArray = expdate.split(".");
+            expDateFromArray = myArray[2] + '-' + myArray[1] + '-' + myArray[0] + 'T00:00:00.000Z'
+
+            if (!expdate) {
+                $("#txtedit-status").val('2 - On Progress');
+            }  else if (expDateFromArray >= newDatePlus3Month.toISOString()) {
+                $("#txtedit-status").val('1 - Finished');
+            }  else if (expDateFromArray >= getdate && expDateFromArray <= newDatePlus3Month.toISOString()) {
+                $("#txtedit-status").val('3 - Expired Soon');
+            } else {
+                $("#txtedit-status").val('4 - Expired');
+            }
+        });
+
+        function addMonths(date, months) {
+
+            date.setMonth(date.getMonth() + months);
+            return date;
+        }
+
+        function addOneYear(date) {
+            const dateCopy = new Date(date);
+            dateCopy.setFullYear(dateCopy.getFullYear() + 1);
+            return dateCopy;
+        }
+        function addTwoYear(date) {
+            const dateCopy = new Date(date);
+            dateCopy.setFullYear(dateCopy.getFullYear() + 2);
+            return dateCopy;
+        }
+        function addThreeYear(date) {
+            const dateCopy = new Date(date);
+            dateCopy.setFullYear(dateCopy.getFullYear() + 3);
+            return dateCopy;
+        }
     });
 </script>
 

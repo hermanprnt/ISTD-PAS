@@ -181,10 +181,9 @@
                 },
                 success: function (data) {
                     $("#basicModal").html(data);
-                    //$.Disable(["#txtedit-costcenter"]);
-                    //$("#txtedit-validdate").attr("disabled", "disabled");
-                    //$("#txtedit-validdate").css("background-color", "grey");
+                  
                     document.getElementById("cmb-vendorcode").disabled = true;
+                    
                     $("#basicModal").modal();
                 }
             });

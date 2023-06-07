@@ -10,6 +10,7 @@ using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using System.Collections.Generic;
 using GPS.Models;
+using Toyota.Common.Utilities;
 
 namespace GPS.Controllers.Master
 {
@@ -18,7 +19,7 @@ namespace GPS.Controllers.Master
         #region List Of Controller Method
         public sealed class Action
         {
-            
+
 
         }
         #endregion
@@ -34,6 +35,8 @@ namespace GPS.Controllers.Master
 
             int DIVISION_ID = DivisionRepository.Instance.GetUserDivision(this.GetCurrentRegistrationNumber());
             TempData["DIVISION_ID"] = DIVISION_ID;
+
+            ViewData["DOC_STS"] = SystemRepository.Instance.GetSingleData("AGR01", "StatusDoc").Value;
         }
 
         #region ark.herman 23/3/2023
@@ -47,17 +50,27 @@ namespace GPS.Controllers.Master
             return PartialView("_AddEditPopUp");
         }
 
-        private void Calldata(int Display, int Page, string VendorCode, string VendorName, string AgreementNo, string Status)
+        private void Calldata(int Display, int Page, string VendorCode, string VendorName, string AgreementNo, string Status, string DateFrom, string DateTo)
         {
-            Paging pg = new Paging(MasterAgreementRepository.Instance.CountData(VendorCode, VendorName, AgreementNo, Status), Page, Display);
+            Paging pg = new Paging(MasterAgreementRepository.Instance.CountData(VendorCode, VendorName, AgreementNo, Status, DateFrom, DateTo), Page, Display);
             ViewData["Paging"] = pg;
-            ViewData["ListMasterAgreement"] = MasterAgreementRepository.Instance.GetListData(VendorCode, VendorName, AgreementNo, Status, pg.StartData, pg.EndData);
+            ViewData["ListMasterAgreement"] = MasterAgreementRepository.Instance.GetListData(VendorCode, VendorName, AgreementNo, Status, pg.StartData, pg.EndData, DateFrom, DateTo);
         }
 
         [HttpPost]
-        public ActionResult SearchData(int Display, int Page, string VendorCode, string VendorName, string AgreementNo, string Status)
+        public ActionResult SearchData(int Display, int Page, string VendorCode, string VendorName, string AgreementNo, string Status, string ExpDate)
         {
-            Calldata(Display, Page, VendorCode, VendorName, AgreementNo, Status);
+            string DateFrom = "";
+            string DateTo = "";
+
+            if (!ExpDate.IsNullOrEmpty())
+            {
+                string[] DateRange = ExpDate.Split('-');
+                DateFrom = DateRange[0];
+                DateTo = DateRange[1];
+            }
+
+            Calldata(Display, Page, VendorCode, VendorName, AgreementNo, Status, DateFrom, DateTo);
             return PartialView("_Grid");
         }
 
@@ -66,6 +79,8 @@ namespace GPS.Controllers.Master
         /// </summary>
         public ActionResult SaveData()
         {
+            var filename = "";
+
             string vendorcd = Request.Params[0];
             string vendornm = Request.Params[1];
             string purchasinggrp = Request.Params[2];
@@ -75,19 +90,27 @@ namespace GPS.Controllers.Master
             string expdate = Request.Params[6];
             string status = Request.Params[7];
             string nextaction = Request.Params[8];
-            string flag = Request.Params[9];
+            string amount = Request.Params[9];
+            string txtFile = Request.Params[10];
+            string flag = Request.Params[11];
 
-            var fileupload = Request.Files[0];
-            string AttachmentPath = SystemRepository.Instance.GetSingleData("UPATT", "MsAgreementAttachment").Value;
+            string[] statusSplit = status.Split('-');
+            string statusNo = statusSplit[0].Trim();
 
-            var filename = vendorcd + "_" + Path.GetFileName(fileupload.FileName);
-            string resultFilePath = Path.Combine("~", AttachmentPath + filename);
-            fileupload.SaveAs(Server.MapPath(resultFilePath));
+            if (!txtFile.IsNullOrEmpty())
+            {
+                var fileupload = Request.Files[0];
+                string AttachmentPath = SystemRepository.Instance.GetSingleData("UPATT", "MsAgreementAttachment").Value;
+
+                filename = vendorcd + "_" + Path.GetFileName(fileupload.FileName);
+                string resultFilePath = Path.Combine("~", AttachmentPath + filename);
+                fileupload.SaveAs(Server.MapPath(resultFilePath));
+            }
 
             startdate = conversiDate(startdate);
             expdate = conversiDate(expdate);
             //String message = "";
-            String message = MasterAgreementRepository.Instance.SaveData(flag, vendorcd, vendornm, purchasinggrp, buyer, agreementno, startdate, expdate,status,nextaction, filename , this.GetCurrentUsername());
+            String message = MasterAgreementRepository.Instance.SaveData(flag, vendorcd, vendornm, purchasinggrp, buyer, agreementno, startdate, expdate, statusNo, nextaction, filename, amount, this.GetCurrentUsername());
 
             return new JsonResult { Data = new { message } };
         }
@@ -236,7 +259,7 @@ namespace GPS.Controllers.Master
                             message = message + "Start Date Should Not be More Than 10 Character\n";
                         if (sheet.GetRow(i).GetCell(6).ToString().Trim().Length > 10)
                             message = message + "End Date Should Not be More Than 10 Character\n";
-                       
+
                     }
                     #endregion
 
@@ -352,16 +375,26 @@ namespace GPS.Controllers.Master
                 cektemplate = "False";
             return Json(cektemplate, JsonRequestBehavior.AllowGet);
         }
-        public void DownloadHeader(int Display, int Page, string VendorCode, string VendorName, string Status,string AgreementNo)
+        public void DownloadHeader(int Display, int Page, string VendorCode, string VendorName, string Status, string AgreementNo, string ExpDate)
         {
+            string DateFrom = "";
+            string DateTo = "";
+
+            if (!ExpDate.IsNullOrEmpty())
+            {
+                string[] DateRange = ExpDate.Split('-');
+                DateFrom = DateRange[0];
+                DateTo = DateRange[1];
+            }
+
             CommonDownload downloadEngine = CommonDownload.Instance;
             string FileName = string.Format("AgreementNo {0:dd-MM-yyyy}.xls", DateTime.Now);
             string filePath = HttpContext.Request.MapPath(downloadEngine.GetServerFilePath("MasterAgreementDownloadTemplete.xls"));
             FileStream ftmp = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             var workbook = new HSSFWorkbook(ftmp);
 
-            Paging pg = new Paging(MasterAgreementRepository.Instance.CountData(VendorCode, VendorName, AgreementNo, Status), Page, Display);
-            var dataListDueDilligence = new List<MasterAgreement>(MasterAgreementRepository.Instance.GetListData(VendorCode, VendorName, AgreementNo, Status, pg.StartData, pg.EndData));
+            Paging pg = new Paging(MasterAgreementRepository.Instance.CountData(VendorCode, VendorName, AgreementNo, Status, DateFrom, DateTo), Page, Display);
+            var dataListDueDilligence = new List<MasterAgreement>(MasterAgreementRepository.Instance.GetListData(VendorCode, VendorName, AgreementNo, Status, pg.StartData, pg.EndData, DateFrom, DateTo));
 
             ISheet sheet; IRow Hrow; int row = 1;
 
