@@ -2,7 +2,10 @@
 
 IF(@Flag = '0')
 BEGIN
-	IF NOT EXISTS(select 1 from TB_M_AGREEMENT_NO where VENDOR_CODE = @VendorCode)
+	IF NOT EXISTS(select 1 from TB_M_AGREEMENT_NO 
+    where VENDOR_CODE = @VendorCode
+    and AGREEMENT_NO = @Agreementno
+    AND EXP_DATE = @Expdate )
 	begin --Begin Insert
         INSERT INTO dbo.TB_M_AGREEMENT_NO
         ( VENDOR_CODE ,
