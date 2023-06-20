@@ -32,6 +32,13 @@
         
         hide: function () {
             $("#progress-spinner").modal("hide");
+
+            setTimeout(function () {
+                if ($("body #progress-spinner").length > 0) {
+                    $("body #progress-spinner").hide();
+                }
+            }, 1000);
+
         }
     }
     
