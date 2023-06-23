@@ -32,8 +32,10 @@ SELECT * FROM (
 		mc.CREATED_DT,
 		mc.CHANGED_BY,
 		mc.CHANGED_DT
-FROM TB_M_DUE_DILLIGENCE mc
-		WHERE ((mc.[DD_STATUS] = @Status
+FROM TB_M_DUE_DILLIGENCE mc	
+		WHERE 1 = 1
+		AND DELETION = 'N'
+		  AND ((mc.[DD_STATUS] = @Status
 		  AND isnull(@Status, '') <> ''
 		  OR (isnull(@Status, '') = '')))
 		AND ((mc.VENDOR_CODE LIKE '%' + @VendorCode + '%'

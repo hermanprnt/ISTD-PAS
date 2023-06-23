@@ -21,6 +21,7 @@ using System.Web;
 using System.Data;
 using System.Web.UI.WebControls;
 using System.Data.SqlClient;
+using iTextSharp.text.pdf.codec;
 
 namespace GPS.Controllers.Master
 {
@@ -106,18 +107,23 @@ namespace GPS.Controllers.Master
             string vldddfrom = Request.Params[3];
             string vldddto = Request.Params[4];
             string flag = Request.Params[5];
+            string txtFile = Request.Params[6];
 
-            var fileupload = Request.Files[0];
-            string AttachmentPath = SystemRepository.Instance.GetSingleData("UPATT", "DueDilligenceAttachment").Value;
+            if (!txtFile.IsNullOrEmpty())
+            {
+                var fileupload = Request.Files[0];
+                string AttachmentPath = SystemRepository.Instance.GetSingleData("UPATT", "DueDilligenceAttachment").Value;
 
-            var filename = vendorcd+"_"+Path.GetFileName(fileupload.FileName);
-            string resultFilePath = Path.Combine("~", AttachmentPath + filename);
-            fileupload.SaveAs(Server.MapPath(resultFilePath));
+                var filename = vendorcd + "_" + Path.GetFileName(fileupload.FileName);
+                string resultFilePath = Path.Combine("~", AttachmentPath + filename);
+                fileupload.SaveAs(Server.MapPath(resultFilePath));
+            }
+           
 
             vldddfrom = conversiDate(vldddfrom);
             vldddto = conversiDate(vldddto);
 
-            String message = MasterDueDilligenceRepository.Instance.SaveData(flag, vendorcd, vendornm, status, vldddfrom, vldddto, filename, this.GetCurrentUsername());
+            String message = MasterDueDilligenceRepository.Instance.SaveData(flag, vendorcd, vendornm, status, vldddfrom, vldddto, txtFile, this.GetCurrentUsername());
 
             return new JsonResult { Data = new { message } };
         }

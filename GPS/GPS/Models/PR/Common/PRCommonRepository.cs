@@ -59,7 +59,6 @@ namespace GPS.Models.PR.Common
         }
 
 
-
         public IEnumerable<PRCommonList> GetDataCostCenter(int pDIV)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();

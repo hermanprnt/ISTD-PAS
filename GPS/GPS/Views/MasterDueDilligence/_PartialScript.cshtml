@@ -169,7 +169,6 @@
                 ""
             )
         else {
-
             var selectedData = GetSelectedGrid();
             $.ajax({
                 type: "post",
@@ -198,7 +197,8 @@
         var status = $("#cmbedit-status").val();
         var vldddfrom = $("#txtedit-vldddfrom").val();
         var vldddto = $("#txtedit-vldddto").val();
-        
+        var txtFile = $("#upload-ddFiles").val();
+
         var flag= $("#txtEdit").val();
         var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-vendornm", "#cmbedit-status", "#txtedit-vldddfrom", "#txtedit-vldddto"]);
         if (!isValid) {
@@ -224,6 +224,8 @@
             fileData.append('vldddfrom', vldddfrom);
             fileData.append('vldddto', vldddto);
             fileData.append('flag', flag);
+            fileData.append('txtFile', txtFile);
+
         }
 
         $.progressbox.show("Save Data", "Loading Data...");

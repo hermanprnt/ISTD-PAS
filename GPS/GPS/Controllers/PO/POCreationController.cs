@@ -787,7 +787,6 @@ namespace GPS.Controllers.PO
         {
             try
             {
-          
                 var execModel = new ExecProcedureModel();
                 execModel.CurrentUser = this.GetCurrentUsername();
                 execModel.CurrentRegNo = this.GetCurrentRegistrationNumber();
@@ -796,7 +795,11 @@ namespace GPS.Controllers.PO
                 execModel.ProcessId = viewModel.ProcessId;
 
                 // add by fid.ahmad 27-02-2023 handle issue vendor code was not filtered by purchasing group 
-                //POSaveResult resultChecking = creationRepo.PlantCodeChecking(execModel, viewModel);
+                POSaveResult resultChecking = creationRepo.PlantCodeChecking(execModel, viewModel);
+
+                //add by ark.herman 23.06.2023 check if master due dilligence and master agreement already registered
+                var validation = viewModel.Vendor;
+
 
                 POSaveResult result = creationRepo.SaveData(execModel, viewModel);
                 creationRepo.MoveTempAttachmentToRealPath(viewModel.ProcessId, result.PONo, result.DocYear);

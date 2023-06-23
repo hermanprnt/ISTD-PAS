@@ -35,7 +35,8 @@
         $("input[id^=cb-]").each(function (i, a) {
             if (a.id != null && a.id.length > 0 && a.checked) {
                 ids.push({
-                    vendor_cd: $('#' + a.id).data('vendor_cd')
+                    vendor_cd: $('#' + a.id).data('vendor_cd'),
+                    agreement_no: $('#' + a.id).data('agreement_no')
                 });
             }
         });
@@ -218,12 +219,12 @@
         
 
 
-        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-purchasinggrp", "#txtedit-buyer", "#txtedit-agreementno", "#txtedit-startdate","#txtedit-nextaction"]);
+        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-agreementno", "#txtedit-startdate","#txtedit-nextaction"]);
 
         if (!isValid) return;
 
         if (window.FormData !== undefined) {
-            console.log('masuk sini');
+            
             var fileUpload = $("#upload-anFiles").get(0);
             var files = fileUpload.files;
 
@@ -318,10 +319,12 @@
         var selectedData = GetSelectedGrid();
         var keyArray = [];
         for (var i = 0; i < selectedData.length; i++) {
-            //keyArray.push(selectedData[i].vendor_cd + ";" + selectedData[i].valfr_cd + ";" + selectedData[i].valto_cd);
-            keyArray.push(selectedData[i].vendor_cd);
+            keyArray.push(selectedData[i].vendor_cd + ";" + selectedData[i].agreement_no);
+            //keyArray.push(selectedData[i].vendor_cd)
+            //keyArray.push(selectedData[i].agreement_no);
         }
         var selectedKey = keyArray.join(",");
+        
 
         $.ajax({
             type: "POST",

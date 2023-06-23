@@ -10,5 +10,5 @@
 		AND ((mc.VENDOR_NAME LIKE '%' + @VendorName + '%'
 		  AND isnull(@VendorName, '') <> ''
 		  OR (isnull(@VendorName, '') = '')))
-)a
+) a
 

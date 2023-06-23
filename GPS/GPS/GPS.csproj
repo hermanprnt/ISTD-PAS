@@ -704,6 +704,7 @@
     <Content Include="SQL\POApproval\GetApproval.sql" />
     <Content Include="SQL\POApproval\GetDetailList.sql" />
     <Content Include="SQL\PR\Common\get_homeTracking.sql" />
+    <Content Include="SQL\PR\PRCreation\cek_tb_t_lock.sql" />
     <Content Include="SQL\PR\PRCreation\copy_tempData.sql" />
     <Content Include="SQL\PR\PRCreation\CountData.sql" />
     <Content Include="SQL\PR\PRCreation\CountDataAssetNo.sql" />

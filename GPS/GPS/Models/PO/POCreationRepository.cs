@@ -628,7 +628,6 @@ namespace GPS.Models.PO
             POSaveResult result = new POSaveResult();
             try
             {
-
                 connect.Open();
 
                 SqlCommand sqlSelect = new SqlCommand("[dbo].[sp_POCreation_Save]", connect);

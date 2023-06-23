@@ -152,7 +152,12 @@ namespace GPS.Models.Master
                 {
                     String[] cols = data.Split(';');
 
-                    result = db.SingleOrDefault<string>("Master/MasterAgreement/DeleteData", new { VendorCode = cols[0], UId = uid });
+                    result = db.SingleOrDefault<string>("Master/MasterAgreement/DeleteData", 
+                        new { 
+                                VendorCode = cols[0],
+                                Agreement_No = cols[1],
+                                UId = uid 
+                        });
                 }
                 db.Close();
             }

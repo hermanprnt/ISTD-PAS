@@ -51,24 +51,7 @@ BEGIN
     
 		 SELECT 'True|Save Successfully'
     END
-    ELSE IF EXISTS(SELECT 1 FROM TB_M_DUE_DILLIGENCE WHERE VENDOR_CODE = @vendorcd AND DELETION = 'Y') 
-    BEGIN
-		UPDATE dbo.TB_M_DUE_DILLIGENCE
-		SET [VENDOR_CODE] = @vendorcd,
-				[VENDOR_PLANT] = @@VENDORPLN,
-				[VENDOR_NAME] =@vendornm,
-				[DD_STATUS] =@status,
-				[VALID_DD_FROM] =@vldddfrom,
-				[VALID_DD_TO] =@vldddto,
-				[DD_ATTACHMENT] = @fileUrl,
-				[DELETION] = 'N',
-			CHANGED_BY = @uid,
-			CHANGED_DT = GETDATE()
-		WHERE VENDOR_CODE = @vendorcd
-
-		SELECT 'True|Save Successfully'		
-	END
-	ELSE
+    ELSE
 	BEGIN
 		SELECT 'Error|Fail to add Due Dilligence Data, because duplicate entries.'
 	END
@@ -76,18 +59,34 @@ BEGIN
 END
 ELSE
 BEGIN
-    UPDATE dbo.TB_M_DUE_DILLIGENCE
-    SET [VENDOR_CODE] = @vendorcd,
-	        [VENDOR_PLANT] = @@VENDORPLN,
-	        [VENDOR_NAME] =@vendornm,
-	        [DD_STATUS] =@status,
-	        [VALID_DD_FROM] =@vldddfrom,
-	        [VALID_DD_TO] =@vldddto,
-	        [DD_ATTACHMENT] = @fileUrl,
-        CHANGED_BY = @uid,
-        CHANGED_DT = GETDATE()
-    WHERE VENDOR_CODE = @vendorcd
-
+	IF(@fileUrl <> '')
+	BEGIN
+		UPDATE dbo.TB_M_DUE_DILLIGENCE
+		SET [VENDOR_CODE] = @vendorcd,
+				[VENDOR_PLANT] = @@VENDORPLN,
+				[VENDOR_NAME] =@vendornm,
+				[DD_STATUS] =@status,
+				[VALID_DD_FROM] =@vldddfrom,
+				[VALID_DD_TO] =@vldddto,
+				[DD_ATTACHMENT] = @fileUrl ,
+			CHANGED_BY = @uid,
+			CHANGED_DT = GETDATE()
+		WHERE VENDOR_CODE = @vendorcd
+	END
+	ELSE
+	BEGIN
+		UPDATE dbo.TB_M_DUE_DILLIGENCE
+		SET [VENDOR_CODE] = @vendorcd,
+				[VENDOR_PLANT] = @@VENDORPLN,
+				[VENDOR_NAME] =@vendornm,
+				[DD_STATUS] =@status,
+				[VALID_DD_FROM] =@vldddfrom,
+				[VALID_DD_TO] =@vldddto,
+				
+			CHANGED_BY = @uid,
+			CHANGED_DT = GETDATE()
+		WHERE VENDOR_CODE = @vendorcd
+	END
 	SELECT 'True|Edit Successfully'
 END
 
@@ -100,8 +99,8 @@ END
 	        [DD_STATUS] ,
 	        [VALID_DD_FROM] ,
 	        [VALID_DD_TO] ,
-			 [ACTION] ,
-			 [SAP_VENDOR_ID],
+			[ACTION] ,
+			[SAP_VENDOR_ID],
 	        [CREATED_BY] ,
 	        [CREATED_DT] 
         )
