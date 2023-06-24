@@ -12,6 +12,7 @@ namespace GPS.Controllers.Master
         public PlantController()
         {
             Settings.Title = "Plant Master";
+
         }
 
         protected override void Startup() 
@@ -79,7 +80,7 @@ namespace GPS.Controllers.Master
         #endregion
 
         #region COMMON LIST
-        public static SelectList PlantSelectList
+        public static SelectList PlantSelectList 
         {
             get
             {
@@ -87,6 +88,18 @@ namespace GPS.Controllers.Master
                     .GetPlantList()
                     .AsSelectList(plant => plant.PLANT_CD + " - " + plant.PLANT_NAME, plant => plant.PLANT_CD);
             }
+        }
+        #endregion
+
+        //add by fid.ahmad 20-02-2023
+        #region COMMON LIST
+
+        public static SelectList PlantSelectListByDivisionId(String RegNo, String PlantBefore)
+        {
+            return PlantRepository.Instance
+                     .GetPlantListByDivisionId(RegNo, PlantBefore)
+                     .AsSelectList(plant => plant.PLANT_CD + " - " + plant.PLANT_NAME, plant => plant.PLANT_CD);
+
         }
         #endregion
     }

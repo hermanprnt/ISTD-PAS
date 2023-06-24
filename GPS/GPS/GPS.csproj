@@ -599,6 +599,9 @@
     <Content Include="SQL\Master\Material\GetMaterialImageInfo.sql" />
     <Content Include="SQL\Master\Message\GetById.sql" />
     <Content Include="SQL\Master\Price\call_saveUpload.sql" />
+    <Content Include="SQL\Master\Vendor\GetDivisionCode.sql" />
+    <Content Include="SQL\Master\Vendor\GetAllPlantByDivison.sql" />
+    <Content Include="SQL\Master\Vendor\CheckPlantCodeByRegNo.sql" />
     <Content Include="SQL\Master\Vendor\GetVendorEcatalogueLookupSearchList.sql" />
     <Content Include="SQL\Master\Vendor\GetVendorEcatalogueLookupSearchListCount.sql" />
     <Content Include="SQL\Master\Vendor\GetVendorLookupSearchListCountPO.sql" />
@@ -688,6 +691,7 @@
     <Content Include="SQL\PR\PRCreation\DataList\get_costcenterListFamsDB.sql" />
     <Content Include="SQL\PR\PRCreation\DataList\get_assetlocList.sql" />
     <Content Include="SQL\PR\PRCreation\DataList\get_costcenterListByCoordinator.sql" />
+    <Content Include="SQL\PR\PRCreation\validate_itemdesc.sql" />
     <Content Include="SQL\PR\PRCreation\GetData.sql" />
     <Content Include="SQL\PR\PRCreation\GetDataAssetNo.sql" />
     <Content Include="SQL\PR\PRCreation\insert_prhtempData.sql" />

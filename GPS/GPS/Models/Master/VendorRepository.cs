@@ -189,6 +189,72 @@ namespace GPS.Models.Master
             return data.Count == 0 ? new Vendor() : data[0];
         }
 
+        public string GetPlantData(string VendorCd)
+        {
+            string Plant = "";
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            dynamic args = new
+            {
+                VendorCd
+            };
+
+            var data = db.Fetch<Vendor>("Master/Vendor/GetSelectedData", args);
+            db.Close();
+
+            if (data.Count > 0)
+            {
+                foreach (var item in data)
+                {
+                    Plant = item.VendorPlant;
+                }
+            }
+            return Plant;
+        }
+
+        public string CheckPlantCodeByRegNo(string PlantCd, string RegNo)
+        {
+            string SetDisablePlant = "FALSE";
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            dynamic args = new
+            {
+                PlantCd,
+                RegNo
+            };
+
+            var data = db.Fetch<Vendor>("Master/Vendor/CheckPlantCodeByRegNo", args);
+            db.Close();
+
+            if (data.Count > 0)
+            {
+                foreach (var item in data)
+                {
+                    SetDisablePlant = item.SetDisablePlant;
+                }
+            }
+            return SetDisablePlant;
+        }
+
+        public string GetDivisionCode(string RegNo)
+        {
+            string result = "";
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            dynamic args = new
+            {
+                RegNo
+            };
+
+            var data = db.Fetch<Vendor>("Master/Vendor/GetDivisionCode", args);
+            db.Close();
+
+            if (data.Count > 0)
+            {
+                foreach (var item in data)
+                {
+                    result = item.DivisionId;
+                }
+            }
+            return result;
+        }
         public List<Vendor> GetDownloadData(string VendorCd, string VendorName, string PayTerm, string PayMethod)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();

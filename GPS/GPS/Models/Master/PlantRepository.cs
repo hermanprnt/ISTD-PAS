@@ -1,10 +1,14 @@
+using System;
 using System.Collections.Generic;
+using Toyota.Common.Credential;
 using Toyota.Common.Database;
 using Toyota.Common.Web.Platform;
+using System.Web.Mvc;
+
 
 namespace GPS.Models.Master
 {
-    public class PlantRepository
+    public class PlantRepository 
     {
         private PlantRepository() { }
         private static readonly PlantRepository instance = null;
@@ -93,12 +97,35 @@ namespace GPS.Models.Master
         #region COMMON LIST
         public IEnumerable<Plant> GetPlantList()
         {
+
             IDBContext db = DatabaseManager.Instance.GetContext();
             IEnumerable<Plant> result = db.Fetch<Plant>("Master/GetAllPlant");
             db.Close();
 
             return result;
         }
+        #endregion
+
+        #region Get Plant List By Division Id
+        public IEnumerable<Plant> GetPlantListByDivisionId(String RegNo, String PlantBefore)
+        {
+        
+            string NoReg = RegNo;
+            //string NoReg = "";
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            dynamic args = new
+            {
+                NOREG = NoReg,
+                PLANT_BEFORE = PlantBefore
+            };
+            IEnumerable<Plant> result = db.Fetch<Plant>("Master/Vendor/GetAllPlantByDivison",args);
+            db.Close();
+
+            return result;
+        }
+
+        
+
         #endregion
     }
 }

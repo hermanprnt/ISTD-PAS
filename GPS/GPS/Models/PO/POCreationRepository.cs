@@ -843,6 +843,57 @@ namespace GPS.Models.PO
             return result;
         }
 
+        public POSaveResult PlantCodeChecking(ExecProcedureModel execModel, PurchaseOrderSaveViewModel viewModel)
+        {
+            #region
+            string Message = "";
+            string Result = "";
+            string constring = DatabaseManager.Instance.GetConnectionDescriptor("Dev").ConnectionString;
+            SqlConnection connect = new SqlConnection(constring);
+            SqlDataReader reader = null;
+            POSaveResult result = new POSaveResult();
+            try
+            {
+                connect.Open();
+
+                SqlCommand sqlSelect = new SqlCommand("[dbo].[sp_PlantCodeChecking]", connect);
+                sqlSelect.CommandType = CommandType.StoredProcedure;
+                sqlSelect.CommandTimeout = 180;
+                string[] poNoteArray = viewModel.PONote.ToArray();
+                sqlSelect.Parameters.Add("@vendor", SqlDbType.VarChar).Value = viewModel.Vendor == null ? "" : viewModel.Vendor;
+                sqlSelect.Parameters.Add("@purchasingGroup", SqlDbType.VarChar).Value = viewModel.PurchasingGroup;
+                reader = sqlSelect.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Result = (reader[0]).ToString();
+                }
+
+                connect.Close();
+                if (Result == ActionResponseViewModel.Error) 
+                {
+                    result.Message = "E"+ "|Vendor code was not mapped by purchasing group";
+                }
+                else
+                {
+                    result.Message = "S" + "|Sucess";
+                }
+               
+                var resultViewModel = result.Message.AsActionResponseViewModel();
+                if (Result == ActionResponseViewModel.Error)
+                    throw new InvalidOperationException(resultViewModel.Message);
+
+               
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException(e.Message);
+                connect.Close();
+            }
+            #endregion
+            return result;
+        }
+
         public IList<String> GetDeletedAttachmentList(String processId)
         {
             String query = @"EXEC sp_POCreation_GetDeletedFiles @ProcessId";
