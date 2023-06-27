@@ -48,7 +48,9 @@
                                         <td class="text-center grid-checkbox-col" style="width:20px">
                                             <input id="cb-@item.Number" class="grid-checkbox grid-checkbox-body" type="checkbox" 
                                                    data-vendor_cd="@item.VENDOR_CODE"
-                                                   data-agreement_no="@item.AGREEMENT_NO"/>
+                                                   data-agreement_no="@item.AGREEMENT_NO"
+
+                                                   data-expired_date="@item.EXP_DATE"/>
                                         </td>
                                         <td class="text-center" style="width:20px">@item.Number</td>
                                         <td class="text-center" style="width:80px">@item.VENDOR_CODE</td>
@@ -162,6 +164,7 @@
                         processData: false,
                         data: data,
                         success: function (data) {
+                            $('#upfile').val('');
                             $.progressbox.hide();
                             var result = data.message.split('|');
                             if (result[0] == 'Error') {

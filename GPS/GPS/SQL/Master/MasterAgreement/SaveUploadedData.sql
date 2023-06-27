@@ -25,7 +25,10 @@ END
 
 
 
-IF NOT EXISTS(SELECT 1 FROM TB_M_AGREEMENT_NO WHERE VENDOR_CODE = @vendorCd)
+IF NOT EXISTS(SELECT 1 FROM TB_M_AGREEMENT_NO 
+	WHERE VENDOR_CODE = @vendorCd AND
+	AGREEMENT_NO = @agreementNo AND
+	EXP_DATE = @expDate)
 BEGIN
 	INSERT INTO dbo.TB_M_AGREEMENT_NO
 		(VENDOR_CODE,
@@ -33,10 +36,11 @@ BEGIN
 		 PURCHASING_GROUP,
 		 BUYER,
 		 AGREEMENT_NO,
-		 START_DATE,
+		 [START_DATE],
 		 EXP_DATE,
-		 STATUS,
+		 [STATUS],
 		 NEXT_ACTION,
+		 AMOUNT,
 		 CREATED_BY,
 		 CREATED_DT,
          CHANGED_BY,
@@ -51,6 +55,10 @@ BEGIN
 		 @expDate,
 		 '1',
 		 @nextAction,
+              CASE @amount
+                WHEN '' THEN 0
+                ELSE @amount
+              END,
          @UId,
          GETDATE(),
          NULL,
@@ -58,8 +66,8 @@ BEGIN
 END
 ELSE
 BEGIN
-	
-SELECT 'SUCCESS'
+	SELECT 'Fail to add Agreement Data, because duplicate entries.'
+	RETURN;
 	
 END
 

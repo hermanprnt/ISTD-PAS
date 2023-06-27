@@ -36,7 +36,8 @@
             if (a.id != null && a.id.length > 0 && a.checked) {
                 ids.push({
                     vendor_cd: $('#' + a.id).data('vendor_cd'),
-                    agreement_no: $('#' + a.id).data('agreement_no')
+                    agreement_no: $('#' + a.id).data('agreement_no'),
+                    exp_Date: $('#' + a.id).data('expired_date')
                 });
             }
         });
@@ -183,12 +184,15 @@
             )
         else {
             var selectedData = GetSelectedGrid();
+            //console.log(selectedData);
             $.ajax({
                 type: "post",
                 url: "@Html.Toyota().Page.GetActionUrl("IsFlagEditAdd")",
                 data: {
                     flag: '1',
-                    VendorCode: selectedData[0].vendor_cd
+                    VendorCode: selectedData[0].vendor_cd,
+                    AgreementNo: selectedData[0].agreement_no,
+                    ExpDate: selectedData[0].exp_Date
                 },
                 success: function (data) {
                     $("#basicModal").html(data);

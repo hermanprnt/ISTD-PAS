@@ -10,4 +10,5 @@
 		   mc.NEXT_ACTION,
 		   mc.AMOUNT
 	FROM TB_M_AGREEMENT_NO mc
-WHERE VENDOR_CODE = @VendorCode
+WHERE VENDOR_CODE = @VendorCode AND AGREEMENT_NO = @AgreementNo AND EXP_DATE = @ExpDate
+

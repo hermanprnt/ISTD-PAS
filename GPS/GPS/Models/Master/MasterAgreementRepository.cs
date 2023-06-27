@@ -123,6 +123,8 @@ namespace GPS.Models.Master
                 startDate = param.START_DATE,
                 expDate = param.EXP_DATE,
                 nextAction = param.NEXT_ACTION,
+                amount = param.AMOUNT,
+                
                 UId = username
             };
 
@@ -131,11 +133,13 @@ namespace GPS.Models.Master
 
             return result;
         }
-        public MasterAgreement GetSelectedData(String VendorCode)
+        public MasterAgreement GetSelectedData(String VendorCode,String AgreementNo,String ExpDate)
         {
+            ExpDate = conversiDate(ExpDate);
+
             IDBContext db = DatabaseManager.Instance.GetContext();
 
-            var data = db.SingleOrDefault<MasterAgreement>("Master/MasterAgreement/GetSelectedData", new { VendorCode });
+            var data = db.SingleOrDefault<MasterAgreement>("Master/MasterAgreement/GetSelectedData", new { VendorCode,AgreementNo,ExpDate });
             db.Close();
 
             return data;

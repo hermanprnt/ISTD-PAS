@@ -101,6 +101,8 @@ namespace GPS.Controllers.Master
         [HttpPost]
         public ActionResult SaveData()
         {
+
+            var filename = "";
             string vendorcd = Request.Params[0];
             string vendornm = Request.Params[1];
             string status = Request.Params[2];
@@ -114,7 +116,7 @@ namespace GPS.Controllers.Master
                 var fileupload = Request.Files[0];
                 string AttachmentPath = SystemRepository.Instance.GetSingleData("UPATT", "DueDilligenceAttachment").Value;
 
-                var filename = vendorcd + "_" + Path.GetFileName(fileupload.FileName);
+                filename = vendorcd + "_" + Path.GetFileName(fileupload.FileName);
                 string resultFilePath = Path.Combine("~", AttachmentPath + filename);
                 fileupload.SaveAs(Server.MapPath(resultFilePath));
             }
@@ -123,7 +125,7 @@ namespace GPS.Controllers.Master
             vldddfrom = conversiDate(vldddfrom);
             vldddto = conversiDate(vldddto);
 
-            String message = MasterDueDilligenceRepository.Instance.SaveData(flag, vendorcd, vendornm, status, vldddfrom, vldddto, txtFile, this.GetCurrentUsername());
+            String message = MasterDueDilligenceRepository.Instance.SaveData(flag, vendorcd, vendornm, status, vldddfrom, vldddto, filename, this.GetCurrentUsername());
 
             return new JsonResult { Data = new { message } };
         }

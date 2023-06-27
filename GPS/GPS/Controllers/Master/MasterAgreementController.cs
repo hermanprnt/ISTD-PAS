@@ -11,6 +11,7 @@ using NPOI.SS.UserModel;
 using System.Collections.Generic;
 using GPS.Models;
 using Toyota.Common.Utilities;
+using NPOI.SS.Formula.Functions;
 
 namespace GPS.Controllers.Master
 {
@@ -40,12 +41,12 @@ namespace GPS.Controllers.Master
         }
 
         #region ark.herman 23/3/2023
-        public ActionResult IsFlagEditAdd(String flag, String VendorCode)
+        public ActionResult IsFlagEditAdd(String flag, String VendorCode, String AgreementNo, String ExpDate)
         {
             ViewData["edit"] = flag;
             ViewData["MasterAgreementData"] = flag == "0"
                 ? new MasterAgreement()
-                : MasterAgreementRepository.Instance.GetSelectedData(VendorCode);
+                : MasterAgreementRepository.Instance.GetSelectedData(VendorCode, AgreementNo, ExpDate);
 
             return PartialView("_AddEditPopUp");
         }
@@ -245,63 +246,44 @@ namespace GPS.Controllers.Master
                         message = message + "Next Action Should Not be Empty\n";
                     else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(7).ToString().Trim()))
                         message = message + "Next Action Should Not be Empty\n";
+                    if (sheet.GetRow(i).GetCell(8) == null)
+                        message = message + "Amount Should Not be Empty\n";
+                    else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(8).ToString().Trim()))
+                        message = message + "Amount Should Not be Empty\n";
                     #endregion
 
-                    var a = sheet.GetRow(i).GetCell(1).ToString().Trim();
-                    var b = sheet.GetRow(i).GetCell(2).ToString().Trim();
-                    var c = sheet.GetRow(i).GetCell(3).ToString().Trim();
-
                     #region Data Length Checking
-                    if (message == "")
-                    {
-
-                        if (sheet.GetRow(i).GetCell(5).ToString().Trim().Length > 10)
-                            message = message + "Start Date Should Not be More Than 10 Character\n";
-                        if (sheet.GetRow(i).GetCell(6).ToString().Trim().Length > 10)
-                            message = message + "End Date Should Not be More Than 10 Character\n";
-
-                    }
+                    if (sheet.GetRow(i).GetCell(5).ToString().Trim().Length > 10)
+                        message = message + "Start Date Should Not be More Than 10 Character\n";
+                    if (sheet.GetRow(i).GetCell(6).ToString().Trim().Length > 10)
+                        message = message + "End Date Should Not be More Than 10 Character\n";
                     #endregion
 
                     #region Date Format Checking
-                    if (message == "")
-                    {
-                        if (!sheet.GetRow(i).GetCell(5).ToString().Trim().Contains("."))
-                            message = message + "Start Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
-                        if (!sheet.GetRow(i).GetCell(6).ToString().Trim().Contains("."))
-                            message = message + "Expired Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
-                    }
+                    if (!sheet.GetRow(i).GetCell(5).ToString().Trim().Contains("."))
+                        message = message + "Start Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
+                    if (!sheet.GetRow(i).GetCell(6).ToString().Trim().Contains("."))
+                        message = message + "Expired Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
 
-                    if (message == "")
-                    {
-                        DateTime dStartDate;
-                        string startdatetemp = sheet.GetRow(i).GetCell(5).ToString().Trim().Substring(3, 2) + "/" + sheet.GetRow(i).GetCell(5).ToString().Trim().Substring(0, 2) + "/" + sheet.GetRow(i).GetCell(5).ToString().Trim().Substring(6, 4);
-                        if (!DateTime.TryParse(startdatetemp, out dStartDate))
-                            message = message + "Start Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
 
-                        DateTime dEndDate;
-                        string enddatetemp = sheet.GetRow(i).GetCell(6).ToString().Trim().Substring(3, 2) + "/" + sheet.GetRow(i).GetCell(6).ToString().Trim().Substring(0, 2) + "/" + sheet.GetRow(i).GetCell(6).ToString().Trim().Substring(6, 4);
-                        if (!DateTime.TryParse(enddatetemp, out dEndDate))
-                            message = message + "Expired Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
-                    }
+                    DateTime dStartDate;
+                    string startdatetemp = sheet.GetRow(i).GetCell(5).ToString().Trim().Substring(3, 2) + "/" + sheet.GetRow(i).GetCell(5).ToString().Trim().Substring(0, 2) + "/" + sheet.GetRow(i).GetCell(5).ToString().Trim().Substring(6, 4);
+                    if (!DateTime.TryParse(startdatetemp, out dStartDate))
+                        message = message + "Start Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
+
+                    DateTime dEndDate;
+                    string enddatetemp = sheet.GetRow(i).GetCell(6).ToString().Trim().Substring(3, 2) + "/" + sheet.GetRow(i).GetCell(6).ToString().Trim().Substring(0, 2) + "/" + sheet.GetRow(i).GetCell(6).ToString().Trim().Substring(6, 4);
+                    if (!DateTime.TryParse(enddatetemp, out dEndDate))
+                        message = message + "Expired Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
                     #endregion
 
                     #region Numeric Checking
-                    //if (message == "")
-                    //{
-                    //    if (sheet.GetRow(i).GetCell(3) != null)
-                    //    {
-                    //        if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(2).ToString().Trim()))
-                    //        {
-                    //            Int16 dInt;
-                    //            if (!Int16.TryParse(sheet.GetRow(i).GetCell(2).ToString().Trim(), out dInt))
-                    //                message = message + "Due Dilligence Status is not in correct format\n";
-                    //        }
-                    //    }
-                    //}
+                    Int16 dInt;
+                    if (!Int16.TryParse(sheet.GetRow(i).GetCell(8).ToString().Trim(), out dInt))
+                        message = message + "Amount must be in numeric format \n";
                     #endregion
 
-                    if (message == "")
+                    if (string.IsNullOrEmpty(message))
                     {
                         MasterAgreement data = new MasterAgreement();
 
@@ -312,6 +294,7 @@ namespace GPS.Controllers.Master
                         data.START_DATE = sheet.GetRow(i).GetCell(5).ToString().Trim();
                         data.EXP_DATE = sheet.GetRow(i).GetCell(6).ToString().Trim();
                         data.NEXT_ACTION = sheet.GetRow(i).GetCell(7).ToString().Trim();
+                        data.AMOUNT = sheet.GetRow(i).GetCell(8).ToString().Trim();
 
                         message = MasterAgreementRepository.Instance.SaveUploadedData(data, this.GetCurrentUsername());
                     }
@@ -322,8 +305,10 @@ namespace GPS.Controllers.Master
                     if (message.Substring(message.Length - 2, 2) == "\n")
                         message = message.Substring(0, message.Length - 2);
 
+
                     sheet.GetRow(i).GetCell(10).SetCellValue(message);
                     sheet.GetRow(i).GetCell(10).CellStyle.WrapText = true;
+
                 }
 
                 using (FileStream tfile = new FileStream(Path.Combine(Server.MapPath("~/Content/UploadFile"), filename), FileMode.Open, FileAccess.Write))

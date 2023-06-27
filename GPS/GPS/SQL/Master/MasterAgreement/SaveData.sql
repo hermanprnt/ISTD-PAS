@@ -34,7 +34,11 @@ BEGIN
 			  @Status,
 			  @Nextaction,
               @filename,
-              @Amount,
+              
+              CASE @Amount
+                WHEN '' THEN 0
+                ELSE @Amount
+              END,
               @UId,
               GETDATE(),
               NULL,
@@ -50,19 +54,42 @@ BEGIN
 END
 ELSE
 BEGIN
-    UPDATE dbo.TB_M_AGREEMENT_NO
-    SET VENDOR_NAME = @VendorName,
-	    PURCHASING_GROUP = @PurchasingGrp,
-		BUYER = @Buyer,
-        AGREEMENT_NO = @Agreementno,
-        START_DATE = @Startdate,
-        EXP_DATE = @Expdate,
-        STATUS = @Status,
-        NEXT_ACTION = @Nextaction,
-        AN_ATTACHMENT = @filename,
-        CHANGED_BY = @UId,
-        CHANGED_DT = GETDATE()
-    WHERE VENDOR_CODE = @VendorCode
-
-	SELECT 'True|Edit Successfully'
+    IF (@filename <> '')
+    BEGIN
+            UPDATE dbo.TB_M_AGREEMENT_NO
+             SET VENDOR_NAME = @VendorName,
+	        PURCHASING_GROUP = @PurchasingGrp,
+		    BUYER = @Buyer,
+            AGREEMENT_NO = @Agreementno,
+            START_DATE = @Startdate,
+            EXP_DATE = @Expdate,
+            STATUS = @Status,
+            NEXT_ACTION = @Nextaction,
+            AN_ATTACHMENT = @filename,
+            CHANGED_BY = @UId,
+            CHANGED_DT = GETDATE()
+        WHERE VENDOR_CODE = @VendorCode
+        AND AGREEMENT_NO = @Agreementno
+        AND EXP_DATE = @Expdate
+	    SELECT 'True|Edit Successfully'
+    END
+    ELSE
+    BEGIN
+      UPDATE dbo.TB_M_AGREEMENT_NO
+             SET VENDOR_NAME = @VendorName,
+	        PURCHASING_GROUP = @PurchasingGrp,
+		    BUYER = @Buyer,
+            AGREEMENT_NO = @Agreementno,
+            START_DATE = @Startdate,
+            EXP_DATE = @Expdate,
+            STATUS = @Status,
+            NEXT_ACTION = @Nextaction,
+            CHANGED_BY = @UId,
+            CHANGED_DT = GETDATE()
+        WHERE VENDOR_CODE = @VendorCode
+        AND AGREEMENT_NO = @Agreementno
+        AND EXP_DATE = @Expdate
+	    SELECT 'True|Edit Successfully'
+    END
+    
 END
