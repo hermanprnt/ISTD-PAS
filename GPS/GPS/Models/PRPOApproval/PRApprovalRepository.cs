@@ -380,6 +380,8 @@ namespace GPS.Models.PRPOApproval
                 TYPEAPPROVE = typeApproval
             };
             IEnumerable<CommonApprovalResult> result = db.Fetch<CommonApprovalResult>(SqlFile.ApproveHeader, args);
+
+            //IEnumerable<CommonApprovalResult> result = db.Fetch<CommonApprovalResult>("Master/MasterAgreement/SaveUploadedData1", args);
             db.Close();
             return result.Any() ? result.FirstOrDefault() : new CommonApprovalResult();
         }

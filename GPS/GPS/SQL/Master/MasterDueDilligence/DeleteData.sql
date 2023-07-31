@@ -1,7 +1,7 @@
 ﻿
 	 
 
- --insert tb h
+ --INERT TO TABLE HISTORY
 		INSERT INTO TB_H_DUE_DILLIGENCE(
             [VENDOR_CODE] ,
 	        [VENDOR_PLANT] ,
@@ -28,9 +28,7 @@
         FROM TB_M_DUE_DILLIGENCE
 		WHERE VENDOR_CODE = @vendorcd 
 
-
-		
-
+		--DELETE FROM TABLE MASTER
 		DELETE FROM TB_M_DUE_DILLIGENCE  WHERE VENDOR_CODE = @vendorcd
 
 	 SELECT 'True|Delete successfully'

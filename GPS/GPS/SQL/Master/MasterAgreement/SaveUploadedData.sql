@@ -22,6 +22,12 @@ BEGIN
 	END
 END
 
+IF (ISNUMERIC(@amount) = 0 AND @amount <> '')
+BEGIN
+	SET @@MSG = 'Amount must be numeric'
+	SELECT @@MSG
+	RETURN;
+END
 
 
 
@@ -41,6 +47,10 @@ BEGIN
 		 [STATUS],
 		 NEXT_ACTION,
 		 AMOUNT,
+		 EMAIL_BUYER,
+		 EMAIL_SH,
+		 EMAIL_DPH,
+		 EMAIL_LEGAL,
 		 CREATED_BY,
 		 CREATED_DT,
          CHANGED_BY,
@@ -51,14 +61,29 @@ BEGIN
 		 @purchasingGroup,
 		 @buyer,
 		 @agreementNo,
-		 @startDate,
-		 @expDate,
-		 '1',
+		 CASE
+			WHEN IsNull(@startDate, '') = ''  OR IsNull(@expDate, '') = '' THEN ''
+			ELSE @startDate
+		 END,
+		 CASE
+			WHEN IsNull(@startDate, '') = ''  OR IsNull(@expDate, '') = '' THEN ''
+			ELSE @expDate
+		 END,
+		 CASE
+			WHEN IsNull(@startDate, '') = ''  OR IsNull(@expDate, '') = '' THEN 2
+			WHEN DATEADD(MONTH,3, GETDATE()) > @expDate THEN 4
+			WHEN GETDATE() BETWEEN DATEADD(MONTH,-3,@expDate) AND @expDate THEN 3
+			ELSE 1
+		 END,
 		 @nextAction,
               CASE @amount
                 WHEN '' THEN 0
                 ELSE @amount
               END,
+		  @mailbuyer,
+          @mailsh,
+          @maildph,
+          @maillegal,
          @UId,
          GETDATE(),
          NULL,
@@ -72,4 +97,4 @@ BEGIN
 END
 
 
-SELECT 'SUCCESS'
+SELECT 'SUCCESS UPLOAD'

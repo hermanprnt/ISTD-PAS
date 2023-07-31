@@ -60,6 +60,54 @@
                         <div class="col-xs-10 col-sm-10 col-md-10">
                             <div class="form-group form-group-xs">
                                 <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Email Buyer</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txtmail-buyer" class="form-control" maxlength="1000" autocomplete="off" value="@data.EMAIL_BUYER" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Email SH</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txtmail-sh" class="form-control" maxlength="1000" autocomplete="off" value="@data.EMAIL_SH" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Email DPH</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txtmail-dph" class="form-control" maxlength="1000" autocomplete="off" value="@data.EMAIL_DPH" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Email Legal</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txtmail-legal" class="form-control" maxlength="1000" autocomplete="off" value="@data.EMAIL_LEGAL" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
                                     <label class="control-label text-muted">Due Dilligence Status</label>
                                 </div>
                                 <div class="col-xs-7 col-sm-8">
@@ -110,6 +158,7 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
             <div class="modal-footer">
@@ -130,6 +179,27 @@
         $("#txtedit-vldddto").todatepicker();
         $("#cmbedit-status").val("@data.DD_STATUS");
         $("#cmb-vendorcode").val("@data.VENDOR_CODE");
+
+        if ($("#cmbedit-status").val() == 4) {
+            $("#txtedit-vldddfrom").prop('disabled', true);
+            $("#txtedit-vldddto").prop('disabled', true);
+            //alert($("#cmbedit-status").val());
+        }
+
+
+        $("#cmb-vendorcode").select2new();
+
+        $('#cmbedit-status').change(function () {
+            if ($("#cmbedit-status").val() == 4) {
+                $("#txtedit-vldddfrom").prop('disabled',true);
+                $("#txtedit-vldddto").prop('disabled', true);
+                //alert($("#cmbedit-status").val());
+            } else {
+                $("#txtedit-vldddfrom").prop('disabled', false);
+                $("#txtedit-vldddto").prop('disabled', false);
+            }
+        });
+
         $("#cmb-vendorcode").change(function () {
             var vendor = $(this).val();
             $.support.cors = true;

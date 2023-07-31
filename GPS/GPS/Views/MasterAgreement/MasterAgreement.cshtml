@@ -2,6 +2,7 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     string DOC_STS = (string)ViewData["DOC_STS"];
+
 }
 
 @section HeadScript {
@@ -116,11 +117,9 @@
                     <button id="btn-upload" style="padding: 6px;" class="btn btn-warning btn-xs btn-std btndisable" onclick="$('input[id=upfile]').click();">
                         <span style="font-family: Open Sans; font-size: 12px">Upload</span>
                     </button>
-
-
                     <button type="button" id="btn-download" onclick="onDownload()" class="btn btn-primary btn-xs btn-xs btndisable">Download</button>
 
-                    @*<button type="button" class="btn btn-primary btn-std btn-xs" id="btn-detail" onclick="javascript:detailGrid()">Show Detail</button>*@
+                    <button type="button" class="btn btn-primary btn-std btn-xs" id="btn-detail" onclick="javascript:detailGrid()">Show Detail</button>
                 </div>
             </div>
         </div>

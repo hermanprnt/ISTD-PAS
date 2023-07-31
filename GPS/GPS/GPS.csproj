@@ -512,6 +512,8 @@
     <Content Include="Content\bootstrap-accessibility\bootstrap-accessibility.css" />
     <Content Include="Content\bootstrap-accessibility\bootstrap-accessibility.js" />
     <Content Include="Content\bootstrap-accessibility\bootstrap-accessibility.min.js" />
+    <Content Include="Content\Bootstrap\css\select2new.css" />
+    <Content Include="Content\Bootstrap\js\select2new.js" />
     <Content Include="Content\Bootstrap\js\lobibox\lobibox.css" />
     <Content Include="Content\Bootstrap\js\lobibox\lobibox.js" />
     <Content Include="Content\Common\tdk.lookup.css" />

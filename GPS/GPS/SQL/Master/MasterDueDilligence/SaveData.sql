@@ -2,10 +2,41 @@
 DECLARE @@SAP_VENDOR_CD VARCHAR(20)
 DECLARE @@DELETION VARCHAR(20)
 DECLARE @@ACTION VARCHAR(20)
+DECLARE @@VALID_DD_FROM DATETIME
+DECLARE @@VALID_DD_TO DATETIME
 
 SELECT @@VENDORPLN = VENDOR_PLANT
-	,@@SAP_VENDOR_CD = SAP_VENDOR_ID
 FROM TB_M_VENDOR WHERE VENDOR_CD = @vendorcd
+
+
+IF(@status = '1')
+BEGIN
+	SET @@VALID_DD_TO = DATEADD(year, 1, @vldddfrom)
+END
+ELSE IF(@status = '2')
+BEGIN
+	SET @@VALID_DD_TO = DATEADD(year, 2, @vldddfrom)
+END
+ELSE IF(@status = '3')
+BEGIN
+	SET @@VALID_DD_TO = DATEADD(year, 3, @vldddfrom)
+END
+ELSE IF(@status = '4')
+BEGIN
+	SET @vldddfrom = '9999-01-01 00:00:00.000'
+	SET @vldddto = '9999-01-01 00:00:00.000'
+END
+
+
+IF(LEN(@vendorcd) < 10)
+BEGIN
+	SET @@SAP_VENDOR_CD = RIGHT(CONCAT('0000000000', @vendorcd), 10);
+END
+ELSE
+BEGIN
+	SET @@SAP_VENDOR_CD = @vendorcd
+END
+
 
 IF(@Flag = '0')
 BEGIN
@@ -30,10 +61,12 @@ BEGIN
 	        [VALID_DD_TO] ,
 			 [DD_ATTACHMENT] ,
 			 [SAP_VENDOR_ID],
+			 [EMAIL_BUYER],
+			 [EMAIL_SH],
+			 [EMAIL_DPH],
+			 [EMAIL_LEGAL],
 	        [CREATED_BY] ,
-	        [CREATED_DT] ,
-	        [CHANGED_BY] ,
-	        [CHANGED_DT] 
+	        [CREATED_DT] 
         )
     VALUES  ( @vendorcd,
               @@VENDORPLN,
@@ -43,10 +76,12 @@ BEGIN
               @vldddto,
               @fileUrl,
 			  @@SAP_VENDOR_CD,
+			  @mailbuyer,
+			  @mailsh,
+			  @maildph,
+			  @maillegal,
               @uid,
-              GETDATE(),
-              NULL,
-              NULL
+              GETDATE()
             )
     
 		 SELECT 'True|Save Successfully'
@@ -69,6 +104,10 @@ BEGIN
 				[VALID_DD_FROM] =@vldddfrom,
 				[VALID_DD_TO] =@vldddto,
 				[DD_ATTACHMENT] = @fileUrl ,
+				[EMAIL_BUYER] = @mailbuyer,
+				[EMAIL_SH] = @mailsh,
+				[EMAIL_DPH] = @maildph,
+				[EMAIL_LEGAL] = @maillegal,
 			CHANGED_BY = @uid,
 			CHANGED_DT = GETDATE()
 		WHERE VENDOR_CODE = @vendorcd
@@ -82,7 +121,10 @@ BEGIN
 				[DD_STATUS] =@status,
 				[VALID_DD_FROM] =@vldddfrom,
 				[VALID_DD_TO] =@vldddto,
-				
+				[EMAIL_BUYER] = @mailbuyer,
+				[EMAIL_SH] = @mailsh,
+				[EMAIL_DPH] = @maildph,
+				[EMAIL_LEGAL] = @maillegal,
 			CHANGED_BY = @uid,
 			CHANGED_DT = GETDATE()
 		WHERE VENDOR_CODE = @vendorcd

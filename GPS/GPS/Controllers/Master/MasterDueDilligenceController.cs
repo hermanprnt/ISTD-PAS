@@ -101,40 +101,52 @@ namespace GPS.Controllers.Master
         [HttpPost]
         public ActionResult SaveData()
         {
-
             var filename = "";
-            string vendorcd = Request.Params[0];
-            string vendornm = Request.Params[1];
-            string status = Request.Params[2];
-            string vldddfrom = Request.Params[3];
-            string vldddto = Request.Params[4];
-            string flag = Request.Params[5];
-            string txtFile = Request.Params[6];
+            MasterDueDilligence NewDueDilligence = new MasterDueDilligence
+            {
+                VENDOR_CODE = Request.Params[0],
+                VENDOR_NAME = Request.Params[1],
+                DD_STATUS = Request.Params[2],
+                VALID_DD_FROM = conversiDate(Request.Params[3]),
+                VALID_DD_TO = conversiDate(Request.Params[4]),
+                EMAIL_BUYER = Request.Params[5],
+                EMAIL_SH = Request.Params[6],
+                EMAIL_DPH = Request.Params[7],
+                EMAIL_LEGAL = Request.Params[8],
+            };
+
+            string flag = Request.Params[9];
+            string txtFile = Request.Params[10];
 
             if (!txtFile.IsNullOrEmpty())
             {
                 var fileupload = Request.Files[0];
                 string AttachmentPath = SystemRepository.Instance.GetSingleData("UPATT", "DueDilligenceAttachment").Value;
 
-                filename = vendorcd + "_" + Path.GetFileName(fileupload.FileName);
+                filename = NewDueDilligence.VENDOR_CODE + "_" + Path.GetFileName(fileupload.FileName);
                 string resultFilePath = Path.Combine("~", AttachmentPath + filename);
                 fileupload.SaveAs(Server.MapPath(resultFilePath));
             }
-           
 
-            vldddfrom = conversiDate(vldddfrom);
-            vldddto = conversiDate(vldddto);
+            //vldddfrom = conversiDate(vldddfrom);
+            //vldddto = conversiDate(vldddto);
 
-            String message = MasterDueDilligenceRepository.Instance.SaveData(flag, vendorcd, vendornm, status, vldddfrom, vldddto, filename, this.GetCurrentUsername());
+            String message = MasterDueDilligenceRepository.Instance.SaveData(NewDueDilligence, flag, filename, this.GetCurrentUsername());
 
-            return new JsonResult { Data = new { message } };
+            return new JsonResult
+            {
+                Data = new
+                {
+                    message
+                }
+            };
         }
 
         public ActionResult DownloadFile(string filePath)
         {
             string Attachment = SystemRepository.Instance.GetSingleData("UPATT", "DueDilligenceAttachment").Value;
 
-            string fullName = Server.MapPath("~" + Attachment+ filePath);
+            string fullName = Server.MapPath("~" + Attachment + filePath);
 
             byte[] fileBytes = GetFile(fullName);
 
@@ -192,7 +204,8 @@ namespace GPS.Controllers.Master
             string resultFilePath = "";
             string savefile = "";
             string result = "";
-
+            string dateFrom = "";
+            
             try
             {
                 #region Get File
@@ -217,50 +230,77 @@ namespace GPS.Controllers.Master
                         message = message + "Vendor Code Should Not be Empty\n";
 
                     if (sheet.GetRow(i).GetCell(2) == null)
-                        message = message + "Due Dilligence Status Should Not be Empty\n";
+                        message = message + "Email Buyer Should Not be Empty\n";
                     else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(2).ToString().Trim()))
-                        message = message + "Due Dilligence Status Should Not be Empty\n";
+                        message = message + "Email BuyerShould Not be Empty\n";
 
                     if (sheet.GetRow(i).GetCell(3) == null)
-                        message = message + "Due Dilligence From Should Not be Empty\n";
+                        message = message + "Email SH Should Not be Empty\n";
                     else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(3).ToString().Trim()))
-                        message = message + "Due Dilligence From Should Not be Empty\n";
+                        message = message + "Email SH Should Not be Empty\n";
+
+                    if (sheet.GetRow(i).GetCell(4) == null)
+                        message = message + "Email DPH Should Not be Empty\n";
+                    else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(4).ToString().Trim()))
+                        message = message + "Email DPH Should Not be Empty\n";
+
+                    if (sheet.GetRow(i).GetCell(5) == null)
+                        message = message + "Email Legal Should Not be Empty\n";
+                    else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(5).ToString().Trim()))
+                        message = message + "Email Legal Should Not be Empty\n";
+
+                    if (sheet.GetRow(i).GetCell(6) == null)
+                        message = message + "Due Dilligence Status Should Not be Empty\n";
+                    else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(6).ToString().Trim()))
+                        message = message + "Due Dilligence Status Should Not be Empty\n";
+
+                    //if (sheet.GetRow(i).GetCell(7) == null)
+                    //    message = message + "Due Dilligence From Should Not be Empty\n";
+                    //else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(7).ToString().Trim()))
+                    //    message = message + "Due Dilligence From Should Not be Empty\n";
                     #endregion
 
                     #region Data Length Checking
-                    if (message == "")
-                    {
-
-                        if (sheet.GetRow(i).GetCell(3).ToString().Trim().Length > 10)
-                            message = message + "Due Dilligence From Should Not be More Than 10 Character\n";
-                    }
+                    //if (message == "")
+                    //{
+                    //    //if (!string.IsNullOrEmpty(sheet.GetRow(i).GetCell(7).ToString()))
+                    //    if (sheet.GetRow(i).GetCell(7) != null)
+                    //    {
+                    //        if (sheet.GetRow(i).GetCell(7).ToString().Trim().Length > 10)
+                    //            message = message + "Due Dilligence From Should Not be More Than 10 Character\n";
+                    //    }
+                    //}
                     #endregion
 
-                    #region Date Format Checking
+                    #region Date Format Checking And Date Length Checking
                     if (message == "")
                     {
-                        if (!sheet.GetRow(i).GetCell(3).ToString().Trim().Contains("."))
-                            message = message + "Due Dilligence From is not in Correct Format. Valid Format : dd.MM.yyyy\n";
-                    }
+                        //if (!string.IsNullOrEmpty(sheet.GetRow(i).GetCell(7).ToString()))
+                        if (sheet.GetRow(i).GetCell(7).ToString().Length > 0)
+                        {
+                            DateTime dDate;
+                            string datetemp = sheet.GetRow(i).GetCell(7).ToString().Trim().Substring(3, 2) + "/"
+                                + sheet.GetRow(i).GetCell(7).ToString().Trim().Substring(0, 2) + "/"
+                                + sheet.GetRow(i).GetCell(7).ToString().Trim().Substring(6, 4);
 
-                    if (message == "")
-                    {
-                        DateTime dDate;
-                        string datetemp = sheet.GetRow(i).GetCell(3).ToString().Trim().Substring(3, 2) + "/" + sheet.GetRow(i).GetCell(3).ToString().Trim().Substring(0, 2) + "/" + sheet.GetRow(i).GetCell(3).ToString().Trim().Substring(6, 4);
-                        if (!DateTime.TryParse(datetemp, out dDate))
-                            message = message + "Due Dilligence From is not in Correct Format. Valid Format : dd.MM.yyyy\n";
+                            if (!DateTime.TryParse(datetemp, out dDate) || !sheet.GetRow(i).GetCell(7).ToString().Trim().Contains("."))
+                                message = message + "Due Dilligence From is not in Correct Format. Valid Format : dd.MM.yyyy\n";
+
+                            if (sheet.GetRow(i).GetCell(7).ToString().Trim().Length > 10)
+                                message = message + "Due Dilligence From Should Not be More Than 10 Character\n";
+                        }
                     }
                     #endregion
 
                     #region Numeric Checking
                     if (message == "")
                     {
-                        if (sheet.GetRow(i).GetCell(3) != null)
+                        if (sheet.GetRow(i).GetCell(6) != null)
                         {
-                            if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(2).ToString().Trim()))
+                            if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(6).ToString().Trim()))
                             {
                                 Int16 dInt;
-                                if (!Int16.TryParse(sheet.GetRow(i).GetCell(2).ToString().Trim(), out dInt))
+                                if (!Int16.TryParse(sheet.GetRow(i).GetCell(6).ToString().Trim(), out dInt))
                                     message = message + "Due Dilligence Status is not in correct format\n";
                             }
                         }
@@ -272,20 +312,27 @@ namespace GPS.Controllers.Master
                         MasterDueDilligence data = new MasterDueDilligence();
 
                         data.VENDOR_CODE = sheet.GetRow(i).GetCell(1).ToString().Trim();
-                        data.DD_STATUS = sheet.GetRow(i).GetCell(2).ToString().Trim();
-                        data.VALID_DD_FROM = sheet.GetRow(i).GetCell(3).ToString().Trim();
+                        data.EMAIL_BUYER = sheet.GetRow(i).GetCell(2).ToString().Trim();
+                        data.EMAIL_SH = sheet.GetRow(i).GetCell(3).ToString().Trim();
+                        data.EMAIL_DPH = sheet.GetRow(i).GetCell(4).ToString().Trim();
+                        data.EMAIL_LEGAL = sheet.GetRow(i).GetCell(5).ToString().Trim();
+                        data.DD_STATUS = sheet.GetRow(i).GetCell(6).ToString().Trim();
+
+                        data.VALID_DD_FROM = sheet.GetRow(i).GetCell(7) != null ? sheet.GetRow(i).GetCell(7).ToString().Trim() : "";
+
+                        string a = "";
 
                         message = MasterDueDilligenceRepository.Instance.SaveUploadedData(data, this.GetCurrentUsername());
                     }
 
-                    if (sheet.GetRow(i).GetCell(5) == null)
-                        sheet.GetRow(i).CreateCell(5);
+                    if (sheet.GetRow(i).GetCell(10) == null)
+                        sheet.GetRow(i).CreateCell(10);
 
                     if (message.Substring(message.Length - 2, 2) == "\n")
                         message = message.Substring(0, message.Length - 2);
 
-                    sheet.GetRow(i).GetCell(5).SetCellValue(message);
-                    sheet.GetRow(i).GetCell(5).CellStyle.WrapText = true;
+                    sheet.GetRow(i).GetCell(10).SetCellValue(message);
+                    sheet.GetRow(i).GetCell(10).CellStyle.WrapText = true;
                 }
 
                 using (FileStream tfile = new FileStream(Path.Combine(Server.MapPath("~/Content/UploadFile"), filename), FileMode.Open, FileAccess.Write))

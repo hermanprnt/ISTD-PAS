@@ -72,8 +72,7 @@ namespace GPS.Models.Master
         }
 
 
-        public String SaveData(String flag, String vendorcd, String vendornm, String status, String vldddfrom,
-            String vldddto, String fileUrl, String uid)
+        public String SaveData(MasterDueDilligence NewData, String flag, String fileUrl, String uid)
         {
             string result = "";
             try
@@ -82,13 +81,17 @@ namespace GPS.Models.Master
                 dynamic args = new
                 {
                     Flag = flag,
-                    vendorcd,
-                    vendornm,
-                    status,
-                    vldddfrom,
-                    vldddto,
+                    vendorcd = NewData.VENDOR_CODE,
+                    vendornm = NewData.VENDOR_NAME,
+                    status = NewData.DD_STATUS,
+                    vldddfrom = NewData.VALID_DD_FROM,
+                    vldddto = NewData.VALID_DD_TO,
+                    mailbuyer = NewData.EMAIL_BUYER,
+                    mailsh = NewData.EMAIL_SH,
+                    maildph = NewData.EMAIL_DPH,
+                    maillegal = NewData.EMAIL_LEGAL,
                     uid,
-                    fileUrl 
+                    fileUrl
                 };
 
                 result = db.SingleOrDefault<string>("Master/MasterDueDilligence/SaveData", args);
@@ -112,6 +115,10 @@ namespace GPS.Models.Master
                 vendorCd = param.VENDOR_CODE,
                 dd_Status = param.DD_STATUS,
                 dd_from = param.VALID_DD_FROM,
+                mail_buyer = param.EMAIL_BUYER,
+                mail_sh = param.EMAIL_SH,
+                mail_dph = param.EMAIL_DPH,
+                mail_legal = param.EMAIL_LEGAL,
 
                 //ValidDtFrom = conversiDate(param.ValidDtFrom),
                 UId = username

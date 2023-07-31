@@ -15,6 +15,12 @@ namespace GPS.Models.Master
         public String AGREEMENT_NO { get; set; }
         public String VALID_AGREEMENT_NO_FROM { get; set; }
         public String VALID_AGREEMENT_NO_TO { get; set; }
+
+        public String EMAIL_BUYER { get; set; }
+        public String EMAIL_SH { get; set; }
+        public String EMAIL_DPH { get; set; }
+        public String EMAIL_LEGAL { get; set; }
+
         public String DELETION { get; set; }
         public String BG_COLOR { get; set; }
         public String CREATED_BY { get; set; }

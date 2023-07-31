@@ -9,15 +9,15 @@
             $("#btn-detail").html('Show Detail');
             $("._toggle-detail").hide();
             $tdk.isDetail = 0;
-            $("#dynamic-table").css("width", "100%");
-            $("#tblScroll").css("width", "100%");
+            $("#dynamic-table").css("width", "1300px");
+            $("#tblScroll").css("width", "1300px");
         }
         else {
             $("#btn-detail").html('Hide Detail');
             $("._toggle-detail").show();
             $tdk.isDetail = 1;
-            $("#dynamic-table").css("width", "1270px");
-            $("#tblScroll").css("width", "1270px");
+            $("#dynamic-table").css("width", "2900px");
+            $("#tblScroll").css("width", "2900px");
         }
     }
 
@@ -37,7 +37,8 @@
                 ids.push({
                     vendor_cd: $('#' + a.id).data('vendor_cd'),
                     agreement_no: $('#' + a.id).data('agreement_no'),
-                    exp_Date: $('#' + a.id).data('expired_date')
+                    exp_Date: $('#' + a.id).data('expired_date'),
+                    id: $('#' + a.id).data('id')
                 });
             }
         });
@@ -53,7 +54,6 @@
         var orderby = null;
         //if (ViewData.Get("OrderBy") !== undefined && ViewData.Get("OrderBy") !== null && ViewData.Get("OrderBy") !== "")
         //    orderby = ViewData.Get("OrderBy");
-        console.log('tessss');
         $.progressbox.show($tdk.PageTitle, "Download File");
 
         $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadHeader")", {
@@ -110,15 +110,16 @@
         return true;
     }
 
-
     $(document).on('keyup', '.masking', function () {
         var x = $(this).val();
         $(this).val(x.toString().replace(/,/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ","));
     });
 
     function onClear() {
-        $("#cmb-division").val('');
-        $("#txt-costcenter").val('');
+        $("#cmb-status").val('');
+        $("#txt-vendorcode").val('');
+        $("#txt-vendorname").val('');
+        $("#txt-agreementno").val('');
         $("#txt-expdaterange").val('');
         $("input[id^=cb-]").each(function (i, a) {
             a.checked = false;
@@ -141,6 +142,77 @@
                 }
         });
     }
+
+    $('#upfile').on('change', function (e) {
+        var fileName = $('#upfile').val();
+        var xls = fileName.match(/\.(xls?)$/i);
+        if (xls != null) {
+            var files = e.target.files;
+            if (files.length > 0) {
+                if (window.FormData !== undefined) {
+                    var data = new FormData();
+                    for (var x = 0; x < files.length; x++) {
+                        data.append("file" + x, files[x]);
+                    }
+
+                    $.progressbox.show("Upload", "Loading Data...");
+
+                     $.ajax({
+                        type: "POST",
+                        url: "@Url.Content("~/MasterAgreement/UploadFile")",
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        success: function (data) {
+                            $.progressbox.hide();
+                            var result = data.message.split('|');
+                            if (result[0] == 'Error') {
+                                $.messagebox.show(
+                                    "Error",
+                                    result[1],
+                                    "ERR",
+                                    "SINGLE",
+                                    "",
+                                    ""
+                                )
+                            }
+                            else if (result[0] == 'Success') {
+                                $('#upfile').val('');
+                                window.location = "MasterAgreement/DownloadUploadedResult?path=" + result[1];
+                                onGetData(1);
+                            }
+                        },
+                        error: function (xhr, status, p3, p4) {
+                            var err = "Error " + " " + status + " " + p3 + " " + p4;
+                            if (xhr.responseText && xhr.responseText[0] == "{")
+                                err = JSON.parse(xhr.responseText).Message;
+                            console.log(err);
+                        }
+                    });
+                } else {
+                    $.messagebox.show(
+                        "Error",
+                        "This browser doesn't support HTML5 file uploads!",
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            }
+        }
+        else {
+            $.messagebox.show(
+               "Error",
+               "Please select an excel file with format xls",
+               "ERR",
+               "SINGLE",
+               "",
+               ""
+           )
+        }
+    });
+
 </script>
 
 <script type="text/javascript" id="savedelete">
@@ -192,7 +264,8 @@
                     flag: '1',
                     VendorCode: selectedData[0].vendor_cd,
                     AgreementNo: selectedData[0].agreement_no,
-                    ExpDate: selectedData[0].exp_Date
+                    ExpDate: selectedData[0].exp_Date,
+                    Identity: selectedData[0].id
                 },
                 success: function (data) {
                     $("#basicModal").html(data);
@@ -218,12 +291,18 @@
         var status = $("#txtedit-status").val();
         var nextaction = $("#txtedit-nextaction").val();
         var amount = $("#txtedit-amount").val();
+        var mailbuyer = $("#txtmail-buyer").val();
+        var mailsh = $("#txtmail-sh").val();
+        var maildph = $("#txtmail-dph").val();
+        var maillegal = $("#txtmail-legal").val();
+
         var txtFile = $("#upload-anFiles").val();
         var flag = $("#txtEdit").val();
+
+        var identity = $("#Identity").val();
         
-
-
-        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-agreementno", "#txtedit-startdate","#txtedit-nextaction"]);
+        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-agreementno", "#txtedit-nextaction", "#txtmail-buyer"
+            , "#txtmail-sh", "#txtmail-dph", "#txtmail-legal"]);
 
         if (!isValid) return;
 
@@ -250,9 +329,15 @@
             fileData.append('expdate', expdate);
             fileData.append('status', status);
             fileData.append('nextaction', nextaction);
-            fileData.append('amount',amount);
+            fileData.append('amount', amount);
+            fileData.append('mailbuyer', mailbuyer);
+            fileData.append('mailsh', mailsh);
+            fileData.append('maildph', maildph);
+            fileData.append('maillegal', maillegal);
             fileData.append('txtFile', txtFile)
             fileData.append('flag', flag);
+
+            fileData.append('identity', identity);
 
         }
 
@@ -323,7 +408,7 @@
         var selectedData = GetSelectedGrid();
         var keyArray = [];
         for (var i = 0; i < selectedData.length; i++) {
-            keyArray.push(selectedData[i].vendor_cd + ";" + selectedData[i].agreement_no);
+            keyArray.push(selectedData[i].vendor_cd + ";" + selectedData[i].agreement_no + ";" + selectedData[i].id);
             //keyArray.push(selectedData[i].vendor_cd)
             //keyArray.push(selectedData[i].agreement_no);
         }

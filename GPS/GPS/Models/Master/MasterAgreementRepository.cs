@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Principal;
 using System.Web.Mvc;
 using Toyota.Common.Database;
 using Toyota.Common.Web.Platform;
@@ -72,8 +73,10 @@ namespace GPS.Models.Master
             return result;
         }
 
-        public String SaveData(String flag, String vendorcd, String vendornm, String purchasinggrp, String buyer, String agreementno, String startdate, String expdate, String status, String nextaction,String filename,String amount, String uid)
+        public String SaveData(String flag,MasterAgreement NewAgreement,String filename, String uid)
         {
+
+
             string result = "";
             try
             {
@@ -81,19 +84,23 @@ namespace GPS.Models.Master
                 dynamic args = new
                 {
                     Flag = flag,
-                    VendorCode = vendorcd,
-                    VendorName = vendornm,
-                    PurchasingGrp = purchasinggrp,
-                    Buyer = buyer,
-                    Agreementno = agreementno,
-                    Startdate = startdate,
-                    Expdate = expdate,
-                    Status = status,
-                    Amount = amount,
-                    Nextaction = nextaction,
+                    VendorCode = NewAgreement.VENDOR_CODE,
+                    VendorName = NewAgreement.VENDOR_NAME,
+                    PurchasingGrp = NewAgreement.PURCHASING_GROUP,
+                    Buyer = NewAgreement.BUYER,
+                    Agreementno = NewAgreement.AGREEMENT_NO,
+                    Startdate = NewAgreement.START_DATE,
+                    Expdate = NewAgreement.EXP_DATE,
+                    Status = NewAgreement.STATUS,
+                    Amount = NewAgreement.AMOUNT,
+                    Nextaction = NewAgreement.NEXT_ACTION,
+                    mailbuyer = NewAgreement.EMAIL_BUYER,
+                    mailsh = NewAgreement.EMAIL_SH,
+                    maildph = NewAgreement.EMAIL_DPH,
+                    maillegal = NewAgreement.EMAIL_LEGAL,
+                    identity = NewAgreement.ID,
                     UId = uid,
                     filename
-
                 };
 
                 result = db.SingleOrDefault<string>("Master/MasterAgreement/SaveData", args);
@@ -110,8 +117,6 @@ namespace GPS.Models.Master
 
         public string SaveUploadedData(MasterAgreement param, string username)
         {
-            param.START_DATE = conversiDate(param.START_DATE);
-            param.EXP_DATE = conversiDate(param.EXP_DATE);
 
             IDBContext db = DatabaseManager.Instance.GetContext();
             dynamic args = new
@@ -124,7 +129,11 @@ namespace GPS.Models.Master
                 expDate = param.EXP_DATE,
                 nextAction = param.NEXT_ACTION,
                 amount = param.AMOUNT,
-                
+                mailbuyer = param.EMAIL_BUYER,
+                mailsh = param.EMAIL_SH,
+                maildph = param.EMAIL_DPH,
+                maillegal = param.EMAIL_LEGAL,
+
                 UId = username
             };
 
@@ -133,13 +142,14 @@ namespace GPS.Models.Master
 
             return result;
         }
-        public MasterAgreement GetSelectedData(String VendorCode,String AgreementNo,String ExpDate)
+        public MasterAgreement GetSelectedData(String VendorCode,String AgreementNo,String ExpDate,String Identity)
         {
             ExpDate = conversiDate(ExpDate);
 
             IDBContext db = DatabaseManager.Instance.GetContext();
 
-            var data = db.SingleOrDefault<MasterAgreement>("Master/MasterAgreement/GetSelectedData", new { VendorCode,AgreementNo,ExpDate });
+            var data = db.SingleOrDefault<MasterAgreement>("Master/MasterAgreement/GetSelectedData", 
+                new { VendorCode,AgreementNo,ExpDate , Identity });
             db.Close();
 
             return data;
@@ -160,6 +170,7 @@ namespace GPS.Models.Master
                         new { 
                                 VendorCode = cols[0],
                                 Agreement_No = cols[1],
+                                Identity = cols[2],
                                 UId = uid 
                         });
                 }

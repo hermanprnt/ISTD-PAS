@@ -1,9 +1,83 @@
 ﻿<script type="text/javascript">
+    $tdk.isDetail = 0;
+
     $(document).ready(function () {
+        
         $("#txt-dddaterange").todaterangepicker();
         onClear();
     });
 
+
+
+    $('#upfile').on('change', function (e) {
+        var fileName = $('#upfile').val();
+        var xls = fileName.match(/\.(xls?)$/i);
+        if (xls != null) {
+            var files = e.target.files;
+            if (files.length > 0) {
+                if (window.FormData !== undefined) {
+                    var data = new FormData();
+                    for (var x = 0; x < files.length; x++) {
+                        data.append("file" + x, files[x]);
+                    }
+
+                    $.progressbox.show("Upload", "Loading Data...");
+
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Content("~/MasterDueDilligence/UploadFile")",
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        success: function (data) {
+                            $.progressbox.hide();
+                            var result = data.message.split('|');
+                            if (result[0] == 'Error') {
+                                $.messagebox.show(
+                                    "Error",
+                                    result[1],
+                                    "ERR",
+                                    "SINGLE",
+                                    "",
+                                    ""
+                                )
+                            }
+                            else if (result[0] == 'Success') {
+                                $('#upfile').val('');
+                                window.location = "MasterDueDilligence/DownloadUploadedResult?path=" + result[1];
+                                onGetData(1);
+                            }
+                        },
+                        error: function (xhr, status, p3, p4) {
+                            var err = "Error " + " " + status + " " + p3 + " " + p4;
+                            if (xhr.responseText && xhr.responseText[0] == "{")
+                                err = JSON.parse(xhr.responseText).Message;
+                            console.log(err);
+                        }
+                    });
+                } else {
+                    $.messagebox.show(
+                        "Error",
+                        "This browser doesn't support HTML5 file uploads!",
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            }
+        }
+        else {
+            $.messagebox.show(
+               "Error",
+               "Please select an excel file with format xls",
+               "ERR",
+               "SINGLE",
+               "",
+               ""
+           )
+        }
+    });
 
     function onDownload() {
             var orderby = null;
@@ -35,19 +109,20 @@
     }
 
     function detailGrid() {
+        console.log('before if');
         if ($tdk.isDetail > 0) {
-            $("#btn-detail").html('Show Detail');
+            $("#btnToggleDetail").html('Show Detail');
             $("._toggle-detail").hide();
             $tdk.isDetail = 0;
             $("#dynamic-table").css("width", "100%");
             $("#tblScroll").css("width", "100%");
         }
         else {
-            $("#btn-detail").html('Hide Detail');
+            $("#btnToggleDetail").html('Hide Detail');
             $("._toggle-detail").show();
             $tdk.isDetail = 1;
-            $("#dynamic-table").css("width", "1270px");
-            $("#tblScroll").css("width", "1270px");
+            $("#dynamic-table").css("width", "2250px");
+            $("#tblScroll").css("width", "2250px");
         }
     }
 
@@ -96,6 +171,7 @@
             },
             success: function (data) {
                 $("#divtable").html(data);
+                $("#btnToggleDetail").html('Show Detail');
                 $.disable_enable_button.enable();
             }
         });
@@ -179,10 +255,9 @@
 
                 },
                 success: function (data) {
-                    $("#basicModal").html(data);
-                  
                     document.getElementById("cmb-vendorcode").disabled = true;
-                    
+
+                    $("#basicModal").html(data);
                     $("#basicModal").modal();
                 }
             });
@@ -197,10 +272,15 @@
         var status = $("#cmbedit-status").val();
         var vldddfrom = $("#txtedit-vldddfrom").val();
         var vldddto = $("#txtedit-vldddto").val();
+        var mailbuyer = $("#txtmail-buyer").val();
+        var mailsh = $("#txtmail-sh").val();
+        var maildph = $("#txtmail-dph").val();
+        var maillegal = $("#txtmail-legal").val();
         var txtFile = $("#upload-ddFiles").val();
 
         var flag= $("#txtEdit").val();
-        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-vendornm", "#cmbedit-status", "#txtedit-vldddfrom", "#txtedit-vldddto"]);
+        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-vendornm", "#cmbedit-status", "#txtmail-buyer"
+            , "#txtmail-sh", "#txtmail-dph", "#txtmail-legal"]);
         if (!isValid) {
             return;
         }
@@ -217,12 +297,17 @@
                 fileData.append(files[i].name, files[i]);
             }
 
-            //// Adding one more more key to FormData object
+            //// Adding more key to FormData object
             fileData.append('vendorcd', vendorcd);
             fileData.append('vendornm', vendornm);
             fileData.append('status', status);
             fileData.append('vldddfrom', vldddfrom);
             fileData.append('vldddto', vldddto);
+            fileData.append('mailbuyer', mailbuyer);
+            fileData.append('mailsh', mailsh);
+            fileData.append('maildph', maildph);
+            fileData.append('maillegal', maillegal);
+
             fileData.append('flag', flag);
             fileData.append('txtFile', txtFile);
 

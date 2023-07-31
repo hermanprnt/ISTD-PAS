@@ -13,9 +13,13 @@
 		[dbo].[fn_date_format] (mc.VALID_DD_FROM) AS VALID_DD_FROM,
 		[dbo].[fn_date_format] (mc.VALID_DD_TO) AS VALID_DD_TO,
 		mc.DELETION,
+		mc.EMAIL_BUYER,
+		mc.EMAIL_SH,
+		mc.EMAIL_DPH,
+		mc.EMAIL_LEGAL,
 		mc.CREATED_BY,
 		mc.CREATED_DT,
 		mc.CHANGED_BY,
 		mc.CHANGED_DT
-FROM TB_M_DUE_DILLIGENCE mc
+		FROM TB_M_DUE_DILLIGENCE mc
 		WHERE VENDOR_CODE = @VendorCode

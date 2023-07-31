@@ -1,17 +1,15 @@
-﻿using System;
-using System.Web.Mvc;
-using GPS.CommonFunc;
+﻿using GPS.CommonFunc;
+using GPS.Models;
 using GPS.Models.Common;
 using GPS.Models.Master;
-using Toyota.Common.Web.Platform;
-using System.Text.RegularExpressions;
-using System.IO;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
+using System;
 using System.Collections.Generic;
-using GPS.Models;
+using System.IO;
+using System.Web.Mvc;
 using Toyota.Common.Utilities;
-using NPOI.SS.Formula.Functions;
+using Toyota.Common.Web.Platform;
 
 namespace GPS.Controllers.Master
 {
@@ -41,12 +39,12 @@ namespace GPS.Controllers.Master
         }
 
         #region ark.herman 23/3/2023
-        public ActionResult IsFlagEditAdd(String flag, String VendorCode, String AgreementNo, String ExpDate)
+        public ActionResult IsFlagEditAdd(String flag, String VendorCode, String AgreementNo, String ExpDate, String Identity)
         {
             ViewData["edit"] = flag;
             ViewData["MasterAgreementData"] = flag == "0"
                 ? new MasterAgreement()
-                : MasterAgreementRepository.Instance.GetSelectedData(VendorCode, AgreementNo, ExpDate);
+                : MasterAgreementRepository.Instance.GetSelectedData(VendorCode, AgreementNo, ExpDate, Identity);
 
             return PartialView("_AddEditPopUp");
         }
@@ -82,38 +80,51 @@ namespace GPS.Controllers.Master
         {
             var filename = "";
 
-            string vendorcd = Request.Params[0];
-            string vendornm = Request.Params[1];
-            string purchasinggrp = Request.Params[2];
-            string buyer = Request.Params[3];
-            string agreementno = Request.Params[4];
-            string startdate = Request.Params[5];
-            string expdate = Request.Params[6];
-            string status = Request.Params[7];
-            string nextaction = Request.Params[8];
-            string amount = Request.Params[9];
-            string txtFile = Request.Params[10];
-            string flag = Request.Params[11];
+            MasterAgreement NewAgreement = new MasterAgreement
+            {
+                VENDOR_CODE = Request.Params[0],
+                VENDOR_NAME = Request.Params[1],
+                PURCHASING_GROUP = Request.Params[2],
+                BUYER = Request.Params[3],
+                AGREEMENT_NO = Request.Params[4],
+                START_DATE = conversiDate(Request.Params[5]),
+                EXP_DATE = conversiDate(Request.Params[6]),
+                STATUS = Request.Params[7],
+                NEXT_ACTION = Request.Params[8],
+                AMOUNT = Request.Params[9],
+                EMAIL_BUYER = Request.Params[10],
+                EMAIL_SH = Request.Params[11],
+                EMAIL_DPH = Request.Params[12],
+                EMAIL_LEGAL = Request.Params[13],
+                ID = Request.Params[16]
+            };
 
-            string[] statusSplit = status.Split('-');
-            string statusNo = statusSplit[0].Trim();
+            string txtFile = Request.Params[14];
+            string flag = Request.Params[15];
+
+            string[] statusSplit = NewAgreement.STATUS.Split('-');
+            NewAgreement.STATUS = statusSplit[0].Trim();
 
             if (!txtFile.IsNullOrEmpty())
             {
                 var fileupload = Request.Files[0];
                 string AttachmentPath = SystemRepository.Instance.GetSingleData("UPATT", "MsAgreementAttachment").Value;
 
-                filename = vendorcd + "_" + Path.GetFileName(fileupload.FileName);
+                filename = NewAgreement.VENDOR_CODE + "_" + Path.GetFileName(fileupload.FileName);
                 string resultFilePath = Path.Combine("~", AttachmentPath + filename);
                 fileupload.SaveAs(Server.MapPath(resultFilePath));
             }
 
-            startdate = conversiDate(startdate);
-            expdate = conversiDate(expdate);
             //String message = "";
-            String message = MasterAgreementRepository.Instance.SaveData(flag, vendorcd, vendornm, purchasinggrp, buyer, agreementno, startdate, expdate, statusNo, nextaction, filename, amount, this.GetCurrentUsername());
+            String message = MasterAgreementRepository.Instance.SaveData(flag, NewAgreement, filename, this.GetCurrentUsername());
 
-            return new JsonResult { Data = new { message } };
+            return new JsonResult
+            {
+                Data = new
+                {
+                    message
+                }
+            };
         }
 
         public ActionResult DownloadFile(string filePath)
@@ -222,65 +233,122 @@ namespace GPS.Controllers.Master
                         message = message + "Vendor Code Should Not be Empty\n";
                     else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(1).ToString().Trim()))
                         message = message + "Vendor Code Should Not be Empty\n";
-                    if (sheet.GetRow(i).GetCell(2) == null)
-                        message = message + "Purchasing Group Should Not be Empty\n";
-                    else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(2).ToString().Trim()))
-                        message = message + "Purchasing Group Should Not be Empty\n";
+                    //if (sheet.GetRow(i).GetCell(2) == null)
+                    //    message = message + "Purchasing Group Should Not be Empty\n";
+                    //else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(2).ToString().Trim()))
+                    //    message = message + "Purchasing Group Should Not be Empty\n";
                     if (sheet.GetRow(i).GetCell(3) == null)
                         message = message + "Buyer Should Not be Empty\n";
                     else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(3).ToString().Trim()))
                         message = message + "Buyer Should Not be Empty\n";
+
                     if (sheet.GetRow(i).GetCell(4) == null)
-                        message = message + "Agreement No Should Not be Empty\n";
+                        message = message + "Email Buyer Should Not be Empty\n";
                     else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(4).ToString().Trim()))
-                        message = message + "Agreement No Should Not be Empty\n";
+                        message = message + "Email Buyer Should Not be Empty\n";
                     if (sheet.GetRow(i).GetCell(5) == null)
-                        message = message + "Start Date Should Not be Empty\n";
+                        message = message + "Email SH Should Not be Empty\n";
                     else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(5).ToString().Trim()))
-                        message = message + "Start Date Should Not be Empty\n";
+                        message = message + "Email SH Should Not be Empty\n";
                     if (sheet.GetRow(i).GetCell(6) == null)
-                        message = message + "Expired Date From Should Not be Empty\n";
+                        message = message + "Email DPH Should Not be Empty\n";
                     else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(6).ToString().Trim()))
-                        message = message + "Expired Date Should Not be Empty\n";
+                        message = message + "Email DPH Should Not be Empty\n";
                     if (sheet.GetRow(i).GetCell(7) == null)
-                        message = message + "Next Action Should Not be Empty\n";
+                        message = message + "Email Legal Should Not be Empty\n";
                     else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(7).ToString().Trim()))
-                        message = message + "Next Action Should Not be Empty\n";
+                        message = message + "Email Legal Should Not be Empty\n";
+
+
+
+
+
+
                     if (sheet.GetRow(i).GetCell(8) == null)
-                        message = message + "Amount Should Not be Empty\n";
+                        message = message + "Agreement No Should Not be Empty\n";
                     else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(8).ToString().Trim()))
-                        message = message + "Amount Should Not be Empty\n";
+                        message = message + "Agreement No Should Not be Empty\n";
+                    //if (sheet.GetRow(i).GetCell(9) == null)
+                    //    message = message + "Start Date Should Not be Empty\n";
+                    //else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(9).ToString().Trim()))
+                    //    message = message + "Start Date Should Not be Empty\n";
+                    //if (sheet.GetRow(i).GetCell(10) == null)
+                    //    message = message + "Expired Date From Should Not be Empty\n";
+                    //else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(10).ToString().Trim()))
+                    //    message = message + "Expired Date Should Not be Empty\n";
+                    if (sheet.GetRow(i).GetCell(11) == null)
+                        message = message + "Next Action Should Not be Empty\n";
+                    else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(11).ToString().Trim()))
+                        message = message + "Next Action Should Not be Empty\n";
+                    //if (sheet.GetRow(i).GetCell(12) == null)
+                    //    message = message + "Amount Should Not be Empty\n";
+                    //else if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(12).ToString().Trim()))
+                    //    message = message + "Amount Should Not be Empty\n";
                     #endregion
 
                     #region Data Length Checking
-                    if (sheet.GetRow(i).GetCell(5).ToString().Trim().Length > 10)
+                    if (sheet.GetRow(i).GetCell(9).ToString().Trim().Length > 10)
                         message = message + "Start Date Should Not be More Than 10 Character\n";
-                    if (sheet.GetRow(i).GetCell(6).ToString().Trim().Length > 10)
+                    if (sheet.GetRow(i).GetCell(10).ToString().Trim().Length > 10)
                         message = message + "End Date Should Not be More Than 10 Character\n";
                     #endregion
 
                     #region Date Format Checking
-                    if (!sheet.GetRow(i).GetCell(5).ToString().Trim().Contains("."))
-                        message = message + "Start Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
-                    if (!sheet.GetRow(i).GetCell(6).ToString().Trim().Contains("."))
-                        message = message + "Expired Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
+                    //if (message == "")
+                    //{
+                    //    if (!sheet.GetRow(i).GetCell(9).ToString().Trim().Contains("."))
+                    //        message = message + "Start Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
+                    //    if (!sheet.GetRow(i).GetCell(10).ToString().Trim().Contains("."))
+                    //        message = message + "Expired Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
+                    //}
 
+                      
+                    if (message == "")
+                    {
+                        if (sheet.GetRow(i).GetCell(9).ToString().Length > 0)
+                        {   
+                            DateTime dStartDate;
+                            string startdatetemp = sheet.GetRow(i).GetCell(9).ToString().Trim().Substring(3, 2) + "/"
+                                + sheet.GetRow(i).GetCell(9).ToString().Trim().Substring(0, 2) + "/"
+                                + sheet.GetRow(i).GetCell(9).ToString().Trim().Substring(6, 4);
+                            if (!DateTime.TryParse(startdatetemp, out dStartDate))
+                                message = message + "Start Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
 
-                    DateTime dStartDate;
-                    string startdatetemp = sheet.GetRow(i).GetCell(5).ToString().Trim().Substring(3, 2) + "/" + sheet.GetRow(i).GetCell(5).ToString().Trim().Substring(0, 2) + "/" + sheet.GetRow(i).GetCell(5).ToString().Trim().Substring(6, 4);
-                    if (!DateTime.TryParse(startdatetemp, out dStartDate))
-                        message = message + "Start Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
+                            if (!sheet.GetRow(i).GetCell(9).ToString().Trim().Contains("."))
+                                message = message + "Start Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
+                        }
 
-                    DateTime dEndDate;
-                    string enddatetemp = sheet.GetRow(i).GetCell(6).ToString().Trim().Substring(3, 2) + "/" + sheet.GetRow(i).GetCell(6).ToString().Trim().Substring(0, 2) + "/" + sheet.GetRow(i).GetCell(6).ToString().Trim().Substring(6, 4);
-                    if (!DateTime.TryParse(enddatetemp, out dEndDate))
-                        message = message + "Expired Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
+                        if (sheet.GetRow(i).GetCell(10).ToString().Length > 0)
+                        {
+                            DateTime dEndDate;
+                            string enddatetemp = sheet.GetRow(i).GetCell(10).ToString().Trim().Substring(3, 2) + "/"
+                                + sheet.GetRow(i).GetCell(10).ToString().Trim().Substring(0, 2) + "/"
+                                + sheet.GetRow(i).GetCell(10).ToString().Trim().Substring(6, 4);
+                            if (!DateTime.TryParse(enddatetemp, out dEndDate))
+                                message = message + "Expired Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
+
+                            if (!sheet.GetRow(i).GetCell(10).ToString().Trim().Contains("."))
+                                message = message + "Expired Date is not in Correct Format. Valid Format : dd.MM.yyyy\n";
+                        }
+                    }
+
                     #endregion
 
                     #region Numeric Checking
-                    Int16 dInt;
-                    if (!Int16.TryParse(sheet.GetRow(i).GetCell(8).ToString().Trim(), out dInt))
-                        message = message + "Amount must be in numeric format \n";
+                    //if (message == "")
+                    //{
+                    //    if (sheet.GetRow(i).GetCell(12) != null)
+                    //    {
+                    //        if (String.IsNullOrEmpty(sheet.GetRow(i).GetCell(12).ToString().Trim()))
+                    //        {
+                    //            Int32 dInt;
+                    //            if (!Int32.TryParse(sheet.GetRow(i).GetCell(12).ToString().Trim(), out dInt))
+                    //                message = message + "Amount is not in correct format\n";
+                    //        }
+                    //    }
+                    //}
+                   
+
                     #endregion
 
                     if (string.IsNullOrEmpty(message))
@@ -290,24 +358,27 @@ namespace GPS.Controllers.Master
                         data.VENDOR_CODE = sheet.GetRow(i).GetCell(1).ToString().Trim();
                         data.PURCHASING_GROUP = sheet.GetRow(i).GetCell(2).ToString().Trim();
                         data.BUYER = sheet.GetRow(i).GetCell(3).ToString().Trim();
-                        data.AGREEMENT_NO = sheet.GetRow(i).GetCell(4).ToString().Trim();
-                        data.START_DATE = sheet.GetRow(i).GetCell(5).ToString().Trim();
-                        data.EXP_DATE = sheet.GetRow(i).GetCell(6).ToString().Trim();
-                        data.NEXT_ACTION = sheet.GetRow(i).GetCell(7).ToString().Trim();
-                        data.AMOUNT = sheet.GetRow(i).GetCell(8).ToString().Trim();
+                        data.EMAIL_BUYER = sheet.GetRow(i).GetCell(4).ToString().Trim();
+                        data.EMAIL_SH = sheet.GetRow(i).GetCell(5).ToString().Trim();
+                        data.EMAIL_DPH = sheet.GetRow(i).GetCell(6).ToString().Trim();
+                        data.EMAIL_LEGAL = sheet.GetRow(i).GetCell(7).ToString().Trim();
+                        data.AGREEMENT_NO = sheet.GetRow(i).GetCell(8).ToString().Trim();
+                        data.START_DATE = conversiDate(sheet.GetRow(i).GetCell(9).ToString().Trim());
+                        data.EXP_DATE = conversiDate(sheet.GetRow(i).GetCell(10).ToString().Trim());
+                        data.NEXT_ACTION = sheet.GetRow(i).GetCell(11).ToString().Trim();
+                        data.AMOUNT = sheet.GetRow(i).GetCell(12) != null ?  sheet.GetRow(i).GetCell(12).ToString().Trim() : "0";
 
                         message = MasterAgreementRepository.Instance.SaveUploadedData(data, this.GetCurrentUsername());
                     }
 
-                    if (sheet.GetRow(i).GetCell(10) == null)
-                        sheet.GetRow(i).CreateCell(10);
+                    if (sheet.GetRow(i).GetCell(15) == null)
+                        sheet.GetRow(i).CreateCell(15);
 
                     if (message.Substring(message.Length - 2, 2) == "\n")
                         message = message.Substring(0, message.Length - 2);
 
-
-                    sheet.GetRow(i).GetCell(10).SetCellValue(message);
-                    sheet.GetRow(i).GetCell(10).CellStyle.WrapText = true;
+                    sheet.GetRow(i).GetCell(15).SetCellValue(message);
+                    sheet.GetRow(i).GetCell(15).CellStyle.WrapText = true;
 
                 }
 
