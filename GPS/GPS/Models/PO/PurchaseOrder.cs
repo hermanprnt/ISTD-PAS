@@ -7,6 +7,7 @@ namespace GPS.Models.PO
 {
     public class PurchaseOrder
     {
+        public String GovRelated { get; set; }
         public String CurrentUserNoReg { get; set; }
         public String ProcessId { get; set; }
         public Int32 DataNo { get; set; }
@@ -16,6 +17,7 @@ namespace GPS.Models.PO
         {
             get { return VendorCode + (String.IsNullOrEmpty(VendorName) ? String.Empty : " - " + VendorName); }
         }
+        public String DD_STATUS { get; set; }
         public String VendorCode { get; set; }
         public String VendorName { get; set; }
         public String VendorAddress { get; set; }

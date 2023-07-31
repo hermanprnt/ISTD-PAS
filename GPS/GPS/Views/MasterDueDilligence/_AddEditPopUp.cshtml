@@ -1,0 +1,288 @@
+﻿@using GPS.CommonFunc
+@using GPS.Controllers.Master
+@using GPS.Models.Master
+@{
+    MasterDueDilligence data = ViewData["MasterDueDilligenceData"] == null ? new MasterDueDilligence() : (MasterDueDilligence)ViewData["MasterDueDilligenceData"];
+
+    string edit = (string)ViewData["edit"];
+    string title = " Master Due Dilligence";
+    if (edit == "1")
+    {
+        title = "Edit" + title;
+    }
+    else
+    {
+        title = "Add" + title;
+    }
+}
+
+<div class="modal-dialog" style="width:600px">
+    <form method="post" action="javascript: onSaveData();">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>@title</div>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtEdit" value="@edit" />
+                <div class="form-horizontal">
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Vendor Code</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    @if (edit == "1")
+                                    {
+                                        @Html.DropDownList("cmb-vendorcode", VendorController.VendorSelectList, new { tabindex = "1", @class = "form-control", Enabled = false })
+                                    }
+                                    else
+                                    {
+                                        @Html.DropDownList("cmb-vendorcode", VendorController.VendorSelectList, new { tabindex = "1", @class = "form-control" })
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Vendor Name</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txtedit-vendornm" class="form-control" maxlength="50" autocomplete="off" disabled value="@data.VENDOR_NAME" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Email Buyer</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txtmail-buyer" class="form-control" maxlength="1000" autocomplete="off" value="@data.EMAIL_BUYER" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Email SH</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txtmail-sh" class="form-control" maxlength="1000" autocomplete="off" value="@data.EMAIL_SH" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Email DPH</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txtmail-dph" class="form-control" maxlength="1000" autocomplete="off" value="@data.EMAIL_DPH" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Email Legal</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="text" id="txtmail-legal" class="form-control" maxlength="1000" autocomplete="off" value="@data.EMAIL_LEGAL" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Due Dilligence Status</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    @Html.DropDownList("cmbedit-status", MasterDueDilligenceController.GetStatusList(), new { @class = "cursor-1", @style = "width:100%;" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Due Dilligence From</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <div class="input-group" style="cursor: pointer;">
+                                        <input class="form-control date-picker" type="text" name="date-range-picker" id="txtedit-vldddfrom" data-date-format="dd.mm.yyyy" autocomplete="off" value="@data.VALID_DD_FROM" />
+                                        <span class="input-group-addon"><i class="fa fa-calendar bigger-110"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Due Dilligence To</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <div class="input-group" style="cursor: pointer;">
+                                        <input class="form-control date-picker" type="text" name="date-range-picker" id="txtedit-vldddto" data-date-format="dd.mm.yyyy" autocomplete="off" value="@data.VALID_DD_TO" />
+                                        <span class="input-group-addon"><i class="fa fa-calendar bigger-110"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-10 col-sm-10 col-md-10">
+                            <div class="form-group form-group-xs">
+                                <div class="col-xs-5 col-sm-4 text-right">
+                                    <label class="control-label text-muted">Attachement Due Dilligence</label>
+                                </div>
+                                <div class="col-xs-7 col-sm-8">
+                                    <input type="file" id="upload-ddFiles" name="upload-ddFiles" class="form-control"><br />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="col-xs-12 text-right">
+                    <div class="form-group-xs">
+                        <button type="submit" class="btn btn-primary btn-xs btn-std"> Save </button>
+                        <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#txtedit-vldddfrom").todatepicker();
+        $("#txtedit-vldddto").todatepicker();
+        $("#cmbedit-status").val("@data.DD_STATUS");
+        $("#cmb-vendorcode").val("@data.VENDOR_CODE");
+
+        if ($("#cmbedit-status").val() == 4) {
+            $("#txtedit-vldddfrom").prop('disabled', true);
+            $("#txtedit-vldddto").prop('disabled', true);
+            //alert($("#cmbedit-status").val());
+        }
+
+
+        $("#cmb-vendorcode").select2new();
+
+        $('#cmbedit-status').change(function () {
+            if ($("#cmbedit-status").val() == 4) {
+                $("#txtedit-vldddfrom").prop('disabled',true);
+                $("#txtedit-vldddto").prop('disabled', true);
+                //alert($("#cmbedit-status").val());
+            } else {
+                $("#txtedit-vldddfrom").prop('disabled', false);
+                $("#txtedit-vldddto").prop('disabled', false);
+            }
+        });
+
+        $("#cmb-vendorcode").change(function () {
+            var vendor = $(this).val();
+            $.support.cors = true;
+            $.ajax({
+                type: "POST",
+                url: "/MasterDueDilligence/GetVendorOnChange",
+                async: true,
+                data: JSON.stringify({ vendor }),
+                cache: false,
+                crossDomain: true,
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                error: function (xhr, err) {
+                },
+                success: function (result) {
+                    $('#txtedit-vendornm').val(result.VENDOR_NAME);
+                }
+            });
+        });
+
+        $("#cmbedit-status").change(function () {
+            if ($("#txtedit-vldddfrom").val() == '') {
+
+            } else {
+                var date1 = $("#txtedit-vldddfrom").val();
+                const myArray = date1.split(".");
+                var dateHasilArray = myArray[2] + '-' + myArray[1] + '-' + myArray[0] + 'T00:00:00.000Z'
+
+                if ($("#cmbedit-status").val() == '1') {
+                    const dateAfterAdd = addOneYear(dateHasilArray);
+                    $("#txtedit-vldddto").val(dateAfterAdd.toLocaleDateString('en-GB').replaceAll("/", "."));
+                } else if ($("#cmbedit-status").val() == '2') {
+                    const dateAfterAdd = addTwoYear(dateHasilArray);
+                    $("#txtedit-vldddto").val(dateAfterAdd.toLocaleDateString('en-GB').replaceAll("/", "."));
+                } else if ($("#cmbedit-status").val() == '3' || $("#cmbedit-status").val() == '4') {
+                    const dateAfterAdd = addThreeYear(dateHasilArray);
+                    $("#txtedit-vldddto").val(dateAfterAdd.toLocaleDateString('en-GB').replaceAll("/", "."));
+                } else {
+
+                }
+            }
+        });
+
+        $("#txtedit-vldddfrom").change(function () {
+            var date1 = $("#txtedit-vldddfrom").val();
+
+            const myArray = date1.split(".");
+            var dateHasilArray = myArray[2] + '-' + myArray[1] + '-' + myArray[0] + 'T00:00:00.000Z'
+
+            if ($("#cmbedit-status").val() == '1') {
+                const dateAfterAdd = addOneYear(dateHasilArray);
+                $("#txtedit-vldddto").val(dateAfterAdd.toLocaleDateString('en-GB').replaceAll("/", "."));
+            } else if ($("#cmbedit-status").val() == '2') {
+                const dateAfterAdd = addTwoYear(dateHasilArray);
+                //console.log(dateAfterAdd);
+                $("#txtedit-vldddto").val(dateAfterAdd.toLocaleDateString('en-GB').replaceAll("/", "."));
+            } else if ($("#cmbedit-status").val() == '3' || $("#cmbedit-status").val() == '4') {
+                const dateAfterAdd = addThreeYear(dateHasilArray);
+                //console.log(dateAfterAdd);
+                $("#txtedit-vldddto").val(dateAfterAdd.toLocaleDateString('en-GB').replaceAll("/", "."));
+            } else {
+
+            }
+        });
+
+
+
+        function addOneYear(date) {
+            const dateCopy = new Date(date);
+            dateCopy.setFullYear(dateCopy.getFullYear() + 1);
+            return dateCopy;
+        }
+        function addTwoYear(date) {
+            const dateCopy = new Date(date);
+            dateCopy.setFullYear(dateCopy.getFullYear() + 2);
+            return dateCopy;
+        }
+        function addThreeYear(date) {
+            const dateCopy = new Date(date);
+            dateCopy.setFullYear(dateCopy.getFullYear() + 3);
+            return dateCopy;
+        }
+    });
+</script>
+
+

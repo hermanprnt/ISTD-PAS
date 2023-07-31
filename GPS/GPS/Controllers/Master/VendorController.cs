@@ -42,6 +42,8 @@ namespace GPS.Controllers.Master
             }
         }
 
+     
+
         [HttpPost]
         public JsonResult GetVendorList()
         {

@@ -1,6 +1,7 @@
 ﻿@using GPS.Constants
 @using GPS.Constants.PRPOApproval
 @using GPS.Controllers.Master
+@using GPS.Controllers.PO
 @using GPS.Core.ViewModel
 @{
     String noreg = ViewData["Noreg"] == null ? "" : (String)ViewData["Noreg"];
@@ -23,7 +24,13 @@
             <div class="form-group form-group-xs">
                 <label for="cmb-vendorcode" class="col-xs-5 col-sm-4 control-label text-muted">Vendor</label>
                 <div class="col-xs-7 col-sm-8">
-                    @Html.DropDownList("cmb-vendorcode", VendorController.VendorSelectList, new { tabindex="5", @class = "form-control"})
+                    @Html.DropDownList("cmb-vendorcode", VendorController.VendorSelectList, new { tabindex = "5", @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
+                <label for="cmb-status" class="col-xs-5 col-sm-4 control-label text-muted">Gov. Related</label>
+                <div class="col-xs-7 col-sm-8">
+                    @Html.DropDownList("cmb-govrelate", POInquiryController.GovRelatedSelectList, new { tabindex = "9", @class = "form-control" })
                 </div>
             </div>
         </div>
@@ -37,7 +44,7 @@
             <div class="form-group form-group-xs">
                 <label for="cmb-purchgrp" class="col-xs-5 col-sm-4 control-label text-muted">Currency</label>
                 <div class="col-xs-7 col-sm-8">
-                    @Html.DropDownList("cmb-curr", CurrencyController.CurrencySelectList, new { tabindex="6", @class = "form-control"})
+                    @Html.DropDownList("cmb-curr", CurrencyController.CurrencySelectList, new { tabindex = "6", @class = "form-control" })
                 </div>
             </div>
         </div>
@@ -49,14 +56,14 @@
                         <span class="input-group-addon" style="cursor: pointer;padding:4px 10px;" tabindex="3">
                             <i class="fa fa-calendar bigger-110"></i>
                         </span>
-                        <input class="form-control" type="text" name="date-range-picker" id="txt-docdate" data-date-format="dd.mm.yyyy" style="font-size:12px;height:25px;"/>
+                        <input class="form-control" type="text" name="date-range-picker" id="txt-docdate" data-date-format="dd.mm.yyyy" style="font-size:12px;height:25px;" />
                     </div>
                 </div>
             </div>
             <div class="form-group form-group-xs">
                 <label for="cmb-status" class="col-xs-5 col-sm-4 control-label text-muted">Status</label>
                 <div class="col-xs-7 col-sm-8">
-                    @Html.DropDownList("cmb-status", DocStatusController.GetDocStatusSelectList("PO"), new {tabindex="5", @class = "form-control" })
+                    @Html.DropDownList("cmb-status", DocStatusController.GetDocStatusSelectList("PO"), new { tabindex = "5", @class = "form-control" })
                 </div>
             </div>
         </div>
@@ -64,13 +71,13 @@
             <div class="form-group form-group-xs">
                 <label for="cmb-purchgrp" class="col-xs-5 col-sm-4 control-label text-muted">Purch. Group</label>
                 <div class="col-xs-7 col-sm-8">
-                    @Html.DropDownList("cmb-purchgrp", PurchasingGroupController.PurchasingGroupByRegNoSelectList(noreg), new {tabindex = "4", @class = "form-control"})
+                    @Html.DropDownList("cmb-purchgrp", PurchasingGroupController.PurchasingGroupByRegNoSelectList(noreg), new { tabindex = "4", @class = "form-control" })
                 </div>
             </div>
             <div class="form-group form-group-xs">
                 <label for="cmb-usertype" class="col-xs-5 col-sm-4 control-label text-muted">User Type</label>
                 <div class="col-xs-7 col-sm-8">
-                    @Html.DropDownList("cmb-usertype", userTypeList, PRPOApprovalPlaceHolder.SelectOption.ToLower(), new { tabindex="8", @class = "form-control"})
+                    @Html.DropDownList("cmb-usertype", userTypeList, PRPOApprovalPlaceHolder.SelectOption.ToLower(), new { tabindex = "8", @class = "form-control" })
                 </div>
             </div>
         </div>
@@ -97,7 +104,7 @@
             @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("POApproval", "btn-reject"))
             {
                 <button id="btn-reject" tabindex="14" class="btn btn-danger btn-xs btn-std">Reject</button>
-            } 
+            }
         </div>
         <div class="col-sm-6 text-right">
             <button id="btn-hideshow" tabindex="14" class="btn btn-primary btn-xs btn-std">Show Detail</button>
@@ -218,6 +225,19 @@
     $("#btn-hideshow").click(function (e) {
         showDetail();
     });
+
+    //$("#cmb-vendorcode").onchange(function (e) {
+    //    showDetail();
+    //});
+
+    document.getElementById('cmb-vendorcode').onchange = function () {
+        //document.getElementById('cmb-vendorcode').style.backgroundColor = 'red';
+        //$("#cmb-vendorcode").val().style.backgroundColor = 'red';
+        //console.log(a,'a');
+
+    };
+
+
 
     //# sourceURL=POApprovalParam.cshtml
 </script>

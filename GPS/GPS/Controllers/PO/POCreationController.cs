@@ -19,6 +19,7 @@ using GPS.ViewModels.PO;
 using NameValueItem = GPS.Models.Common.NameValueItem;
 using System.Linq;
 using System.IO;
+using System.Diagnostics;
 
 namespace GPS.Controllers.PO
 {
@@ -115,6 +116,7 @@ namespace GPS.Controllers.PO
             execModel.CurrentUserName = this.GetCurrentUserFullName();
             execModel.ModuleId = ModuleId.PurchaseOrder;
             execModel.FunctionId = FunctionId.POCreation;
+           
 
             String processId = execModel.ProcessId = creationRepo.Initial(execModel, String.Empty);
             var viewModel = new POCreationViewModel();
@@ -128,13 +130,15 @@ namespace GPS.Controllers.PO
             viewModel.Header.PurchasingGroup = PurchasingGroupController.GetFirstPurchasingGroup(this.GetCurrentRegistrationNumber());
             viewModel.Header.Currency = String.IsNullOrEmpty(viewModel.Header.Currency) ? CurrencyController.GetDefaultCurrency() : viewModel.Header.Currency;
             viewModel.Header.SPKInfo = viewModel.Header.SPKInfo ?? new POSPKViewModel();
-
+            viewModel.PlantCode = SystemRepository.Instance.GetSingleData("POCR01", "PLANT_LIMIT").Value;
+            viewModel.AgreementStatus = SystemRepository.Instance.GetSingleData("AGR001", "AGREEMENT_LIMIT").Value;
             IList<PRPOItem> itemList = creationRepo.GetItemTemp(processId) ?? new List<PRPOItem>();
             var itemViewModel = new PRItemAdoptResultViewModel();
             itemViewModel.CurrentUser = viewModel.CurrentUser;
             itemViewModel.DataList = itemList;
             itemViewModel.GridPaging = PaginationViewModel.GetDefault(POCommonRepository.POItemDataName);
             viewModel.ItemList = itemViewModel;
+           
 
             Model = viewModel;
         }
@@ -793,6 +797,10 @@ namespace GPS.Controllers.PO
                 // add by fid.ahmad 27-02-2023 handle issue vendor code was not filtered by purchasing group 
                 POSaveResult resultChecking = creationRepo.PlantCodeChecking(execModel, viewModel);
 
+                //add by ark.herman 23.06.2023 check if master due dilligence and master agreement already registered
+                var validation = viewModel.Vendor;
+
+
                 POSaveResult result = creationRepo.SaveData(execModel, viewModel);
                 creationRepo.MoveTempAttachmentToRealPath(viewModel.ProcessId, result.PONo, result.DocYear);
                 Session.Add(PONoSaveSessionKey, result.PONo);
@@ -1080,7 +1088,7 @@ namespace GPS.Controllers.PO
                 execModel.ModuleId = ModuleId.PurchaseOrder;
                 execModel.FunctionId = FunctionId.POCreation;
                 execModel.ProcessId = viewModel.ProcessId;
-
+            
                 creationRepo.SaveHeaderTemp(execModel, viewModel);
                 return Json(new ActionResponseViewModel { ResponseType = ActionResponseViewModel.Success, Message = "PO Header is silently saved." });
             }

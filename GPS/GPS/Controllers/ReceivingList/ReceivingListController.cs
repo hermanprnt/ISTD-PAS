@@ -16,6 +16,7 @@ using GPS.Models;
 using System.IO;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
+using GPS.Models.Master;
 
 namespace GPS.Controllers
 {
@@ -25,6 +26,10 @@ namespace GPS.Controllers
         private ReceivingListRepository receivingListRepo = ReceivingListRepository.Instance;
         private SupplierRepository supplierRepo = SupplierRepository.Instance;
         private GR_IRRepository grIrRepo = GR_IRRepository.Instance;
+
+        public const String _ReceivingUploadController = "/ReceivingList/";
+        public const String _SaveFileTemp = _ReceivingUploadController + "MoveFileToTemp";
+        public const String _DeleteFileTemp = _ReceivingUploadController + "DeleteTempFile";
 
         protected override void Startup()
         {
@@ -37,6 +42,9 @@ namespace GPS.Controllers
 
             ViewBag.ProcessId = processIdRepo.GetNewProcessId(ModuleId.Receiving, FunctionId.ReceivingList, "Initial");
             ViewBag.UserName = this.GetCurrentUsername();
+
+            ViewBag.MaxFileSize = SystemRepository.Instance.GetSingleData("RCVLST", "MAX_SIZE_FILE_UPLOAD").Value;
+            ViewBag.AllowExtension = SystemRepository.Instance.GetSingleData("RCVLST", "EXT_FILE_UPLOAD").Value;
         }
 
         private void getRecevingList(ReceivingListSearchViewModel searchViewModel)
@@ -47,7 +55,9 @@ namespace GPS.Controllers
 
             Paging pg = new Paging(countdata, searchViewModel.CurrentPage, searchViewModel.PageSize);
             ViewData["CountData"] = countdata;
-            ViewData["Paging"] = pg;           
+            ViewData["Paging"] = pg;
+            ViewBag.MaxFileSize = SystemRepository.Instance.GetSingleData("RCVLST", "MAX_SIZE_FILE_UPLOAD").Value;
+            ViewBag.AllowExtension = SystemRepository.Instance.GetSingleData("RCVLST", "EXT_FILE_UPLOAD").Value;        
             
             ViewData["ReceivingListInquiry"] = receivingListRepo.GetReceivingList(searchViewModel);
         }
@@ -241,5 +251,172 @@ namespace GPS.Controllers
             }
             return Json(result);
         }
+
+        //20230705 -> Enchanced Vision Project
+        public JsonResult concurencyChecking(string receivingNo, string changeDtParam)
+        {
+            int result = 0;
+            string msg = "";
+
+            try
+            {
+
+                result = ReceivingListRepository.Instance.concurencyChecking(receivingNo, changeDtParam);
+
+            }
+            catch (Exception e)
+            {
+                msg = e.Message;
+            }
+            return Json(result);
+        }
+
+        public ActionResult GetReceivingListUpload(String receivingNo)
+        {
+            ViewData["UploadList"] = receivingListRepo.GetReceivingListUpload(receivingNo);
+            return PartialView("_UploadAttachPopUp");
+        }
+
+        public string MoveFileToTemp(HttpPostedFileBase file, string rcvNo, int id, string chgDate)
+        {
+            string message = "";
+
+            string uid = this.GetCurrentUsername();
+            string FunctionId = "501003";
+            string ModuleId = "5";
+            string loc = "Upload Attachment";
+            Int64 ProcessID = 0;
+
+            try
+            {
+                if (ReceivingListRepository.Instance.concurencyChecking(rcvNo, chgDate) == 1 && id == 1)
+                {
+                    message = "ERR|Concurrency found in Upload (Edit Mode) operation";
+                }
+                else
+                {
+
+                    Tuple<Int64, string> newcreation = receivingListRepo.UploadInit(this.GetCurrentUsername());
+                    ProcessID = newcreation.Item1;
+
+                    if (file == null)
+                    {
+                        throw new Exception("File is Null, Please Upload Again");
+                    }
+
+                    VendorRepository.Instance.InsertLog("Executing check uploaded attachment file (Receiving No " + rcvNo + ") process", loc, ProcessID, "INF00008", "INF", "", null, 0, uid);
+
+                    string mainPath = SystemRepository.Instance.GetSingleData("RCVLST", "ATTACHMENT_PATH").Value;
+
+                    string dirpath = mainPath + DateTime.Now.Year.ToString() + @"\" + rcvNo + @"\"; 
+
+                    string filepath = dirpath + file.FileName;
+                    bool flagNew = false;
+
+                    if (Directory.Exists(dirpath))
+                    {
+
+                        loc = "File Found";
+                        VendorRepository.Instance.InsertLog("Executing delete all physical file on " + dirpath + " process", loc, ProcessID, "INF00008", "INF", "", null, 0, uid);
+
+                        //Directory.Delete(dirpath, true);
+                        if (receivingListRepo.GetAttachByid(rcvNo, id) != null)
+                        {
+                            string oldPath = receivingListRepo.GetAttachByid(rcvNo, id).AttachmentPath;
+                            if (System.IO.File.Exists(oldPath))
+                            {
+                                loc = "Delete file";
+                                VendorRepository.Instance.InsertLog("Executing delete attachmend data for Receiving No " + rcvNo + " process", loc, ProcessID, "INF00008", "INF", "", null, 0, uid);
+
+                                System.IO.File.Delete(oldPath);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        flagNew = true;
+                        loc = "Create Directory";
+                        VendorRepository.Instance.InsertLog("Executing create new folder (" + dirpath + ") process", loc, ProcessID, "INF00008", "INF", "", null, 0, uid);
+
+                        Directory.CreateDirectory(dirpath);
+                    }
+
+                    if (flagNew)
+                    {
+                        loc = "Save file";
+                        VendorRepository.Instance.InsertLog("Executing insert attachment data for Receiving No " + rcvNo + " process", loc, ProcessID, "INF00008", "INF", "", null, 0, uid);
+                    }
+                    else
+                    {
+                        loc = "Save file";
+                        VendorRepository.Instance.InsertLog("Executing upload new attachment file " + file.FileName + " to " + dirpath + " for Receiving No " + rcvNo + " process", loc, ProcessID, "INF00008", "INF", "", null, 0, uid);
+                    }
+
+                    file.SaveAs(filepath);
+
+                    var a = receivingListRepo.UpdateGRAttachment(rcvNo, id, filepath, file.FileName, this.GetCurrentUsername());
+
+                    loc = "Upload Attachment";
+                    VendorRepository.Instance.InsertLog("Upload Attachment is finished successfully.", loc, ProcessID, "INF00006", "INF", "", null, 0, uid);
+
+                    message = "SUCCESS|" + Path.GetFileName(filepath) + "|" + a;
+                }
+            }
+            catch (Exception ex)
+            {
+                VendorRepository.Instance.InsertLog("System error has occurred : " + ex.Message, loc, ProcessID, "ERR00016", "ERR", "", null, 1, uid);
+                loc = "Upload Attachment";
+                VendorRepository.Instance.InsertLog("Upload Attachment is finished with error.", loc, ProcessID, "INF00007", "INF", "", null, 3, uid);
+
+                message = "ERR|" + ex.Message;
+            }
+
+            return message;
+        }
+
+        public void DownloadFile(string rcvNo, int id)
+        {
+            string path = receivingListRepo.GetAttachByid(rcvNo, id).AttachmentPath;
+            string mime = GetMimeType(path);
+
+            Response.Clear();
+            Response.ContentType = mime;
+            Response.AppendHeader("content-disposition", "attachment; filename=" + Path.GetFileName(path));
+            Response.TransmitFile(path);
+            Response.End();
+        }
+
+        private string GetMimeType(string fileName)
+        {
+            string mimeType = "application/unknown";
+            string ext = Path.GetExtension(fileName).ToLower();
+            Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(ext);
+            if (regKey != null && regKey.GetValue("Content Type") != null)
+                mimeType = regKey.GetValue("Content Type").ToString();
+            return mimeType;
+        }
+
+        public String DeleteTempFile(string rcvNo, int id, string chgDate)
+        {
+            try
+            {
+                if (ReceivingListRepository.Instance.concurencyChecking(rcvNo, chgDate) == 1)
+                {
+                    return "ERR|Concurrency found in Delete File operation";
+                }
+                else
+                {
+                    string dirpath = receivingListRepo.GetAttachByid(rcvNo, id).AttachmentPath;
+                    var a = receivingListRepo.UpdateGRAttachment(rcvNo, id, "", "", this.GetCurrentUsername());
+                    System.IO.File.Delete(dirpath);
+                    return "SUCCESS|";
+                }
+            }
+            catch (Exception ex)
+            {
+                return "ERR|" + ex.Message;
+            }
+        }
+
     }
 }

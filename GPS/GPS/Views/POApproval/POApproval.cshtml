@@ -457,6 +457,7 @@
             Currency: $("#cmb-curr").val(),
             Status: $("#cmb-status").val(),
             UserType: $("#cmb-usertype").val(),
+            GovRelate: $("#cmb-govrelate").valOrDefault(),
             OrderBy: orderby,
             CurrentPage: pageIndex,
             PageSize: pageSize
@@ -466,7 +467,7 @@
     function GetPOApprovalDetailParameter(showNotice, pageIndex, pageSize) {
         pageIndex = pageIndex || 1;
         pageSize = pageSize || 10;
-
+        
         return {
             param: {
                 DocNo: docNo,
@@ -474,6 +475,7 @@
                 DocDate: docDt,
                 Division: divisionName,
                 UserType: $("#cmb-usertype").valOrDefault()
+               
             },
             showNotice: (showNotice !== undefined),
             pageIndex: pageIndex,

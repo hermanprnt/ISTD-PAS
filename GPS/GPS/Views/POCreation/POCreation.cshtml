@@ -32,8 +32,12 @@
         var mydataname ="";
         var mydatano = "";
         var myExpanderRow = "";
-		var vendoredit = "";
+        var vendoredit = "";
+        var plantCodeLimit = "@Model.PlantCode";
+        var agreementStatus = "@Model.AgreementStatus";
         //end : 20190617 : isid.rgl
+        const agreementStatusArray = agreementStatus.split(",");
+        
 
         /* ============================== Init: begin ============================== */
 
@@ -327,6 +331,13 @@
         }
 
         function InitExistingData() {
+            if ("@Model.Header.DD_STATUS" === "1") {
+                document.getElementById('txtlookup-vendor').style.backgroundColor = 'red';
+            } else if ("@Model.Header.DD_STATUS" === "2") {
+                document.getElementById('txtlookup-vendor').style.backgroundColor = 'yellow';
+            } else if ("@Model.Header.DD_STATUS" === "3") {
+                document.getElementById('txtlookup-vendor').style.backgroundColor = 'lawngreen';
+            };
             $("#txtedit-poheadertext").val($("<div />").html("@Model.Header.POHeaderText").text());
             $("#txtlookup-vendor").val("@(String.IsNullOrEmpty(Model.Header.VendorCode) ? String.Empty : Model.Header.VendorCode + " - " + Model.Header.VendorName)");
             $("#txtedit-exchangerate").val(Number("@Model.Header.ExchangeRate"));
@@ -534,12 +545,11 @@
             return poNoteArray;
         }
 
-        if(isFromECatalogue)
-        {
+        if (isFromECatalogue) {
             $("#lookup-vendor").lookup({
                 IsSingleSelection: true,
-                LookupOpenUrl: "@POCreationController.Action.OpenCreationVendorEcatalogueLookup?PO_No="+poNo+"",
-                LookupSearchUrl: "@POCreationController.Action.SearchCreationVendorEcatalogueLookup?PO_No="+poNo+"",
+                LookupOpenUrl: "@POCreationController.Action.OpenCreationVendorEcatalogueLookup?PO_No=" + poNo + "",
+                LookupSearchUrl: "@POCreationController.Action.SearchCreationVendorEcatalogueLookup?PO_No=" + poNo + "",
                 OnBeginCallback: function () { OnAjaxBegin("Search Vendor"); },
                 OnEndCallback: OnAjaxComplete,
                 OnSearchButtonClick: function () { $.ClearLookup(["#lookup-vendor"]); },
@@ -561,7 +571,7 @@
                 },
                 OnOkButtonClick: function () { },
                 OnOkButtonClicked: function () {
-                    var isValid = $.ValidateMandatory(["#txtotv-vendor-name","#txtotv-vendor-address","#cmbotv-vendor-country","#txtotv-vendor-city","#txtotv-vendor-postalcode","#txtotv-vendor-phone","#txtotv-vendor-fax"]);
+                    var isValid = $.ValidateMandatory(["#txtotv-vendor-name", "#txtotv-vendor-address", "#cmbotv-vendor-country", "#txtotv-vendor-city", "#txtotv-vendor-postalcode", "#txtotv-vendor-phone", "#txtotv-vendor-fax"]);
                     if (isValid) {
                         var vendor = {
                             IsOneTimeVendor: true,
@@ -584,29 +594,92 @@
                 }
             });
         }
-        else{
+        else {
             $("#lookup-vendor").lookup({
                 IsSingleSelection: true,
-                LookupOpenUrl: "@POCreationController.Action.OpenCreationVendorLookup?PurchGroup="+$("#cmbedit-purchasinggroup").val()+"", // add 20200123
-                LookupSearchUrl: "@POCreationController.Action.SearchCreationVendorLookup?PurchGroup="+$("#cmbedit-purchasinggroup").val()+"", // add 20200123
+
+                LookupOpenUrl: "@POCreationController.Action.OpenCreationVendorLookup?PurchGroup=" + $("#cmbedit-purchasinggroup").val() + "", // add 20200123
+                LookupSearchUrl: "@POCreationController.Action.SearchCreationVendorLookup?PurchGroup=" + $("#cmbedit-purchasinggroup").val() + "", // add 20200123
                 OnBeginCallback: function () { OnAjaxBegin("Search Vendor"); },
                 OnEndCallback: OnAjaxComplete,
                 OnSearchButtonClick: function () { $.ClearLookup(["#lookup-vendor"]); },
                 OnRowSelected: function (selected) {
-                    ViewData.Add("VendorInfo", {
-                        IsOneTimeVendor: false,
-                        Code: selected.Value,
-                        Name: selected.Name,
-                        Address: "",
-                        Country: $("#cmbotv-vendor-country").valOrDefault(),
-                        City: "",
-                        PostalCode: "",
-                        Phone: "",
-                        Fax: ""
-                    });
-                    SilentSavePOHeader();
+                    //herman
+                    if (selected.Background === null && selected.VendorPlant === plantCodeLimit) {
+                        var vendor = ViewData.Get("VendorInfo");
+                        $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
+                        $.messagebox.show(
+                            "Error",
+                            "Has not been defined by master due dilligence",
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                    } else if (selected.Background === '0') {
+                        var vendor = ViewData.Get("VendorInfo");
+                        $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
+                        $.messagebox.show(
+                            "Error",
+                            "Due Dilligence has been expired",
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+                    } else if (agreementStatusArray.includes(selected.AgreementStatus) === false) {
+                        var vendor = ViewData.Get("VendorInfo");
+                        $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
+                        $.messagebox.show(  
+                            "Error",
+                            "Vendor agreement status must be [Active] or [Expired Soon]",
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        );
+                    }
+                    //if (selected.Background === null || selected.VendorPlant === plantCodeLimit || agreementStatusArray.includes(selected.AgreementStatus) === false
+                    //    || selected.Background === null || !plantCodeLimit || agreementStatusArray.includes(selected.AgreementStatus) === false) {
+                    //    //to maintain previous vendor when error due dilligence not registered
+                    //    var vendor = ViewData.Get("VendorInfo");
+                    //    $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
+                    //    $.messagebox.show(
+                    //        "Error",
+                    //        "Has not been defined by master due dilligence or master agreement",
+                    //        "ERR",
+                    //        "SINGLE",
+                    //        "",
+                    //        ""
+                    //    );
+                    //}
+                    else {
+                        ViewData.Add("VendorInfo", {
+                            IsOneTimeVendor: false,
+                            Code: selected.Value,
+                            Name: selected.Name,
+                            Background: selected.Background,
+                            Address: "",
+                            Country: $("#cmbotv-vendor-country").valOrDefault(),
+                            City: "",
+                            PostalCode: "",
+                            Phone: "",
+                            Fax: ""
+                        });
+                        var vendor = ViewData.Get("VendorInfo");
+                        if (vendor.Background === "1") {
+                            document.getElementById('txtlookup-vendor').style.backgroundColor = 'red';
+                        } else if (vendor.Background === "2") {
+                            document.getElementById('txtlookup-vendor').style.backgroundColor = 'yellow';
+                        } else if (vendor.Background === "3") {
+                            document.getElementById('txtlookup-vendor').style.backgroundColor = 'lawngreen';
+                        } else if (vendor.Background === "4") {
+                            document.getElementById('txtlookup-vendor').style.backgroundColor = 'white';
+                        }
 
-                    $("#popuplookup-vendor").modal("hide");
+                        SilentSavePOHeader();
+                        $("#popuplookup-vendor").modal("hide");
+                    }
                 },
                 OnOkButtonClick: function () { },
                 OnOkButtonClicked: function () {
@@ -626,6 +699,7 @@
 
                         $("#lookup-vendor").LookupVal(vendor.Code + " - " + vendor.Name);
                         ViewData.Add("VendorInfo", vendor);
+
                         SilentSavePOHeader();
 
                         $("#popuplookup-vendor").modal("hide");
@@ -647,6 +721,7 @@
 
         // NOTE: these function is initialized in InitExistingData function
         var InitSPKForm, FillSPKInfo;
+
         InitExistingData();
         RefreshPOItemMat(processId, poNo);
         RefreshSPKAmount();
@@ -886,7 +961,7 @@
                     {
                         console.log("Silent save PO Header success.");
                     }
-                       
+
                 },
                 error: OnAjaxError
             });
@@ -958,7 +1033,7 @@
 			//end : 20190716 : isid.rgl
             var embedded = $(this).data("embedded");
             ResetEditor();
-			
+
 			//start : 20190716 : isid.rgl
 			$('#txtlookup-vendor').val(vendoredit);
 			//end : 20190716 : isid.rgl
@@ -1183,7 +1258,7 @@
                         });
                     });
 
-                    console.log(subItemList);
+                    console.log(subItemList,'here');
 
                     var vendor = ViewData.Get("VendorInfo");
                     OnAjaxBegin("Save Sub Item");
@@ -1323,6 +1398,17 @@
             });
         });
 
+        /*const checkbox = */
+        document.getElementById('chkbox-govrelated').addEventListener('change', (event) => {
+        //checkbox.addEventListener('change', (event) => {
+            if (event.currentTarget.checked) {
+                //alert('hey');
+                SilentSavePOHeader();
+            } else {
+                SilentSavePOHeader();
+            }
+        })
+
         $(document).on("click", "#btn-subitemedit-cancel", function (e) {
             DisableAllFeatures();
             ResetSubItemEditedRowValue();
@@ -1338,7 +1424,7 @@
             if($('#txtlookup-vendor').val() !="")
             {
                 lookup = $('#txtlookup-vendor').val().split('-');
-            
+
                 if(lookup != "")
                 {
                     vendcode = lookup[0].trim();
@@ -1350,6 +1436,7 @@
                 vendcode = "";
                 vendname = "";
             }
+            const cb = document.querySelector('#chkbox-govrelated');
             /*ended : 20190628 : isid.rgl*/
             return {
                 ProcessId: processId,
@@ -1358,7 +1445,7 @@
                 PONote: GetPONoteValue($("#txtedit-ponote").valOrDefault()),
                 //Vendor: vendor.Code,          closed : 20190628 : isid.rgl
                 //VendorName: vendor.Name,      closed : 20190628 : isid.rgl
-                Vendor: vendcode,               
+                Vendor: vendcode,
                 VendorName: vendname,
                 VendorAddress: vendor.Address,
                 VendorCountry: vendor.Country,
@@ -1371,7 +1458,8 @@
                 DeliveryAddress: $("#cmbedit-deliveryaddr").valOrDefault(),
                 SPKInfo: ViewData.Get("SPKInfo"),
                 OtherMail : $("#hiddenmail").val(),
-                SaveAsDraft: isSavedAsDraft
+                SaveAsDraft: isSavedAsDraft,
+                GOVERNMENT_RELATED: cb.checked
             };
         }
 
@@ -1436,6 +1524,10 @@
 
         $("#btnsave-draft").click(function (e) {
             SilentSavePOHeader();
+
+            const cb = document.querySelector('#chkbox-govrelated');
+            //console.log(cb.checked,'really?');
+
             var isPOManual = $("#cmb-poitem-creationtype").valOrDefault() === "@POCreationType.Manual";
             if (!ValidatePOItem())
                 $.messagebox.show("@ActionResponseViewModel.Error", isPOManual ? "Please add or save item first." : "PR isn't adopted yet.", "@ActionResponseViewModel.Error");
@@ -1510,7 +1602,7 @@
             window.location.href = "@POInquiryController.Action.Index";
         });
 
-        
+
 
         function ValidateAddItem() {
             var headerSelectorList = [
@@ -2707,6 +2799,12 @@
                 </div>
             </div>
             <div class="form-group form-group-xs">
+                <label for="cmbedit-currency" class="col-xs-5 col-sm-4 control-label required-left text-muted">Government Related</label>
+                <div class="col-xs-7 col-sm-8">
+                    <input id="chkbox-govrelated" class="grid-checkbox grid-checkbox-body" type="checkbox" />
+                </div>
+            </div>
+            <div class="form-group form-group-xs">
                 <label for="upledit-bidingdoc" class="col-xs-5 col-sm-4 control-label text-muted">Attachment</label>
                 <div class="col-xs-7 col-sm-8">
                     <input type="file" id="upledit-bidingdoc" tabindex="8" value="" />
@@ -2879,7 +2977,7 @@
             </div>
             <div class="modal-body">
                 <p>
-                    Are you sure want to create PO?
+                    Are you sure want to create PO ?
                 </p>
             </div>
             <div class="modal-footer">

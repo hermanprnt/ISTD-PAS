@@ -12,15 +12,15 @@
     foreach (POApproval item in poApprovalList)
     {
         <tr>
-            <td class="text-center" width="20px"><input id="chk-approval-@item.DataNo" data-docno="@item.DocNo" data-doctype="PO" type="checkbox"/></td>
+            <td class="text-center" width="20px"><input id="chk-approval-@item.DataNo" data-docno="@item.DocNo" data-doctype="PO" type="checkbox" /></td>
             <td class="text-center" style="vertical-align:middle;" width="20px">
-                @if(item.UrgentDoc == "Y")
+                @if (item.UrgentDoc == "Y")
                 {
                     <img src="@Url.Content("~/Content/img/alert_16.png")" />
                 }
             </td>
             <td class="text-center" style="vertical-align:middle;" width="20px">
-                @if(item.IsHaveAttachment)
+                @if (item.IsHaveAttachment)
                 {
                     <i class="fa fa-paperclip"></i>
                 }
@@ -30,11 +30,33 @@
             </td>
             <td class="text-left" width="180px">@item.DocDesc</td>
             <td class="text-center" width="65px">@item.DocDate.ToStandardFormat()</td>
-            <td class="text-left" width="250px">@item.Vendor</td>
+            @if (item.DD_STATUS == "1")
+            {
+                <td class="text-left" width="250px" style="background-color:red">@item.Vendor</td>
+            }
+            else if (item.DD_STATUS == "2")
+            {
+                <td class="text-left" width="250px" style="background-color:yellow">@item.Vendor</td>
+            }
+            else if (item.DD_STATUS == "3")
+            {
+                <td class="text-left" width="250px" style="background-color:lawngreen">@item.Vendor</td>
+            }
+            else if (item.DD_STATUS == "4")
+            {
+                <td class="text-left" width="250px">@item.Vendor</td>
+            }
+            else
+            {
+                <td class="text-left" width="250px" style="background-color:grey">@item.Vendor</td>
+            }
+
             <td class="text-center" width="30px">@item.Currency</td>
             <td class="text-right" width="80px">@item.Amount.ToStandardFormat()</td>
             <td class="text-left" width="90px">@item.Status</td>
             <td class="text-center" width="60px">@item.PurchasingGroup</td>
+            <td class="text-center" width="100px">@item.GovRelate</td>
+            
             <td class="_toggle-detail text-left" width="100px">@item.CreatedBy</td>
             <td class="_toggle-detail text-center" width="165px">@item.CreatedDate.ToStandardFormatWithTime()</td>
             <td class="_toggle-detail text-left" width="100px">@item.ChangedBy</td>

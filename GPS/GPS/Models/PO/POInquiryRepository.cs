@@ -15,12 +15,19 @@ using System.Data.SqlClient;
 using System.Text;
 using GPS.Models.PRPOApproval;
 using GPS.Constants.PRPOApproval;
+using GPS.Models.Master;
 
 namespace GPS.Models.PO
 {
     public class POInquiryRepository
     {
         public const String ApprovalDataName = "poapproval";
+        
+        private static POInquiryRepository instance = null;
+        public static POInquiryRepository Instance
+        {
+            get { return instance ?? (instance = new POInquiryRepository()); }
+        }
 
         private readonly IDBContext db;
         public POInquiryRepository()
@@ -59,7 +66,7 @@ namespace GPS.Models.PO
 
         public IList<PurchaseOrder> GetList(PurchaseOrderSearchViewModel searchViewModel)
         {
-            String query = "EXEC sp_POInquiry_GetList @PONo, @Vendor, @Status, @CreatedBy, @DateFrom, @DateTo, @PurchasingGroup, @POHeaderText, @OrderBy, @PRNo, @CurrentPage, @PageSize, @ProcChannel";
+            String query = "EXEC sp_POInquiry_GetList @PONo, @Vendor, @Status, @CreatedBy, @DateFrom, @DateTo, @PurchasingGroup, @POHeaderText, @OrderBy, @PRNo, @CurrentPage, @PageSize, @ProcChannel,@GovRelate";
             IList<PurchaseOrder> result = db.Fetch<PurchaseOrder>(query, searchViewModel);
             db.Close();
 
@@ -485,5 +492,16 @@ namespace GPS.Models.PO
             return result;
         }
         //20200129 end
+
+        public IEnumerable<SystemMaster> GetGovRelatedList()
+        {
+            String query = "SELECT SYSTEM_CD AS Code ,SYSTEM_VALUE AS Value FROM TB_M_SYSTEM WHERE FUNCTION_ID = 'GOVREL'";
+
+
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            IEnumerable<SystemMaster> result = db.Fetch<SystemMaster>(query);
+            db.Close();
+            return result;
+        }
     }
 }

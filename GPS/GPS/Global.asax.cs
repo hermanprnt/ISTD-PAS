@@ -29,14 +29,14 @@ namespace GPS
         }
         private void BypassLogin(bool isBypass)
         {
-            if (isBypass)
+            if (isBypass)   
             {
                 ApplicationSettings.Instance.Security.IgnoreAuthorization = true;
                 ApplicationSettings.Instance.Security.SimulateAuthenticatedSession = true;
                 ApplicationSettings.Instance.Security.SimulatedAuthenticatedUser = new User()
                 {
                     //Username = "danny.fahmi",
-                    //Username = "christian_gunawan",
+                    //Username = "christian_gunawan",   
                     Username = "tony_a",
                     Password = "toyota",
                     FirstName = "Anonymous",

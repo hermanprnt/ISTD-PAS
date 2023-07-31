@@ -1,0 +1,76 @@
+﻿@using GPS.Models.ReceivingList
+@using GPS.CommonFunc
+@{
+    List<GRDetail> listData = ViewData["DetailData"] != null ? (List<GRDetail>)ViewData["DetailData"] : new List<GRDetail>();
+    GRApproval gRApproval = ViewData["Header"] != null ? (GRApproval)ViewData["Header"] : new GRApproval();
+}
+
+
+<div class="row">
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs">
+            <label class="col-xs-4 col-sm-4 col-md-5 control-label text-muted" style="white-space: nowrap!important;">Receiving No</label>
+            <div class="col-xs-8 col-sm-8 col-md-7">
+                <input type="text" class="form-control" disabled="disabled" id="matdocnoPopUp" value="@gRApproval.MAT_DOC_NO" />
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs">
+            <label class="col-xs-4 col-sm-4 col-md-4 control-label text-muted" style="white-space: nowrap!important;">PO Number</label>
+            <div class="col-xs-8 col-sm-8 col-md-8">
+                <input type="text" class="form-control" disabled="disabled" id="ponumberpopup" value="@gRApproval.PO_NO" />
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 left">
+        <div class="form-group form-group-xs">
+            <label class="col-xs-4 col-sm-4 col-md-4 control-label text-muted" style="white-space: nowrap!important;">Header Text</label>
+            <div class="col-xs-8 col-sm-8 col-md-8">
+                <input type="text" class="form-control" disabled="disabled" id="headertxtpopup" value="@gRApproval.HEADER_TEXT" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs">
+            <label class="col-xs-4 col-sm-4 col-md-5 control-label text-muted" style="white-space: nowrap!important;">Surat Jalan / BAP</label>
+            <div class="col-xs-8 col-sm-8 col-md-7">
+                <label class="control-label text-muted">@Html.Raw(gRApproval.SURAT_JALAN_PATH)</label>
+                
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="form-group form-group-xs">
+            <label class="col-xs-4 col-sm-4 col-md-4 control-label text-muted" style="white-space: nowrap!important;">Other</label>
+            <div class="col-xs-8 col-sm-8 col-md-8">
+                <label class="control-label text-muted">@Html.Raw(gRApproval.OTHER_PATH)</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="lastUpdatePopUp" value="@gRApproval.LastChange.ToSqlCompatibleFormat()" />
+<br />
+
+<div class="text-center" style="margin-bottom: 3px;">
+    <hr id="hrsrc3" style="margin: 0; padding: 0;" />
+</div>
+<div id="divtabledetail">
+    @Html.Partial("_GridDetail")
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        if ($('#ApproveEnableHid').val() == '1') {
+            $('#ApproveButtonPopUp').prop('disabled', false);
+        }
+        else {
+            $('#ApproveButtonPopUp').prop('disabled', true);
+        }
+    });
+
+</script>

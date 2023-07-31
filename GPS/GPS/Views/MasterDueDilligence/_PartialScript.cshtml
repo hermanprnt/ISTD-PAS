@@ -1,0 +1,444 @@
+﻿<script type="text/javascript">
+    $tdk.isDetail = 0;
+
+    $(document).ready(function () {
+        
+        $("#txt-dddaterange").todaterangepicker();
+        onClear();
+    });
+
+
+
+    $('#upfile').on('change', function (e) {
+        var fileName = $('#upfile').val();
+        var xls = fileName.match(/\.(xls?)$/i);
+        if (xls != null) {
+            var files = e.target.files;
+            if (files.length > 0) {
+                if (window.FormData !== undefined) {
+                    var data = new FormData();
+                    for (var x = 0; x < files.length; x++) {
+                        data.append("file" + x, files[x]);
+                    }
+
+                    $.progressbox.show("Upload", "Loading Data...");
+
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Content("~/MasterDueDilligence/UploadFile")",
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        success: function (data) {
+                            $.progressbox.hide();
+                            var result = data.message.split('|');
+                            if (result[0] == 'Error') {
+                                $.messagebox.show(
+                                    "Error",
+                                    result[1],
+                                    "ERR",
+                                    "SINGLE",
+                                    "",
+                                    ""
+                                )
+                            }
+                            else if (result[0] == 'Success') {
+                                $('#upfile').val('');
+                                window.location = "MasterDueDilligence/DownloadUploadedResult?path=" + result[1];
+                                onGetData(1);
+                            }
+                        },
+                        error: function (xhr, status, p3, p4) {
+                            var err = "Error " + " " + status + " " + p3 + " " + p4;
+                            if (xhr.responseText && xhr.responseText[0] == "{")
+                                err = JSON.parse(xhr.responseText).Message;
+                            console.log(err);
+                        }
+                    });
+                } else {
+                    $.messagebox.show(
+                        "Error",
+                        "This browser doesn't support HTML5 file uploads!",
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            }
+        }
+        else {
+            $.messagebox.show(
+               "Error",
+               "Please select an excel file with format xls",
+               "ERR",
+               "SINGLE",
+               "",
+               ""
+           )
+        }
+    });
+
+    function onDownload() {
+            var orderby = null;
+            //if (ViewData.Get("OrderBy") !== undefined && ViewData.Get("OrderBy") !== null && ViewData.Get("OrderBy") !== "")
+            //    orderby = ViewData.Get("OrderBy");
+
+            $.progressbox.show($tdk.PageTitle, "Download File");
+
+            $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadHeader")", {
+                data: {
+                    Display: $("#cbodisplay").val(),
+                    Page: 1,
+                    VendorCode: $("#txt-vendorcode").val(),
+                    VendorName: $("#txt-vendorname").val(),
+                    DueDilDateRange: $("#txt-dddaterange").val(),
+
+                    Status: $("#cmb-status").val(),
+
+                },
+                successCallback: function (responseHtml, url) {
+                    $.progressbox.hide();
+                },
+                failCallback: function (responseHtml, url) {
+                    console.log(responseHtml);
+                    $.progressbox.hide();
+                    alert("A file download error has occured, please try again");
+                }
+            });
+    }
+
+    function detailGrid() {
+        console.log('before if');
+        if ($tdk.isDetail > 0) {
+            $("#btnToggleDetail").html('Show Detail');
+            $("._toggle-detail").hide();
+            $tdk.isDetail = 0;
+            $("#dynamic-table").css("width", "100%");
+            $("#tblScroll").css("width", "100%");
+        }
+        else {
+            $("#btnToggleDetail").html('Hide Detail');
+            $("._toggle-detail").show();
+            $tdk.isDetail = 1;
+            $("#dynamic-table").css("width", "2250px");
+            $("#tblScroll").css("width", "2250px");
+        }
+    }
+
+    /*Checkbox all*/
+    function onCekAll() {
+        if ($("#checkall").is(":checked")) {
+            $(".grid-checkbox-body").prop('checked', true);
+        } else {
+            $(".grid-checkbox-body").prop('checked', false);
+        }
+    }
+
+    function GetSelectedGrid() {
+        var ids = [];
+        $("input[id^=cb-]").each(function (i, a) {
+            if (a.id != null && a.id.length > 0 && a.checked) {
+                ids.push({
+                    vendor_cd: $('#' + a.id).data('vendor_cd')
+                });
+            }
+        });
+        return ids;
+    }
+
+    $.fn.addOption = function (optText, optValue) {
+        var option = new Option(optText, optValue);
+        return this.append(option);
+    };
+</script>
+<script type="text/javascript" id="Search">
+    function onGetData(page) {
+
+        $.disable_enable_button.disable();
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+            data: {
+                Display: $("#cbodisplay").val(),
+                Page: page,
+                VendorCode: $("#txt-vendorcode").val(),
+                VendorName: $("#txt-vendorname").val(),
+                DueDilDateRange: $("#txt-dddaterange").val(),
+
+                Status: $("#cmb-status").val(),
+
+            },
+            success: function (data) {
+                $("#divtable").html(data);
+                $("#btnToggleDetail").html('Show Detail');
+                $.disable_enable_button.enable();
+            }
+        });
+    }
+
+    function onClear() {
+        $("#cmb-status").val('');
+        $("#txt-vendorname").val('');
+        $("#txt-vendorcode").val('');
+        $("#txt-dddaterange").val('');
+
+        $("input[id^=cb-]").each(function (i, a) {
+            a.checked = false;
+        });
+        ClearGrid(1);
+    }
+
+    function ClearGrid(page) {
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("SearchData")",
+                data: {
+                    Display: $("#cbodisplay").val(),
+                    Page: page,
+                    CostGroup: 'NULLSTATE',
+                    CostCenter: 'NULLSTATE'
+                },
+                success: function (data) {
+                    $("#divtable").html(data);
+                }
+        });
+    }
+</script>
+
+<script type="text/javascript" id="savedelete">
+    function onAddData() {
+
+        $.ajax({
+            type: "post",
+            url: "@Html.Toyota().Page.GetActionUrl("IsFlagEditAdd")",
+            data: {
+                flag: '0',
+                Key: null
+            },
+            success: function (data) {
+                document.getElementById("cmb-vendorcode").disabled = false;
+                $("#basicModal").html(data);
+                $("#basicModal").modal();
+            }
+        });
+    }
+
+    function onEditData() {
+        if ($(".grid-checkbox-body:checked").length == 0)
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else if ($(".grid-checkbox-body:checked").length > 1)
+            //$("#selected-more-confirm").modal();
+            $.messagebox.show(
+                "Warning",
+                "Please Select only One Record to be edit",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else {
+            var selectedData = GetSelectedGrid();
+            $.ajax({
+                type: "post",
+                url: "@Html.Toyota().Page.GetActionUrl("IsFlagEditAdd")",
+                data: {
+                    flag: '1',
+                    VendorCode: selectedData[0].vendor_cd
+
+                },
+                success: function (data) {
+                    document.getElementById("cmb-vendorcode").disabled = true;
+
+                    $("#basicModal").html(data);
+                    $("#basicModal").modal();
+                }
+            });
+        }
+    }
+
+
+
+    function onSaveData() {
+        var vendorcd = $("#cmb-vendorcode").val();
+        var vendornm = $("#txtedit-vendornm").val();
+        var status = $("#cmbedit-status").val();
+        var vldddfrom = $("#txtedit-vldddfrom").val();
+        var vldddto = $("#txtedit-vldddto").val();
+        var mailbuyer = $("#txtmail-buyer").val();
+        var mailsh = $("#txtmail-sh").val();
+        var maildph = $("#txtmail-dph").val();
+        var maillegal = $("#txtmail-legal").val();
+        var txtFile = $("#upload-ddFiles").val();
+
+        var flag= $("#txtEdit").val();
+        var isValid = $.ValidateMandatory(["#cmb-vendorcode", "#txtedit-vendornm", "#cmbedit-status", "#txtmail-buyer"
+            , "#txtmail-sh", "#txtmail-dph", "#txtmail-legal"]);
+        if (!isValid) {
+            return;
+        }
+        if (window.FormData !== undefined) {
+
+            var fileUpload = $("#upload-ddFiles").get(0);
+            var files = fileUpload.files;
+
+            // Create FormData object
+            var fileData = new FormData();
+
+            // Looping over all files and add it to FormData object
+            for (var i = 0; i < files.length; i++) {
+                fileData.append(files[i].name, files[i]);
+            }
+
+            //// Adding more key to FormData object
+            fileData.append('vendorcd', vendorcd);
+            fileData.append('vendornm', vendornm);
+            fileData.append('status', status);
+            fileData.append('vldddfrom', vldddfrom);
+            fileData.append('vldddto', vldddto);
+            fileData.append('mailbuyer', mailbuyer);
+            fileData.append('mailsh', mailsh);
+            fileData.append('maildph', maildph);
+            fileData.append('maillegal', maillegal);
+
+            fileData.append('flag', flag);
+            fileData.append('txtFile', txtFile);
+
+        }
+
+        $.progressbox.show("Save Data", "Loading Data...");
+
+        $.ajax({
+            type: "post",
+            contentType: false, // Not to set any content header
+            processData: false, // Not to process data
+            url: "@Html.Toyota().Page.GetActionUrl("SaveData")",
+            data: fileData,
+            success: function (data) {
+                $.progressbox.hide();
+                var result = data.message.split('|');
+                if (result[0] == 'True') {
+                    $.messagebox.show(
+                    "Info",
+                    result[1],
+                    "SUC",
+                    "SINGLE",
+                    "OkInfoSave()",
+                    ""
+                    )
+                    $('#basicModal').modal('hide');
+
+                }
+                else {
+                    //$.progressbox.hide();
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            }
+        });
+    }
+
+    function OkInfoSave() {
+        $("#basicModal").modal('hide');
+        onGetData(1);
+    }
+
+    function onDeleteData() {
+        if ($(".grid-checkbox-body:checked").length === 0)
+            $.messagebox.show(
+                "Warning",
+                "Please Select at Least One Record to be deleted",
+                "WRN",
+                "SINGLE",
+                "",
+                ""
+            )
+        else
+            $.messagebox.show(
+               "Confirmation",
+               "Are You Sure You Want to Delete this Item ?",
+               "INF",
+               "CONFIRM",
+               "onYesDelete()",
+               ""
+           )
+    }
+
+    function onYesDelete() {
+        var selectedData = GetSelectedGrid();
+        var keyArray = [];
+        for (var i = 0; i < selectedData.length; i++) {
+            //keyArray.push(selectedData[i].vendor_cd + ";" + selectedData[i].valfr_cd + ";" + selectedData[i].valto_cd);
+            keyArray.push(selectedData[i].vendor_cd);
+        }
+        var selectedKey = keyArray.join(",");
+
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("DeleteData")",
+            data: {
+                Key: selectedKey
+            },
+            success: function (data) {
+                var result = data.split('|');
+                if (result[0] == 'True') {
+                    $.messagebox.show(
+                       "Info",
+                       result[1],
+                       "SUC",
+                       "SINGLE",
+                       "",
+                       ""
+                   )
+                    onGetData(1);
+                }
+                else if (result[0] == 'Error') {
+                    $.messagebox.show(
+                        "Error",
+                        result[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                }
+            }
+        });
+    }
+</script>
+<script type="text/javascript" id="upload">
+    function OnDownloadTemplate() {
+        $.ajax({
+            type: "POST",
+            url: "@Html.Toyota().Page.GetActionUrl("CekTemplate")",
+            success: function (data) {
+                if(data == 'False'){
+                     $.messagebox.show(
+                        "Error",
+                        "Template Not Found",
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                 }
+                 else {
+                     $.fileDownload("MasterDueDilligence/DownloadTemplate/");
+                 }
+             }
+        });
+    }
+</script>

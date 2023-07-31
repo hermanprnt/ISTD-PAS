@@ -22,6 +22,7 @@ namespace GPS.ViewModels.PO
         public String DeliveryAddress { get ;set; }
         public POSPKViewModel SPKInfo { get; set; }
         public String OtherMail { get; set; }
+        public String GOVERNMENT_RELATED { get; set; }
         public Boolean SaveAsDraft { get; set; }
     }
 }

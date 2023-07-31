@@ -16,7 +16,7 @@
 
     string ListDocNo = (string)ViewData["PRDocNoOnly"] != null ? (string)ViewData["PRDocNoOnly"] : null;
     //add by rendika 08/03/2021
-    var maxmonth =  ViewData["commonMonth"];
+    var maxmonth = ViewData["commonMonth"];
     var maxyears = ViewData["commonYears"];
     //end add by rendika 08/03/2021
 }
@@ -567,7 +567,7 @@
 
         if (header.toUpperCase() == 'EXC') {
             //listDocNo = listDocNoOnly;
-            listDocNo = $("#docno-list-value-exc").val();
+            listDocNo = $("#docno-list-value").val();
         } else {
             listDocNo = $("#docno-list-value").val();
         }

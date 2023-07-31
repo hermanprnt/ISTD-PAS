@@ -1,0 +1,151 @@
+﻿@using GPS.Controllers.Master
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string DOC_STS = (string)ViewData["DOC_STS"];
+
+}
+
+@section HeadScript {
+    <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
+
+    <!-- NOTE: moment.js is referenced by daterangepicker -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/moment.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/daterangepicker.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Common/gps.js")"></script>
+    <script src="@Url.Content("~/Content/Konva/konva.min.js")"></script>
+    <!-- Bootstrap Datepicker js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/date-time/bootstrap-datepicker.js")"></script>
+    <!-- Dropzone file js -->
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/dropzone.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Content/Bootstrap/js/typeahead.jquery.js")"></script>
+}
+
+<div class="hidden-xs">
+    <form role="form" class="form-horizontal" id="searchForm" method="post" action="javascript: onGetData(1)">
+        <div class="row">
+            <div class="col-xs-12 col-sm-3 col-md-3">
+                <div class="form-group form-group-xs">
+                    <div class="col-xs-4 col-sm-4 text-right">
+                        <label class="control-label text-muted">Vendor Code</label>
+                    </div>
+                    <div class="col-xs-8 col-sm-8">
+                        <input type="text" id="txt-vendorcode" class="form-control" autocomplete="off"/>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-3 col-md-3">
+                <div class="form-group form-group-xs">
+                    <div class="col-xs-4 col-sm-4 text-right">
+                        <label class="control-label text-muted">Vendor Name</label>
+                    </div>
+                    <div class="col-xs-8 col-sm-8">
+                        <input type="text" id="txt-vendorname" class="form-control" autocomplete="off"/>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-4 col-md-4">
+                <div class="form-group form-group-xs">
+                    <div class="col-xs-6 col-sm-6 text-right">
+                        <label class="control-label text-muted">Status</label>
+                    </div>
+                    <div class="col-xs-6 col-sm-6">
+                        @Html.DropDownList("cmb-status", MasterAgreementController.GetStatusList(), new { @class = "cursor-1", @style = "width:100%;" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xs-12 col-sm-5 col-md-5"> </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col-xs-12 col-sm-3 col-md-3">
+                <div class="form-group form-group-xs">
+                    <div class="col-xs-4 col-sm-4 text-right">
+                        <label class="control-label text-muted">Agreement No</label>
+                    </div>
+                    <div class="col-xs-8 col-sm-8">
+                        <input type="text" id="txt-agreementno" class="form-control" autocomplete="off" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-3 col-md-3">
+                <div class="form-group form-group-xs">
+                    <div class="col-xs-4 col-sm-4 text-right">
+                        <label class="control-label text-muted">Expired Date</label>
+                    </div>
+                    <div class="col-xs-7 col-sm-8">
+                        <div class="input-group">
+                            <span class="input-group-addon" style="cursor: pointer;padding:4px 10px;" tabindex="3">
+                                <i class="fa fa-calendar bigger-110"></i>
+                            </span>
+                            <input class="form-control" type="text" name="date-range-picker" id="txt-expdaterange" data-date-format="dd.mm.yyyy" autocomplete="off" style="font-size:12px;height:25px;" />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-xs-12 col-sm-5 col-md-5"> </div>
+        </div>
+        <div class="v-space"></div>
+        <div class="row">
+            <div class="col-sm-6">
+            </div>
+            <div class="col-xs-12 col-sm-6 text-right">
+                <button type="submit" class="btn btn-primary btn-xs btn-std btndisable" onclick="">Search</button>
+                <button type="button" class="btn btn-default btn-xs btn-std btndisable" onclick="onClear()">Clear</button>
+            </div>
+        </div>
+    </form>
+    <div class="v-space"></div>
+    <div class="line-br"></div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-6">
+            <button type="button" onclick=" onAddData() " id="btn-add" class="btn btn-primary btn-xs btn-std btndisable">Add</button>
+            <button type="button" onclick=" onEditData() " id="btn-edit" class="btn btn-primary btn-xs btn-std btndisable">Edit</button>
+            <button type="button" onclick=" onDeleteData() " id="btn-delete" class="btn btn-danger btn-xs btn-std btndisable">Delete</button>
+        </div>
+        <div class="col-xs-12 col-sm-6 text-right">
+            <div class="btn-group">
+                <div class="form-group form-group-xs" style="margin-bottom: 3px;">
+
+                    <a href="javascript:OnDownloadTemplate()" id="lnk-download"><span style="font-family: Open Sans; font-size: 12px">Download Template</span></a>
+
+                    <input type="file" id="upfile" name="upfile" style="display: none" />
+
+                    <button id="btn-upload" style="padding: 6px;" class="btn btn-warning btn-xs btn-std btndisable" onclick="$('input[id=upfile]').click();">
+                        <span style="font-family: Open Sans; font-size: 12px">Upload</span>
+                    </button>
+                    <button type="button" id="btn-download" onclick="onDownload()" class="btn btn-primary btn-xs btn-xs btndisable">Download</button>
+
+                    <button type="button" class="btn btn-primary btn-std btn-xs" id="btn-detail" onclick="javascript:detailGrid()">Show Detail</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divtable">
+        @Html.Partial("_Grid")
+    </div>
+    <div class="modal fade" id="basicModal" data-backdrop="static" data-keyboard="false">
+        @Html.Partial("_AddEditPopUp")
+    </div>
+</div>
+
+@Html.Partial("_PartialScript")
+@section BodyScript{
+    <script>
+    function download()
+    {
+     $.fileDownload("@Html.Toyota().Page.GetActionUrl("DownloadReport")", {
+        data:
+        {
+              CostCenterCd: $("#txt-costcenter").val(),
+              Division: $("#cmb-division").val(),
+              recordPerPage: $("#cbodisplay").val(),
+              currentPage: 1
+        }
+     });
+    }
+    </script>
+}

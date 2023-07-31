@@ -27,7 +27,7 @@
             {
                 <i class="fa fa-paperclip"></i>
             }
-@*@item.DataNo*@
+            @*@item.DataNo*@
         </td>
         <td class="text-center">
             <!-- NOTE: tabindex need not to be sequential http://www.w3.org/TR/WCAG20-TECHS/H4.html#H4-ex3 -->
@@ -48,13 +48,36 @@
         <td>@item.POHeaderText</td>
         <td class="text-center">@item.PODate.ToStandardFormat()</td>
         <td class="text-center">@item.PurchasingGroup</td>
-        <td class="text-left">@item.Vendor</td>
+
+        @if (item.DD_STATUS == "1")
+        {
+            <td class="text-left" style="background-color:red">@item.Vendor</td>
+        }
+        else if (item.DD_STATUS == "2")
+        {
+            <td class="text-left" style="background-color:yellow">@item.Vendor</td>
+        }
+        else if (item.DD_STATUS == "3")
+        {
+            <td class="text-left" style="background-color:lawngreen">@item.Vendor</td>
+        }
+        else if (item.DD_STATUS == "4")
+        {
+            <td class="text-left">@item.Vendor</td>
+        }
+        else
+        {
+            <td class="text-left" style="background-color:grey">@item.Vendor</td>
+        }
+
+
         <td class="text-center">@item.Currency</td>
         <td class="text-right">@item.Amount.ToStandardFormat()</td>
         @* 20200129 *@
-        <td>@if (@item.POStatus.Equals("PO Posting"))
+        <td>
+            @if (@item.POStatus.Equals("PO Posting"))
             {
-                 <a href="javascript:void(0)" onclick="openPopUpErrorPosting(@item.PONo)">@item.POStatus</a>
+                <a href="javascript:void(0)" onclick="openPopUpErrorPosting(@item.PONo)">@item.POStatus</a>
             }
             else
             {
@@ -65,23 +88,24 @@
         <td class="icon text-center">
             @if (item.HasSPK && item.POStatusCode != POStatus.Draft)
             {
-                <img id="img-spkpdf-@item.DataNo" tabindex="14" data-pono="@item.PONo" data-podate="@item.PODate.Year.ToString()" src="@Url.Content("~/Content/img/pdf_icon.png")"/>
+                <img id="img-spkpdf-@item.DataNo" tabindex="14" data-pono="@item.PONo" data-podate="@item.PODate.Year.ToString()" src="@Url.Content("~/Content/img/pdf_icon.png")" />
             }
         </td>
         <td class="icon text-center">
             @if (item.POStatusCode == POStatus.Created)
             {
                 <!-- NOTE: tabindex need not to be sequential http://www.w3.org/TR/WCAG20-TECHS/H4.html#H4-ex3 -->
-                <img id="img-pdf-@item.DataNo" tabindex="15" data-pono="@item.PONo" data-podate="@item.PODate.Year.ToString()" src="@Url.Content("~/Content/img/pdf_icon.png")"/>
+                <img id="img-pdf-@item.DataNo" tabindex="15" data-pono="@item.PONo" data-podate="@item.PODate.Year.ToString()" src="@Url.Content("~/Content/img/pdf_icon.png")" />
             }
         </td>
         <td class="icon text-center">
             @if (item.POStatusCode == POStatus.Posting || item.POStatusCode == POStatus.Released)
             {
                 <!-- NOTE: tabindex need not to be sequential http://www.w3.org/TR/WCAG20-TECHS/H4.html#H4-ex3 -->
-                <img id="img-pdf-@item.DataNo" tabindex="15" data-pono="@item.PONo" data-podate="@item.PODate.Year.ToString()" src="@Url.Content("~/Content/img/pdf_icon.png")"/>
+                <img id="img-pdf-@item.DataNo" tabindex="15" data-pono="@item.PONo" data-podate="@item.PODate.Year.ToString()" src="@Url.Content("~/Content/img/pdf_icon.png")" />
             }
         </td>
+        <td class="text-center">@item.GovRelated</td>
         <td class="col-hidden hidden">
             @if ((item.CancelBy != "") && (item.CancelBy != null))
             {
