@@ -10,37 +10,43 @@
     <link rel="stylesheet" href="@Url.Content("~/Content/Bootstrap/css/daterangepicker.css")" />
 }
 
-<div >
+<div>
     @Html.Partial("_SearchCriteria")
     <div class="text-center">
         <hr id="hrsrc" style="margin: 0; padding: 0;" />
     </div>
     <div class="row" style="margin-top:5px">
-    <div class="col-xs-4 col-sm-4 col-md-4">
-        @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("ReceivingList","btn-cancel"))
-        {
-            <button type="button" class="btn btn-danger btn-xs btn-std" onclick="javascript:cancelGR()">Cancel</button>
-        }
+        <div class="col-xs-4 col-sm-4 col-md-4">
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("ReceivingList", "btn-cancel"))
+            {
+                <button type="button" class="btn btn-danger btn-xs btn-std" onclick="javascript:cancelGR()">Cancel</button>
+            }
+        </div>
+        <div class="col-xs-4 col-sm-4 col-md-4 text-center">
+            <button data-rel="tooltip" title="Hide filter" onclick="javascript:toggleSearch()"
+                    type="button" class="ace-icon fa fa-angle-double-up btn btn-default btn-xs btn-tiny-down" id="toogle-search">
+            </button>
+            <input type="text" id="btnLostFocus" style="display: block; height: 1px; width: 1px;border: none;" />
+        </div>
+        <div class="col-xs-4 col-sm-4 col-md-4 text-right">
+            @if (Html.Toyota().Authorization.IsAuthorizedToAccessFeature("ReceivingList", "btn-download"))
+            {
+                <button data-rel="tooltip" title="Download files" id="btn-download" class="btn btn-success btn-xs btn-std"
+                        onclick="javascript:Download()">
+                    <span style="font-family: Open Sans; font-size: 12px">Download</span>
+                </button>
+            }
+        </div>
     </div>
-    <div class="col-xs-4 col-sm-4 col-md-4 text-center">
-        <button data-rel="tooltip" title="Hide filter" onclick="javascript:toggleSearch()"
-            type="button" class="ace-icon fa fa-angle-double-up btn btn-default btn-xs btn-tiny-down" id="toogle-search">
-        </button>
-        <input type="text" id="btnLostFocus" style="display: block; height: 1px; width: 1px;border: none;" />
-    </div>
-    <div class="col-xs-4 col-sm-4 col-md-4 text-right">
-        <button data-rel="tooltip" title="Download files" id="btn-download" class="btn btn-success btn-xs btn-std"
-            onclick="javascript:Download()">
-            <span style="font-family: Open Sans; font-size: 12px">Download</span>
-        </button>
-    </div>
-</div>
     <div id="tablegrid">
         @Html.Partial("_GridView")
     </div>
 </div>
 <div id="matDocDetailPopUp">
     @Html.Partial("_MatDocDetailPopUp")
+</div>
+<div id="uploadAttachPopUp">
+    @Html.Partial("_UploadAttachPopUp")
 </div>
 
 @Html.Partial("_CancelPopUp")
@@ -51,20 +57,24 @@
             <div class="modal-header">
                 <div class="close" style="opacity: 1 !important; margin-top: -7px;">
                     <span aria-hidden="true">
-                        <img src="@Url.Content("~/Content/Bootstrap/img/Warning.png")" class="modal-icon" /></span>
+                        <img src="@Url.Content("~/Content/Bootstrap/img/Warning.png")" class="modal-icon" />
+                    </span>
                     <span class="sr-only">Close</span>
                 </div>
                 <h4 class="modal-title" id="popup-title">
-                    Warning</h4>
+                    Warning
+                </h4>
             </div>
             <div class="modal-body">
                 <div class="row" style="padding-left: 10px;">
                     <div id="msgWarningId">
-                        &nbsp;</div>
+                        &nbsp;
+                    </div>
                 </div>
                 <div class="row" style="text-align: right; padding-right: 10px; padding-top: 5px;">
                     <button type="button" class="btn btn-primary btn-xs" data-dismiss="modal" style="width: 60px;">
-                        OK</button>
+                        OK
+                    </button>
                 </div>
             </div>
         </div>
@@ -76,11 +86,13 @@
             <div class="modal-header">
                 <div class="close" style="opacity: 1 !important; margin-top: -7px;">
                     <span aria-hidden="true">
-                        <img src="@Url.Content("~/Content/Bootstrap/img/question.png")" class="modal-icon" /></span>
+                        <img src="@Url.Content("~/Content/Bootstrap/img/question.png")" class="modal-icon" />
+                    </span>
                     <span class="sr-only">Close</span>
                 </div>
                 <h4 class="modal-title" id="popup-title">
-                    Confirmation</h4>
+                    Confirmation
+                </h4>
             </div>
             <div class="modal-body">
                 <div class="modal-body">
@@ -89,10 +101,12 @@
                     </div>
                     <div class="row" style="text-align: right; padding-right: 10px; margin-top: 10px;">
                         <button type="button" class="btn btn-primary btn-xs" data-dismiss="modal" style="width: 60px;"
-                            onclick="javascript:confirmCancelGR()">
-                            Yes</button>
+                                onclick="javascript:confirmCancelGR()">
+                            Yes
+                        </button>
                         <button class="btn btn-danger btn-xs" data-dismiss="modal" style="width: 60px;">
-                            No</button>
+                            No
+                        </button>
                     </div>
                 </div>
             </div>
@@ -105,11 +119,13 @@
             <div class="modal-header">
                 <div class="close" style="opacity: 1 !important; margin-top: -7px;">
                     <span aria-hidden="true">
-                        <img src="@Url.Content("~/Content/Bootstrap/img/question.png")" class="modal-icon" /></span>
+                        <img src="@Url.Content("~/Content/Bootstrap/img/question.png")" class="modal-icon" />
+                    </span>
                     <span class="sr-only">Close</span>
                 </div>
                 <h4 class="modal-title" id="popup-title">
-                    Confirmation</h4>
+                    Confirmation
+                </h4>
             </div>
             <div class="modal-body">
                 <div class="modal-body">
@@ -118,10 +134,12 @@
                     </div>
                     <div class="row" style="text-align: right; padding-right: 10px; margin-top: 10px;">
                         <button type="button" class="btn btn-primary btn-xs" data-dismiss="modal" style="width: 60px;"
-                            onclick="javascript:confirmApproveGR()">
-                            Yes</button>
+                                onclick="javascript:confirmApproveGR()">
+                            Yes
+                        </button>
                         <button class="btn btn-danger btn-xs" data-dismiss="modal" style="width: 60px;">
-                            No</button>
+                            No
+                        </button>
                     </div>
                 </div>
             </div>
@@ -146,6 +164,15 @@
         //link
         $("#txtdateinput-receivingdate").todaterangepicker();
         $("#matDocPostDate").todatepicker();
+
+        var curdate = new Date();
+        curdate.getDate();
+        curdate.setMonth(curdate.getMonth() - 1);
+
+        var dt = new Date();
+        dt.getDate();
+        $("#txtdateinput-receivingdate").val(("0" + curdate.getUTCDate()).slice(-2) + '.' + ("0" + (curdate.getUTCMonth() + 1).toString()).slice(-2) + '.' + curdate.getUTCFullYear() + " - " + ("0" + dt.getUTCDate()).slice(-2) + '.' + ("0" + (dt.getUTCMonth() + 1).toString()).slice(-2) + '.' + dt.getUTCFullYear());
+
         function OnAjaxBegin(title) {
             $.progressbox.show($tdk.PageTitle, title);
             DisableAllFeatures();

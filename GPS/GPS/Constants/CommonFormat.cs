@@ -6,6 +6,7 @@ namespace GPS.Constants
     {
         public const String Date = "dd.MM.yyyy";
         public const String Datetime = "dd.MM.yyyy HH:mm";
+        public const String DatetimeWithSecond = "dd.MM.yyyy HH:mm:ss";
         public const String FullDateTime = "ddMMyyyyHHmmssffff";
         public const String CommDateTime = "ddd d, MMM yyyy hh:mm tt";
         public const String SqlCompatibleDate = "yyyy-MM-dd";

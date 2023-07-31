@@ -1,0 +1,92 @@
+﻿@using GPS.Models.ReceivingList
+@using GPS.CommonFunc
+@using GPS.Models
+@{
+    string ReceivingNo = "";
+    string VendorName = "";
+    string AttachmentFile = "";
+    string OtherAttachmentFile = "";
+    
+    List<ReceivingListUpload> uploadList = (List<ReceivingListUpload>)ViewData["UploadList"] ?? new List<ReceivingListUpload>();
+
+    ReceivingListUpload uplHeader = new ReceivingListUpload();
+    if (uploadList.Count > 0)
+    {
+        uplHeader = uploadList.First();
+        ReceivingNo = uplHeader.ReceivingNo;
+        VendorName = uplHeader.VendorName;
+        AttachmentFile = uplHeader.AttachmentFilename;
+        OtherAttachmentFile = uplHeader.OtherAttachmentFilename;
+    }
+}
+
+@*Modal popup Upload Attachment*@
+<div id="modal-upload-attachment" class="modal fade">
+    <div class="modal-dialog modal-lg" style="width: 40%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title dettitle popup-title">Upload Attachment GR / SA</h4>
+            </div>
+            <div class="modal-body" style="padding-top: 0px; margin-top: 6px">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="form-group form-group-xs" style="padding-bottom: 2.2em;">
+                            <label class="col-xs-4 col-sm-4 col-md-4 control-label text-muted">GR / SA Number</label>
+                            <div class="col-xs-8 col-sm-8 col-md-8">
+                                <input type="text" style="width: 100%;" readonly="readonly" disabled="disabled" value="@uplHeader.ReceivingNo" />
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="form-group form-group-xs" style="padding-bottom: 2.2em;">
+                            <label class="col-xs-4 col-sm-4 col-md-4 control-label text-muted">Vendor</label>
+                            <div class="col-xs-8 col-sm-8 col-md-8">
+                                <input type="text" id="det1" style="width: 100%;" readonly="readonly" disabled="disabled" value="@uplHeader.VendorName" />
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="form-group form-group-xs" style="padding-bottom: 2.2em;">
+                            <label class="col-xs-4 col-sm-4 col-md-4 control-label text-muted" style="padding-top: 0px;">Surat Jalan / BAP</label>
+                            <div class="col-xs-8 col-sm-8 col-md-8">
+                                <div id="divBAP" style="display: none"><a href="#" id="linkBAP" onclick="gotoFile(1, @uplHeader.ReceivingNo)">@uplHeader.AttachmentFilename</a>&nbsp;<span id="deleteBAP" class="fa fa-times" style="cursor: pointer;color:red" onclick="deleteFile(1, @uplHeader.ReceivingNo, '@uplHeader.ChangeDtParam')"></span></div>
+                                <input type="file" id="upfileBAP" name="upfileBAP" />@*onchange="javascript:validateFile(1, @uplHeader.ReceivingNo)"*@
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="col-xs-12 col-sm-12 col-md-12" style="padding-top: 0.2em;">
+                        <div class="form-group form-group-xs" style="padding-bottom: 2.2em;">
+                            <label class="col-xs-4 col-sm-4 col-md-4 control-label text-muted" style="padding-top: 0px;">Others</label>
+                            <div class="col-xs-8 col-sm-8 col-md-8">
+                                <div id="divOther" style="display: none"><a href="#" id="linkOther" onclick="gotoFile(2, @uplHeader.ReceivingNo)">@uplHeader.OtherAttachmentFilename</a>&nbsp;<span id="deleteOther" class="fa fa-times" style="cursor: pointer;color:red" onclick="deleteFile(2, @uplHeader.ReceivingNo, '@uplHeader.ChangeDtParam')"></span></div>
+                                <input type="file" id="upfileOther" name="upfileOther"  /> @*onchange="javascript:validateFile(2, @uplHeader.ReceivingNo)"*@
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="col-xs-12 col-sm-12 col-md-12" style="display:none">
+                        <div class="form-group form-group-xs" style="padding-bottom: 2.2em;">
+                            <div class="col-xs-8 col-sm-8 col-md-8">
+                                <input id="changeDtParam" type="text" style="width: 100%;" readonly="readonly" disabled="disabled" value="@uplHeader.ChangeDtParam" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div>
+                    <div class="row">
+                        <div class="modal-footer">
+
+                            <button id="btnUploadAttach" type="button" class="btn btn-primary btn-xs btn-std" onclick="javascript:doUploadAttachProcess('@uplHeader.ReceivingNo', '@uplHeader.ChangeDtParam')">Upload</button>
+                            <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

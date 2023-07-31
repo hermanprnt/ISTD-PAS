@@ -9,7 +9,7 @@
     string HeaderText = "";
 
     ReceivingListDetail matheader = new ReceivingListDetail();
-    if(materialList.Count > 0)
+    if (materialList.Count > 0)
     {
         matheader = materialList.First();
         RecNo = matheader.ReceivingNo;
@@ -20,7 +20,7 @@
 }
 @*Modal popup Preview Material [start] *@
 <div id="modal-preview-material" class="modal fade">
-    <div class="modal-dialog modal-lg" >
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title dettitle popup-title" id="popup-title"></h4>
@@ -53,38 +53,34 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-12 col-sm-12" style="margin-top:10px; padding-left:12px">
+                    <div class="col-xs-6 col-sm-6" style="margin-top: 10px; padding-left: 12px">
+                    </div>
+                    <div class="col-xs-6 col-sm-6 text-right" style="margin-top: 10px; padding-left: 12px">
+                        <button type="button" class="btn btn-primary btn-xs btn-std" id="btnUploadAttachment" onclick="javascript:doUploadAttachment(@matheader.ReceivingNo)">Upload Attachment</button>
                     </div>
                 </div>
+                <br />
                 <div class="row">
                     <div id="tScrollHead" style="width: 98.5%; overflow: hidden; margin-left: 10px;">
                         <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed"
                             style="width: 100%; max-width: 877px !important;">
                             <thead>
                                 <tr>
-                                    <th width="100px">
-                                        Rcv. Item No
+                                    <th width="100px">Rcv. Item No
                                     </th>
-                                    <th width="100px">
-                                        Material No
+                                    <th width="100px">Material No
                                     </th>
-                                    <th width="240px">
-                                        Description
+                                    <th width="240px">Description
                                     </th>
-                                    <th width="80px">
-                                        Order Qty
+                                    <th width="80px">Order Qty
                                     </th>
-                                    <th width="80px">
-                                        Receive Qty
+                                    <th width="80px">Receive Qty
                                     </th>
-                                    <th width="50px">
-                                        UoM
+                                    <th width="50px">UoM
                                     </th>
-                                    <th width="100px">
-                                        Total Receive
+                                    <th width="100px">Total Receive
                                     </th>
-                                    <th width="100px">
-                                        PO Item No
+                                    <th width="100px">PO Item No
                                     </th>
                                 </tr>
                             </thead>
@@ -99,58 +95,57 @@
                                     {
                                         foreach (ReceivingListDetail item in materialList)
                                         {
-                                            <tr>
-                                                <td width="100px">@item.ReceivingItemNo
-                                                </td>
-                                                <td width="100px">@item.MaterialNo
-                                                </td>
-                                                <td width="240px">@item.MaterialDesc
-                                                </td>
-                                                <td width="80px" class="text-right">@item.OrderQty.ToStandardFormat()
-                                                </td>
-                                                <td width="80px" class="text-right">@item.ReceiveQty.ToStandardFormat()
-                                                </td>
-                                                <td width="50px">@item.UOM
-                                                </td>
-                                                <td width="100px" class="text-right">@item.TotalReceive.ToStandardFormat()
-                                                </td>
-                                                <td width="100px" style="text-align:center">@item.POItemNo
-                                                </td>
-                                            </tr>
+                                    <tr>
+                                        <td width="100px">@item.ReceivingItemNo
+                                        </td>
+                                        <td width="100px">@item.MaterialNo
+                                        </td>
+                                        <td width="240px">@item.MaterialDesc
+                                        </td>
+                                        <td width="80px" class="text-right">@item.OrderQty.ToStandardFormat()
+                                        </td>
+                                        <td width="80px" class="text-right">@item.ReceiveQty.ToStandardFormat()
+                                        </td>
+                                        <td width="50px">@item.UOM
+                                        </td>
+                                        <td width="100px" class="text-right">@item.TotalReceive.ToStandardFormat()
+                                        </td>
+                                        <td width="100px" style="text-align: center">@item.POItemNo
+                                        </td>
+                                    </tr>
                                         }
                                     }
                                     else
                                     {
-                                        <tr>
-                                            <td colspan="2" class="text-center">
-                                                No data retrieved.
-                                            </td>
-                                        </tr>
+                                    <tr>
+                                        <td colspan="2" class="text-center">No data retrieved.
+                                        </td>
+                                    </tr>
                                     }
                                 }
                             </tbody>
                         </table>
                     </div>
                 </div>
-            <div>
-                <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; ">
-                    <tfoot>
-                        <tr>
-                            <td colspan="13">
-                                @Html.Partial("_UIPagingLookup")
-                            </td>
-                        </tr>
+                <div>
+                    <table class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%;">
+                        <tfoot>
+                            <tr>
+                                <td colspan="13">
+                                    @Html.Partial("_UIPagingLookup")
+                                </td>
+                            </tr>
 
-                    </tfoot>
-                </table>
-                            <div class="row">
-                <div class="modal-footer">
-                 
-             <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Close</button>
-       
+                        </tfoot>
+                    </table>
+                    <div class="row">
+                        <div class="modal-footer">
+
+                            <button type="button" class="btn btn-danger btn-xs" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </div>
                 </div>
-            </div>
-            </div>
             </div>
         </div>
     </div>

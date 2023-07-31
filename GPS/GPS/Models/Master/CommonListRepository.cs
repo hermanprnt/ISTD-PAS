@@ -49,7 +49,13 @@ namespace GPS.Models.Master
             db.Close();
             return result;
         }
-
+        public IEnumerable<CommonList> GetDataCoordinatorList()
+        {
+            IDBContext db = DatabaseManager.Instance.GetContext();
+            IEnumerable<CommonList> result = db.Fetch<CommonList>(MasterSqlFiles.GetCoordinatorList);
+            db.Close();
+            return result;
+        }
 
         public IEnumerable<CommonList> GetDataMatGroup()
         {

@@ -1,10 +1,20 @@
 ﻿@using GPS.CommonFunc
 @using GPS.Models.ReceivingList
 @using GPS.Models
+@using GPS.Controllers
 
+<style>
+    .disabled {
+      pointer-events: none;
+      cursor: default;
+    }
+</style>
 
 @{
     List<ReceivingList> receivingList = (List<ReceivingList>)ViewData["ReceivingListInquiry"];
+
+    var disableA = "disabled";
+    var disableO = "disabled";
 }
 @* Button Process *@
 <div class="v-space"></div>
@@ -14,19 +24,20 @@
             <div id="tScrollHead" style="width: 100%; overflow: scroll;">
                 <table id="dynamic-table" class="table table-striped table-bordered table-condensed table-fixed" style="width: 100%; max-width: 1403px;">
                     <thead>
-                    <th width="25px" class="grid-checkbox-col" rowspan="2"></th>
-                    <th width="100px" rowspan="2">Receiving No</th>
-                    <th width="100px" rowspan="2">Receiving Date</th>
-                    <th width="250px" rowspan="2">Header Text</th>
-                    <th width="75px" rowspan="2">PO No</th>
-                    <th width="270px" rowspan="2">Vendor</th>
-                    <th width="60" rowspan="2">Currency</th>
-                    <th width="105px" rowspan="2">Status</th>
-                    <th width="100px" rowspan="2" class="_toggle-detail text-left">Doc No</th>
-                    <th width="80px" class="_toggle-detail text-left">Created By</th>
-                    <th width="80px" class="_toggle-detail text-left">Created Date</th>
-                    <th width="80px" class="_toggle-detail text-left">Changed By</th>
-                    <th width="80px" class="_toggle-detail text-left">Changed Date</th>
+                        <th width="25px" class="grid-checkbox-col" rowspan="2"></th>
+                        <th width="100px" rowspan="2">Receiving No</th>
+                        <th width="100px" rowspan="2">Receiving Date</th>
+                        <th width="100px" rowspan="2">Attachment</th>
+                        <th width="250px" rowspan="2">Header Text</th>
+                        <th width="75px" rowspan="2">PO No</th>
+                        <th width="270px" rowspan="2">Vendor</th>
+                        <th width="60" rowspan="2">Currency</th>
+                        <th width="105px" rowspan="2">Status</th>
+                        <th width="100px" rowspan="2" class="_toggle-detail text-left">Doc No</th>
+                        <th width="80px" class="_toggle-detail text-left">Created By</th>
+                        <th width="80px" class="_toggle-detail text-left">Created Date</th>
+                        <th width="80px" class="_toggle-detail text-left">Changed By</th>
+                        <th width="80px" class="_toggle-detail text-left">Changed Date</th>
                     </thead>
 
 
@@ -36,65 +47,85 @@
                             {
                                 foreach (ReceivingList item in receivingList)
                                 {
+                                    if (item.isHaveBAP == 1)
+                                    {
+                                        disableA = "";
+                                    }
+                                    else
+                                    {
+                                        disableA = "disabled";
+                                    }
 
-                                    <tr>
-                                        <td width="25px" class="text-center grid-checkbox-col">
-                                            <input type="checkbox" id="chk-receivinglist-@item.ReceivingNo" data-embedded="@item.AsEmbeddedData()" class="check" @Html.Raw(item.TotalQty <= 0 ? "disabled" : String.Empty) />
-                                        </td>
-                                        <td width="100px" class="text-center">
-                                            <a href="javascript:void(0)" onclick="openPopupMaterial(1,10, '@item.ReceivingNo')">@item.ReceivingNo</a>
-                                        </td>
-                                        <td width="100px" class="text-center">
-                                            @item.ReceivingDate.ToStandardFormat()
-                                        </td>
-                                        <td width="250px" class="text-left ellipsis" title="@item.PO_TEXT">
-                                            @item.HeaderText
-                                        </td>
-                                        <td width="75px" class="text-center">
-                                            @item.PONo
-                                        </td>
-                                        <td width="270px" class="text-left">
-                                            @item.Vendor
-                                        </td>
-                                        <td width="60" class="text-center" title="@item.Currency">
-                                            @item.Currency
-                                        </td>
-                                        <td width="105px" class="text-left">
-                                            @if (@item.Status.Equals("GR/SA Error Posting"))
-                                            {
-                                                @*<a href="javascript:void(0)" onclick="openPopUpErrorPosting(@item.ReceivingNo)">@item.Status</a>*@
-                                                <a href="javascript:void(0)" class="clicked" data-receive="@item.ReceivingNo">@item.Status</a>
-                                            }
-                                            else
-                                            {
-                                                @item.Status
-                                            }
-                                        </td>
-                                        <td width="100px" class="_toggle-detail text-left">
-                                            @item.SAPDocNo
-                                        </td>
-                                        <td width="80px" class="_toggle-detail text-left">
-                                            @item.CreatedBy
-                                        </td>
-                                        <td width="80px" class="_toggle-detail text-center">
-                                            @item.CreatedDate.ToStandardFormat()
-                                        </td>
-                                        <td width="80px" class="_toggle-detail text-left">
-                                            @item.ChangedBy
-                                        </td>
-                                        <td width="80px" class="_toggle-detail text-center">
-                                            @item.ChangedDate.ToStandardFormat()
-                                        </td>
-                                    </tr>
+                                    if (item.isHaveOther == 1)
+                                    {
+                                        disableO = "";
+                                    }
+                                    else
+                                    {
+                                        disableO = "disabled";
+                                    }
+
+                            <tr>
+                                <td width="25px" class="text-center grid-checkbox-col">
+                                    <input type="checkbox" id="chk-receivinglist-@item.ReceivingNo" data-embedded="@item.AsEmbeddedData()" class="check" @Html.Raw(item.TotalQty <= 0 ? "disabled" : String.Empty) />
+                                </td>
+                                <td width="100px" class="text-center">
+                                    <a href="javascript:void(0)" onclick="openPopupMaterial(1,10, '@item.ReceivingNo')">@item.ReceivingNo</a>
+                                </td>
+                                <td width="100px" class="text-center">
+                                    @item.ReceivingDate.ToStandardFormat()
+                                </td>
+                                <td width="100px" class="text-center">
+                                    <a href="#" id="linkBAPgrid" class="@disableA" onclick="gotoFile(1, @item.ReceivingNo)" title="BAP File"><i class="fa fa-paperclip" aria-hidden="true"></i></a>
+                                    <a href="#" id="linkOthergrid" class="@disableO" onclick="gotoFile(2, @item.ReceivingNo)" title="Other File"><i class="fa fa-paperclip" aria-hidden="true"></i></a>
+                                </td>
+                                <td width="250px" class="text-left ellipsis" title="@item.PO_TEXT">
+                                    @item.HeaderText
+                                </td>
+                                <td width="75px" class="text-center">
+                                    @item.PONo
+                                </td>
+                                <td width="270px" class="text-left">
+                                    @item.Vendor
+                                </td>
+                                <td width="60" class="text-center" title="@item.Currency">
+                                    @item.Currency
+                                </td>
+                                <td width="105px" class="text-left">
+                                    @if (@item.Status.Equals("GR/SA Error Posting"))
+                                    {
+@*<a href="javascript:void(0)" onclick="openPopUpErrorPosting(@item.ReceivingNo)">@item.Status</a>*@
+                                        <a href="javascript:void(0)" class="clicked" data-receive="@item.ReceivingNo">@item.Status</a>
+                                    }
+                                    else
+                                    {
+                                        @item.Status
+                                    }
+                                </td>
+                                <td width="100px" class="_toggle-detail text-left">
+                                    @item.SAPDocNo
+                                </td>
+                                <td width="80px" class="_toggle-detail text-left">
+                                    @item.CreatedBy
+                                </td>
+                                <td width="80px" class="_toggle-detail text-center">
+                                    @item.CreatedDate.ToStandardFormat()
+                                </td>
+                                <td width="80px" class="_toggle-detail text-left">
+                                    @item.ChangedBy
+                                </td>
+                                <td width="80px" class="_toggle-detail text-center">
+                                    @item.ChangedDate.ToStandardFormat()
+                                </td>
+                            </tr>
                                 }
                             }
                             else
                             {
-                                <tr>
-                                    <td colspan="14" class="text-center">
-                                        No data retrieved.
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td colspan="14" class="text-center">No data retrieved.
+                                </td>
+                            </tr>
                             }
                         }
                     </tbody>
@@ -112,7 +143,7 @@
                                     <div id="prc-pagesize" class="form-inline text-right">
                                         <label>
                                             Page Size
-                                            <select class="cursor-1 page" id="cbodisplay" onchange="javascript: searchData(1)" style="height:25px;">
+                                            <select class="cursor-1 page" id="cbodisplay" onchange="javascript: searchData(1)" style="height: 25px;">
                                                 <option>10</option>
                                                 <option>25</option>
                                                 <option>50</option>
@@ -130,6 +161,7 @@
     </div>
 </div>
 <script type="text/javascript">
+    $tdk.AjaxMethod = "POST";
     $("document").ready(function () {
         $("#checkall").click(function () {
             $(".check:enabled").prop("checked", $("#checkall").is(":checked"));
@@ -243,7 +275,7 @@
             type: "POST",
             url: "/ReceivingList/GetReceivingListDetail",
             data: {
-                CurrentPage : page,
+                CurrentPage: page,
                 PageSIZE: pageSize,
                 receivingNo: receivingNo
             },
@@ -251,7 +283,8 @@
             success: function (data) {
                 $("#matDocDetailPopUp").html(data);
                 $('.dettitle').html('Receiving List Detail');
-                $("#modal-preview-material").modal();
+                //$("#modal-preview-material").modal();
+                $('#modal-preview-material').modal({ backdrop: 'static', keyboard: false })
                 $("#poNumber").text(poNumber);
                 $("#poItem").text(poItem);
                 $("#poText").text(poText);
@@ -273,7 +306,7 @@
             @*url: "@GPS.Controllers.PO.POInquiryController.Action.Error_GRSA",*@
             url: "@Url.Content("~/ReceivingList/errorPosting")",
             data: { receivingNo: receivingNo },
-            success: function (data) {  
+            success: function (data) {
                 $.messagebox.show(
                     "Detail Error Posting" + " " + receivingNo,
                     data,
@@ -285,7 +318,7 @@
                 if (data[1] != null) {
                     $('#messagebox-text').html('<h1 style="font-size: 25px;"><strong>' + data[1] + "</strong></h1>" + "<br />" + data[0]);
                 }
-               
+
                 //alert(text);
             },
             error: function (data) {
@@ -301,4 +334,408 @@
         });
     }
     // open popup preview error posting [end]
+
+    //Upload Attach
+    function concurencyChecking(receivingNo, changeDtParam) {
+        var result = false;
+        $.ajax({
+            type: "POST",
+            url: "@Url.Content("~/ReceivingList/concurencyChecking")",
+            data: { receivingNo: receivingNo, changeDtParam: changeDtParam },
+            success: function (data) {
+                if (data == 1) {
+                    result = true;
+                } else {
+                    result = false;
+                }
+
+
+            },
+            error: function (data) {
+                result = true;
+            }
+        });
+        return result;
+    }
+
+    function doUploadAttachment(receivingNo) {
+        $.ajax({
+            type: "POST",
+            url: "/ReceivingList/GetReceivingListUpload",
+            data: {
+                receivingNo: receivingNo
+            },
+            //beforeSend:function () {$('#btnSearch').button('loading');},
+            success: function (data) {
+                $("#uploadAttachPopUp").html(data);
+                $("#modal-upload-attachment").modal();
+
+                if ($("#linkBAP").text() != '') {
+                    document.getElementById('divBAP').style.display = 'block';
+                }
+
+                if ($("#linkOther").text() != '') {
+                    document.getElementById('divOther').style.display = 'block';
+                }
+            }
+
+        });
+
+    }
+
+    function validateFile(id, rcvNo) {
+        $.messagebox.show(
+            "Info",
+            "Are you sure you want to proceed?",
+            "INF",
+            "CONFIRM",
+            "validateFileProcess(" + id + ", " + rcvNo + ")",
+            ""
+        )
+    }
+
+    function validateFileProcess(id, rcvNo) {
+        var idFile = (id == 1 ? "BAP" : "Other");
+        var file = $("#upfile" + idFile).get(0).files[0];
+        
+        var filecounter = 0;
+        var filemaxsize = parseInt("@ViewBag.MaxFileSize");
+        var filemax = 0;
+        var filetypeori = "";
+        var filevalidextension = ("@ViewBag.AllowExtension").split(';'); //('jpg,jpeg,xls,xlsx,pdf').split(','); //["jpg", "jpeg", "xls", "xlsx", "pdf"];
+
+        var oriextension = file.name.split('.');
+        if (!filevalidextension.includes(oriextension[oriextension.length - 1])) {
+            //if ($.inArray("." + oriextension[oriextension.length - 1], filevalidextension) === -1) {
+            var strmsg = "Please upload file with " + filevalidextension.join(';') + " extension file only";
+
+            $.messagebox.show(
+                "Upload Asset",
+                strmsg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+
+            $("#upfile" + idFile).val('');
+
+            return;
+        }
+
+        if (file.size > (filemaxsize * 1000000)) {
+            var strmsg = "Please upload file with file size not greater than " + filemaxsize + " MB";
+
+            $.messagebox.show(
+                "Upload Asset",
+                strmsg,
+                "ERR",
+                "SINGLE",
+                "",
+                ""
+            )
+
+            $("#upfile" + idFile).val('');
+
+            return;
+        }
+
+        var filedata = new FormData();
+        filedata.append("file", file);
+        filedata.append("rcvNo", rcvNo);
+        filedata.append("id", id);
+
+        //$.progressbox.show("Upload Asset", "Uploading . . .");
+        var html = "";
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@ReceivingListController._SaveFileTemp",
+            data: filedata,
+            contentType: false, // NOTE: disable header to include content-type
+            processData: false, // NOTE: disabe jquery to convert data to string
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] != "SUCCESS") {
+                    $.messagebox.show(
+                        "Upload Attachment",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+
+                    $.progressbox.hide();
+                    return;
+                } else {
+                    document.getElementById('div' + idFile).style.display = 'block';
+
+                    $("#link" + idFile).text(resultMessage.split('|')[1]);
+                }
+
+                $.progressbox.hide();
+            },
+            error: function (resultMessage) {
+                $.messagebox.show(
+                    "Upload Attachment",
+                    "Cannot Upload File. Cannot connect to server",
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+
+                $.progressbox.hide();
+            }
+        });
+    }
+
+    function doUploadAttachProcess(rcvNo, chgDate) {
+        if ($("#upfileBAP").val() == '' && $("#linkBAP").text() == '') {
+            $.messagebox.show(
+                    "Upload File",
+                    "File Surat Jalan / BAP should not be empty",
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+
+            return;
+        } else {
+            $.messagebox.show(
+                "Info",
+                "Are you sure you want to proceed?",
+                "INF",
+                "CONFIRM",
+                "validateAllFileProcess('" + rcvNo + "','" + chgDate + "')",
+                ""
+            )
+            //$("#modal-upload-attachment").modal('hide');
+        }
+    }
+    var newChgdt = "";
+    function validateAllFileProcess(rcvNo, chgDate) {
+        debugger
+        var upRes = false;
+        //if (concurencyChecking(rcvNo, chgDate)) {
+        //    $.messagebox.show(
+        //            "Upload Attachment",
+        //            "Concurrency found in Upload (Edit Mode) operation",
+        //            "ERR",
+        //            "SINGLE",
+        //            "",
+        //            ""
+        //        )
+        //} else {
+            //process BAP
+            if (validateAttach(1)) {
+                upRes = SaveAttach(1, rcvNo, chgDate);
+            }
+
+            //process other
+        setTimeout(function () { 
+            if (upRes) {
+                if ($("#upfileOther").val() != '') {
+                    if (validateAttach(2)) {
+                        chgDate == (newChgdt != "" ? newChgdt : chgDate);
+
+                        upRes = SaveAttach(2, rcvNo, chgDate);
+                    }
+                }
+            }
+        }, 1000);
+
+            if (upRes) {
+                $.messagebox.show(
+                    "Upload Attachment",
+                    "Upload file process is completed successfully",
+                    "SUC",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+
+                $("#modal-upload-attachment").modal('hide');
+            } else {
+                $("#modal-upload-attachment").modal('hide');
+            }
+        //}
+    }
+
+    function validateAttach(id) {
+        var idFile = (id == 1 ? "BAP" : "Other");
+        var file = $("#upfile" + idFile).get(0).files[0];
+        debugger
+        var filecounter = 0;
+        var filemaxsize = parseInt("@ViewBag.MaxFileSize");
+        var filemax = 0;
+        var filetypeori = "";
+        var filevalidextension = ("@ViewBag.AllowExtension").split(';'); //('jpg,jpeg,xls,xlsx,pdf').split(','); //["jpg", "jpeg", "xls", "xlsx", "pdf"];
+
+        if (file != undefined) {
+            var oriextension = file.name.split('.');
+            if (!filevalidextension.includes(oriextension[oriextension.length - 1])) {
+                //if ($.inArray("." + oriextension[oriextension.length - 1], filevalidextension) === -1) {
+                var strmsg = "Please upload file with " + filevalidextension.join(';') + " extension file only";
+
+                $.messagebox.show(
+                    "Upload Asset",
+                    strmsg,
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+
+                $("#upfile" + idFile).val('');
+
+                return false;
+            }
+
+            if (file.size > (filemaxsize * 1000000)) {
+                var strmsg = "Please upload file with file size not greater than " + filemaxsize + " MB";
+
+                $.messagebox.show(
+                    "Upload Asset",
+                    strmsg,
+                    "ERR",
+                    "SINGLE",
+                    "",
+                    ""
+                )
+
+                $("#upfile" + idFile).val('');
+
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function SaveAttach(id, rcvNo, chgDate) {
+        var res = true;
+        var idFile = (id == 1 ? "BAP" : "Other");
+        var file = $("#upfile" + idFile).get(0).files[0];
+        chgDate == (newChgdt != "" ? newChgdt : chgDate);
+        debugger
+        if (file != undefined) {
+            var filedata = new FormData();
+            filedata.append("file", file);
+            filedata.append("rcvNo", rcvNo);
+            filedata.append("id", id);
+            filedata.append("chgDate", chgDate);
+
+            var html = "";
+            $.ajax({
+                type: $tdk.AjaxMethod,
+                url: "@ReceivingListController._SaveFileTemp",
+                data: filedata,
+                contentType: false, // NOTE: disable header to include content-type
+                processData: false, // NOTE: disabe jquery to convert data to string
+                success: function (resultMessage) {
+                    debugger
+                    if (resultMessage.split('|')[0] != "SUCCESS") {
+                        $.messagebox.show(
+                            "Upload Attachment " + idFile,
+                            resultMessage.split('|')[1],
+                            "ERR",
+                            "SINGLE",
+                            "",
+                            ""
+                        )
+
+                        res = false;
+                    } else {
+                        document.getElementById('div' + idFile).style.display = 'block';
+
+                        $("#link" + idFile).text(resultMessage.split('|')[1]);
+
+                        res = false;
+                    }
+                    newChgdt = resultMessage.split('|')[2];
+
+                },
+                error: function (resultMessage) {
+                    $.messagebox.show(
+                        "Upload Attachment " + idFile,
+                        "Cannot Upload File. Cannot connect to server",
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+
+                    res = false;
+                }
+            });
+        }
+        return res;
+    }
+
+    function gotoFile(id, rcvNo) {
+        window.open("@Url.Content("~/ReceivingList/DownloadFile?")" + "rcvNo=" + rcvNo + "&id=" + id, '_self');
+    }
+
+    function deleteFile(id, rcvNo, chgDate) {
+        $.messagebox.show(
+            "Info",
+            "Are you sure you want to proceed?",
+            "INF",
+            "CONFIRM",
+            "deleteFileProcess(" + id + ", " + rcvNo + ",'" + chgDate + "')",
+            ""
+        )
+    }
+
+    function deleteFileProcess(id, rcvNo, chgDate) {
+        var idFile = (id == 1 ? "BAP" : "Other");
+        $.progressbox.show("Delete File", "Deleting file...");
+        $.ajax({
+            type: $tdk.AjaxMethod,
+            url: "@ReceivingListController._DeleteFileTemp",
+            data: {
+                rcvNo: rcvNo,
+                id: id,
+                chgDate: chgDate
+            },
+            success: function (resultMessage) {
+                if (resultMessage.split('|')[0] == "SUCCESS") {
+                    document.getElementById('div' + idFile).style.display = 'none';
+                    $("#upfile" + idFile).val('');
+                    $("#link" + idFile).text('');
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Upload File",
+                        "File Has Been Removed",
+                        "SUC",
+                        "SINGLE",
+                        "",
+                        ""
+                    );
+
+                    $("#modal-upload-attachment").modal('hide');
+                    setTimeout(function () { doUploadAttachment(rcvNo) }, 1000);
+                    
+
+                }
+                else {
+                    $.progressbox.hide();
+                    $.messagebox.show(
+                        "Upload File",
+                        resultMessage.split('|')[1],
+                        "ERR",
+                        "SINGLE",
+                        "",
+                        ""
+                    )
+                    $("#modal-upload-attachment").modal('hide');
+                }
+            },
+            error: function (resultMessage) {
+                $.progressbox.hide();
+                alert(resultMessage);
+            }
+        });
+    }
+
 </script>
