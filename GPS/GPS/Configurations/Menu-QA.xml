@@ -133,6 +133,17 @@
 
       </authorization>
     </menu-item>
+	  <menu-item Id="AGREEMENT_NO" Enabled="True" Visible="True" Text="Master Agreement" Description="Master Agreement Page" Url="/MasterAgreement" Glyph="file-o">
+		  <authorization>
+			  <role Id="R-GPS-TORA-001"/>
+		  </authorization>
+	  </menu-item>
+	  <menu-item Id="DUE_DILLIGENCE" Enabled="True" Visible="True" Text="Due Dilligence" Description="Due Dilligence Page" Url="/MasterDueDilligence" Glyph="file-o">
+		  <authorization>
+			  <role Id="R-GPS-TORA-001"/>
+
+		  </authorization>
+	  </menu-item>
   </menu-item>
 
   <menu-item Id="PR" Enabled="True" Visible="True" Text="Purchase Requisition" Description="Group menu of purchase requisition" Url="/" Glyph="file" Restricted="true">

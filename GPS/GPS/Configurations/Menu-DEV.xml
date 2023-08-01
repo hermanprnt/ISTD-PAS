@@ -126,15 +126,15 @@
 		<menu-item Id="VALUATION_CLASS" Enabled="True" Visible="True" Text="Valuation Class" Description="Valuation Class Page" Url="/ValuationClass" Glyph="file-o">
 		</menu-item>
 		<menu-item Id="AGREEMENT_NO" Enabled="True" Visible="True" Text="Master Agreement" Description="Master Agreement Page" Url="/MasterAgreement" Glyph="file-o">
-			<authorization>
+			<!--<authorization>
 				<role Id="R-GPS-TORA-001"/>
-			</authorization>
+			</authorization>-->
 		</menu-item>
 		<menu-item Id="DUE_DILLIGENCE" Enabled="True" Visible="True" Text="Due Dilligence" Description="Due Dilligence Page" Url="/MasterDueDilligence" Glyph="file-o">
-			<authorization>
+			<!--<authorization>
 				<role Id="R-GPS-TORA-001"/>
 				
-			</authorization>
+			</authorization>-->
 		</menu-item>
 	</menu-item>
 
