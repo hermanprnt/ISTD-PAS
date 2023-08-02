@@ -347,7 +347,7 @@ namespace GPS.Controllers.Master
                     //        }
                     //    }
                     //}
-                   
+
 
                     #endregion
 
@@ -356,7 +356,7 @@ namespace GPS.Controllers.Master
                         MasterAgreement data = new MasterAgreement();
 
                         data.VENDOR_CODE = sheet.GetRow(i).GetCell(1).ToString().Trim();
-                        data.PURCHASING_GROUP = sheet.GetRow(i).GetCell(2).ToString().Trim();
+                        data.PURCHASING_GROUP = sheet.GetRow(i).GetCell(2) != null ? sheet.GetRow(i).GetCell(2).ToString().Trim() : "";
                         data.BUYER = sheet.GetRow(i).GetCell(3).ToString().Trim();
                         data.EMAIL_BUYER = sheet.GetRow(i).GetCell(4).ToString().Trim();
                         data.EMAIL_SH = sheet.GetRow(i).GetCell(5).ToString().Trim();

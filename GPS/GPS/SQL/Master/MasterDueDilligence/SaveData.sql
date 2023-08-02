@@ -2,29 +2,28 @@
 DECLARE @@SAP_VENDOR_CD VARCHAR(20)
 DECLARE @@DELETION VARCHAR(20)
 DECLARE @@ACTION VARCHAR(20)
-DECLARE @@VALID_DD_FROM DATETIME
-DECLARE @@VALID_DD_TO DATETIME
+DECLARE @@VALID_DD_FROM DATE = @vldddfrom
+DECLARE @@VALID_DD_TO DATE = @vldddto
 
 SELECT @@VENDORPLN = VENDOR_PLANT
 FROM TB_M_VENDOR WHERE VENDOR_CD = @vendorcd
 
-
 IF(@status = '1')
 BEGIN
-	SET @@VALID_DD_TO = DATEADD(year, 1, @vldddfrom)
+	SET @@VALID_DD_TO = DATEADD(year, 1, @@VALID_DD_FROM)
 END
 ELSE IF(@status = '2')
 BEGIN
-	SET @@VALID_DD_TO = DATEADD(year, 2, @vldddfrom)
+	SET @@VALID_DD_TO = DATEADD(year, 2, @@VALID_DD_FROM)
 END
 ELSE IF(@status = '3')
 BEGIN
-	SET @@VALID_DD_TO = DATEADD(year, 3, @vldddfrom)
+	SET @@VALID_DD_TO = DATEADD(year, 3, @@VALID_DD_FROM)
 END
 ELSE IF(@status = '4')
 BEGIN
-	SET @vldddfrom = '9999-01-01 00:00:00.000'
-	SET @vldddto = '9999-01-01 00:00:00.000'
+	SET @@VALID_DD_FROM = '9999-01-01'
+	SET @@VALID_DD_TO = '9999-01-01'
 END
 
 
@@ -72,8 +71,8 @@ BEGIN
               @@VENDORPLN,
               @vendornm,
 			  @status,
-			  @vldddfrom,
-              @vldddto,
+			  @@VALID_DD_FROM,
+              @@VALID_DD_TO,
               @fileUrl,
 			  @@SAP_VENDOR_CD,
 			  @mailbuyer,
@@ -101,8 +100,8 @@ BEGIN
 				[VENDOR_PLANT] = @@VENDORPLN,
 				[VENDOR_NAME] =@vendornm,
 				[DD_STATUS] =@status,
-				[VALID_DD_FROM] =@vldddfrom,
-				[VALID_DD_TO] =@vldddto,
+				[VALID_DD_FROM] =@@VALID_DD_FROM,
+				[VALID_DD_TO] =@@VALID_DD_TO,
 				[DD_ATTACHMENT] = @fileUrl ,
 				[EMAIL_BUYER] = @mailbuyer,
 				[EMAIL_SH] = @mailsh,
@@ -119,8 +118,8 @@ BEGIN
 				[VENDOR_PLANT] = @@VENDORPLN,
 				[VENDOR_NAME] =@vendornm,
 				[DD_STATUS] =@status,
-				[VALID_DD_FROM] =@vldddfrom,
-				[VALID_DD_TO] =@vldddto,
+				[VALID_DD_FROM] =@@VALID_DD_FROM,
+				[VALID_DD_TO] =@@VALID_DD_TO,
 				[EMAIL_BUYER] = @mailbuyer,
 				[EMAIL_SH] = @mailsh,
 				[EMAIL_DPH] = @maildph,
@@ -150,8 +149,8 @@ END
               @@VENDORPLN,
               @vendornm,
 			  @status,
-			  @vldddfrom,
-              @vldddto,
+			  @@VALID_DD_FROM,
+              @@VALID_DD_TO,
               @@ACTION,
 			  @@SAP_VENDOR_CD,
               @uid,

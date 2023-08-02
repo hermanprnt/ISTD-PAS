@@ -276,7 +276,7 @@ namespace GPS.Controllers.Master
                     if (message == "")
                     {
                         //if (!string.IsNullOrEmpty(sheet.GetRow(i).GetCell(7).ToString()))
-                        if (sheet.GetRow(i).GetCell(7).ToString().Length > 0)
+                        if (sheet.GetRow(i).GetCell(7) != null)
                         {
                             DateTime dDate;
                             string datetemp = sheet.GetRow(i).GetCell(7).ToString().Trim().Substring(3, 2) + "/"

@@ -185,9 +185,13 @@
             $("#txtedit-vldddto").prop('disabled', true);
             //alert($("#cmbedit-status").val());
         }
-
-
-        $("#cmb-vendorcode").select2new();
+        
+        if ($("#txtEdit").val() == '1') {
+            $("#cmb-vendorcode").prop('disabled', true);
+        } else {
+            $("#cmb-vendorcode").select2new();
+        }
+       
 
         $('#cmbedit-status').change(function () {
             if ($("#cmbedit-status").val() == 4) {
