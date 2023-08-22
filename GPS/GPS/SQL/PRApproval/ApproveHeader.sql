@@ -1,4 +1,4 @@
-﻿EXEC [sp_PRApproval_ApproveHeader_HERMAN_07.08.2023] 
+﻿EXEC [sp_PRApproval_ApproveHeader] 
 @DOC_NO_PARAM, 
 @DOC_TYPE_PARAM, 
 @VENDOR_CD_PARAM, 
