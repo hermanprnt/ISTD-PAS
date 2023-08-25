@@ -206,8 +206,6 @@
     <Compile Include="Constants\YesNoFlag.cs" />
     <Compile Include="Controllers\Asset\AssetUploadController.cs" />
     <Compile Include="Controllers\CommonController.cs" />
-    <Compile Include="Controllers\FileController.cs" />
-    <Compile Include="Controllers\GR\GRApprovalController.cs" />
     <Compile Include="Controllers\GR\GRCreationController.cs" />
     <Compile Include="Controllers\Home\LogMonitoringController.cs" />
     <Compile Include="Controllers\Home\LogMonitoringDetailController.cs" />
@@ -453,8 +451,6 @@
     <Compile Include="Models\ReceivingList\CANCEL_GR_IN.cs" />
     <Compile Include="Models\ReceivingList\CANCEL_GR_OUT.cs" />
     <Compile Include="Models\ReceivingList\CANCEL_GR_TABLE.cs" />
-    <Compile Include="Models\ReceivingList\GRApproval.cs" />
-    <Compile Include="Models\ReceivingList\GRApprovalRepository.cs" />
     <Compile Include="Models\ReceivingList\GR_IRRepository.cs" />
     <Compile Include="Models\ReceivingList\GR_IR_DATA.cs" />
     <Compile Include="Models\ReceivingList\GR_IR_DOC_DATE.cs" />
@@ -580,13 +576,6 @@
     <Content Include="SQL\Common\GetNewProcessId.sql" />
     <Content Include="SQL\Country\GetDefault.sql" />
     <Content Include="SQL\Country\GetList.sql" />
-    <Content Include="SQL\GRApproval\Approve.sql" />
-    <Content Include="SQL\GRApproval\CountData.sql" />
-    <Content Include="SQL\GRApproval\CountDetail.sql" />
-    <Content Include="SQL\GRApproval\GetData.sql" />
-    <Content Include="SQL\GRApproval\GetDetail.sql" />
-    <Content Include="SQL\GRApproval\GetNoreg.sql" />
-    <Content Include="SQL\GRApproval\GetUserType.sql" />
     <Content Include="SQL\MasterGLAccount\countData.sql" />
     <Content Include="SQL\MasterGLAccount\deleteData.sql" />
     <Content Include="SQL\MasterGLAccount\GetListData.sql" />
@@ -601,7 +590,6 @@
     <Content Include="SQL\Master\BudgetConfig\SaveUploadedData.sql" />
     <Content Include="SQL\Master\BudgetControl\getFiscalYear.sql" />
     <Content Include="SQL\Master\CostCenter\SaveUploadedData.sql" />
-    <Content Include="SQL\Master\GetAllSLocList.sql" />
     <Content Include="SQL\Master\GetSTSDueDilligence.sql" />
     <Content Include="SQL\Master\GetSTSAgreement.sql" />
     <Content Include="SQL\Master\GetAllDivisionCombo.sql" />
@@ -617,7 +605,6 @@
     <Content Include="SQL\Master\GetPurchasingGroupCD.sql" />
     <Content Include="SQL\Master\GetSystemConstant.sql" />
     <Content Include="SQL\Master\GetVendor.sql" />
-    <Content Include="SQL\Master\get_CoordinatorList.sql" />
     <Content Include="SQL\Master\get_ItemClass.sql" />
     <Content Include="SQL\Master\get_MatGroup.sql" />
     <Content Include="SQL\Master\get_PRCoordinator.sql" />
@@ -1600,7 +1587,6 @@
     <Content Include="SQL\Quota\SaveData.sql" />
     <Content Include="SQL\Quota\UploadData.sql" />
     <Content Include="SQL\ReceivingList\ApproveGR.sql" />
-    <Content Include="SQL\ReceivingList\concurencyChecking.sql" />
     <Content Include="SQL\ReceivingList\CountReceivingListDetail.sql" />
     <Content Include="SQL\ReceivingList\CountReceivingList.sql" />
     <Content Include="SQL\ReceivingList\CountSupplier.sql" />
@@ -1610,11 +1596,8 @@
     <Content Include="SQL\ReceivingList\GetDownloadExcel.sql" />
     <Content Include="SQL\ReceivingList\GetReceivingList.sql" />
     <Content Include="SQL\ReceivingList\GetReceivingListDetail.sql" />
-    <Content Include="SQL\ReceivingList\GetReceivingListUpload.sql" />
     <Content Include="SQL\ReceivingList\GetStatusGR.sql" />
     <Content Include="SQL\ReceivingList\GetSupplier.sql" />
-    <Content Include="SQL\ReceivingList\UpdateGRAttachment.sql" />
-    <Content Include="SQL\ReceivingList\UploadInit.sql" />
     <Content Include="SQL\Report\GetStatusCd.sql" />
     <Content Include="SQL\Report\countProcurementTracking.sql" />
     <Content Include="SQL\Report\downloadDataHeader.sql" />
@@ -2446,14 +2429,6 @@
     <Content Include="Views\MasterDueDilligence\_Paging.cshtml" />
     <Content Include="Views\MasterDueDilligence\_PartialScript.cshtml" />
     <Content Include="Views\MasterDueDilligence\MasterDueDilligence.cshtml" />
-    <Content Include="Views\GRApproval\GRApproval.cshtml" />
-    <Content Include="Views\GRApproval\_DetailData.cshtml" />
-    <Content Include="Views\GRApproval\_Grid.cshtml" />
-    <Content Include="Views\GRApproval\_GridDetail.cshtml" />
-    <Content Include="Views\GRApproval\_Paging.cshtml" />
-    <Content Include="Views\GRApproval\_Paging_Detail.cshtml" />
-    <Content Include="Views\GRApproval\_PartialScript.cshtml" />
-    <Content Include="Views\ReceivingList\_UploadAttachPopUp.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Report\PO\UrgentSPK.rdlc" />
