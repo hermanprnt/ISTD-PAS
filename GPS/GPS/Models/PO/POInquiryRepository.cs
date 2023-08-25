@@ -75,7 +75,7 @@ namespace GPS.Models.PO
 
         public PaginationViewModel GetListPaging(PurchaseOrderSearchViewModel searchViewModel)
         {
-            String query = "EXEC sp_POInquiry_GetListCount @PONo, @Vendor, @Status, @CreatedBy, @DateFrom, @DateTo, @PurchasingGroup, @POHeaderText, @PRNo, @ProcChannel";
+            String query = "EXEC sp_POInquiry_GetListCount @PONo, @Vendor, @Status, @CreatedBy, @DateFrom, @DateTo, @PurchasingGroup, @POHeaderText, @PRNo, @ProcChannel,@GovRelate";
 
             var model = new PaginationViewModel();
             model.DataName = POCommonRepository.DataName;

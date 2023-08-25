@@ -1,1 +1,1 @@
-﻿EXEC sp_POApproval_GetListCount @DocNo, @DocDesc, @Plant, @SLoc, @PurchasingGroup, @Vendor, @Status, @DateFrom, @DateTo, @Currency, @CurrentUser, @CurrentUserRegNo, @UserType
+﻿EXEC sp_POApproval_GetListCount @DocNo, @DocDesc, @Plant, @SLoc, @PurchasingGroup, @Vendor, @Status, @DateFrom, @DateTo, @Currency, @CurrentUser, @CurrentUserRegNo, @UserType,@GovRelate
