@@ -27,14 +27,6 @@ namespace GPS.CommonFunc
             return dateString;
         }
 
-        public static String ToStandardFormatWithTimeAndSecond(this DateTime datetime)
-        {
-            String dateString = datetime.ToString(CommonFormat.DatetimeWithSecond, CultureInfo.InvariantCulture);
-            if (dateString == "01.01.0001")
-                return String.Empty;
-            return dateString;
-        }
-
         public static String ToStandardFormat(this DateTime? datetime)
         {
             if (datetime == null)

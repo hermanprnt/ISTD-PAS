@@ -23,15 +23,6 @@ namespace GPS.Models.Master
             return result;
         }
 
-        public IEnumerable<SLoc> GetAllSLocList()
-        {
-            IDBContext db = DatabaseManager.Instance.GetContext();
-            IEnumerable<SLoc> result = db.Fetch<SLoc>("Master/GetAllSLocList", new { });
-            db.Close();
-
-            return result;
-        }
-
         public SLoc GetSLoc(String plantCode, String slocCode)
         {
             IDBContext db = DatabaseManager.Instance.GetContext();

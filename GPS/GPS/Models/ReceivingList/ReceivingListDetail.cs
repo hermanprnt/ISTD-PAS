@@ -54,16 +54,4 @@ namespace GPS.Models.ReceivingList
         public Decimal TotalReceive { get; set; }
         
     }
-
-
-    public class ReceivingListUpload
-    {
-        public String ReceivingNo { get; set; }
-        public String VendorName { get; set; }
-        public String AttachmentFilename { get; set; }
-        public String OtherAttachmentFilename { get; set; }
-        public String AttachmentPath { get; set; }
-        public String ChangeDtParam { get; set; }
-
-    }
 }

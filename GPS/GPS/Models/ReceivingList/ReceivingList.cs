@@ -37,9 +37,5 @@ namespace GPS.Models.ReceivingList
 
         public string STATUS_CD { get; set; }
         public string STATUS_DESC { get; set; }
-
-        //20230705 -> Enchanced Vision Project
-        public int isHaveBAP { get; set; }
-        public int isHaveOther { get; set; }
     }
 }

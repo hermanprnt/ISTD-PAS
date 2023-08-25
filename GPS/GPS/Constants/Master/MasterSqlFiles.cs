@@ -12,7 +12,6 @@ namespace GPS.Constants.Master
         public const String GetPRType = _Root_Folder + "get_procurementtype";
         public const String GetItemClass = _Root_Folder + "get_ItemClass";
         public const String GetPRCoordinator = _Root_Folder + "get_PRCoordinator";
-        public const String GetCoordinatorList = _Root_Folder + "get_CoordinatorList";
         public const String GetMatGroup = _Root_Folder + "get_MatGroup";
         public const String GetFDCheck = _Root_Folder + "get_fdcheck";
         public const String GetPurchasingGroup = _Root_Folder + "get_purchasinggroup";

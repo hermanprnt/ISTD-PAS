@@ -1,8 +1,0 @@
-SELECT * FROM
-(SELECT row_number() over(order by [CREATED_DT] desc) as seq_no, * FROM
-(
-select A.MAT_DOC_ITEM_NO,A.MATERIAL_NO,A.MATERIAL_DESCRIPTION,B.PO_QTY_ORI,A.MOVEMENT_QTY,A.UNIT_OF_MEASURE_CD,A.GR_IR_AMOUNT,A.PO_ITEM,A.CREATED_DT
-from TB_R_GR_IR A
-inner join TB_R_PO_ITEM B ON A.PO_NO=B.PO_NO
-WHERE A.MAT_DOC_NO=@MAT_DOC_NO AND A.PO_NO=@PO_NO AND A.HEADER_TEXT=@HEADER_TEXT
-) x) tb where seq_no between @RowStart and @RowEnd order by seq_no asc
