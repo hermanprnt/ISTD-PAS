@@ -365,19 +365,19 @@ namespace GPS.Models.PRPOApproval
 
             dynamic args = new
             {
-                DOC_NO_PARAM = param.DOC_NO,
-                DIVISION_ID_PARAM = param.DIVISION_ID,
-                DOC_TYPE_PARAM = param.DOC_TYPE,
-                DATE_FROM_PARAM = param.DATE_FROM,
-                DATE_TO_PARAM = param.DATE_TO,
-                VENDOR_CD_PARAM =param.VENDOR_CD,
-                HEADER_MODE_PARAM  = headerMode,
-                DOC_LIST_PARAM = docNoList,
-                DOC_ITEM_LIST_PARAM  = docItemNoList,
-                REG_NO_PARAM = param.REG_NO,
-                USER_ID_PARAM = userid,
-                USER_TYPE_PARAM = param.USER_TYPE,
-                TYPEAPPROVE_PARAM = typeApproval
+                param.DOC_NO,
+                param.DIVISION_ID,
+                param.DOC_TYPE,
+                param.DATE_FROM,
+                param.DATE_TO,
+                param.VENDOR_CD,
+                HEADER_MODE = headerMode,
+                DOC_LIST = docNoList,
+                DOC_ITEM_LIST = docItemNoList,
+                param.REG_NO,
+                USER_ID = userid,
+                param.USER_TYPE,
+                TYPEAPPROVE = typeApproval
             };
             IEnumerable<CommonApprovalResult> result = db.Fetch<CommonApprovalResult>(SqlFile.ApproveHeader, args);
             db.Close();

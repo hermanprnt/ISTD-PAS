@@ -33,8 +33,9 @@
         var mydatano = "";
         var myExpanderRow = "";
         var vendoredit = "";
-        var plantCodeLimit = "@Model.PlantCode";
+        var plantCodeLimit = "@Model.PlantCode"; //2000 from system master
         var agreementStatus = "@Model.AgreementStatus";
+        var validation = 0;
         //end : 20190617 : isid.rgl
         const agreementStatusArray = agreementStatus.split(",");
         
@@ -604,56 +605,49 @@
                 OnEndCallback: OnAjaxComplete,
                 OnSearchButtonClick: function () { $.ClearLookup(["#lookup-vendor"]); },
                 OnRowSelected: function (selected) {
-                    //herman
-                    if (selected.Background === null && selected.VendorPlant === plantCodeLimit) {
-                        var vendor = ViewData.Get("VendorInfo");
-                        $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
-                        $.messagebox.show(
-                            "Error",
-                            "Has not been defined by master due dilligence",
-                            "ERR",
-                            "SINGLE",
-                            "",
-                            ""
-                        );
-                    } else if (selected.Background === '0') {
-                        var vendor = ViewData.Get("VendorInfo");
-                        $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
-                        $.messagebox.show(
-                            "Error",
-                            "Due Dilligence has been expired",
-                            "ERR",
-                            "SINGLE",
-                            "",
-                            ""
-                        )
-                    } else if (agreementStatusArray.includes(selected.AgreementStatus) === false) {
-                        var vendor = ViewData.Get("VendorInfo");
-                        $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
-                        $.messagebox.show(  
-                            "Error",
-                            "Vendor agreement status must be [Active] or [Expired Soon]",
-                            "ERR",
-                            "SINGLE",
-                            "",
-                            ""
-                        );
+                    //added by arkamaya.herman project TORA
+                    if (selected.VendorPlant == 2000)
+                    {
+                        if (selected.Background === null && selected.VendorPlant === plantCodeLimit) {
+                            validation = 1;
+                            var vendor = ViewData.Get("VendorInfo");
+                            $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
+                            $.messagebox.show(
+                                "Error",
+                                "Has not been defined by master due dilligence",
+                                "ERR",
+                                "SINGLE",
+                                "",
+                                ""
+                            );
+                        } else if (selected.Background === '0') {
+                            validation = 1;
+                            var vendor = ViewData.Get("VendorInfo");
+                            $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
+                            $.messagebox.show(
+                                "Error",
+                                "Due Dilligence has been expired",
+                                "ERR",
+                                "SINGLE",
+                                "",
+                                ""
+                            )
+                        } else if (agreementStatusArray.includes(selected.AgreementStatus) === false) {
+                            validation = 1;
+                            var vendor = ViewData.Get("VendorInfo");
+                            $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
+                            $.messagebox.show(
+                                "Error",
+                                "Vendor agreement status must be [Active] or [Expired Soon]",
+                                "ERR",
+                                "SINGLE",
+                                "",
+                                ""
+                            );
+                        }
                     }
-                    //if (selected.Background === null || selected.VendorPlant === plantCodeLimit || agreementStatusArray.includes(selected.AgreementStatus) === false
-                    //    || selected.Background === null || !plantCodeLimit || agreementStatusArray.includes(selected.AgreementStatus) === false) {
-                    //    //to maintain previous vendor when error due dilligence not registered
-                    //    var vendor = ViewData.Get("VendorInfo");
-                    //    $('#txtlookup-vendor').val(vendor.Code + ' - ' + vendor.Name);
-                    //    $.messagebox.show(
-                    //        "Error",
-                    //        "Has not been defined by master due dilligence or master agreement",
-                    //        "ERR",
-                    //        "SINGLE",
-                    //        "",
-                    //        ""
-                    //    );
-                    //}
-                    else {
+                   
+                    if (validation == 0) {
                         ViewData.Add("VendorInfo", {
                             IsOneTimeVendor: false,
                             Code: selected.Value,
@@ -666,6 +660,7 @@
                             Phone: "",
                             Fax: ""
                         });
+
                         var vendor = ViewData.Get("VendorInfo");
                         if (vendor.Background === "1") {
                             document.getElementById('txtlookup-vendor').style.backgroundColor = 'red';
@@ -680,6 +675,12 @@
                         SilentSavePOHeader();
                         $("#popuplookup-vendor").modal("hide");
                     }
+                    //console.log(plantCodeLimit,'plantCodeLimit');
+                    //console.log(selected.VendorPlant, 'selected.VendorPlant');
+                    //console.log(selected.Background, 'selected.Background ');
+                    //console.log(agreementStatusArray, 'agreementStatusArray');
+                    //console.log(selected.AgreementStatus, 'selected.AgreementStatus ');
+
                 },
                 OnOkButtonClick: function () { },
                 OnOkButtonClicked: function () {
